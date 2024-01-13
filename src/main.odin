@@ -12,7 +12,10 @@ TITLE :: "My Window!"
 window_handle: glfw.WindowHandle
 framebuffer_resized: bool
 
-framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: i32) {
+framebuffer_size_callback :: proc "c" (
+	window: glfw.WindowHandle,
+	width, height: i32,
+) {
 	context = runtime.default_context()
 
 	fmt.println("Window resized")
@@ -57,15 +60,7 @@ main :: proc() {
 
 		begin_draw()
 
-		uniform_object.view[0] = {1, 0, 0, 0}
-		uniform_object.view[1] = {0, 1, 0, 0}
-		uniform_object.view[2] = {0, 0, 1, 0}
-		uniform_object.view[3] = {0, 0, 0, 1}
-
-		uniform_object.proj[0] = {1, 0, 0, 0}
-		uniform_object.proj[1] = {0, 1, 0, 0}
-		uniform_object.proj[2] = {0, 0, 1, 0}
-		uniform_object.proj[3] = {0, 0, 0, 1}
+        update_camera()
 
 		// draw_triangle(
 		// 	{pos = {-0.5, -0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0}},
@@ -73,16 +68,34 @@ main :: proc() {
 		// 	{pos = {0.0, 0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.5, 1.0, f32(Sprites.Grass), 0.0}},
 		// )
 
-        draw_quad(
-			{pos = {-0.5, -0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0}},
-			{pos = {0.5, -0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {1.0, 0.0, f32(Sprites.Grass), 0.0}},
-			{pos = {0.5, 0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {1.0, 1.0, f32(Sprites.Grass), 0.0}},
-			{pos = {-0.5, 0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.0, 1.0, f32(Sprites.Grass), 0.0}},
-        )
+		draw_quad(
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1.0, 1.0, 1.0},
+				texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0},
+			},
+			 {
+				pos = {0.5, 0.0, -0.5},
+				light = {1.0, 1.0, 1.0},
+				texcoords = {1.0, 0.0, f32(Sprites.Grass), 0.0},
+			},
+			 {
+				pos = {0.5, 0.0, 0.5},
+				light = {1.0, 1.0, 1.0},
+				texcoords = {1.0, 1.0, f32(Sprites.Grass), 0.0},
+			},
+			 {
+				pos = {-0.5, 0.0, 0.5},
+				light = {1.0, 1.0, 1.0},
+				texcoords = {0.0, 1.0, f32(Sprites.Grass), 0.0},
+			},
+		)
 
 		end_draw()
 
-		should_close = bool(glfw.WindowShouldClose(window_handle)) || is_key_down(.Key_Escape)
+		should_close =
+			bool(glfw.WindowShouldClose(window_handle)) ||
+			is_key_down(.Key_Escape)
 
 		update_keyboard()
 	}

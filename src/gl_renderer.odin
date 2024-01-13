@@ -21,13 +21,13 @@ indices: [dynamic]u32
 uniform_object: Uniform_Object
 
 Uniform_Object :: struct {
-	proj, view: matrix[4, 4]f32,
+	proj, view: Mat4,
 }
 
 Vertex :: struct {
-	pos:      [3]f32,
-	light:    [3]f32,
-	texcoords: [4]f32,
+	pos:       Vec3,
+	light:     Vec3,
+	texcoords: Vec4,
 }
 
 gl_debug_callback :: proc "c" (
@@ -57,7 +57,14 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, TEXTURE_SIZE, TEXTURE_SIZE, textures)
+	gl.TexStorage3D(
+		gl.TEXTURE_2D_ARRAY,
+		1,
+		gl.RGBA8,
+		TEXTURE_SIZE,
+		TEXTURE_SIZE,
+		textures,
+	)
 
 	for path, i in sprite_paths {
 		width: i32
@@ -112,7 +119,13 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	return
 }
 
-load_shader :: proc(pathname: string, shader_type: u32) -> (shader: u32, ok: bool = true) {
+load_shader :: proc(
+	pathname: string,
+	shader_type: u32,
+) -> (
+	shader: u32,
+	ok: bool = true,
+) {
 	shader = gl.CreateShader(shader_type)
 
 	source := os.read_entire_file(pathname) or_return
@@ -128,7 +141,12 @@ load_shader :: proc(pathname: string, shader_type: u32) -> (shader: u32, ok: boo
 	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &success)
 	if success == 0 {
 		gl.GetShaderInfoLog(shader, 512, nil, raw_data(&info_log))
-		fmt.println("ERROR::SHADER::", shader_type, "::COMPILATION_FAILED: ", string(info_log[:]))
+		fmt.println(
+			"ERROR::SHADER::",
+			shader_type,
+			"::COMPILATION_FAILED: ",
+			string(info_log[:]),
+		)
 		return 0, false
 	}
 
@@ -137,8 +155,14 @@ load_shader :: proc(pathname: string, shader_type: u32) -> (shader: u32, ok: boo
 
 load_shader_program :: proc() -> (ok: bool = true) {
 	shader_program = gl.CreateProgram()
-	vertex_shader := load_shader(VERTEX_SHADER_PATH, gl.VERTEX_SHADER) or_return
-	fragment_shader := load_shader(FRAGMENT_SHADER_PATH, gl.FRAGMENT_SHADER) or_return
+	vertex_shader := load_shader(
+		VERTEX_SHADER_PATH,
+		gl.VERTEX_SHADER,
+	) or_return
+	fragment_shader := load_shader(
+		FRAGMENT_SHADER_PATH,
+		gl.FRAGMENT_SHADER,
+	) or_return
 
 	gl.AttachShader(shader_program, vertex_shader)
 	gl.AttachShader(shader_program, fragment_shader)
@@ -182,16 +206,42 @@ init_renderer :: proc() -> (ok: bool = true) {
 
 	gl.GenBuffers(1, &ubo)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	gl.BufferData(gl.UNIFORM_BUFFER, size_of(Uniform_Object), nil, gl.STATIC_DRAW)
+	gl.BufferData(
+		gl.UNIFORM_BUFFER,
+		size_of(Uniform_Object),
+		nil,
+		gl.STATIC_DRAW,
+	)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, size_of(Vertex), offset_of(Vertex, pos))
+	gl.VertexAttribPointer(
+		0,
+		3,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, pos),
+	)
 	gl.EnableVertexAttribArray(0)
 
-	gl.VertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, size_of(Vertex), offset_of(Vertex, light))
+	gl.VertexAttribPointer(
+		1,
+		3,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, light),
+	)
 	gl.EnableVertexAttribArray(1)
 
-	gl.VertexAttribPointer(2, 4, gl.FLOAT, gl.FALSE, size_of(Vertex), offset_of(Vertex, texcoords))
+	gl.VertexAttribPointer(
+		2,
+		4,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, texcoords),
+	)
 	gl.EnableVertexAttribArray(2)
 
 	load_shader_program() or_return
@@ -230,9 +280,19 @@ end_draw :: proc() {
 		gl.STATIC_DRAW,
 	)
 
-	gl.BufferSubData(gl.UNIFORM_BUFFER, 0, size_of(Uniform_Object), &uniform_object)
+	gl.BufferSubData(
+		gl.UNIFORM_BUFFER,
+		0,
+		size_of(Uniform_Object),
+		&uniform_object,
+	)
 
-	gl.DrawElements(gl.TRIANGLES, i32(len(indices)), gl.UNSIGNED_INT, raw_data(indices))
+	gl.DrawElements(
+		gl.TRIANGLES,
+		i32(len(indices)),
+		gl.UNSIGNED_INT,
+		raw_data(indices),
+	)
 
 	glfw.SwapBuffers(window_handle)
 
