@@ -15,8 +15,8 @@ Half_Tile :: struct {
 	corner:        Half_Tile_Corner,
 	corners_y:     Vec3,
 	corners_light: [3]Vec3,
-	texture:       Sprites,
-	mask_texture:  Sprites,
+	texture:       Sprite,
+	mask_texture:  Sprite,
 }
 
 HALF_TILE_CORNER_VERTICES_MAP :: [Half_Tile_Corner][3]Vertex {

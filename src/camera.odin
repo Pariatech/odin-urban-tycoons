@@ -2,10 +2,10 @@ package main
 
 import "vendor:glfw"
 
-CAMERA_SPEED :: 1.0
-CAMERA_TRANSLATE :: Vec3{-3, 3, -3}
+CAMERA_SPEED :: 2.0
+CAMERA_TRANSLATE :: Vec3{-10, 10, -10}
 
-zoom: f32 = 8.0
+zoom: f32 = 2.0
 camera_position: Vec3
 
 look_at :: proc(eye, target, up: Vec3) -> Mat4 {
@@ -26,25 +26,30 @@ look_at :: proc(eye, target, up: Vec3) -> Mat4 {
 ortho :: proc(left, right, bottom, top, near, far: f32) -> Mat4 {
 	proj := Mat4{}
 
-	proj[0] = {2 / (right - left), 0, 0, -(right + left) / (right - left)}
-	proj[1] = {0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)}
-	proj[2] = {0, 0, -2 / (far - near), -(far + near) / (far - near)}
-	proj[3] = {0, 0, 0, 1}
+    proj[0,0] = 2 / (right - left)
+    proj[1,1] = 2 / (top - bottom)
+    proj[2,2] = -2 / (far - near)
+    proj[3,3] = 1
+
+    proj[0, 3] = -(right + left) / (right - left)
+    proj[1, 3] = -(top + bottom) / (top - bottom)
+    proj[2, 3] = -(far + near) / (far - near)
 
 	return proj
 }
 
-update_camera :: proc() {
+update_camera :: proc(delta_time: f64) {
+	camera_movement := f32(CAMERA_SPEED * delta_time)
 	if is_key_down(.Key_W) {
-		camera_position += Vec3{CAMERA_SPEED, 0, CAMERA_SPEED}
+		camera_position += Vec3{camera_movement, 0, camera_movement}
 	} else if is_key_down(.Key_S) {
-		camera_position += Vec3{-CAMERA_SPEED, 0, -CAMERA_SPEED}
+		camera_position += Vec3{-camera_movement, 0, -camera_movement}
 	}
 
 	if is_key_down(.Key_A) {
-		camera_position += Vec3{CAMERA_SPEED, 0, -CAMERA_SPEED}
+		camera_position += Vec3{-camera_movement, 0, camera_movement}
 	} else if is_key_down(.Key_D) {
-		camera_position += Vec3{-CAMERA_SPEED, 0, CAMERA_SPEED}
+		camera_position += Vec3{camera_movement, 0, -camera_movement}
 	}
 
 	uniform_object.view = look_at(
