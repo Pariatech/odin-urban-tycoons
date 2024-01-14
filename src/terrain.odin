@@ -7,13 +7,13 @@ terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]Vec3
 terrain_tile_triangles: [WORLD_WIDTH][WORLD_DEPTH][Tile_Triangle_Side]Tile_Triangle
 
 init_terrain :: proc() {
-	SEED :: 694201337
-	for x in 0 ..= WORLD_WIDTH {
-		for z in 0 ..= WORLD_DEPTH {
-			terrain_heights[x][z] =
-				noise.noise_2d(SEED, {f64(x), f64(z)}) / 2.0
-		}
-	}
+	// SEED :: 694201337
+	// for x in 0 ..= WORLD_WIDTH {
+	// 	for z in 0 ..= WORLD_DEPTH {
+	// 		terrain_heights[x][z] =
+	// 			noise.noise_2d(SEED, {f64(x), f64(z)}) / 2.0
+	// 	}
+	// }
 
 	for x in 0 ..= WORLD_WIDTH {
 		for z in 0 ..= WORLD_DEPTH {

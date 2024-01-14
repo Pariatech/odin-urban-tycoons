@@ -1,10 +1,10 @@
 package main
 
-WORLD_WIDTH :: 32
-WORLD_HEIGHT :: 32
+WORLD_WIDTH :: 64
+WORLD_HEIGHT :: 64
 WORLD_DEPTH :: 32
 
-sun := Vec3{1, -2, 1}
+sun := Vec3{0, -1, 0}
 
 draw_world :: proc() {
 	// for y in 0 ..< WORLD_HEIGHT {
