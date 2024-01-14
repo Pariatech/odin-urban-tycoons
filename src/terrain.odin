@@ -15,7 +15,6 @@ init_terrain :: proc() {
 
 	for x in 0 ..= WORLD_WIDTH {
 		for z in 0 ..= WORLD_DEPTH {
-			// terrain_lights[x][z] = {1, 1, 1}
 			calculate_terrain_light(x, z)
 		}
 	}
@@ -160,7 +159,6 @@ calculate_terrain_light :: proc(x, z: int) {
 	}
 
 	normal = normalize(normal)
-	sun := Vec3{1, -2, 1}
 	light := dot(normalize(sun), normal)
 	terrain_lights[x][z] = {light, light, light}
 }

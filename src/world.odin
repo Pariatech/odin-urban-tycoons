@@ -4,6 +4,8 @@ WORLD_WIDTH :: 32
 WORLD_HEIGHT :: 32
 WORLD_DEPTH :: 32
 
+sun := Vec3{1, -2, 1}
+
 draw_world :: proc() {
 	// for y in 0 ..< WORLD_HEIGHT {
 	for x in 0 ..< WORLD_WIDTH {
