@@ -12,7 +12,7 @@ draw_world :: proc() {
 		for z in 0 ..< WORLD_DEPTH {
 			// draw_half_tiles_at({f32(x), f32(y), f32(z)})
 			for side in Tile_Triangle_Side {
-				draw_tile_triangle(side, {x, 0, z})
+				draw_terrain_tile_triangle(side, x, z)
 			}
 		}
 	}
@@ -23,7 +23,7 @@ init_world :: proc() {
 	for x in 0 ..< WORLD_WIDTH {
 		for z in 0 ..< WORLD_DEPTH {
 			for side in Tile_Triangle_Side {
-				append_tile_triangle(side, {x, 0, z}, .Grass, .Full_Mask)
+				set_terrain_tile_triangle(side, x, z, .Grass, .Full_Mask)
 			}
 			// add_half_tile(
 			// 	 {
