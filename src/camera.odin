@@ -2,7 +2,11 @@ package main
 
 import "vendor:glfw"
 
+CAMERA_SPEED :: 1.0
+CAMERA_TRANSLATE :: Vec3{-3, 3, -3}
+
 zoom: f32 = 8.0
+camera_position: Vec3
 
 look_at :: proc(eye, target, up: Vec3) -> Mat4 {
 	f := normalize(target - eye)
@@ -31,7 +35,23 @@ ortho :: proc(left, right, bottom, top, near, far: f32) -> Mat4 {
 }
 
 update_camera :: proc() {
-	uniform_object.view = look_at({-3, 3, -3}, {0, 0, 0}, {0, 1, 0})
+	if is_key_down(.Key_W) {
+		camera_position += Vec3{CAMERA_SPEED, 0, CAMERA_SPEED}
+	} else if is_key_down(.Key_S) {
+		camera_position += Vec3{-CAMERA_SPEED, 0, -CAMERA_SPEED}
+	}
+
+	if is_key_down(.Key_A) {
+		camera_position += Vec3{CAMERA_SPEED, 0, -CAMERA_SPEED}
+	} else if is_key_down(.Key_D) {
+		camera_position += Vec3{-CAMERA_SPEED, 0, CAMERA_SPEED}
+	}
+
+	uniform_object.view = look_at(
+		camera_position + CAMERA_TRANSLATE,
+		camera_position,
+		{0, 1, 0},
+	)
 	width, height := glfw.GetWindowSize(window_handle)
 	aspect_ratio := f32(height) / f32(width)
 	scale := f32(width) / TEXTURE_SIZE

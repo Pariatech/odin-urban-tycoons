@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:runtime"
+import "core:time"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
 
@@ -49,18 +50,30 @@ main :: proc() {
 	defer deinit_renderer()
 	init_keyboard()
 
+    init_world()
+
 	should_close := false
+    current_time_ns := time.now()
+    previous_time_ns := time.now()
+    frames : i64 = 0
 	for !should_close {
+        current_time_ns = time.now()
+        if time.diff(previous_time_ns, current_time_ns) >= time.Second {
+            previous_time_ns = current_time_ns
+            fmt.println("FPS:", frames)
+            frames = 0
+        }
+
 		glfw.PollEvents()
-
-
-		if is_key_press(.Key_F) {
-			fmt.println("F in the chat!")
-		}
 
 		begin_draw()
 
-        update_camera()
+		update_camera()
+
+        // draw_half_tile(half_tiles[0])
+        // draw_half_tile(half_tiles[1])
+
+        draw_world()
 
 		// draw_triangle(
 		// 	{pos = {-0.5, -0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0}},
@@ -68,28 +81,28 @@ main :: proc() {
 		// 	{pos = {0.0, 0.5, 0.0}, light = {1.0, 1.0, 1.0}, texcoords = {0.5, 1.0, f32(Sprites.Grass), 0.0}},
 		// )
 
-		draw_quad(
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1.0, 1.0, 1.0},
-				texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1.0, 1.0, 1.0},
-				texcoords = {1.0, 0.0, f32(Sprites.Grass), 0.0},
-			},
-			 {
-				pos = {0.5, 0.0, 0.5},
-				light = {1.0, 1.0, 1.0},
-				texcoords = {1.0, 1.0, f32(Sprites.Grass), 0.0},
-			},
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1.0, 1.0, 1.0},
-				texcoords = {0.0, 1.0, f32(Sprites.Grass), 0.0},
-			},
-		)
+		// draw_quad(
+		// 	 {
+		// 		pos = {-0.5, 0.0, -0.5},
+		// 		light = {1.0, 1.0, 1.0},
+		// 		texcoords = {0.0, 0.0, f32(Sprites.Grass), 0.0},
+		// 	},
+		// 	 {
+		// 		pos = {0.5, 0.0, -0.5},
+		// 		light = {1.0, 1.0, 1.0},
+		// 		texcoords = {1.0, 0.0, f32(Sprites.Grass), 0.0},
+		// 	},
+		// 	 {
+		// 		pos = {0.5, 0.0, 0.5},
+		// 		light = {1.0, 1.0, 1.0},
+		// 		texcoords = {1.0, 1.0, f32(Sprites.Grass), 0.0},
+		// 	},
+		// 	 {
+		// 		pos = {-0.5, 0.0, 0.5},
+		// 		light = {1.0, 1.0, 1.0},
+		// 		texcoords = {0.0, 1.0, f32(Sprites.Grass), 0.0},
+		// 	},
+		// )
 
 		end_draw()
 
@@ -98,5 +111,7 @@ main :: proc() {
 			is_key_down(.Key_Escape)
 
 		update_keyboard()
+
+        frames += 1
 	}
 }
