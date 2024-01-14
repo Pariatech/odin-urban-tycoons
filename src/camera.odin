@@ -5,7 +5,7 @@ import "vendor:glfw"
 CAMERA_SPEED :: 2.0
 CAMERA_TRANSLATE :: Vec3{-10, 10, -10}
 
-zoom: f32 = 2.0
+zoom: f32 = 1.0
 camera_position: Vec3
 
 look_at :: proc(eye, target, up: Vec3) -> Mat4 {

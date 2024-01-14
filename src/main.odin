@@ -51,6 +51,7 @@ main :: proc() {
 	init_keyboard()
 
 	init_world()
+    init_terrain()
 
 	should_close := false
 	current_time_ns := time.now()
