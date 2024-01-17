@@ -6,6 +6,7 @@ import "core:runtime"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"
+import m "core:math/linalg/glsl"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
@@ -21,13 +22,13 @@ indices: [dynamic]u32
 uniform_object: Uniform_Object
 
 Uniform_Object :: struct {
-	proj, view: Mat4,
+	proj, view: m.mat4,
 }
 
 Vertex :: struct {
-	pos:       Vec3,
-	light:     Vec3,
-	texcoords: Vec4,
+	pos:       m.vec3,
+	light:     m.vec3,
+	texcoords: m.vec4,
 }
 
 gl_debug_callback :: proc "c" (

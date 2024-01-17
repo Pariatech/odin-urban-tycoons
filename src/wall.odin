@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import m "core:math/linalg/glsl"
 
 Wall_Axis :: enum {
 	North_South,
@@ -56,7 +57,7 @@ WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
     .Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
 }
 
-WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]Vec3 {
+WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
 	.North_South =  {
 		.South_West = {0, 0, 0},
 		.South_East = {-1, 0, 0},
@@ -130,8 +131,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 	.Left_Corner_End =  {
 		.North_South =  {
-			.South_West = .Full,
-			.South_East = .End,
+			.South_West = .End,
+			.South_East = .Full,
 			.North_East = .Extended_Side,
 			.North_West = .Extended_Side,
 		},
@@ -146,8 +147,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 		.North_South =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
-			.North_East = .End,
-			.North_West = .Full,
+			.North_East = .Full,
+			.North_West = .End,
 		},
 		.East_West =  {
 			.South_West = .Full,
@@ -158,8 +159,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 	.Right_Corner_End =  {
 		.North_South =  {
-			.South_West = .End,
-			.South_East = .Full,
+			.South_West = .Full,
+			.South_East = .End,
 			.North_East = .Extended_Side,
 			.North_West = .Extended_Side,
 		},
@@ -202,8 +203,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 		.North_South =  {
 			.South_West = .Side,
 			.South_East = .Side,
-			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_East = .Extended_Side,
+			.North_West = .Side,
 		},
 		.East_West =  {
 			.South_West = .Extended_Side,
@@ -234,10 +235,10 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 			.North_West = .Side,
 		},
 		.East_West =  {
-			.South_West = .Side,
+			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Side,
 		},
 	},
 	.Left_Corner_Left_Corner =  {
@@ -323,7 +324,7 @@ WALL_MASK_TEXTURE_MAP :: [Wall_Mask][Wall_Texture_Position]Texture {
 	.End = {.Base = .End_Wall_Base_Mask, .Top = .End_Wall_Top_Mask},
 }
 
-draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
+draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	mirror_map := WALL_MIRROR_MAP
 	texture_map := WALL_TEXTURE_MAP
 	mask_map := WALL_MASK_MAP
@@ -334,7 +335,7 @@ draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
 	translation := wall_translation_map[axis][camera_rotation]
-	position := Vec3{f32(pos.x), wall.y, f32(pos.z)} + translation
+	position := m.vec3{f32(pos.x), wall.y, f32(pos.z)} + translation
 
 	sprite := Sprite {
 		position = position,
@@ -357,8 +358,8 @@ draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
 	draw_sprite(sprite)
 }
 
-draw_tile_walls :: proc(x, z, floor: int) {
-	north_south_key := IVec3{x, floor, z}
+draw_tile_walls :: proc(x, z, floor: i32) {
+	north_south_key := m.ivec3{x, floor, z}
     #partial switch camera_rotation {
         case .South_East, .North_East:
             north_south_key.x += 1
@@ -367,7 +368,7 @@ draw_tile_walls :: proc(x, z, floor: int) {
 		draw_wall(wall, north_south_key, .North_South)
 	}
 
-	east_west_key := IVec3{x, floor, z}
+	east_west_key := m.ivec3{x, floor, z}
     #partial switch camera_rotation {
         case .North_East, .North_West:
             east_west_key.z += 1
@@ -377,10 +378,10 @@ draw_tile_walls :: proc(x, z, floor: int) {
 	}
 }
 
-insert_north_south_wall :: proc(pos: IVec3, wall: Wall) {
+insert_north_south_wall :: proc(pos: m.ivec3, wall: Wall) {
 	north_south_walls[pos] = wall
 }
 
-insert_east_west_wall :: proc(pos: IVec3, wall: Wall) {
+insert_east_west_wall :: proc(pos: m.ivec3, wall: Wall) {
 	east_west_walls[pos] = wall
 }

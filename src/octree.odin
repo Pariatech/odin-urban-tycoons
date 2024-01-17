@@ -1,9 +1,10 @@
 package main
 
 import "core:fmt"
+import m "core:math/linalg/glsl"
 
 Octree_Point :: struct {
-	position: Vec3,
+	position: m.vec3,
 	index:    int,
 }
 
@@ -19,7 +20,7 @@ Octree_Node :: struct {
 insert_in_octree :: proc(
 	node: ^Octree_Node,
 	using point: Octree_Point,
-	center: Vec3,
+	center: m.vec3,
 	size: f32,
 ) {
 	relative := position - center
@@ -42,7 +43,7 @@ insert_in_octree :: proc(
                 return 
 			}
 			new_node := new(Octree_Node)
-			new_center := Vec3 {
+			new_center := m.vec3 {
 				center.x + f32(2 * x - 1) * quarter_size,
 				center.y + f32(2 * y - 1) * quarter_size,
 				center.z + f32(2 * z - 1) * quarter_size,
@@ -52,7 +53,7 @@ insert_in_octree :: proc(
 			insert_in_octree(new_node, v, new_center, half_size)
 			insert_in_octree(new_node, point, new_center, half_size)
 		case ^Octree_Node:
-			new_center := Vec3 {
+			new_center := m.vec3 {
 				center.x + f32(2 * x - 1) * quarter_size,
 				center.y + f32(2 * y - 1) * quarter_size,
 				center.z + f32(2 * z - 1) * quarter_size,
@@ -64,8 +65,8 @@ insert_in_octree :: proc(
 
 get_in_octree :: proc(
 	node: ^Octree_Node,
-	position: Vec3,
-	center: Vec3,
+	position: m.vec3,
+	center: m.vec3,
 	size: f32,
 ) -> Maybe(int) {
 	relative := position - center
@@ -87,7 +88,7 @@ get_in_octree :: proc(
 
             return nil
 		case ^Octree_Node:
-			new_center := Vec3 {
+			new_center := m.vec3 {
 				center.x + f32(2 * x - 1) * quarter_size,
 				center.y + f32(2 * y - 1) * quarter_size,
 				center.z + f32(2 * z - 1) * quarter_size,

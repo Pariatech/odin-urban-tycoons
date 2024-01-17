@@ -1,9 +1,10 @@
 package main
 
 import "core:math/noise"
+import m "core:math/linalg/glsl"
 
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
-terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]Vec3
+terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
 terrain_tile_triangles: [WORLD_WIDTH][WORLD_DEPTH][Tile_Triangle_Side]Tile_Triangle
 
 init_terrain :: proc() {
@@ -23,9 +24,9 @@ init_terrain :: proc() {
 }
 
 calculate_terrain_light :: proc(x, z: int) {
-	normal: Vec3
+	normal: m.vec3
 	if x == 0 && z == 0 {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{-0.5, terrain_heights[x][z], -0.5},
 				{0.5, terrain_heights[x + 1][z], -0.5},
@@ -36,7 +37,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == WORLD_WIDTH && z == WORLD_DEPTH {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{-1.0, terrain_heights[x - 1][z], 0.0},
@@ -47,7 +48,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == 0 && z == WORLD_DEPTH {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z - 1], -1.0},
@@ -58,7 +59,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == 0 && x == WORLD_WIDTH {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z + 1], 1.0},
@@ -69,7 +70,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == 0 {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -85,7 +86,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == 0 {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -101,7 +102,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == WORLD_WIDTH {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z + 1], 1.0},
@@ -117,7 +118,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == WORLD_DEPTH {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{-1.0, terrain_heights[x - 1][z], 0.0},
@@ -133,7 +134,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else {
-		triangles := [?][3]Vec3 {
+		triangles := [?][3]m.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -160,8 +161,8 @@ calculate_terrain_light :: proc(x, z: int) {
 		}
 	}
 
-	normal = normalize(normal)
-	light := dot(normalize(sun), normal)
+	normal = m.normalize(normal)
+	light := m.dot(m.normalize(sun), normal)
 	terrain_lights[x][z] = {light, light, light}
 }
 
@@ -169,11 +170,11 @@ get_terrain_tile_triangle_lights :: proc(
 	side: Tile_Triangle_Side,
 	x, z: int,
 ) -> (
-	lights: [3]Vec3,
+	lights: [3]m.vec3,
 ) {
 	lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}
 
-	tile_lights := [4]Vec3 {
+	tile_lights := [4]m.vec3 {
 		terrain_lights[x][z],
 		terrain_lights[x + 1][z],
 		terrain_lights[x + 1][z + 1],
