@@ -48,6 +48,8 @@ Wall :: struct {
 	texture: Wall_Texture,
 }
 
+WALL_HEIGHT :: 3
+
 WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
 }
@@ -343,9 +345,13 @@ draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
 
 	draw_sprite(sprite)
 
-	sprite.position += Vec3{0, SPRITE_HEIGHT, 0}
+	sprite.position.y += SPRITE_HEIGHT
 	sprite.texture = texture[.Top]
 	sprite.mask_texture = mask_texture[.Top]
+	draw_sprite(sprite)
+
+    sprite.texture = .Wall_Top
+    sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT - 0.005
 	draw_sprite(sprite)
 }
 
