@@ -42,12 +42,8 @@ Wall_Mask :: enum {
 	End,
 }
 
-Wall_Mirror :: enum {
-	Yes,
-	No,
-}
-
 Wall :: struct {
+	y:       f32,
 	type:    Wall_Type,
 	texture: Wall_Texture,
 }
@@ -59,9 +55,9 @@ WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]Vec3 {
 	.North_South =  {
 		.South_West = {0, 0, 0},
-		.South_East = {0, 0, -1},
+		.South_East = {0, 0, 0},
 		.North_East = {0, 0, -1},
-		.North_West = {0, 0, 0},
+		.North_West = {0, 0, -1},
 	},
 	.East_West =  {
 		.South_West = {0, 0, 0},
@@ -298,7 +294,7 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-WALL_MIRROR_MAP :: [Wall_Axis][Camera_Rotation]Wall_Mirror {
+WALL_MIRROR_MAP :: [Wall_Axis][Camera_Rotation]Sprite_Mirror {
 	.North_South =  {
 		.South_West = .Yes,
 		.South_East = .No,
@@ -323,84 +319,34 @@ WALL_MASK_TEXTURE_MAP :: [Wall_Mask][Wall_Texture_Position]Texture {
 	.End = {.Base = .End_Wall_Base_Mask, .Top = .End_Wall_Top_Mask},
 }
 
-WALL_WIDTH :: 1.115
-SPRITE_HEIGHT :: 1.9312
-WALL_START :: 0.0575
-WALL_END :: 1.0575
-
-WALL_VERTEX_POSITION_MAP :: [Camera_Rotation][4]Vec3 {
-	.South_West =  {
-		{-WALL_END, 0.0, WALL_START},
-		{-WALL_END, SPRITE_HEIGHT, WALL_START},
-		{WALL_START, SPRITE_HEIGHT, -WALL_END},
-		{WALL_START, 0.0, -WALL_END},
-	},
-	.South_East =  {
-		{WALL_START, 0.0, WALL_END},
-		{WALL_START, SPRITE_HEIGHT, WALL_END},
-		{-WALL_END, SPRITE_HEIGHT, -WALL_START},
-		{-WALL_END, 0.0, -WALL_START},
-	},
-	.North_East =  {
-		{WALL_END, 0.0, -WALL_START},
-		{WALL_END, SPRITE_HEIGHT, -WALL_START},
-		{-WALL_START, SPRITE_HEIGHT, WALL_END},
-		{-WALL_START, 0.0, WALL_END},
-	},
-	.North_West =  {
-		{-WALL_START, 0.0, -WALL_END},
-		{-WALL_START, SPRITE_HEIGHT, -WALL_END},
-		{WALL_END, SPRITE_HEIGHT, WALL_START},
-		{WALL_END, 0.0, WALL_START},
-	},
-}
-
-WALL_VERTEX_TEXCOORDS_MAP :: [Wall_Mirror][4]Vec4 {
-	.Yes = {{0, 1, 0, 0}, {0, 0, 0, 0}, {1, 0, 0, 0}, {1, 1, 0, 0}},
-	.No = {{1, 1, 0, 0}, {1, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}},
-}
-
 draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
-	position_map := WALL_VERTEX_POSITION_MAP
-	texcoords_map := WALL_VERTEX_TEXCOORDS_MAP
 	mirror_map := WALL_MIRROR_MAP
 	texture_map := WALL_TEXTURE_MAP
 	mask_map := WALL_MASK_MAP
 	mask_texture_map := WALL_MASK_TEXTURE_MAP
-	positions := position_map[camera_rotation]
-	texcoords := texcoords_map[mirror_map[axis][camera_rotation]]
+	wall_translation_map := WALL_TRANSLATION_MAP
+
 	texture := texture_map[wall.texture]
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
-	light := Vec3{1, 1, 1}
-	vertices: [4]Vertex
+	translation := wall_translation_map[axis][camera_rotation]
+	position := Vec3{f32(pos.x), wall.y, f32(pos.z)} + translation
 
-	for i in 0 ..< len(vertices) {
-		texcoords[i].z = f32(texture[.Base])
-		texcoords[i].w = f32(mask_texture[.Base])
-	    positions[i] += Vec3{f32(pos.x), 0, f32(pos.z)}
-		vertices[i] = {
-			pos       = positions[i],
-			light     = light,
-			texcoords = texcoords[i],
-		}
+	sprite := Sprite {
+		position = position,
+		texture = texture[.Base],
+		mask_texture = mask_texture[.Base],
+		mirror = mirror_map[axis][camera_rotation],
+		lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
 	}
 
-    fmt.println(vertices)
-	draw_quad(vertices[0], vertices[1], vertices[2], vertices[3])
 
-	for i in 0 ..< len(vertices) {
-		texcoords[i].z = f32(texture[.Top])
-		texcoords[i].w = f32(mask_texture[.Top])
-		positions[i] += Vec3{0, SPRITE_HEIGHT, 0}
-		vertices[i] = {
-			pos       = positions[i],
-			light     = light,
-			texcoords = texcoords[i],
-		}
-	}
+	draw_sprite(sprite)
 
-	draw_quad(vertices[0], vertices[1], vertices[2], vertices[3])
+	sprite.position += Vec3{0, SPRITE_HEIGHT, 0}
+	sprite.texture = texture[.Top]
+	sprite.mask_texture = mask_texture[.Top]
+	draw_sprite(sprite)
 }
 
 draw_tile_walls :: proc(x, z, floor: int) {

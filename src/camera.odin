@@ -57,9 +57,11 @@ update_camera :: proc(delta_time: f64) {
 	if is_key_press(.Key_Q) {
 		camera_translate *= Vec3{-1, 1, 1}
 		camera_translate.zx = camera_translate.xz
+        camera_rotation = Camera_Rotation((int(camera_rotation) + 3) % 4)
 	} else if is_key_press(.Key_E) {
 		camera_translate *= Vec3{1, 1, -1}
 		camera_translate.zx = camera_translate.xz
+        camera_rotation = Camera_Rotation((int(camera_rotation) + 1) % 4)
 	}
 
 	camera_movement *= camera_translate / camera_distance

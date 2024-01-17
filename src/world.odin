@@ -13,16 +13,15 @@ draw_world :: proc() {
 	for x in 0 ..< WORLD_WIDTH {
 		x := x
 		#partial switch camera_rotation {
-		case .South_West, .South_East:
+		case .South_West, .North_West:
 			x = WORLD_WIDTH - x - 1
 		}
 		for z in 0 ..< WORLD_DEPTH {
 			z := z
 			#partial switch camera_rotation {
-			case .South_West, .North_West:
+			case .South_West, .South_East:
 				z = WORLD_DEPTH - z - 1
 			}
-			// draw_half_tiles_at({f32(x), f32(y), f32(z)})
 			for side in Tile_Triangle_Side {
 				draw_terrain_tile_triangle(side, x, z)
 			}
