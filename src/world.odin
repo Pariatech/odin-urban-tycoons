@@ -62,4 +62,6 @@ init_world :: proc() {
 	}
 
 	insert_north_south_wall({1, 0, 1}, {type = .End_End, texture = .Brick})
+
+	insert_east_west_wall({2, 0, 1}, {type = .End_End, texture = .Brick})
 }

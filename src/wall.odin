@@ -57,15 +57,15 @@ WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]Vec3 {
 	.North_South =  {
 		.South_West = {0, 0, 0},
-		.South_East = {0, 0, 0},
-		.North_East = {0, 0, -1},
-		.North_West = {0, 0, -1},
+		.South_East = {-1, 0, 0},
+		.North_East = {-1, 0, 0},
+		.North_West = {0, 0, 0},
 	},
 	.East_West =  {
 		.South_West = {0, 0, 0},
 		.South_East = {0, 0, 0},
-		.North_East = {-1, 0, 0},
-		.North_West = {-1, 0, 0},
+		.North_East = {0, 0, -1},
+		.North_West = {0, 0, -1},
 	},
 }
 
@@ -298,16 +298,16 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 
 WALL_MIRROR_MAP :: [Wall_Axis][Camera_Rotation]Sprite_Mirror {
 	.North_South =  {
-		.South_West = .Yes,
-		.South_East = .No,
-		.North_East = .Yes,
-		.North_West = .No,
-	},
-	.East_West =  {
 		.South_West = .No,
 		.South_East = .Yes,
 		.North_East = .No,
 		.North_West = .Yes,
+	},
+	.East_West =  {
+		.South_West = .Yes,
+		.South_East = .No,
+		.North_East = .Yes,
+		.North_West = .No,
 	},
 }
 
