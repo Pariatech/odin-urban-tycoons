@@ -5,15 +5,29 @@ WORLD_HEIGHT :: 64
 WORLD_DEPTH :: 32
 
 sun := Vec3{0, -1, 0}
+north_south_walls := make(map[IVec3]Wall)
+east_west_walls := make(map[IVec3]Wall)
 
 draw_world :: proc() {
 	// for y in 0 ..< WORLD_HEIGHT {
 	for x in 0 ..< WORLD_WIDTH {
+		x := x
+		#partial switch camera_rotation {
+		case .South_West, .South_East:
+			x = WORLD_WIDTH - x - 1
+		}
 		for z in 0 ..< WORLD_DEPTH {
+			z := z
+			#partial switch camera_rotation {
+			case .South_West, .North_West:
+				z = WORLD_DEPTH - z - 1
+			}
 			// draw_half_tiles_at({f32(x), f32(y), f32(z)})
 			for side in Tile_Triangle_Side {
 				draw_terrain_tile_triangle(side, x, z)
 			}
+
+			draw_tile_walls(x, z, 0)
 		}
 	}
 	// }
@@ -47,4 +61,6 @@ init_world :: proc() {
 			// )
 		}
 	}
+
+	insert_north_south_wall({1, 0, 1}, {type = .End_End, texture = .Brick})
 }

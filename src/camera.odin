@@ -6,11 +6,11 @@ CAMERA_SPEED :: 2.0
 
 zoom: f32 = 1.0
 camera_position: Vec3
-camera_rotation: Camera_Rotiation
+camera_rotation: Camera_Rotation
 camera_distance := f32(10)
 camera_translate := Vec3{-camera_distance, camera_distance, -camera_distance}
 
-Camera_Rotiation :: enum {
+Camera_Rotation :: enum {
 	South_West,
 	South_East,
 	North_East,

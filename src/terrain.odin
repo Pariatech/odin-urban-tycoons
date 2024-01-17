@@ -269,8 +269,8 @@ draw_terrain_tile_triangle :: proc(side: Tile_Triangle_Side, x, z: int) {
 set_terrain_tile_triangle :: proc(
 	side: Tile_Triangle_Side,
 	x, z: int,
-	texture: Sprite,
-	mask: Sprite,
+	texture: Texture,
+	mask: Texture,
 ) {
 	terrain_tile_triangles[x][z][side] = Tile_Triangle {
 		texture      = texture,

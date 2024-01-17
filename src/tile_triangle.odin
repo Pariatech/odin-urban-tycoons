@@ -8,8 +8,8 @@ Tile_Triangle_Side :: enum {
 }
 
 Tile_Triangle :: struct {
-	texture:      Sprite,
-	mask_texture: Sprite,
+	texture:      Texture,
+	mask_texture: Texture,
 }
 
 TILE_TRIANGLE_SIDE_VERTICES_MAP :: [Tile_Triangle_Side][3]Vertex {

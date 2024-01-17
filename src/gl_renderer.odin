@@ -47,7 +47,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
-	textures :: len(sprite_paths)
+	textures :: len(texture_paths)
 
 	if (textures == 0) {
 		fmt.println("No textures to load.")
@@ -66,7 +66,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 		textures,
 	)
 
-	for path, i in sprite_paths {
+	for path, i in texture_paths {
 		width: i32
 		height: i32
 		pixels := stbi.load(path, &width, &height, nil, 4)

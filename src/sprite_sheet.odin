@@ -1,6 +1,6 @@
 package main
 
-Sprite :: enum {
+Texture :: enum {
 	Full_Mask,
 	Grid_Mask,
 	Terrain_Leveling_Mask,
@@ -48,7 +48,7 @@ Sprite :: enum {
 	Cursors_Wall_Tool_Top,
 }
 
-sprite_paths :: [Sprite]cstring {
+texture_paths :: [Texture]cstring {
 	.Full_Mask                              = "resources/textures/full-mask.png",
 	.Grid_Mask                              = "resources/textures/grid-mask.png",
 	.Terrain_Leveling_Mask                  = "resources/textures/leveling-mask.png",
