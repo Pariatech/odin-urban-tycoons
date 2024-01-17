@@ -70,6 +70,5 @@ draw_sprite :: proc(sprite: Sprite) {
 		}
 	}
 
-    fmt.println(vertices)
 	draw_quad(vertices[0], vertices[1], vertices[2], vertices[3])
 }

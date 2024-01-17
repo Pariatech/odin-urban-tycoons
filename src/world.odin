@@ -36,7 +36,7 @@ init_world :: proc() {
 	for x in 0 ..< WORLD_WIDTH {
 		for z in 0 ..< WORLD_DEPTH {
 			for side in Tile_Triangle_Side {
-				set_terrain_tile_triangle(side, x, z, .Grass, .Full_Mask)
+				set_terrain_tile_triangle(side, x, z, .Grass, .Grid_Mask)
 			}
 			// add_half_tile(
 			// 	 {
@@ -64,4 +64,7 @@ init_world :: proc() {
 	insert_north_south_wall({1, 0, 1}, {type = .End_End, texture = .Brick})
 
 	insert_east_west_wall({2, 0, 1}, {type = .End_End, texture = .Brick})
+
+    insert_north_south_wall({5, 0, 1}, {type = .End_Right_Corner, texture = .Varg})
+    insert_east_west_wall({5, 0, 1}, {type = .Left_Corner_End, texture = .Brick})
 }

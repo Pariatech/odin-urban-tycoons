@@ -28,6 +28,7 @@ Wall_Type :: enum {
 
 Wall_Texture :: enum {
 	Brick,
+    Varg,
 }
 
 Wall_Texture_Position :: enum {
@@ -52,6 +53,7 @@ WALL_HEIGHT :: 3
 
 WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
+    .Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
 }
 
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]Vec3 {
@@ -172,8 +174,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 		.North_South =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
-			.North_East = .Full,
-			.North_West = .End,
+			.North_East = .End,
+			.North_West = .Full,
 		},
 		.East_West =  {
 			.South_West = .End,
@@ -357,11 +359,19 @@ draw_wall :: proc(wall: Wall, pos: IVec3, axis: Wall_Axis) {
 
 draw_tile_walls :: proc(x, z, floor: int) {
 	north_south_key := IVec3{x, floor, z}
+    #partial switch camera_rotation {
+        case .South_East, .North_East:
+            north_south_key.x += 1
+    }
 	if wall, ok := north_south_walls[north_south_key]; ok {
 		draw_wall(wall, north_south_key, .North_South)
 	}
 
 	east_west_key := IVec3{x, floor, z}
+    #partial switch camera_rotation {
+        case .North_East, .North_West:
+            east_west_key.z += 1
+    }
 	if wall, ok := east_west_walls[east_west_key]; ok {
 		draw_wall(wall, east_west_key, .East_West)
 	}
