@@ -49,6 +49,7 @@ main :: proc() {
 	if (!init_renderer()) do return
 	defer deinit_renderer()
 	init_keyboard()
+    init_cursor()
 
 	init_world()
     init_terrain()
@@ -87,6 +88,7 @@ main :: proc() {
 			is_key_down(.Key_Escape)
 
 		update_keyboard()
+        update_cursor()
 
 		frames += 1
 	}
