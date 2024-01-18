@@ -187,8 +187,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 	.Left_Corner_Side =  {
 		.North_South =  {
-			.South_West = .Extended_Side,
-			.South_East = .Side,
+			.South_West = .Side,
+			.South_East = .Extended_Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
@@ -215,8 +215,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 	.Right_Corner_Side =  {
 		.North_South =  {
-			.South_West = .Side,
-			.South_East = .Extended_Side,
+			.South_West = .Extended_Side,
+			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
@@ -231,14 +231,14 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 		.North_South =  {
 			.South_West = .Side,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
-			.North_West = .Side,
+			.North_East = .Side,
+			.North_West = .Extended_Side,
 		},
 		.East_West =  {
-			.South_West = .Extended_Side,
+			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
-			.North_West = .Side,
+			.North_West = .Extended_Side,
 		},
 	},
 	.Left_Corner_Left_Corner =  {

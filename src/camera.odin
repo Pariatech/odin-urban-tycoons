@@ -3,7 +3,7 @@ package main
 import "vendor:glfw"
 import m "core:math/linalg/glsl"
 
-CAMERA_SPEED :: 2.0
+CAMERA_SPEED :: 3.0
 
 zoom: f32 = 1.0
 camera_position: m.vec3
