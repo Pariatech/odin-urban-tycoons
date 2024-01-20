@@ -29,7 +29,7 @@ Wall_Type :: enum {
 
 Wall_Texture :: enum {
 	Brick,
-    Varg,
+	Varg,
 }
 
 Wall_Texture_Position :: enum {
@@ -54,7 +54,7 @@ WALL_HEIGHT :: 3
 
 WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
-    .Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
+	.Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
 }
 
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
@@ -301,16 +301,16 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 
 WALL_MIRROR_MAP :: [Wall_Axis][Camera_Rotation]Sprite_Mirror {
 	.North_South =  {
-		.South_West = .No,
-		.South_East = .Yes,
-		.North_East = .No,
-		.North_West = .Yes,
-	},
-	.East_West =  {
 		.South_West = .Yes,
 		.South_East = .No,
 		.North_East = .Yes,
 		.North_West = .No,
+	},
+	.East_West =  {
+		.South_West = .No,
+		.South_East = .Yes,
+		.North_East = .No,
+		.North_West = .Yes,
 	},
 }
 
@@ -353,26 +353,26 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	sprite.mask_texture = mask_texture[.Top]
 	draw_sprite(sprite)
 
-    sprite.texture = .Wall_Top
-    sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT - 0.005
+	sprite.texture = .Wall_Top
+	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT - 0.005
 	draw_sprite(sprite)
 }
 
 draw_tile_walls :: proc(x, z, floor: i32) {
 	north_south_key := m.ivec3{x, floor, z}
-    #partial switch camera_rotation {
-        case .South_East, .North_East:
-            north_south_key.x += 1
-    }
+	#partial switch camera_rotation {
+	case .South_East, .North_East:
+		north_south_key.x += 1
+	}
 	if wall, ok := north_south_walls[north_south_key]; ok {
 		draw_wall(wall, north_south_key, .North_South)
 	}
 
 	east_west_key := m.ivec3{x, floor, z}
-    #partial switch camera_rotation {
-        case .North_East, .North_West:
-            east_west_key.z += 1
-    }
+	#partial switch camera_rotation {
+	case .North_East, .North_West:
+		east_west_key.z += 1
+	}
 	if wall, ok := east_west_walls[east_west_key]; ok {
 		draw_wall(wall, east_west_key, .East_West)
 	}

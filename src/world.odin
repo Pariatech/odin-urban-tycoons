@@ -9,6 +9,8 @@ WORLD_DEPTH :: 32
 sun := m.vec3{0, -1, 0}
 north_south_walls := map[m.ivec3]Wall{}
 east_west_walls := map[m.ivec3]Wall{}
+north_west_south_east_walls := map[m.ivec3]Wall{}
+south_west_north_east_walls := map[m.ivec3]Wall{}
 
 draw_world :: proc() {
 	// for y in 0 ..< WORLD_HEIGHT {
@@ -28,6 +30,7 @@ draw_world :: proc() {
 				draw_terrain_tile_triangle(side, x, z)
 			}
 
+			draw_tile_diagonal_walls(i32(x), i32(z), 0)
 			draw_tile_walls(i32(x), i32(z), 0)
 		}
 	}
@@ -170,20 +173,39 @@ init_world :: proc() {
 		{type = .Right_Corner_Right_Corner, texture = .Varg},
 	)
 
-	insert_north_south_wall(
-		{5, 0, 10},
-		{type = .Side_End, texture = .Brick},
+	insert_north_south_wall({5, 0, 10}, {type = .Side_End, texture = .Brick})
+	insert_north_south_wall({5, 0, 11}, {type = .End_Side, texture = .Brick})
+	insert_east_west_wall({4, 0, 11}, {type = .End_Side, texture = .Varg})
+	insert_east_west_wall({5, 0, 11}, {type = .Side_End, texture = .Varg})
+
+	insert_north_west_south_east_wall(
+		{1, 0, 13},
+		{type = .End_End, texture = .Brick},
 	)
-	insert_north_south_wall(
-		{5, 0, 11},
-		{type = .End_Side, texture = .Brick},
+
+	insert_south_west_north_east_wall(
+		{1, 0, 15},
+		{type = .End_End, texture = .Brick},
 	)
-	insert_east_west_wall(
-		{4, 0, 11},
-		{type = .End_Side, texture = .Varg},
+
+
+	insert_north_west_south_east_wall(
+		{1, 0, 17},
+		{type = .End_Left_Corner, texture = .Brick},
 	)
-	insert_east_west_wall(
-		{5, 0, 11},
-		{type = .Side_End, texture = .Varg},
+
+	insert_south_west_north_east_wall(
+		{2, 0, 17},
+		{type = .Left_Corner_End, texture = .Brick},
+	)
+
+	insert_north_west_south_east_wall(
+		{6, 0, 17},
+		{type = .Left_Corner_End, texture = .Brick},
+	)
+
+	insert_south_west_north_east_wall(
+		{6, 0, 18},
+		{type = .Right_Corner_End, texture = .Brick},
 	)
 }

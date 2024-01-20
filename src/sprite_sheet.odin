@@ -57,7 +57,7 @@ texture_paths :: [Texture]cstring {
 	.Light_Post_Base                        = "resources/textures/light-pole-base.png",
 	.Light_Post_Top                         = "resources/textures/light-pole-top.png",
 	.Wall_Top                               = "resources/textures/walls/top/side.png",
-	.Wall_Top_Diagonal                      = "resources/textures/walls/wall-top-diagonal.png",
+	.Wall_Top_Diagonal                      = "resources/textures/walls/top/diagonal.png",
 	.Wall_Top_Diagonal_Cross                = "resources/textures/walls/wall-top-diagonal-cross.png",
 	.Short_Wall_Top_Diagonal                = "resources/textures/walls/short-wall-top-diagonal.png",
 	.Brick_Wall_Side_Base                   = "resources/textures/walls/brick/side-base.png",
