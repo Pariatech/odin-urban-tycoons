@@ -44,13 +44,33 @@ Wall_Mask :: enum {
 	End,
 }
 
+Wall_Side :: enum {
+    Inside,
+    Outside,
+}
+
 Wall :: struct {
 	y:       f32,
 	type:    Wall_Type,
-	texture: Wall_Texture,
+	textures: [Wall_Side]Wall_Texture,
 }
 
 WALL_HEIGHT :: 3
+
+WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
+	.North_South =  {
+		.South_West = .Outside,
+		.South_East = .Inside,
+		.North_East = .Inside,
+		.North_West = .Outside,
+	},
+	.East_West =  {
+		.South_West = .Outside,
+		.South_East = .Outside,
+		.North_East = .Inside,
+		.North_West = .Inside,
+	},
+}
 
 WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
@@ -330,8 +350,10 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	mask_map := WALL_MASK_MAP
 	mask_texture_map := WALL_MASK_TEXTURE_MAP
 	wall_translation_map := WALL_TRANSLATION_MAP
+    side_map := WALL_SIDE_MAP
 
-	texture := texture_map[wall.texture]
+    side := side_map[axis][camera_rotation]
+	texture := texture_map[wall.textures[side]]
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
 	translation := wall_translation_map[axis][camera_rotation]

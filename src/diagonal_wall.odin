@@ -428,6 +428,21 @@ DIAGONAL_WALL_DRAW_MAP ::
 		},
 	}
 
+DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
+	.South_West_North_East =  {
+		.South_West = .Outside,
+		.South_East = .Inside,
+		.North_East = .Inside,
+		.North_West = .Outside,
+	},
+	.North_West_South_East =  {
+		.South_West = .Outside,
+		.South_East = .Outside,
+		.North_East = .Inside,
+		.North_West = .Inside,
+	},
+}
+
 draw_diagonal_wall :: proc(
 	wall: Wall,
 	pos: m.ivec3,
@@ -439,16 +454,14 @@ draw_diagonal_wall :: proc(
 	texture_map := DIAGONAL_WALL_TEXTURE_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
     top_texture_map := DIAGONAL_WALL_TOP_TEXTURE_MAP
+    side_map := DIAGONAL_WALL_SIDE_MAP
 
+    side := side_map[axis][camera_rotation]
 	rotation := rotation_map[axis][camera_rotation]
-	texture := texture_map[rotation][wall.texture]
+	texture := texture_map[rotation][wall.textures[side]]
 	mask := mask_map[axis][camera_rotation][wall.type]
 	mask_texture := mask_texture_map[mask]
 	draw := draw_map[axis][wall.type][camera_rotation]
-	// texture := texture_map[wall.texture]
-	// mask := mask_map[wall.type][axis][camera_rotation]
-	// mask_texture := mask_texture_map[mask]
-	// translation := wall_translation_map[axis][camera_rotation]
 	position := m.vec3{f32(pos.x), wall.y, f32(pos.z)}
 
 	sprite := Sprite {
