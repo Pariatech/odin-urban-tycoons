@@ -14,5 +14,4 @@ void main() {
         discard;
     }
     color = vec4(light * tex.rgb * mask_tex.rgb, tex.a * mask_tex.a);
-    // color = vec4(1.0);
 }

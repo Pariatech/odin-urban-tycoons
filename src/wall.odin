@@ -376,7 +376,8 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	draw_sprite(sprite)
 
 	sprite.texture = .Wall_Top
-	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT - 0.005
+	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
+	sprite.mask_texture = mask_texture_map[.Full][.Base]
 	draw_sprite(sprite)
 }
 

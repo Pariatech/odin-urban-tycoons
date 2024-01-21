@@ -188,6 +188,158 @@ DIAGONAL_WALL_MASK_MAP ::
 		},
 	}
 
+DIAGONAL_WALL_TOP_MASK_MAP ::
+	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Texture {
+		.South_West_North_East =  {
+			.South_West =  {
+				.End_End = .Full_Mask,
+				.Side_Side = .Full_Mask,
+				.End_Side = .Full_Mask,
+				.Side_End = .Full_Mask,
+				.Left_Corner_End = .Full_Mask,
+				.End_Left_Corner = .Full_Mask,
+				.Right_Corner_End = .Full_Mask,
+				.End_Right_Corner = .Full_Mask,
+				.Left_Corner_Side = .Full_Mask,
+				.Side_Left_Corner = .Full_Mask,
+				.Right_Corner_Side = .Full_Mask,
+				.Side_Right_Corner = .Full_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.South_East =  {
+				.End_End = .Diagonal_Wall_Top_Mask,
+				.Side_Side = .Diagonal_Wall_Top_Mask,
+				.End_Side = .Diagonal_Wall_Top_Mask,
+				.Side_End = .Diagonal_Wall_Top_Mask,
+				.Left_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.End_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Right_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.End_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Side_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Right_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Side_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.North_East =  {
+				.End_End = .Full_Mask,
+				.Side_Side = .Full_Mask,
+				.End_Side = .Full_Mask,
+				.Side_End = .Full_Mask,
+				.Left_Corner_End = .Full_Mask,
+				.End_Left_Corner = .Full_Mask,
+				.Right_Corner_End = .Full_Mask,
+				.End_Right_Corner = .Full_Mask,
+				.Left_Corner_Side = .Full_Mask,
+				.Side_Left_Corner = .Full_Mask,
+				.Right_Corner_Side = .Full_Mask,
+				.Side_Right_Corner = .Full_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.North_West =  {
+				.End_End = .Diagonal_Wall_Top_Mask,
+				.Side_Side = .Diagonal_Wall_Top_Mask,
+				.End_Side = .Diagonal_Wall_Top_Mask,
+				.Side_End = .Diagonal_Wall_Top_Mask,
+				.Left_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.End_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Right_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.End_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Side_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Right_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Side_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+		},
+		.North_West_South_East =  {
+			.South_West =  {
+				.End_End = .Diagonal_Wall_Top_Mask,
+				.Side_Side = .Diagonal_Wall_Top_Mask,
+				.End_Side = .Diagonal_Wall_Top_Mask,
+				.Side_End = .Diagonal_Wall_Top_Mask,
+				.Left_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.End_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Right_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.End_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Side_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Right_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Side_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.South_East =  {
+				.End_End = .Full_Mask,
+				.Side_Side = .Full_Mask,
+				.End_Side = .Full_Mask,
+				.Side_End = .Full_Mask,
+				.Left_Corner_End = .Full_Mask,
+				.End_Left_Corner = .Full_Mask,
+				.Right_Corner_End = .Full_Mask,
+				.End_Right_Corner = .Full_Mask,
+				.Left_Corner_Side = .Full_Mask,
+				.Side_Left_Corner = .Full_Mask,
+				.Right_Corner_Side = .Full_Mask,
+				.Side_Right_Corner = .Full_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.North_East =  {
+				.End_End = .Diagonal_Wall_Top_Mask,
+				.Side_Side = .Diagonal_Wall_Top_Mask,
+				.End_Side = .Diagonal_Wall_Top_Mask,
+				.Side_End = .Diagonal_Wall_Top_Mask,
+				.Left_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.End_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Right_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.End_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Side_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Right_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
+				.Side_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+			.North_West =  {
+				.End_End = .Full_Mask,
+				.Side_Side = .Full_Mask,
+				.End_Side = .Full_Mask,
+				.Side_End = .Full_Mask,
+				.Left_Corner_End = .Full_Mask,
+				.End_Left_Corner = .Full_Mask,
+				.Right_Corner_End = .Full_Mask,
+				.End_Right_Corner = .Full_Mask,
+				.Left_Corner_Side = .Full_Mask,
+				.Side_Left_Corner = .Full_Mask,
+				.Right_Corner_Side = .Full_Mask,
+				.Side_Right_Corner = .Full_Mask,
+				.Left_Corner_Left_Corner = .Full_Mask,
+				.Right_Corner_Right_Corner = .Full_Mask,
+				.Left_Corner_Right_Corner = .Full_Mask,
+				.Right_Corner_Left_Corner = .Full_Mask,
+			},
+		},
+	}
+
 DIAGONAL_WALL_ROTATION_MAP ::
 	[Diagonal_Wall_Axis][Camera_Rotation]Diagonal_Wall_Axis {
 		.South_West_North_East =  {
@@ -429,19 +581,19 @@ DIAGONAL_WALL_DRAW_MAP ::
 	}
 
 DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
-	.South_West_North_East =  {
-		.South_West = .Outside,
-		.South_East = .Inside,
-		.North_East = .Inside,
-		.North_West = .Outside,
-	},
-	.North_West_South_East =  {
-		.South_West = .Outside,
-		.South_East = .Outside,
-		.North_East = .Inside,
-		.North_West = .Inside,
-	},
-}
+		.South_West_North_East =  {
+			.South_West = .Outside,
+			.South_East = .Inside,
+			.North_East = .Inside,
+			.North_West = .Outside,
+		},
+		.North_West_South_East =  {
+			.South_West = .Outside,
+			.South_East = .Outside,
+			.North_East = .Inside,
+			.North_West = .Inside,
+		},
+	}
 
 draw_diagonal_wall :: proc(
 	wall: Wall,
@@ -453,10 +605,11 @@ draw_diagonal_wall :: proc(
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
 	texture_map := DIAGONAL_WALL_TEXTURE_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
-    top_texture_map := DIAGONAL_WALL_TOP_TEXTURE_MAP
-    side_map := DIAGONAL_WALL_SIDE_MAP
+	top_texture_map := DIAGONAL_WALL_TOP_TEXTURE_MAP
+	top_mask_map := DIAGONAL_WALL_TOP_MASK_MAP
+	side_map := DIAGONAL_WALL_SIDE_MAP
 
-    side := side_map[axis][camera_rotation]
+	side := side_map[axis][camera_rotation]
 	rotation := rotation_map[axis][camera_rotation]
 	texture := texture_map[rotation][wall.textures[side]]
 	mask := mask_map[axis][camera_rotation][wall.type]
@@ -483,6 +636,7 @@ draw_diagonal_wall :: proc(
 	}
 
 	sprite.texture = top_texture_map[rotation]
+	sprite.mask_texture = top_mask_map[axis][camera_rotation][wall.type]
 	sprite.position.y = wall.y + WALL_HEIGHT
 	draw_sprite(sprite)
 }

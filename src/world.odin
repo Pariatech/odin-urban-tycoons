@@ -443,4 +443,20 @@ init_world :: proc() {
 			textures = {.Inside = .Brick, .Outside = .Varg},
 		},
 	)
+
+	insert_north_west_south_east_wall(
+		{1, 0, 20},
+		 {
+			type = .End_Side,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	insert_east_west_wall(
+		{2, 0, 20},
+		 {
+			type = .Left_Corner_End,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
 }

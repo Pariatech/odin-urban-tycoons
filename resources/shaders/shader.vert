@@ -14,7 +14,6 @@ layout(location = 1) out vec4 frag_texcoord;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * vec4(pos, 1.0);
-    // gl_Position = vec4(pos, 1.0);
     frag_light = light;
     frag_texcoord = texcoord;
 }
