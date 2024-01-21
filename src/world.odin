@@ -256,4 +256,26 @@ init_world :: proc() {
 		{17, 0, 16},
 		{type = .End_Left_Corner, texture = .Brick},
 	)
+
+
+	insert_north_west_south_east_wall(
+		{20, 0, 17},
+		{type = .Right_Corner_End, texture = .Brick},
+	)
+
+	insert_south_west_north_east_wall(
+		{19, 0, 17},
+		{type = .End_Right_Corner, texture = .Brick},
+	)
+
+
+	insert_north_west_south_east_wall(
+		{22, 0, 17},
+		{type = .End_Right_Corner, texture = .Brick},
+	)
+
+	insert_south_west_north_east_wall(
+		{22, 0, 16},
+		{type = .End_Left_Corner, texture = .Brick},
+	)
 }
