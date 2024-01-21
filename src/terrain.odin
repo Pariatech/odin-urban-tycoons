@@ -245,26 +245,10 @@ get_terrain_tile_triangle_heights :: proc(
 draw_terrain_tile_triangle :: proc(side: Tile_Triangle_Side, x, z: int) {
 	tri := terrain_tile_triangles[x][z][side]
 
-	verts_map := TILE_TRIANGLE_SIDE_VERTICES_MAP
-	verts := verts_map[side]
-
 	lights := get_terrain_tile_triangle_lights(side, x, z)
 	heights := get_terrain_tile_triangle_heights(side, x, z)
 
-	for i in 0 ..< len(verts) {
-		verts[i].pos.x += f32(x)
-		verts[i].pos.z += f32(z)
-		verts[i].pos.y = heights[i]
-		verts[i].light = lights[i]
-		verts[i].texcoords.z = f32(tri.texture)
-		verts[i].texcoords.w = f32(tri.mask_texture)
-	}
-
-	v0 := verts[0]
-	v1 := verts[1]
-	v2 := verts[2]
-
-	draw_triangle(v0, v1, v2)
+	draw_tile_triangle(tri, side, lights, heights, {f32(x), f32(z)})
 }
 
 set_terrain_tile_triangle :: proc(
