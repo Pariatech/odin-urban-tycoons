@@ -599,6 +599,7 @@ draw_diagonal_wall :: proc(
 	wall: Wall,
 	pos: m.ivec3,
 	axis: Diagonal_Wall_Axis,
+    y: f32
 ) {
 	mask_texture_map := DIAGONAL_WALL_MASK_TEXTURE_MAP
 	mask_map := DIAGONAL_WALL_MASK_MAP
@@ -615,7 +616,7 @@ draw_diagonal_wall :: proc(
 	mask := mask_map[axis][camera_rotation][wall.type]
 	mask_texture := mask_texture_map[mask]
 	draw := draw_map[axis][wall.type][camera_rotation]
-	position := m.vec3{f32(pos.x), wall.y, f32(pos.z)}
+	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 
 	sprite := Sprite {
 			position = position,
@@ -637,16 +638,16 @@ draw_diagonal_wall :: proc(
 
 	sprite.texture = top_texture_map[rotation]
 	sprite.mask_texture = top_mask_map[axis][camera_rotation][wall.type]
-	sprite.position.y = wall.y + WALL_HEIGHT
+	sprite.position.y = y + WALL_HEIGHT
 	draw_sprite(sprite)
 }
 
-draw_tile_diagonal_walls :: proc(x, z, floor: i32) {
+draw_tile_diagonal_walls :: proc(x, z, floor: i32, y: f32) {
 	pos := m.ivec3{x, floor, z}
 	if wall, ok := north_west_south_east_walls[pos]; ok {
-		draw_diagonal_wall(wall, pos, .North_West_South_East)
+		draw_diagonal_wall(wall, pos, .North_West_South_East, y)
 	} else if wall, ok := south_west_north_east_walls[pos]; ok {
-		draw_diagonal_wall(wall, pos, .South_West_North_East)
+		draw_diagonal_wall(wall, pos, .South_West_North_East, y)
 	}
 }
 

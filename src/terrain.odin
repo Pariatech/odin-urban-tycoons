@@ -1,7 +1,7 @@
 package main
 
-import "core:math/noise"
 import m "core:math/linalg/glsl"
+import "core:math/noise"
 
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
 terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
@@ -277,4 +277,13 @@ set_terrain_tile_triangle :: proc(
 		texture      = texture,
 		mask_texture = mask,
 	}
+}
+
+get_tile_height :: proc(x, z: int) -> f32 {
+	total :=
+		terrain_heights[x][z] +
+		terrain_heights[x + 1][z] +
+		terrain_heights[x][z + 1] +
+		terrain_heights[x + 1][z + 1]
+	return total / 4
 }

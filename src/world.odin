@@ -26,12 +26,14 @@ draw_world :: proc() {
 			case .South_West, .South_East:
 				z = WORLD_DEPTH - z - 1
 			}
+
 			for side in Tile_Triangle_Side {
 				draw_terrain_tile_triangle(side, x, z)
 			}
 
-			draw_tile_diagonal_walls(i32(x), i32(z), 0)
-			draw_tile_walls(i32(x), i32(z), 0)
+			y := get_tile_height(x, z)
+			draw_tile_diagonal_walls(i32(x), i32(z), 0, y)
+			draw_tile_walls(i32(x), i32(z), 0, y)
 		}
 	}
 	// }
@@ -446,10 +448,7 @@ init_world :: proc() {
 
 	insert_north_west_south_east_wall(
 		{1, 0, 20},
-		 {
-			type = .End_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
+		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 
 	insert_east_west_wall(

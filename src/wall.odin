@@ -50,7 +50,6 @@ Wall_Side :: enum {
 }
 
 Wall :: struct {
-	y:       f32,
 	type:    Wall_Type,
 	textures: [Wall_Side]Wall_Texture,
 }
@@ -344,7 +343,7 @@ WALL_MASK_TEXTURE_MAP :: [Wall_Mask][Wall_Texture_Position]Texture {
 	.End = {.Base = .End_Wall_Base_Mask, .Top = .End_Wall_Top_Mask},
 }
 
-draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
+draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 	mirror_map := WALL_MIRROR_MAP
 	texture_map := WALL_TEXTURE_MAP
 	mask_map := WALL_MASK_MAP
@@ -357,7 +356,7 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
 	translation := wall_translation_map[axis][camera_rotation]
-	position := m.vec3{f32(pos.x), wall.y, f32(pos.z)} + translation
+	position := m.vec3{f32(pos.x), y, f32(pos.z)} + translation
 
 	sprite := Sprite {
 		position = position,
@@ -381,14 +380,14 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis) {
 	draw_sprite(sprite)
 }
 
-draw_tile_walls :: proc(x, z, floor: i32) {
+draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
 	north_south_key := m.ivec3{x, floor, z}
 	#partial switch camera_rotation {
 	case .South_East, .North_East:
 		north_south_key.x += 1
 	}
 	if wall, ok := north_south_walls[north_south_key]; ok {
-		draw_wall(wall, north_south_key, .North_South)
+		draw_wall(wall, north_south_key, .North_South, y)
 	}
 
 	east_west_key := m.ivec3{x, floor, z}
@@ -397,7 +396,7 @@ draw_tile_walls :: proc(x, z, floor: i32) {
 		east_west_key.z += 1
 	}
 	if wall, ok := east_west_walls[east_west_key]; ok {
-		draw_wall(wall, east_west_key, .East_West)
+		draw_wall(wall, east_west_key, .East_West, y)
 	}
 }
 
