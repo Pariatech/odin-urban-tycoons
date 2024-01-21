@@ -189,6 +189,10 @@ init_renderer :: proc() -> (ok: bool = true) {
 
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.DebugMessageCallback(gl_debug_callback, nil)
+
+    gl.Enable(gl.DEPTH_TEST)
+    gl.DepthFunc(gl.LESS)
+
 	gl.Enable(gl.BLEND)
 	gl.BlendEquation(gl.FUNC_ADD)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -267,7 +271,7 @@ begin_draw :: proc() {
 	framebuffer_resized = false
 
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	clear(&vertices)
 	clear(&indices)
