@@ -30,6 +30,7 @@ Wall_Type :: enum {
 Wall_Texture :: enum {
 	Brick,
 	Varg,
+    Nyana,
 }
 
 Wall_Texture_Position :: enum {
@@ -45,12 +46,12 @@ Wall_Mask :: enum {
 }
 
 Wall_Side :: enum {
-    Inside,
-    Outside,
+	Inside,
+	Outside,
 }
 
 Wall :: struct {
-	type:    Wall_Type,
+	type:     Wall_Type,
 	textures: [Wall_Side]Wall_Texture,
 }
 
@@ -74,6 +75,7 @@ WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
 	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
 	.Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
+	.Nyana = {.Base = .Nyana_Wall_Side_Base, .Top = .Nyana_Wall_Side_Top},
 }
 
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
@@ -349,9 +351,9 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 	mask_map := WALL_MASK_MAP
 	mask_texture_map := WALL_MASK_TEXTURE_MAP
 	wall_translation_map := WALL_TRANSLATION_MAP
-    side_map := WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 
-    side := side_map[axis][camera_rotation]
+	side := side_map[axis][camera_rotation]
 	texture := texture_map[wall.textures[side]]
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
@@ -376,7 +378,12 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 
 	sprite.texture = .Wall_Top
 	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
-	sprite.mask_texture = mask_texture_map[.Full][.Base]
+
+    if (mask == .Side) {
+        mask = .End
+	    mask_texture = mask_texture_map[mask]
+    }
+	sprite.mask_texture = mask_texture[.Top]
 	draw_sprite(sprite)
 }
 

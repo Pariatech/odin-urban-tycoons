@@ -367,6 +367,10 @@ DIAGONAL_WALL_TEXTURE_MAP ::
 				.Base = .Varg_Wall_Cross_Diagonal_Base,
 				.Top = .Varg_Wall_Cross_Diagonal_Top,
 			},
+			.Nyana =  {
+				.Base = .Nyana_Wall_Cross_Diagonal_Base,
+				.Top = .Nyana_Wall_Cross_Diagonal_Top,
+			},
 		},
 		.North_West_South_East =  {
 			.Brick =  {
@@ -376,6 +380,10 @@ DIAGONAL_WALL_TEXTURE_MAP ::
 			.Varg =  {
 				.Base = .Varg_Wall_Diagonal_Base,
 				.Top = .Varg_Wall_Diagonal_Top,
+			},
+			.Nyana =  {
+				.Base = .Nyana_Wall_Diagonal_Base,
+				.Top = .Nyana_Wall_Diagonal_Top,
 			},
 		},
 	}

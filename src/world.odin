@@ -475,17 +475,17 @@ init_world :: proc() {
 
 
 	// The house
-    draw_house_floor(0)
-    draw_house_floor(1)
+    draw_house_floor(0, .Varg)
+    draw_house_floor(1, .Nyana)
 }
 
-draw_house_floor :: proc(floor: i32) {
+draw_house_floor :: proc(floor: i32, inside_texture: Wall_Texture) {
 	// The house's front wall
 	insert_north_south_wall(
 		{house_x, floor, house_z},
 		 {
 			type = .Side_Right_Corner,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 	for i in 0 ..< 2 {
@@ -493,7 +493,7 @@ draw_house_floor :: proc(floor: i32) {
 			{house_x, floor, house_z + i32(i) + 1},
 			 {
 				type = .Side_Side,
-				textures = {.Inside = .Varg, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = .Brick},
 			},
 		)
 	}
@@ -501,33 +501,33 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x, floor, house_z + 3},
 		 {
 			type = .Right_Corner_Side,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
 	insert_south_west_north_east_wall(
 		{house_x, floor, house_z + 4},
-		{type = .Side_Side, textures = {.Inside = .Varg, .Outside = .Brick}},
+		{type = .Side_Side, textures = {.Inside = inside_texture, .Outside = .Brick}},
 	)
 
 	insert_north_south_wall(
 		{house_x + 1, floor, house_z + 5},
 		 {
-			type = .Side_Right_Corner,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			type = .Left_Corner_Left_Corner,
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
 	insert_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
-		{type = .End_Side, textures = {.Inside = .Varg, .Outside = .Brick}},
+		{type = .End_Side, textures = {.Inside = inside_texture, .Outside = .Brick}},
 	)
 
 	insert_north_south_wall(
 		{house_x, floor, house_z + 7},
 		 {
 			type = .Side_Right_Corner,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
@@ -536,7 +536,7 @@ draw_house_floor :: proc(floor: i32) {
 			{house_x, floor, house_z + i32(i) + 8},
 			 {
 				type = .Side_Side,
-				textures = {.Inside = .Varg, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = .Brick},
 			},
 		)
 	}
@@ -545,7 +545,7 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x, floor, house_z + 10},
 		 {
 			type = .Right_Corner_Side,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
@@ -554,7 +554,7 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x, floor, house_z},
 		 {
 			type = .Left_Corner_Side,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
@@ -563,7 +563,7 @@ draw_house_floor :: proc(floor: i32) {
 			{house_x + i32(i) + 1, floor, house_z},
 			 {
 				type = .Side_Side,
-				textures = {.Inside = .Varg, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = .Brick},
 			},
 		)
 	}
@@ -572,7 +572,7 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x + 3, floor, house_z},
 		 {
 			type = .Side_Left_Corner,
-			textures = {.Inside = .Varg, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = .Brick},
 		},
 	)
 
@@ -581,7 +581,7 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x, floor, house_z + 11},
 		 {
 			type = .Right_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
+			textures = {.Inside = .Brick, .Outside = inside_texture},
 		},
 	)
 
@@ -590,7 +590,7 @@ draw_house_floor :: proc(floor: i32) {
 			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
 				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = .Varg},
+				textures = {.Inside = .Brick, .Outside = inside_texture},
 			},
 		)
 	}
@@ -598,21 +598,21 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x + 3, floor, house_z + 11},
 		 {
 			type = .Side_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
+			textures = {.Inside = .Brick, .Outside = inside_texture},
 		},
 	)
 
 	// The house's back wall
 	insert_south_west_north_east_wall(
 		{house_x + 4, floor, house_z},
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = inside_texture}},
 	)
 
 	insert_north_south_wall(
 		{house_x + 5, floor, house_z + 1},
 		 {
 			type = .Side_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
+			textures = {.Inside = .Brick, .Outside = inside_texture},
 		},
 	)
 
@@ -621,7 +621,7 @@ draw_house_floor :: proc(floor: i32) {
 			{house_x + 5, floor, house_z + i32(i) + 2},
 			 {
 				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = .Varg},
+				textures = {.Inside = .Brick, .Outside = inside_texture},
 			},
 		)
 	}
@@ -630,12 +630,12 @@ draw_house_floor :: proc(floor: i32) {
 		{house_x + 5, floor, house_z + 9},
 		 {
 			type = .Left_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
+			textures = {.Inside = .Brick, .Outside = inside_texture},
 		},
 	)
 
 	insert_north_west_south_east_wall(
 		{house_x + 4, floor, house_z + 10},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+		{type = .End_Side, textures = {.Inside = .Brick, .Outside = inside_texture}},
 	)
 }
