@@ -3,8 +3,8 @@ package main
 import m "core:math/linalg/glsl"
 
 WORLD_WIDTH :: 64
-WORLD_HEIGHT :: 64
-WORLD_DEPTH :: 32
+WORLD_HEIGHT :: 8
+WORLD_DEPTH :: 64
 
 sun := m.vec3{0, -1, 0}
 north_south_walls := map[m.ivec3]Wall{}
@@ -457,5 +457,169 @@ init_world :: proc() {
 			type = .Left_Corner_End,
 			textures = {.Inside = .Brick, .Outside = .Varg},
 		},
+	)
+
+
+	// The house
+	house_x: i32 = 32
+	house_z: i32 = 32
+
+	// The house's front wall
+	insert_north_south_wall(
+		{house_x, 0, house_z},
+		 {
+			type = .Side_Right_Corner,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+	for i in 0 ..< 2 {
+		insert_north_south_wall(
+			{house_x, 0, house_z + i32(i) + 1},
+			 {
+				type = .Side_Side,
+				textures = {.Inside = .Varg, .Outside = .Brick},
+			},
+		)
+	}
+	insert_north_south_wall(
+		{house_x, 0, house_z + 3},
+		 {
+			type = .Right_Corner_Side,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	insert_south_west_north_east_wall(
+		{house_x, 0, house_z + 4},
+		{type = .Side_Side, textures = {.Inside = .Varg, .Outside = .Brick}},
+	)
+
+	insert_north_south_wall(
+		{house_x + 1, 0, house_z + 5},
+		 {
+			type = .Side_Right_Corner,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	insert_north_west_south_east_wall(
+		{house_x, 0, house_z + 6},
+		{type = .End_Side, textures = {.Inside = .Varg, .Outside = .Brick}},
+	)
+
+	insert_north_south_wall(
+		{house_x, 0, house_z + 7},
+		 {
+			type = .Side_Right_Corner,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	for i in 0 ..< 2 {
+		insert_north_south_wall(
+			{house_x, 0, house_z + i32(i) + 8},
+			 {
+				type = .Side_Side,
+				textures = {.Inside = .Varg, .Outside = .Brick},
+			},
+		)
+	}
+
+	insert_north_south_wall(
+		{house_x, 0, house_z + 10},
+		 {
+			type = .Right_Corner_Side,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	// The house's right side wall
+	insert_east_west_wall(
+		{house_x, 0, house_z},
+		 {
+			type = .Left_Corner_Side,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	for i in 0 ..< 2 {
+		insert_east_west_wall(
+			{house_x + i32(i) + 1, 0, house_z},
+			 {
+				type = .Side_Side,
+				textures = {.Inside = .Varg, .Outside = .Brick},
+			},
+		)
+	}
+
+	insert_east_west_wall(
+		{house_x + 3, 0, house_z},
+		 {
+			type = .Side_Left_Corner,
+			textures = {.Inside = .Varg, .Outside = .Brick},
+		},
+	)
+
+	// The house's left side wall
+	insert_east_west_wall(
+		{house_x, 0, house_z + 11},
+		 {
+			type = .Right_Corner_Side,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	for i in 0 ..< 2 {
+		insert_east_west_wall(
+			{house_x + i32(i) + 1, 0, house_z + 11},
+			 {
+				type = .Side_Side,
+				textures = {.Inside = .Brick, .Outside = .Varg},
+			},
+		)
+	}
+	insert_east_west_wall(
+		{house_x + 3, 0, house_z + 11},
+		 {
+			type = .Side_Right_Corner,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	// The house's back wall
+	insert_south_west_north_east_wall(
+		{house_x + 4, 0, house_z},
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	)
+
+	insert_north_south_wall(
+		{house_x + 5, 0, house_z + 1},
+		 {
+			type = .Side_Left_Corner,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	for i in 0 ..< 7 {
+		insert_north_south_wall(
+			{house_x + 5, 0, house_z + i32(i) + 2},
+			 {
+				type = .Side_Side,
+				textures = {.Inside = .Brick, .Outside = .Varg},
+			},
+		)
+	}
+
+	insert_north_south_wall(
+		{house_x + 5, 0, house_z + 9},
+		 {
+			type = .Left_Corner_Side,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	insert_north_west_south_east_wall(
+		{house_x + 4, 0, house_z + 10},
+		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 }
