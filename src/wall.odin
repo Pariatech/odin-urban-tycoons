@@ -30,7 +30,7 @@ Wall_Type :: enum {
 Wall_Texture :: enum {
 	Brick,
 	Varg,
-    Nyana,
+	Nyana,
 }
 
 Wall_Texture_Position :: enum {
@@ -345,7 +345,13 @@ WALL_MASK_TEXTURE_MAP :: [Wall_Mask][Wall_Texture_Position]Texture {
 	.End = {.Base = .End_Wall_Base_Mask, .Top = .End_Wall_Top_Mask},
 }
 
-draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
+draw_wall :: proc(
+	wall: Wall,
+	pos: m.ivec3,
+	axis: Wall_Axis,
+	y: f32,
+	draw_top: bool = false,
+) {
 	mirror_map := WALL_MIRROR_MAP
 	texture_map := WALL_TEXTURE_MAP
 	mask_map := WALL_MASK_MAP
@@ -376,15 +382,17 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 	sprite.mask_texture = mask_texture[.Top]
 	draw_sprite(sprite)
 
-	sprite.texture = .Wall_Top
-	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
+	if draw_top {
+		sprite.texture = .Wall_Top
+		sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
 
-    if (mask == .Side) {
-        mask = .End
-	    mask_texture = mask_texture_map[mask]
-    }
-	sprite.mask_texture = mask_texture[.Top]
-	draw_sprite(sprite)
+		if (mask == .Side) {
+			mask = .End
+			mask_texture = mask_texture_map[mask]
+		}
+		sprite.mask_texture = mask_texture[.Top]
+		draw_sprite(sprite)
+	}
 }
 
 draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
@@ -394,7 +402,8 @@ draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
 		north_south_key.x += 1
 	}
 	if wall, ok := north_south_walls[north_south_key]; ok {
-		draw_wall(wall, north_south_key, .North_South, y)
+		draw_top := !(north_south_key + {0, 1, 0} in north_south_walls)
+		draw_wall(wall, north_south_key, .North_South, y, draw_top)
 	}
 
 	east_west_key := m.ivec3{x, floor, z}
@@ -403,7 +412,8 @@ draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
 		east_west_key.z += 1
 	}
 	if wall, ok := east_west_walls[east_west_key]; ok {
-		draw_wall(wall, east_west_key, .East_West, y)
+		draw_top := !(east_west_key + {0, 1, 0} in east_west_walls)
+		draw_wall(wall, east_west_key, .East_West, y, draw_top)
 	}
 }
 

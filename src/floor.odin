@@ -18,3 +18,26 @@ draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 	    draw_tile_triangle(tri, .West, lights, heights, {f32(pos.x), f32(pos.z)})
 	}
 }
+
+insert_north_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
+    north_floor_tile_triangles[pos] = tri
+}
+
+insert_east_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
+    east_floor_tile_triangles[pos] = tri
+}
+
+insert_west_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
+    west_floor_tile_triangles[pos] = tri
+}
+
+insert_south_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
+    south_floor_tile_triangles[pos] = tri
+}
+
+insert_floor_tile :: proc(pos: m.ivec3, tri: Tile_Triangle) {
+    insert_north_floor_tile_triangle(pos, tri)
+    insert_south_floor_tile_triangle(pos, tri)
+    insert_east_floor_tile_triangle(pos, tri)
+    insert_west_floor_tile_triangle(pos, tri)
+}
