@@ -190,7 +190,7 @@ init_renderer :: proc() -> (ok: bool = true) {
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.DebugMessageCallback(gl_debug_callback, nil)
 
-    // gl.Enable(gl.DEPTH_TEST)
+    gl.Enable(gl.DEPTH_TEST)
     gl.DepthFunc(gl.LEQUAL)
 
 	gl.Enable(gl.BLEND)
