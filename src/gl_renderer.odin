@@ -45,8 +45,8 @@ gl_debug_callback :: proc "c" (
 }
 
 load_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 	textures :: len(texture_paths)
 
@@ -325,4 +325,12 @@ draw_quad :: proc(v0, v1, v2, v3: Vertex) {
 		index_offset + 2,
 		index_offset + 3,
 	)
+}
+
+draw_mesh :: proc(verts: []Vertex, idxs: []u32) {
+	index_offset := u32(len(vertices))
+    append(&vertices, ..verts)
+    for idx in idxs {
+        append(&indices, idx + index_offset)
+    }
 }

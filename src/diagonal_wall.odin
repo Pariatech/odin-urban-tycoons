@@ -357,8 +357,8 @@ DIAGONAL_WALL_ROTATION_MAP ::
 	}
 
 DIAGONAL_WALL_TEXTURE_MAP ::
-	[Diagonal_Wall_Axis][Wall_Texture][Wall_Texture_Position]Texture {
-		.South_West_North_East =  {
+	[Diagonal_Wall_Axis][Texture][Wall_Texture_Position]Texture {
+		.South_West_North_East =  #partial {
 			.Brick =  {
 				.Base = .Brick_Wall_Cross_Diagonal_Base,
 				.Top = .Brick_Wall_Cross_Diagonal_Top,
@@ -372,7 +372,7 @@ DIAGONAL_WALL_TEXTURE_MAP ::
 				.Top = .Nyana_Wall_Cross_Diagonal_Top,
 			},
 		},
-		.North_West_South_East =  {
+		.North_West_South_East = #partial {
 			.Brick =  {
 				.Base = .Brick_Wall_Diagonal_Base,
 				.Top = .Brick_Wall_Diagonal_Top,

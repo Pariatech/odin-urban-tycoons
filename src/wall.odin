@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:math/linalg"
 import m "core:math/linalg/glsl"
 
 Wall_Axis :: enum {
@@ -27,12 +28,6 @@ Wall_Type :: enum {
 	Right_Corner_Left_Corner,
 }
 
-Wall_Texture :: enum {
-	Brick,
-	Varg,
-	Nyana,
-}
-
 Wall_Texture_Position :: enum {
 	Base,
 	Top,
@@ -52,10 +47,126 @@ Wall_Side :: enum {
 
 Wall :: struct {
 	type:     Wall_Type,
-	textures: [Wall_Side]Wall_Texture,
+	textures: [Wall_Side]Texture,
 }
 
 WALL_HEIGHT :: 3
+
+WALL_FULL_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.615, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1.115, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1.115, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, 0, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0.115, 0, 0, 0},
+	},
+}
+WALL_FULL_INDICES :: [?]u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
+
+WALL_EXTENDED_SIDE_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.615, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1.115, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1.115, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+WALL_EXTENDED_SIDE_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+
+WALL_SIDE_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+WALL_SIDE_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+
+WALL_END_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, 0, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0.115, 0, 0, 0},
+	},
+}
+WALL_END_INDICES :: [?]u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
 WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	.North_South =  {
@@ -72,12 +183,6 @@ WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	},
 }
 
-WALL_TEXTURE_MAP :: [Wall_Texture][Wall_Texture_Position]Texture {
-	.Brick = {.Base = .Brick_Wall_Side_Base, .Top = .Brick_Wall_Side_Top},
-	.Varg = {.Base = .Varg_Wall_Side_Base, .Top = .Varg_Wall_Side_Top},
-	.Nyana = {.Base = .Nyana_Wall_Side_Base, .Top = .Nyana_Wall_Side_Top},
-}
-
 WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
 	.North_South =  {
 		.South_West = {0, 0, 0},
@@ -90,6 +195,21 @@ WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
 		.South_East = {0, 0, 0},
 		.North_East = {0, 0, -1},
 		.North_West = {0, 0, -1},
+	},
+}
+
+WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]m.mat4 {
+	.North_South =  {
+		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North_East = {0, 0, -1, -1, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+	},
+	.East_West =  {
+		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.South_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
+		.North_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
 	},
 }
 
@@ -352,47 +472,81 @@ draw_wall :: proc(
 	y: f32,
 	draw_top: bool = false,
 ) {
-	mirror_map := WALL_MIRROR_MAP
-	texture_map := WALL_TEXTURE_MAP
 	mask_map := WALL_MASK_MAP
 	mask_texture_map := WALL_MASK_TEXTURE_MAP
 	wall_translation_map := WALL_TRANSLATION_MAP
+	mirror_map := WALL_MIRROR_MAP
 	side_map := WALL_SIDE_MAP
+	transform_map := WALL_TRANSFORM_MAP
 
 	side := side_map[axis][camera_rotation]
-	texture := texture_map[wall.textures[side]]
+	texture := wall.textures[side]
 	mask := mask_map[wall.type][axis][camera_rotation]
 	mask_texture := mask_texture_map[mask]
+	// mirror := mirror_map[axis][camera_rotation] == .Yes
+	mirror := axis == .North_South
 	translation := wall_translation_map[axis][camera_rotation]
-	position := m.vec3{f32(pos.x), y, f32(pos.z)} + translation
+	position := m.vec3{f32(pos.x), y, f32(pos.z)}// + translation
+	transform := transform_map[axis][camera_rotation]
 
-	sprite := Sprite {
-		position = position,
-		texture = texture[.Base],
-		mask_texture = mask_texture[.Base],
-		mirror = mirror_map[axis][camera_rotation],
-		lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-	}
-
-
-	draw_sprite(sprite)
-
-	sprite.position.y += SPRITE_HEIGHT
-	sprite.texture = texture[.Top]
-	sprite.mask_texture = mask_texture[.Top]
-	draw_sprite(sprite)
-
-	if draw_top {
-		sprite.texture = .Wall_Top
-		sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
-
-		if (mask == .Side) {
-			mask = .End
-			mask_texture = mask_texture_map[mask]
+	switch mask {
+	case .Full:
+		vertices := WALL_FULL_VERTICES
+		indices := WALL_FULL_INDICES
+		for i in 0 ..< len(vertices) {
+			vertices[i].texcoords.z = f32(texture)
+			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos += position
 		}
-		sprite.mask_texture = mask_texture[.Top]
-		draw_sprite(sprite)
+		draw_mesh(vertices[:], indices[:])
+	case .Extended_Side:
+		vertices := WALL_EXTENDED_SIDE_VERTICES
+		indices := WALL_EXTENDED_SIDE_INDICES
+		for i in 0 ..< len(vertices) {
+			vertices[i].texcoords.z = f32(texture)
+			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos += position
+		}
+		draw_mesh(vertices[:], indices[:])
+	case .Side:
+		vertices := WALL_SIDE_VERTICES
+		indices := WALL_SIDE_INDICES
+		for i in 0 ..< len(vertices) {
+			vertices[i].texcoords.z = f32(texture)
+			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos += position
+		}
+		draw_mesh(vertices[:], indices[:])
+	case .End:
+		vertices := WALL_END_VERTICES
+		indices := WALL_END_INDICES
+		for i in 0 ..< len(vertices) {
+			vertices[i].texcoords.z = f32(texture)
+			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos += position
+		}
+		draw_mesh(vertices[:], indices[:])
 	}
+
+
+	// if draw_top {
+	// 	sprite := Sprite {
+	// 		position = position,
+	// 		texture = texture,
+	// 		mask_texture = mask_texture[.Base],
+	// 		mirror = .No,
+	// 		lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+	// 	}
+	// 	sprite.texture = .Wall_Top
+	// 	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
+	//
+	// 	if (mask == .Side) {
+	// 		mask = .End
+	// 		mask_texture = mask_texture_map[mask]
+	// 	}
+	// 	sprite.mask_texture = mask_texture[.Top]
+	// 	draw_sprite(sprite)
+	// }
 }
 
 draw_tile_walls :: proc(x, z, floor: i32, y: f32) {

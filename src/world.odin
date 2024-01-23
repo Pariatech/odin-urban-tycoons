@@ -527,7 +527,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
 	}
 }
 
-add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
+add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 	// The house's front wall
 	insert_north_south_wall(
 		{house_x, floor, house_z},
