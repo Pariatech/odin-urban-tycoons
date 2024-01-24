@@ -1,5 +1,6 @@
 package main
 
+import "core:math/linalg"
 import m "core:math/linalg/glsl"
 
 Diagonal_Wall_Axis :: enum {
@@ -12,50 +13,262 @@ Diagonal_Wall_Mask :: enum {
 	Side,
 	Left_Extension,
 	Right_Extension,
+	Cross,
 }
 
-DIAGONAL_WALL_MASK_TEXTURE_MAP ::
-	[Diagonal_Wall_Mask][Wall_Texture_Position]Texture {
-		.Full = {.Base = .Full_Mask, .Top = .Full_Mask},
-		.Side =  {
-			.Base = .Diagonal_Wall_Base_Mask,
-			.Top = .Diagonal_Wall_Top_Mask,
-		},
-		.Left_Extension =  {
-			.Base = .Extended_Left_Diagonal_Wall_Base_Mask,
-			.Top = .Extended_Left_Diagonal_Wall_Top_Mask,
-		},
-		.Right_Extension =  {
-			.Base = .Extended_Right_Diagonal_Wall_Base_Mask,
-			.Top = .Extended_Right_Diagonal_Wall_Top_Mask,
-		},
-	}
+DIAGONAL_WALL_FULL_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5575, 0.0, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5575, 0.0, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
 
-DIAGONAL_WALL_TOP_TEXTURE_MAP :: [Diagonal_Wall_Axis]Texture {
-		.South_West_North_East = .Wall_Top_Diagonal_Cross,
-		.North_West_South_East = .Wall_Top_Diagonal,
-	}
+DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5575, 0.0, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_LEFT_EXTENSION_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5575, 0.0, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_SIDE_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_CROSS_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, 0.0, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {-0.385, 0.0, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+	},
+	 {
+		pos = {-0.385, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0.115, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+
+DIAGONAL_WALL_TOP_CROSS_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {-0.385, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {0.5575, WALL_HEIGHT, 0.4425},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+	 {
+		pos = {0.4425, WALL_HEIGHT, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_TOP_FULL_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.6725, WALL_HEIGHT, -0.4425},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.4425, WALL_HEIGHT, 0.6725},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.4425, WALL_HEIGHT, 0.6725},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, WALL_HEIGHT, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.6725, WALL_HEIGHT, -0.4425},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.385, WALL_HEIGHT, 0.615},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_TOP_SIDE_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, WALL_HEIGHT, 0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.385, WALL_HEIGHT, 0.615},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DIAGONAL_WALL_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
 	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.South_West_North_East =  {
 			.South_West =  {
-				.End_End = .Full,
-				.Side_Side = .Full,
-				.End_Side = .Full,
-				.Side_End = .Full,
-				.Left_Corner_End = .Full,
-				.End_Left_Corner = .Full,
-				.Right_Corner_End = .Full,
-				.End_Right_Corner = .Full,
-				.Left_Corner_Side = .Full,
-				.Side_Left_Corner = .Full,
-				.Right_Corner_Side = .Full,
-				.Side_Right_Corner = .Full,
-				.Left_Corner_Left_Corner = .Full,
-				.Right_Corner_Right_Corner = .Full,
-				.Left_Corner_Right_Corner = .Full,
-				.Right_Corner_Left_Corner = .Full,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.South_East =  {
 				.End_End = .Side,
@@ -76,22 +289,22 @@ DIAGONAL_WALL_MASK_MAP ::
 				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 			.North_East =  {
-				.End_End = .Full,
-				.Side_Side = .Full,
-				.End_Side = .Full,
-				.Side_End = .Full,
-				.Left_Corner_End = .Full,
-				.End_Left_Corner = .Full,
-				.Right_Corner_End = .Full,
-				.End_Right_Corner = .Full,
-				.Left_Corner_Side = .Full,
-				.Side_Left_Corner = .Full,
-				.Right_Corner_Side = .Full,
-				.Side_Right_Corner = .Full,
-				.Left_Corner_Left_Corner = .Full,
-				.Right_Corner_Right_Corner = .Full,
-				.Left_Corner_Right_Corner = .Full,
-				.Right_Corner_Left_Corner = .Full,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.North_West =  {
 				.End_End = .Side,
@@ -132,22 +345,22 @@ DIAGONAL_WALL_MASK_MAP ::
 				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 			.South_East =  {
-				.End_End = .Full,
-				.Side_Side = .Full,
-				.End_Side = .Full,
-				.Side_End = .Full,
-				.Left_Corner_End = .Full,
-				.End_Left_Corner = .Full,
-				.Right_Corner_End = .Full,
-				.End_Right_Corner = .Full,
-				.Left_Corner_Side = .Full,
-				.Side_Left_Corner = .Full,
-				.Right_Corner_Side = .Full,
-				.Side_Right_Corner = .Full,
-				.Left_Corner_Left_Corner = .Full,
-				.Right_Corner_Right_Corner = .Full,
-				.Left_Corner_Right_Corner = .Full,
-				.Right_Corner_Left_Corner = .Full,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.North_East =  {
 				.End_End = .Side,
@@ -168,174 +381,174 @@ DIAGONAL_WALL_MASK_MAP ::
 				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 			.North_West =  {
-				.End_End = .Full,
-				.Side_Side = .Full,
-				.End_Side = .Full,
-				.Side_End = .Full,
-				.Left_Corner_End = .Full,
-				.End_Left_Corner = .Full,
-				.Right_Corner_End = .Full,
-				.End_Right_Corner = .Full,
-				.Left_Corner_Side = .Full,
-				.Side_Left_Corner = .Full,
-				.Right_Corner_Side = .Full,
-				.Side_Right_Corner = .Full,
-				.Left_Corner_Left_Corner = .Full,
-				.Right_Corner_Right_Corner = .Full,
-				.Left_Corner_Right_Corner = .Full,
-				.Right_Corner_Left_Corner = .Full,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 		},
 	}
 
 DIAGONAL_WALL_TOP_MASK_MAP ::
-	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Texture {
+	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.South_West_North_East =  {
 			.South_West =  {
-				.End_End = .Full_Mask,
-				.Side_Side = .Full_Mask,
-				.End_Side = .Full_Mask,
-				.Side_End = .Full_Mask,
-				.Left_Corner_End = .Full_Mask,
-				.End_Left_Corner = .Full_Mask,
-				.Right_Corner_End = .Full_Mask,
-				.End_Right_Corner = .Full_Mask,
-				.Left_Corner_Side = .Full_Mask,
-				.Side_Left_Corner = .Full_Mask,
-				.Right_Corner_Side = .Full_Mask,
-				.Side_Right_Corner = .Full_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.South_East =  {
-				.End_End = .Diagonal_Wall_Top_Mask,
-				.Side_Side = .Diagonal_Wall_Top_Mask,
-				.End_Side = .Diagonal_Wall_Top_Mask,
-				.Side_End = .Diagonal_Wall_Top_Mask,
-				.Left_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.End_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Right_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.End_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Side_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Right_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Side_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Side,
+				.Side_Side = .Side,
+				.End_Side = .Side,
+				.Side_End = .Side,
+				.Left_Corner_End = .Left_Extension,
+				.End_Left_Corner = .Right_Extension,
+				.Right_Corner_End = .Left_Extension,
+				.End_Right_Corner = .Right_Extension,
+				.Left_Corner_Side = .Left_Extension,
+				.Side_Left_Corner = .Right_Extension,
+				.Right_Corner_Side = .Left_Extension,
+				.Side_Right_Corner = .Right_Extension,
+				.Left_Corner_Left_Corner = .Full,
+				.Right_Corner_Right_Corner = .Side,
+				.Left_Corner_Right_Corner = .Left_Extension,
+				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 			.North_East =  {
-				.End_End = .Full_Mask,
-				.Side_Side = .Full_Mask,
-				.End_Side = .Full_Mask,
-				.Side_End = .Full_Mask,
-				.Left_Corner_End = .Full_Mask,
-				.End_Left_Corner = .Full_Mask,
-				.Right_Corner_End = .Full_Mask,
-				.End_Right_Corner = .Full_Mask,
-				.Left_Corner_Side = .Full_Mask,
-				.Side_Left_Corner = .Full_Mask,
-				.Right_Corner_Side = .Full_Mask,
-				.Side_Right_Corner = .Full_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.North_West =  {
-				.End_End = .Diagonal_Wall_Top_Mask,
-				.Side_Side = .Diagonal_Wall_Top_Mask,
-				.End_Side = .Diagonal_Wall_Top_Mask,
-				.Side_End = .Diagonal_Wall_Top_Mask,
-				.Left_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.End_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Right_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.End_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Side_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Right_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Side_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Side,
+				.Side_Side = .Side,
+				.End_Side = .Side,
+				.Side_End = .Side,
+				.Left_Corner_End = .Right_Extension,
+				.End_Left_Corner = .Left_Extension,
+				.Right_Corner_End = .Right_Extension,
+				.End_Right_Corner = .Left_Extension,
+				.Left_Corner_Side = .Right_Extension,
+				.Side_Left_Corner = .Left_Extension,
+				.Right_Corner_Side = .Right_Extension,
+				.Side_Right_Corner = .Left_Extension,
+				.Left_Corner_Left_Corner = .Side,
+				.Right_Corner_Right_Corner = .Full,
+				.Left_Corner_Right_Corner = .Left_Extension,
+				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 		},
 		.North_West_South_East =  {
 			.South_West =  {
-				.End_End = .Diagonal_Wall_Top_Mask,
-				.Side_Side = .Diagonal_Wall_Top_Mask,
-				.End_Side = .Diagonal_Wall_Top_Mask,
-				.Side_End = .Diagonal_Wall_Top_Mask,
-				.Left_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.End_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Right_Corner_End = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.End_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Side_Left_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Right_Corner_Side = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Side_Right_Corner = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Side,
+				.Side_Side = .Side,
+				.End_Side = .Side,
+				.Side_End = .Side,
+				.Left_Corner_End = .Left_Extension,
+				.End_Left_Corner = .Right_Extension,
+				.Right_Corner_End = .Left_Extension,
+				.End_Right_Corner = .Right_Extension,
+				.Left_Corner_Side = .Left_Extension,
+				.Side_Left_Corner = .Right_Extension,
+				.Right_Corner_Side = .Left_Extension,
+				.Side_Right_Corner = .Right_Extension,
+				.Left_Corner_Left_Corner = .Full,
+				.Right_Corner_Right_Corner = .Full,
+				.Left_Corner_Right_Corner = .Left_Extension,
+				.Right_Corner_Left_Corner = .Full,
 			},
 			.South_East =  {
-				.End_End = .Full_Mask,
-				.Side_Side = .Full_Mask,
-				.End_Side = .Full_Mask,
-				.Side_End = .Full_Mask,
-				.Left_Corner_End = .Full_Mask,
-				.End_Left_Corner = .Full_Mask,
-				.Right_Corner_End = .Full_Mask,
-				.End_Right_Corner = .Full_Mask,
-				.Left_Corner_Side = .Full_Mask,
-				.Side_Left_Corner = .Full_Mask,
-				.Right_Corner_Side = .Full_Mask,
-				.Side_Right_Corner = .Full_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 			.North_East =  {
-				.End_End = .Diagonal_Wall_Top_Mask,
-				.Side_Side = .Diagonal_Wall_Top_Mask,
-				.End_Side = .Diagonal_Wall_Top_Mask,
-				.Side_End = .Diagonal_Wall_Top_Mask,
-				.Left_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.End_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Right_Corner_End = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.End_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Side_Left_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Right_Corner_Side = .Extended_Right_Diagonal_Wall_Top_Mask,
-				.Side_Right_Corner = .Extended_Left_Diagonal_Wall_Top_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Side,
+				.Side_Side = .Side,
+				.End_Side = .Side,
+				.Side_End = .Side,
+				.Left_Corner_End = .Right_Extension,
+				.End_Left_Corner = .Left_Extension,
+				.Right_Corner_End = .Right_Extension,
+				.End_Right_Corner = .Left_Extension,
+				.Left_Corner_Side = .Right_Extension,
+				.Side_Left_Corner = .Left_Extension,
+				.Right_Corner_Side = .Right_Extension,
+				.Side_Right_Corner = .Left_Extension,
+				.Left_Corner_Left_Corner = .Full,
+				.Right_Corner_Right_Corner = .Full,
+				.Left_Corner_Right_Corner = .Full,
+				.Right_Corner_Left_Corner = .Full,
 			},
 			.North_West =  {
-				.End_End = .Full_Mask,
-				.Side_Side = .Full_Mask,
-				.End_Side = .Full_Mask,
-				.Side_End = .Full_Mask,
-				.Left_Corner_End = .Full_Mask,
-				.End_Left_Corner = .Full_Mask,
-				.Right_Corner_End = .Full_Mask,
-				.End_Right_Corner = .Full_Mask,
-				.Left_Corner_Side = .Full_Mask,
-				.Side_Left_Corner = .Full_Mask,
-				.Right_Corner_Side = .Full_Mask,
-				.Side_Right_Corner = .Full_Mask,
-				.Left_Corner_Left_Corner = .Full_Mask,
-				.Right_Corner_Right_Corner = .Full_Mask,
-				.Left_Corner_Right_Corner = .Full_Mask,
-				.Right_Corner_Left_Corner = .Full_Mask,
+				.End_End = .Cross,
+				.Side_Side = .Cross,
+				.End_Side = .Cross,
+				.Side_End = .Cross,
+				.Left_Corner_End = .Cross,
+				.End_Left_Corner = .Cross,
+				.Right_Corner_End = .Cross,
+				.End_Right_Corner = .Cross,
+				.Left_Corner_Side = .Cross,
+				.Side_Left_Corner = .Cross,
+				.Right_Corner_Side = .Cross,
+				.Side_Right_Corner = .Cross,
+				.Left_Corner_Left_Corner = .Cross,
+				.Right_Corner_Right_Corner = .Cross,
+				.Left_Corner_Right_Corner = .Cross,
+				.Right_Corner_Left_Corner = .Cross,
 			},
 		},
 	}
@@ -353,38 +566,6 @@ DIAGONAL_WALL_ROTATION_MAP ::
 			.South_East = .South_West_North_East,
 			.North_East = .North_West_South_East,
 			.North_West = .South_West_North_East,
-		},
-	}
-
-DIAGONAL_WALL_TEXTURE_MAP ::
-	[Diagonal_Wall_Axis][Texture][Wall_Texture_Position]Texture {
-		.South_West_North_East =  #partial {
-			.Brick =  {
-				.Base = .Brick_Wall_Cross_Diagonal_Base,
-				.Top = .Brick_Wall_Cross_Diagonal_Top,
-			},
-			.Varg =  {
-				.Base = .Varg_Wall_Cross_Diagonal_Base,
-				.Top = .Varg_Wall_Cross_Diagonal_Top,
-			},
-			.Nyana =  {
-				.Base = .Nyana_Wall_Cross_Diagonal_Base,
-				.Top = .Nyana_Wall_Cross_Diagonal_Top,
-			},
-		},
-		.North_West_South_East = #partial {
-			.Brick =  {
-				.Base = .Brick_Wall_Diagonal_Base,
-				.Top = .Brick_Wall_Diagonal_Top,
-			},
-			.Varg =  {
-				.Base = .Varg_Wall_Diagonal_Base,
-				.Top = .Varg_Wall_Diagonal_Top,
-			},
-			.Nyana =  {
-				.Base = .Nyana_Wall_Diagonal_Base,
-				.Top = .Nyana_Wall_Diagonal_Top,
-			},
 		},
 	}
 
@@ -603,51 +784,80 @@ DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
 		},
 	}
 
+
+DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
+		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.South_East = {0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
+		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+	}
+
 draw_diagonal_wall :: proc(
 	wall: Wall,
 	pos: m.ivec3,
 	axis: Diagonal_Wall_Axis,
-    y: f32
+	y: f32,
 ) {
-	mask_texture_map := DIAGONAL_WALL_MASK_TEXTURE_MAP
 	mask_map := DIAGONAL_WALL_MASK_MAP
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
-	texture_map := DIAGONAL_WALL_TEXTURE_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
-	top_texture_map := DIAGONAL_WALL_TOP_TEXTURE_MAP
 	top_mask_map := DIAGONAL_WALL_TOP_MASK_MAP
 	side_map := DIAGONAL_WALL_SIDE_MAP
+	transform_map := DIAGONAL_WALL_TRANSFORM_MAP
 
 	side := side_map[axis][camera_rotation]
 	rotation := rotation_map[axis][camera_rotation]
-	texture := texture_map[rotation][wall.textures[side]]
+	texture := wall.textures[side]
 	mask := mask_map[axis][camera_rotation][wall.type]
-	mask_texture := mask_texture_map[mask]
+	top_mask := top_mask_map[axis][camera_rotation][wall.type]
 	draw := draw_map[axis][wall.type][camera_rotation]
+	transform := transform_map[camera_rotation]
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 
-	sprite := Sprite {
-			position = position,
-			texture = texture[.Base],
-			mask_texture = mask_texture[.Base],
-			mirror = .No,
-			lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-		}
+	wall_vertices: [4]Vertex
+	switch mask {
+	case .Full:
+		wall_vertices = DIAGONAL_WALL_FULL_VERTICES
+	case .Side:
+		wall_vertices = DIAGONAL_WALL_SIDE_VERTICES
+	case .Left_Extension:
+		wall_vertices = DIAGONAL_WALL_LEFT_EXTENSION_VERTICES
+	case .Right_Extension:
+		wall_vertices = DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES
+	case .Cross:
+		wall_vertices = DIAGONAL_WALL_CROSS_VERTICES
+	}
+	wall_indices := DIAGONAL_WALL_INDICES
 
+	for i in 0 ..< len(wall_vertices) {
+		wall_vertices[i].texcoords.z = f32(texture)
+		wall_vertices[i].pos =
+			linalg.mul(transform, vec4(wall_vertices[i].pos, 1)).xyz
+		wall_vertices[i].pos += position
+	}
+	draw_mesh(wall_vertices[:], wall_indices[:])
 
-	if (draw) {
-		draw_sprite(sprite)
-
-		sprite.position.y += SPRITE_HEIGHT
-		sprite.texture = texture[.Top]
-		sprite.mask_texture = mask_texture[.Top]
-		draw_sprite(sprite)
+	top_vertices: [4]Vertex
+	switch top_mask {
+	case .Full:
+		top_vertices = DIAGONAL_WALL_TOP_FULL_VERTICES
+	case .Side:
+		top_vertices = DIAGONAL_WALL_TOP_SIDE_VERTICES
+	case .Left_Extension:
+		top_vertices = DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES
+	case .Right_Extension:
+		top_vertices = DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES
+	case .Cross:
+		top_vertices = DIAGONAL_WALL_TOP_CROSS_VERTICES
+	}
+	for i in 0 ..< len(wall_vertices) {
+		top_vertices[i].texcoords.z = f32(Texture.Wall_Top)
+		top_vertices[i].pos =
+			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
+		top_vertices[i].pos += position
 	}
 
-	sprite.texture = top_texture_map[rotation]
-	sprite.mask_texture = top_mask_map[axis][camera_rotation][wall.type]
-	sprite.position.y = y + WALL_HEIGHT
-	draw_sprite(sprite)
+	draw_mesh(top_vertices[:], wall_indices[:])
 }
 
 draw_tile_diagonal_walls :: proc(x, z, floor: i32, y: f32) {

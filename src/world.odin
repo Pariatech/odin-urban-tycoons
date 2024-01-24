@@ -474,6 +474,23 @@ init_world :: proc() {
 	)
 
 
+	insert_north_south_wall(
+		{1, 0, 23},
+		 {
+			type = .Right_Corner_Side,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+	insert_south_west_north_east_wall(
+		{1, 0, 24},
+		 {
+			type = .Side_Side,
+			textures = {.Inside = .Brick, .Outside = .Varg},
+		},
+	)
+
+
 	// The house
 	add_house_floor_walls(0, .Varg)
 	add_house_floor_walls(1, .Nyana)

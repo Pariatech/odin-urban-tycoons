@@ -394,7 +394,7 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 	.Right_Corner_Side =  {
 		.North_South =  {
-			.South_West = .Side,
+			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Side,
 			.North_West = .Side,
