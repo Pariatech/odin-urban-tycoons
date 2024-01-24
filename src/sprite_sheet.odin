@@ -13,6 +13,7 @@ Texture :: enum {
 	Light_Post_Base,
 	Light_Post_Top,
 	Wall_Top,
+
 	Wall_Top_Diagonal,
 	Wall_Top_Diagonal_Cross,
 	Short_Wall_Top_Diagonal,
@@ -69,7 +70,7 @@ texture_paths :: [Texture]cstring {
 	.Nyana                                   = "resources/textures/nyana.png",
 	.Light_Post_Base                        = "resources/textures/light-pole-base.png",
 	.Light_Post_Top                         = "resources/textures/light-pole-top.png",
-	.Wall_Top                               = "resources/textures/walls/top/side.png",
+	.Wall_Top                               = "resources/textures/wall-top.png",
 	.Wall_Top_Diagonal                      = "resources/textures/walls/top/diagonal.png",
 	.Wall_Top_Diagonal_Cross                = "resources/textures/walls/wall-top-diagonal-cross.png",
 	.Short_Wall_Top_Diagonal                = "resources/textures/walls/short-wall-top-diagonal.png",

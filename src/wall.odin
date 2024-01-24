@@ -40,6 +40,11 @@ Wall_Mask :: enum {
 	End,
 }
 
+Wall_Top_Mesh :: enum {
+    Full,
+    Side,
+}
+
 Wall_Side :: enum {
 	Inside,
 	Outside,
@@ -168,6 +173,53 @@ WALL_END_VERTICES :: [?]Vertex {
 }
 WALL_END_INDICES :: [?]u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
+
+WALL_FULL_TOP_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+WALL_TOP_VERTICES :: [?]Vertex {
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+WALL_TOP_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+
 WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	.North_South =  {
 		.South_West = .Outside,
@@ -183,21 +235,6 @@ WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	},
 }
 
-WALL_TRANSLATION_MAP :: [Wall_Axis][Camera_Rotation]m.vec3 {
-	.North_South =  {
-		.South_West = {0, 0, 0},
-		.South_East = {-1, 0, 0},
-		.North_East = {-1, 0, 0},
-		.North_West = {0, 0, 0},
-	},
-	.East_West =  {
-		.South_West = {0, 0, 0},
-		.South_East = {0, 0, 0},
-		.North_East = {0, 0, -1},
-		.North_West = {0, 0, -1},
-	},
-}
-
 WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]m.mat4 {
 	.North_South =  {
 		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
@@ -210,6 +247,234 @@ WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]m.mat4 {
 		.South_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
 		.North_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
+	},
+}
+
+
+WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
+	.End_End =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.Side_Side =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+	},
+	.End_Side =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
+	},
+	.Side_End =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+	},
+	.Left_Corner_End =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.End_Left_Corner =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.Right_Corner_End =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.End_Right_Corner =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.Left_Corner_Side =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
+	},
+	.Side_Left_Corner =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+	},
+	.Right_Corner_Side =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+	},
+	.Side_Right_Corner =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+	},
+	.Left_Corner_Left_Corner =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Full,
+		},
+	},
+	.Right_Corner_Right_Corner =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Side,
+		},
+	},
+	.Left_Corner_Right_Corner =  {
+		.North_South =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
+		.East_West =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+	},
+	.Right_Corner_Left_Corner =  {
+		.North_South =  {
+			.South_West = .Side,
+			.South_East = .Full,
+			.North_East = .Side,
+			.North_West = .Full,
+		},
+		.East_West =  {
+			.South_West = .Full,
+			.South_East = .Side,
+			.North_East = .Full,
+			.North_West = .Side,
+		},
 	},
 }
 
@@ -440,31 +705,6 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-WALL_MIRROR_MAP :: [Wall_Axis][Camera_Rotation]Sprite_Mirror {
-	.North_South =  {
-		.South_West = .Yes,
-		.South_East = .No,
-		.North_East = .Yes,
-		.North_West = .No,
-	},
-	.East_West =  {
-		.South_West = .No,
-		.South_East = .Yes,
-		.North_East = .No,
-		.North_West = .Yes,
-	},
-}
-
-WALL_MASK_TEXTURE_MAP :: [Wall_Mask][Wall_Texture_Position]Texture {
-	.Full = {.Base = .Full_Mask, .Top = .Full_Mask},
-	.Extended_Side =  {
-		.Base = .Extended_Side_Wall_Base_Mask,
-		.Top = .Extended_Side_Wall_Top_Mask,
-	},
-	.Side = {.Base = .Side_Wall_Base_Mask, .Top = .Side_Wall_Top_Mask},
-	.End = {.Base = .End_Wall_Base_Mask, .Top = .End_Wall_Top_Mask},
-}
-
 draw_wall :: proc(
 	wall: Wall,
 	pos: m.ivec3,
@@ -473,20 +713,16 @@ draw_wall :: proc(
 	draw_top: bool = false,
 ) {
 	mask_map := WALL_MASK_MAP
-	mask_texture_map := WALL_MASK_TEXTURE_MAP
-	wall_translation_map := WALL_TRANSLATION_MAP
-	mirror_map := WALL_MIRROR_MAP
 	side_map := WALL_SIDE_MAP
 	transform_map := WALL_TRANSFORM_MAP
+    top_mesh_map := WALL_TOP_MESH_MAP
 
 	side := side_map[axis][camera_rotation]
 	texture := wall.textures[side]
 	mask := mask_map[wall.type][axis][camera_rotation]
-	mask_texture := mask_texture_map[mask]
-	// mirror := mirror_map[axis][camera_rotation] == .Yes
-	mirror := axis == .North_South
-	translation := wall_translation_map[axis][camera_rotation]
-	position := m.vec3{f32(pos.x), y, f32(pos.z)}// + translation
+    top_mesh := top_mesh_map[wall.type][axis][camera_rotation]
+
+	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 	transform := transform_map[axis][camera_rotation]
 
 	switch mask {
@@ -495,7 +731,8 @@ draw_wall :: proc(
 		indices := WALL_FULL_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
-			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos =
+				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
 		}
 		draw_mesh(vertices[:], indices[:])
@@ -504,7 +741,8 @@ draw_wall :: proc(
 		indices := WALL_EXTENDED_SIDE_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
-			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos =
+				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
 		}
 		draw_mesh(vertices[:], indices[:])
@@ -513,7 +751,8 @@ draw_wall :: proc(
 		indices := WALL_SIDE_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
-			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos =
+				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
 		}
 		draw_mesh(vertices[:], indices[:])
@@ -522,31 +761,23 @@ draw_wall :: proc(
 		indices := WALL_END_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
-			vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+			vertices[i].pos =
+				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
 		}
 		draw_mesh(vertices[:], indices[:])
 	}
 
-
-	// if draw_top {
-	// 	sprite := Sprite {
-	// 		position = position,
-	// 		texture = texture,
-	// 		mask_texture = mask_texture[.Base],
-	// 		mirror = .No,
-	// 		lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-	// 	}
-	// 	sprite.texture = .Wall_Top
-	// 	sprite.position.y += WALL_HEIGHT - SPRITE_HEIGHT
-	//
-	// 	if (mask == .Side) {
-	// 		mask = .End
-	// 		mask_texture = mask_texture_map[mask]
-	// 	}
-	// 	sprite.mask_texture = mask_texture[.Top]
-	// 	draw_sprite(sprite)
-	// }
+	top_vertices := WALL_FULL_TOP_VERTICES
+    if top_mesh == .Side do top_vertices = WALL_TOP_VERTICES
+	top_indices := WALL_TOP_INDICES
+	for i in 0 ..< len(top_vertices) {
+		top_vertices[i].texcoords.z = f32(Texture.Wall_Top)
+		top_vertices[i].pos =
+			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
+		top_vertices[i].pos += position
+	}
+	draw_mesh(top_vertices[:], top_indices[:])
 }
 
 draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
