@@ -2,7 +2,7 @@ package main
 
 import m "core:math/linalg/glsl"
 
-FLOOR_OFFSET :: 0.001
+FLOOR_OFFSET :: 0.0004
 
 draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 	lights := [3]m.vec3{1, 1, 1}

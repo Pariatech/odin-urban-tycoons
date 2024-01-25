@@ -56,6 +56,7 @@ Wall :: struct {
 }
 
 WALL_HEIGHT :: 3
+WALL_TOP_OFFSET :: 0.0001
 
 WALL_FULL_VERTICES :: [?]Vertex {
 	 {
@@ -386,7 +387,7 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 			.North_West = .Full,
 		},
 		.East_West =  {
-			.South_West = .Side,
+			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Full,
@@ -776,6 +777,7 @@ draw_wall :: proc(
 		top_vertices[i].pos =
 			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
 		top_vertices[i].pos += position
+        top_vertices[i].pos.y += WALL_TOP_OFFSET * f32(axis)
 	}
 	draw_mesh(top_vertices[:], top_indices[:])
 }

@@ -16,6 +16,9 @@ Diagonal_Wall_Mask :: enum {
 	Cross,
 }
 
+DIAGONAL_WALL_TOP_CROSS_OFFSET :: 0.0002
+DIAGONAL_WALL_TOP_OFFSET :: 0.0003
+
 DIAGONAL_WALL_FULL_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
@@ -134,22 +137,22 @@ DIAGONAL_WALL_CROSS_VERTICES :: [?]Vertex {
 
 DIAGONAL_WALL_TOP_CROSS_VERTICES :: [?]Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT, -0.5},
+		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT, 0.4425},
+		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 	 {
-		pos = {0.4425, WALL_HEIGHT, 0.5575},
+		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
@@ -157,22 +160,22 @@ DIAGONAL_WALL_TOP_CROSS_VERTICES :: [?]Vertex {
 
 DIAGONAL_WALL_TOP_FULL_VERTICES :: [?]Vertex {
 	 {
-		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		pos = {0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, WALL_HEIGHT, -0.4425},
+		pos = {0.6725, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, WALL_HEIGHT, 0.6725},
+		pos = {-0.4425, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -180,22 +183,22 @@ DIAGONAL_WALL_TOP_FULL_VERTICES :: [?]Vertex {
 
 DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES :: [?]Vertex {
 	 {
-		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.385},
+		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, WALL_HEIGHT, 0.6725},
+		pos = {-0.4425, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -203,22 +206,22 @@ DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES :: [?]Vertex {
 
 DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT, 0.5},
+		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		pos = {0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, WALL_HEIGHT, -0.4425},
+		pos = {0.6725, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT, 0.615},
+		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -226,22 +229,22 @@ DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
 
 DIAGONAL_WALL_TOP_SIDE_VERTICES :: [?]Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT, 0.5},
+		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.385},
+		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT, 0.615},
+		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
