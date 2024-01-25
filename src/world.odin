@@ -7,14 +7,26 @@ WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 64
 
 sun := m.vec3{0, -1, 0}
-north_south_walls := map[m.ivec3]Wall{}
-east_west_walls := map[m.ivec3]Wall{}
-north_west_south_east_walls := map[m.ivec3]Wall{}
-south_west_north_east_walls := map[m.ivec3]Wall{}
-north_floor_tile_triangles := map[m.ivec3]Tile_Triangle{}
-east_floor_tile_triangles := map[m.ivec3]Tile_Triangle{}
-south_floor_tile_triangles := map[m.ivec3]Tile_Triangle{}
-west_floor_tile_triangles := map[m.ivec3]Tile_Triangle{}
+north_south_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Wall){}
+east_west_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Wall){}
+north_west_south_east_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall,
+){}
+south_west_north_east_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall,
+){}
+north_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Tile_Triangle,
+){}
+east_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Tile_Triangle,
+){}
+south_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Tile_Triangle,
+){}
+west_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Tile_Triangle,
+){}
 
 house_x: i32 = 32
 house_z: i32 = 32

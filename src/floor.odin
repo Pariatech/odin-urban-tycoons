@@ -7,7 +7,7 @@ FLOOR_OFFSET :: 0.0004
 draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 	lights := [3]m.vec3{1, 1, 1}
 	heights := [3]f32{y + FLOOR_OFFSET, y + FLOOR_OFFSET, y + FLOOR_OFFSET}
-	if tri, ok := north_floor_tile_triangles[pos]; ok {
+	if tri, ok := north_floor_tile_triangles[pos.x][pos.z][pos.y].?; ok {
 		draw_tile_triangle(
 			tri,
 			.North,
@@ -16,7 +16,7 @@ draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 			{f32(pos.x), f32(pos.z)},
 		)
 	}
-	if tri, ok := east_floor_tile_triangles[pos]; ok {
+	if tri, ok := east_floor_tile_triangles[pos.x][pos.z][pos.y].?; ok {
 		draw_tile_triangle(
 			tri,
 			.East,
@@ -25,7 +25,7 @@ draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 			{f32(pos.x), f32(pos.z)},
 		)
 	}
-	if tri, ok := south_floor_tile_triangles[pos]; ok {
+	if tri, ok := south_floor_tile_triangles[pos.x][pos.z][pos.y].?; ok {
 		draw_tile_triangle(
 			tri,
 			.South,
@@ -34,7 +34,7 @@ draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 			{f32(pos.x), f32(pos.z)},
 		)
 	}
-	if tri, ok := west_floor_tile_triangles[pos]; ok {
+	if tri, ok := west_floor_tile_triangles[pos.x][pos.z][pos.y].?; ok {
 		draw_tile_triangle(
 			tri,
 			.West,
@@ -46,19 +46,19 @@ draw_tile_floor_trianges :: proc(pos: m.ivec3, y: f32) {
 }
 
 insert_north_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
-	north_floor_tile_triangles[pos] = tri
+	north_floor_tile_triangles[pos.x][pos.z][pos.y] = tri
 }
 
 insert_east_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
-	east_floor_tile_triangles[pos] = tri
+	east_floor_tile_triangles[pos.x][pos.z][pos.y] = tri
 }
 
 insert_west_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
-	west_floor_tile_triangles[pos] = tri
+	west_floor_tile_triangles[pos.x][pos.z][pos.y] = tri
 }
 
 insert_south_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
-	south_floor_tile_triangles[pos] = tri
+	south_floor_tile_triangles[pos.x][pos.z][pos.y] = tri
 }
 
 insert_floor_tile :: proc(pos: m.ivec3, tri: Tile_Triangle) {

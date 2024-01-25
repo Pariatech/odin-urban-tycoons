@@ -867,17 +867,17 @@ draw_diagonal_wall :: proc(
 
 draw_tile_diagonal_walls :: proc(x, z, floor: i32, y: f32) {
 	pos := m.ivec3{x, floor, z}
-	if wall, ok := north_west_south_east_walls[pos]; ok {
+	if wall, ok := north_west_south_east_walls[x][z][floor].?; ok {
 		draw_diagonal_wall(wall, pos, .North_West_South_East, y)
-	} else if wall, ok := south_west_north_east_walls[pos]; ok {
+	} else if wall, ok := south_west_north_east_walls[x][z][floor].?; ok {
 		draw_diagonal_wall(wall, pos, .South_West_North_East, y)
 	}
 }
 
 insert_north_west_south_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	north_west_south_east_walls[pos] = wall
+	north_west_south_east_walls[pos.x][pos.z][pos.y] = wall
 }
 
 insert_south_west_north_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	south_west_north_east_walls[pos] = wall
+	south_west_north_east_walls[pos.x][pos.z][pos.y] = wall
 }
