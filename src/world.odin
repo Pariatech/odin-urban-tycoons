@@ -32,18 +32,19 @@ house_x: i32 = 32
 house_z: i32 = 32
 
 draw_world :: proc() {
-	// for y in 0 ..< WORLD_HEIGHT {
-	for x in 0 ..< WORLD_WIDTH {
+    width := WORLD_WIDTH
+    depth := WORLD_DEPTH
+	for x in 0 ..< width {
 		x := x
 		#partial switch camera_rotation {
 		case .South_West, .North_West:
-			x = WORLD_WIDTH - x - 1
+			x = width - x - 1
 		}
-		for z in 0 ..< WORLD_DEPTH {
+		for z in 0 ..< depth {
 			z := z
 			#partial switch camera_rotation {
 			case .South_West, .South_East:
-				z = WORLD_DEPTH - z - 1
+				z = depth - z - 1
 			}
 
 			for side in Tile_Triangle_Side {
