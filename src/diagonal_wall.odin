@@ -816,29 +816,31 @@ draw_diagonal_wall :: proc(
 	draw := draw_map[axis][wall.type][camera_rotation]
 	transform := transform_map[camera_rotation]
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
-
-	wall_vertices: [4]Vertex
-	switch mask {
-	case .Full:
-		wall_vertices = DIAGONAL_WALL_FULL_VERTICES
-	case .Side:
-		wall_vertices = DIAGONAL_WALL_SIDE_VERTICES
-	case .Left_Extension:
-		wall_vertices = DIAGONAL_WALL_LEFT_EXTENSION_VERTICES
-	case .Right_Extension:
-		wall_vertices = DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES
-	case .Cross:
-		wall_vertices = DIAGONAL_WALL_CROSS_VERTICES
-	}
 	wall_indices := DIAGONAL_WALL_INDICES
 
-	for i in 0 ..< len(wall_vertices) {
-		wall_vertices[i].texcoords.z = f32(texture)
-		wall_vertices[i].pos =
-			linalg.mul(transform, vec4(wall_vertices[i].pos, 1)).xyz
-		wall_vertices[i].pos += position
+	if draw {
+		wall_vertices: [4]Vertex
+		switch mask {
+		case .Full:
+			wall_vertices = DIAGONAL_WALL_FULL_VERTICES
+		case .Side:
+			wall_vertices = DIAGONAL_WALL_SIDE_VERTICES
+		case .Left_Extension:
+			wall_vertices = DIAGONAL_WALL_LEFT_EXTENSION_VERTICES
+		case .Right_Extension:
+			wall_vertices = DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES
+		case .Cross:
+			wall_vertices = DIAGONAL_WALL_CROSS_VERTICES
+		}
+
+		for i in 0 ..< len(wall_vertices) {
+			wall_vertices[i].texcoords.z = f32(texture)
+			wall_vertices[i].pos =
+				linalg.mul(transform, vec4(wall_vertices[i].pos, 1)).xyz
+			wall_vertices[i].pos += position
+		}
+		draw_mesh(wall_vertices[:], wall_indices[:])
 	}
-	draw_mesh(wall_vertices[:], wall_indices[:])
 
 	top_vertices: [4]Vertex
 	switch top_mask {
@@ -853,7 +855,7 @@ draw_diagonal_wall :: proc(
 	case .Cross:
 		top_vertices = DIAGONAL_WALL_TOP_CROSS_VERTICES
 	}
-	for i in 0 ..< len(wall_vertices) {
+	for i in 0 ..< len(top_vertices) {
 		top_vertices[i].texcoords.z = f32(Texture.Wall_Top)
 		top_vertices[i].pos =
 			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
