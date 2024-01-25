@@ -484,10 +484,7 @@ init_world :: proc() {
 
 	insert_south_west_north_east_wall(
 		{1, 0, 24},
-		 {
-			type = .Side_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 
 	insert_north_south_wall(
@@ -500,25 +497,16 @@ init_world :: proc() {
 
 	insert_south_west_north_east_wall(
 		{4, 0, 23},
-		 {
-			type = .Side_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 
 	insert_south_west_north_east_wall(
 		{6, 0, 23},
-		 {
-			type = .End_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
+		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 	insert_south_west_north_east_wall(
 		{7, 0, 24},
-		 {
-			type = .Side_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
+		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
 	)
 
 
@@ -609,11 +597,15 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 		},
 	)
 
+	// door?
+	mask := Texture.Window_Opening
+	if floor == 0 do mask = .Door_Opening
 	insert_north_south_wall(
 		{house_x + 1, floor, house_z + 5},
 		 {
 			type = .Left_Corner_Left_Corner,
 			textures = {.Inside = inside_texture, .Outside = .Brick},
+			mask = mask,
 		},
 	)
 
@@ -622,6 +614,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 		 {
 			type = .End_Side,
 			textures = {.Inside = inside_texture, .Outside = .Brick},
+			mask = .Window_Opening,
 		},
 	)
 
@@ -639,6 +632,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			 {
 				type = .Side_Side,
 				textures = {.Inside = inside_texture, .Outside = .Brick},
+				mask = .Window_Opening,
 			},
 		)
 	}
@@ -666,6 +660,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			 {
 				type = .Side_Side,
 				textures = {.Inside = inside_texture, .Outside = .Brick},
+				mask = .Window_Opening,
 			},
 		)
 	}
@@ -693,6 +688,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			 {
 				type = .Side_Side,
 				textures = {.Inside = .Brick, .Outside = inside_texture},
+				mask = .Window_Opening,
 			},
 		)
 	}

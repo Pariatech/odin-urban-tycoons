@@ -53,6 +53,7 @@ Wall_Side :: enum {
 Wall :: struct {
 	type:     Wall_Type,
 	textures: [Wall_Side]Texture,
+    mask: Texture,
 }
 
 WALL_HEIGHT :: 3
@@ -62,12 +63,12 @@ WALL_FULL_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.615, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1.115, WALL_HEIGHT, 0, 0},
+		texcoords = {1.115, 1, 0, 0},
 	},
 	 {
 		pos = {0.615, WALL_HEIGHT, -0.5},
@@ -82,7 +83,7 @@ WALL_FULL_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0, -0.385},
 		light = {1, 1, 1},
-		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+		texcoords = {0.115, 1, 0, 0},
 	},
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.385},
@@ -96,12 +97,12 @@ WALL_EXTENDED_SIDE_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.615, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1.115, WALL_HEIGHT, 0, 0},
+		texcoords = {1.115, 1, 0, 0},
 	},
 	 {
 		pos = {0.615, WALL_HEIGHT, -0.5},
@@ -120,12 +121,12 @@ WALL_SIDE_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
@@ -144,12 +145,12 @@ WALL_END_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
@@ -164,7 +165,7 @@ WALL_END_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0, -0.385},
 		light = {1, 1, 1},
-		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+		texcoords = {0.115, 1, 0, 0},
 	},
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.385},
@@ -732,6 +733,7 @@ draw_wall :: proc(
 		indices := WALL_FULL_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
+            vertices[i].texcoords.w = f32(wall.mask)
 			vertices[i].pos =
 				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
@@ -742,6 +744,7 @@ draw_wall :: proc(
 		indices := WALL_EXTENDED_SIDE_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
+            vertices[i].texcoords.w = f32(wall.mask)
 			vertices[i].pos =
 				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
@@ -752,6 +755,7 @@ draw_wall :: proc(
 		indices := WALL_SIDE_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
+            vertices[i].texcoords.w = f32(wall.mask)
 			vertices[i].pos =
 				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position
@@ -762,6 +766,7 @@ draw_wall :: proc(
 		indices := WALL_END_INDICES
 		for i in 0 ..< len(vertices) {
 			vertices[i].texcoords.z = f32(texture)
+            vertices[i].texcoords.w = f32(wall.mask)
 			vertices[i].pos =
 				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 			vertices[i].pos += position

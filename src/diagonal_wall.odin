@@ -23,12 +23,12 @@ DIAGONAL_WALL_FULL_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5575, 0.0, -0.5575},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5575, WALL_HEIGHT, -0.5575},
@@ -46,12 +46,12 @@ DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, 0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5575, 0.0, -0.5575},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5575, WALL_HEIGHT, -0.5575},
@@ -69,12 +69,12 @@ DIAGONAL_WALL_LEFT_EXTENSION_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
@@ -92,12 +92,12 @@ DIAGONAL_WALL_SIDE_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, 0.5},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1, WALL_HEIGHT, 0, 0},
+		texcoords = {1, 1, 0, 0},
 	},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
@@ -115,12 +115,12 @@ DIAGONAL_WALL_CROSS_VERTICES :: [?]Vertex {
 	 {
 		pos = {-0.5, 0.0, -0.385},
 		light = {1, 1, 1},
-		texcoords = {0, WALL_HEIGHT, 0, 0},
+		texcoords = {0, 1, 0, 0},
 	},
 	 {
 		pos = {-0.385, 0.0, -0.5},
 		light = {1, 1, 1},
-		texcoords = {0.115, WALL_HEIGHT, 0, 0},
+		texcoords = {0.115, 1, 0, 0},
 	},
 	 {
 		pos = {-0.385, WALL_HEIGHT, -0.5},

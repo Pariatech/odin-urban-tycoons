@@ -18,6 +18,8 @@ Texture :: enum {
 	Floor_Marker,
 	Cursors_Wall_Tool_Base,
 	Cursors_Wall_Tool_Top,
+	Door_Opening,
+    Window_Opening,
 }
 
 texture_paths :: [Texture]cstring {
@@ -26,9 +28,9 @@ texture_paths :: [Texture]cstring {
 	.Terrain_Leveling_Mask  = "resources/textures/leveling-mask.png",
 	.Grass                  = "resources/textures/lawn-diffuse-512x512.png",
 	.Gravel                 = "resources/textures/gravel-diffuse-512x512.png",
-	.Brick                  = "resources/textures/brick.png",
-	.Varg                   = "resources/textures/varg.png",
-	.Nyana                  = "resources/textures/nyana.png",
+	.Brick                  = "resources/textures/brick-wall.png",
+	.Varg                   = "resources/textures/varg-wall.png",
+	.Nyana                  = "resources/textures/nyana-wall.png",
 	.Light_Post_Base        = "resources/textures/light-pole-base.png",
 	.Light_Post_Top         = "resources/textures/light-pole-top.png",
 	.Wall_Top               = "resources/textures/wall-top.png",
@@ -38,4 +40,6 @@ texture_paths :: [Texture]cstring {
 	.Wood                   = "resources/textures/floors/wood.png",
 	.Cursors_Wall_Tool_Base = "resources/textures/cursors/wall-tool-base.png",
 	.Cursors_Wall_Tool_Top  = "resources/textures/cursors/wall-tool-top.png",
+	.Door_Opening           = "resources/textures/door-opening.png",
+	.Window_Opening           = "resources/textures/window-opening.png",
 }
