@@ -68,6 +68,7 @@ draw_world :: proc() {
 			draw_tile_walls(i32(x), i32(z), 0, y)
 			draw_tile_wall_windows({i32(x), 0, i32(z)}, y)
 			draw_tile_wall_doors({i32(x), 0, i32(z)}, y)
+            draw_tile_table({i32(x), 0, i32(z)}, y)
 
 			for floor in 1 ..< WORLD_HEIGHT {
 				floor_y := y + f32(floor * WALL_HEIGHT)
@@ -75,6 +76,8 @@ draw_world :: proc() {
 				draw_tile_diagonal_walls(i32(x), i32(z), i32(floor), floor_y)
 				draw_tile_walls(i32(x), i32(z), i32(floor), floor_y)
 				draw_tile_wall_windows({i32(x), i32(floor), i32(z)}, floor_y)
+			    draw_tile_wall_doors({i32(x), i32(floor), i32(z)}, y)
+                draw_tile_table({i32(x), i32(floor), i32(z)}, y)
 			}
 		}
 	}
@@ -544,7 +547,9 @@ init_world :: proc() {
 	add_house_floor_triangles(2, .Wood)
 
 	// insert_wall_window(.East_West, {3, 0, 3}, {texture = .Medium_Window_Wood})
-	insert_wall_door(.East_West, {4, 0, 4}, {model = .Wood})
+	// insert_wall_door(.East_West, {4, 0, 4}, {model = .Wood})
+
+    insert_table({4, 0, 4}, {model = .Six_Places, texture = .Table_6Places_Wood})
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {

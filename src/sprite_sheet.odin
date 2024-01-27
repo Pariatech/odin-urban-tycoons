@@ -22,6 +22,7 @@ Texture :: enum {
 	Window_Opening,
 	Medium_Window_Wood,
 	Door_Wood,
+	Table_6Places_Wood,
 }
 
 texture_paths :: [Texture]cstring {
@@ -46,4 +47,5 @@ texture_paths :: [Texture]cstring {
 	.Window_Opening         = "resources/textures/window-opening.png",
 	.Medium_Window_Wood     = "resources/textures/wood-window.png",
 	.Door_Wood              = "resources/textures/door-wood.png",
+	.Table_6Places_Wood     = "resources/textures/table-2-places-wood.png",
 }
