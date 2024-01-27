@@ -27,13 +27,25 @@ south_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 west_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 	Tile_Triangle,
 ){}
+north_south_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall_Window,
+){}
+east_west_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall_Window,
+){}
+north_south_wall_doors := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall_Door,
+){}
+east_west_wall_doors := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
+	Wall_Door,
+){}
 
 house_x: i32 = 32
 house_z: i32 = 32
 
 draw_world :: proc() {
-    width := WORLD_WIDTH
-    depth := WORLD_DEPTH
+	width := WORLD_WIDTH
+	depth := WORLD_DEPTH
 	for x in 0 ..< width {
 		x := x
 		#partial switch camera_rotation {
@@ -54,12 +66,15 @@ draw_world :: proc() {
 			y := get_tile_height(x, z)
 			draw_tile_diagonal_walls(i32(x), i32(z), 0, y)
 			draw_tile_walls(i32(x), i32(z), 0, y)
+			draw_tile_wall_windows({i32(x), 0, i32(z)}, y)
+			draw_tile_wall_doors({i32(x), 0, i32(z)}, y)
 
 			for floor in 1 ..< WORLD_HEIGHT {
 				floor_y := y + f32(floor * WALL_HEIGHT)
 				draw_tile_floor_trianges({i32(x), i32(floor), i32(z)}, floor_y)
 				draw_tile_diagonal_walls(i32(x), i32(z), i32(floor), floor_y)
 				draw_tile_walls(i32(x), i32(z), i32(floor), floor_y)
+				draw_tile_wall_windows({i32(x), i32(floor), i32(z)}, floor_y)
 			}
 		}
 	}
@@ -527,6 +542,9 @@ init_world :: proc() {
 	add_house_floor_walls(0, .Varg)
 	add_house_floor_walls(1, .Nyana)
 	add_house_floor_triangles(2, .Wood)
+
+	// insert_wall_window(.East_West, {3, 0, 3}, {texture = .Medium_Window_Wood})
+	insert_wall_door(.East_West, {4, 0, 4}, {model = .Wood})
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
@@ -621,13 +639,25 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			mask = mask,
 		},
 	)
+	if floor > 0 {
+		insert_wall_window(
+			.North_South,
+			{house_x + 1, floor, house_z + 5},
+			{texture = .Medium_Window_Wood},
+		)
+	} else {
+	    insert_wall_door(
+			.North_South,
+			{house_x + 1, floor, house_z + 5},
+            {model = .Wood},
+            )
+    }
 
 	insert_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
 		 {
 			type = .End_Side,
 			textures = {.Inside = inside_texture, .Outside = .Brick},
-			mask = .Window_Opening,
 		},
 	)
 
@@ -647,6 +677,11 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 				textures = {.Inside = inside_texture, .Outside = .Brick},
 				mask = .Window_Opening,
 			},
+		)
+		insert_wall_window(
+			.North_South,
+			{house_x, floor, house_z + i32(i) + 8},
+			{texture = .Medium_Window_Wood},
 		)
 	}
 
@@ -676,6 +711,12 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 				mask = .Window_Opening,
 			},
 		)
+
+		insert_wall_window(
+			.East_West,
+			{house_x + i32(i) + 1, floor, house_z},
+			{texture = .Medium_Window_Wood},
+		)
 	}
 
 	insert_east_west_wall(
@@ -703,6 +744,12 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 				textures = {.Inside = .Brick, .Outside = inside_texture},
 				mask = .Window_Opening,
 			},
+		)
+
+		insert_wall_window(
+			.East_West,
+			{house_x + i32(i) + 1, floor, house_z + 11},
+			{texture = .Medium_Window_Wood},
 		)
 	}
 	insert_east_west_wall(

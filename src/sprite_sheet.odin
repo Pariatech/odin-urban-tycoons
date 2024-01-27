@@ -19,7 +19,9 @@ Texture :: enum {
 	Cursors_Wall_Tool_Base,
 	Cursors_Wall_Tool_Top,
 	Door_Opening,
-    Window_Opening,
+	Window_Opening,
+	Medium_Window_Wood,
+	Door_Wood,
 }
 
 texture_paths :: [Texture]cstring {
@@ -41,5 +43,7 @@ texture_paths :: [Texture]cstring {
 	.Cursors_Wall_Tool_Base = "resources/textures/cursors/wall-tool-base.png",
 	.Cursors_Wall_Tool_Top  = "resources/textures/cursors/wall-tool-top.png",
 	.Door_Opening           = "resources/textures/door-opening.png",
-	.Window_Opening           = "resources/textures/window-opening.png",
+	.Window_Opening         = "resources/textures/window-opening.png",
+	.Medium_Window_Wood     = "resources/textures/wood-window.png",
+	.Door_Wood              = "resources/textures/door-wood.png",
 }

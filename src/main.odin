@@ -51,6 +51,7 @@ main :: proc() {
 	init_keyboard()
     init_cursor()
 
+    load_wall_door_models()
 	init_world()
     init_terrain()
 

@@ -761,11 +761,14 @@ draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
 	case .South_East, .North_East:
 		north_south_key.x += 1
 	}
-	if wall, ok :=
-		   north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y].?;
-	   ok {
-		draw_top := north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y + 1] == nil
-		draw_wall(wall, north_south_key, .North_South, y, draw_top)
+	if north_south_key.x < WORLD_WIDTH {
+		if wall, ok := north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y].?;
+		   ok {
+			draw_top :=
+				north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y + 1] ==
+				nil
+			draw_wall(wall, north_south_key, .North_South, y, draw_top)
+		}
 	}
 
 	east_west_key := m.ivec3{x, floor, z}
@@ -773,9 +776,14 @@ draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
 	case .North_East, .North_West:
 		east_west_key.z += 1
 	}
-	if wall, ok := east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y].?; ok {
-		draw_top := east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y + 1] == nil
-		draw_wall(wall, east_west_key, .East_West, y, draw_top)
+	if east_west_key.z < WORLD_DEPTH {
+		if wall, ok := east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y].?;
+		   ok {
+			draw_top :=
+				east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y + 1] ==
+				nil
+			draw_wall(wall, east_west_key, .East_West, y, draw_top)
+		}
 	}
 }
 
