@@ -69,6 +69,7 @@ draw_world :: proc() {
 			draw_tile_wall_windows({i32(x), 0, i32(z)}, y)
 			draw_tile_wall_doors({i32(x), 0, i32(z)}, y)
             draw_tile_table({i32(x), 0, i32(z)}, y)
+            draw_tile_chair({i32(x), 0, i32(z)}, y)
 
 			for floor in 1 ..< WORLD_HEIGHT {
 				floor_y := y + f32(floor * WALL_HEIGHT)
@@ -113,432 +114,432 @@ init_world :: proc() {
 		}
 	}
 
-	insert_north_south_wall(
-		{1, 0, 1},
-		{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_east_west_wall(
-		{3, 0, 1},
-		{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_south_wall(
-		{7, 0, 1},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{7, 0, 1},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{11, 0, 1},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{10, 0, 1},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{14, 0, 1},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{13, 0, 2},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{16, 0, 1},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{16, 0, 2},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{1, 0, 6},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_north_south_wall(
-		{1, 0, 7},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_east_west_wall(
-		{3, 0, 6},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{4, 0, 6},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_south_wall(
-		{7, 0, 6},
-		 {
-			type = .Side_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_north_south_wall(
-		{7, 0, 7},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{7, 0, 6},
-		 {
-			type = .Left_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{8, 0, 6},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_south_wall(
-		{12, 0, 6},
-		 {
-			type = .Side_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_north_south_wall(
-		{12, 0, 7},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{10, 0, 6},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{11, 0, 6},
-		 {
-			type = .Side_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{15, 0, 6},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_north_south_wall(
-		{15, 0, 7},
-		 {
-			type = .Left_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{13, 0, 8},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{14, 0, 8},
-		 {
-			type = .Side_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{16, 0, 6},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_north_south_wall(
-		{16, 0, 7},
-		 {
-			type = .Right_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{16, 0, 8},
-		 {
-			type = .Right_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{17, 0, 8},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_south_wall(
-		{1, 0, 10},
-		 {
-			type = .Right_Corner_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_north_south_wall(
-		{2, 0, 10},
-		 {
-			type = .Left_Corner_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{1, 0, 10},
-		 {
-			type = .Left_Corner_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-	insert_east_west_wall(
-		{1, 0, 11},
-		 {
-			type = .Right_Corner_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_south_wall(
-		{5, 0, 10},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_north_south_wall(
-		{5, 0, 11},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{4, 0, 11},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_east_west_wall(
-		{5, 0, 11},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_west_south_east_wall(
-		{1, 0, 13},
-		{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_south_west_north_east_wall(
-		{1, 0, 15},
-		{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{1, 0, 17},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{2, 0, 17},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_west_south_east_wall(
-		{6, 0, 17},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{6, 0, 18},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{9, 0, 17},
-		 {
-			type = .Left_Corner_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{9, 0, 18},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{10, 0, 17},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{13, 0, 17},
-		 {
-			type = .Right_Corner_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{12, 0, 17},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{14, 0, 17},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{17, 0, 17},
-		 {
-			type = .Right_Corner_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{16, 0, 17},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{17, 0, 16},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{20, 0, 17},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{19, 0, 17},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_west_south_east_wall(
-		{22, 0, 17},
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{22, 0, 16},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_north_west_south_east_wall(
-		{1, 0, 20},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_east_west_wall(
-		{2, 0, 20},
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-
-	insert_north_south_wall(
-		{1, 0, 23},
-		 {
-			type = .Right_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{1, 0, 24},
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_north_south_wall(
-		{5, 0, 24},
-		 {
-			type = .End_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = .Varg},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		{4, 0, 23},
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-
-	insert_south_west_north_east_wall(
-		{6, 0, 23},
-		{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
-	insert_south_west_north_east_wall(
-		{7, 0, 24},
-		{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	)
+	// insert_north_south_wall(
+	// 	{1, 0, 1},
+	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_east_west_wall(
+	// 	{3, 0, 1},
+	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{7, 0, 1},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{7, 0, 1},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{11, 0, 1},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{10, 0, 1},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{14, 0, 1},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{13, 0, 2},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{16, 0, 1},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{16, 0, 2},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{1, 0, 6},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_north_south_wall(
+	// 	{1, 0, 7},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_east_west_wall(
+	// 	{3, 0, 6},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{4, 0, 6},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{7, 0, 6},
+	// 	 {
+	// 		type = .Side_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_north_south_wall(
+	// 	{7, 0, 7},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{7, 0, 6},
+	// 	 {
+	// 		type = .Left_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{8, 0, 6},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{12, 0, 6},
+	// 	 {
+	// 		type = .Side_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_north_south_wall(
+	// 	{12, 0, 7},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{10, 0, 6},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{11, 0, 6},
+	// 	 {
+	// 		type = .Side_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{15, 0, 6},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_north_south_wall(
+	// 	{15, 0, 7},
+	// 	 {
+	// 		type = .Left_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{13, 0, 8},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{14, 0, 8},
+	// 	 {
+	// 		type = .Side_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{16, 0, 6},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_north_south_wall(
+	// 	{16, 0, 7},
+	// 	 {
+	// 		type = .Right_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{16, 0, 8},
+	// 	 {
+	// 		type = .Right_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{17, 0, 8},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{1, 0, 10},
+	// 	 {
+	// 		type = .Right_Corner_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_north_south_wall(
+	// 	{2, 0, 10},
+	// 	 {
+	// 		type = .Left_Corner_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{1, 0, 10},
+	// 	 {
+	// 		type = .Left_Corner_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	// insert_east_west_wall(
+	// 	{1, 0, 11},
+	// 	 {
+	// 		type = .Right_Corner_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{5, 0, 10},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_north_south_wall(
+	// 	{5, 0, 11},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{4, 0, 11},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_east_west_wall(
+	// 	{5, 0, 11},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_west_south_east_wall(
+	// 	{1, 0, 13},
+	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{1, 0, 15},
+	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{1, 0, 17},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{2, 0, 17},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_west_south_east_wall(
+	// 	{6, 0, 17},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{6, 0, 18},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{9, 0, 17},
+	// 	 {
+	// 		type = .Left_Corner_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{9, 0, 18},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{10, 0, 17},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{13, 0, 17},
+	// 	 {
+	// 		type = .Right_Corner_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{12, 0, 17},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{14, 0, 17},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{17, 0, 17},
+	// 	 {
+	// 		type = .Right_Corner_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{16, 0, 17},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{17, 0, 16},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{20, 0, 17},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{19, 0, 17},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_west_south_east_wall(
+	// 	{22, 0, 17},
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{22, 0, 16},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_north_west_south_east_wall(
+	// 	{1, 0, 20},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_east_west_wall(
+	// 	{2, 0, 20},
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	//
+	// insert_north_south_wall(
+	// 	{1, 0, 23},
+	// 	 {
+	// 		type = .Right_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{1, 0, 24},
+	// 	{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	{5, 0, 24},
+	// 	 {
+	// 		type = .End_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Varg},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{4, 0, 23},
+	// 	{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	{6, 0, 23},
+	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
+	// insert_south_west_north_east_wall(
+	// 	{7, 0, 24},
+	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
+	// )
 
 
 	// The house
@@ -550,6 +551,14 @@ init_world :: proc() {
 	// insert_wall_door(.East_West, {4, 0, 4}, {model = .Wood})
 
     insert_table({4, 0, 4}, {model = .Six_Places, texture = .Table_6Places_Wood})
+    insert_chair({4, 0, 6}, {model = .Wood, orientation = .South})
+    insert_chair({4, 0, 3}, {model = .Wood, orientation = .North})
+
+    insert_chair({3, 0, 5}, {model = .Wood, orientation = .East})
+    insert_chair({3, 0, 4}, {model = .Wood, orientation = .East})
+
+    insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
+    insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {

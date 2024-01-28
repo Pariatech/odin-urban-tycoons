@@ -1,0 +1,164 @@
+package main
+
+import "core:fmt"
+import "core:math/linalg"
+import m "core:math/linalg/glsl"
+
+Chair_Model :: enum {
+	Wood,
+}
+
+Chair_Orientation :: enum {
+	South,
+	West,
+	North,
+	East,
+}
+
+Chair :: struct {
+	orientation: Chair_Orientation,
+	model:       Chair_Model,
+}
+
+chairs := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Chair){}
+
+chair_north_vertices: [19]Vertex
+chair_north_indices: [33]u32
+
+chair_south_vertices: [23]Vertex
+chair_south_indices: [39]u32
+
+CHAIR_NORTH_PATH :: "resources/models/chair-north.glb"
+CHAIR_SOUTH_PATH :: "resources/models/chair-south.glb"
+
+load_chair_models :: proc() {
+	load_model(CHAIR_NORTH_PATH, &chair_north_vertices, &chair_north_indices)
+	load_model(CHAIR_SOUTH_PATH, &chair_south_vertices, &chair_south_indices)
+}
+
+CHAIR_TEXTURE_MAP :: [Chair_Model][Chair_Orientation]Texture {
+	.Wood =  {
+		.South = .Chair_South_Wood,
+		.West = .Chair_South_Wood,
+		.North = .Chair_North_Wood,
+		.East = .Chair_North_Wood,
+	},
+}
+
+CHAIR_ROTATION_MAP :: [Camera_Rotation][Chair_Orientation]Chair_Orientation {
+	.South_West =  {
+		.South = .South,
+		.West = .West,
+		.North = .North,
+		.East = .East,
+	},
+    .South_East = {
+		.South = .South,
+		.West = .East,
+		.North = .North,
+		.East = .West,
+    },
+    .North_East = {
+		.South = .North,
+		.West = .East,
+		.North = .South,
+		.East = .West,
+    },
+    .North_West = {
+		.South = .North,
+		.West = .West,
+		.North = .South,
+		.East = .East,
+    },
+}
+
+CHAIR_TRANSFORM_MAP :: [Camera_Rotation][Chair_Orientation]m.mat4 {
+	.South_West =  {
+		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+	},
+    .South_East = {
+		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+    },
+    .North_East = {
+		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
+		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
+    },
+    .North_West = {
+		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
+		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
+    },
+}
+
+draw_chair_mesh :: proc(
+	using chair: Chair,
+	pos: m.ivec3,
+	y: f32,
+	vertices: [$T]Vertex,
+	indices: [$Y]u32,
+) {
+	vertices := vertices
+	indices := indices
+	texture_map := CHAIR_TEXTURE_MAP
+	texture := texture_map[model][orientation]
+	transform_map := OBJECT_TRANSFORM_MAP
+	transform := transform_map[camera_rotation]
+	position := m.vec3{f32(pos.x), y, f32(pos.z)}
+	chair_transform_map := CHAIR_TRANSFORM_MAP
+	transform *= chair_transform_map[camera_rotation][orientation]
+
+	for i in 0 ..< len(vertices) {
+		vertices[i].texcoords.z = f32(texture)
+		vertices[i].pos.x *= -1
+		vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+		vertices[i].pos += position
+	}
+	draw_mesh(vertices[:], indices[:])
+}
+
+draw_chair :: proc(chair: Chair, pos: m.ivec3, y: f32) {
+    chair := chair
+    rotation_map := CHAIR_ROTATION_MAP
+    chair.orientation = rotation_map[camera_rotation][chair.orientation]
+	switch chair.orientation {
+	case .South, .West:
+		draw_chair_mesh(
+			chair,
+			pos,
+			y,
+			chair_south_vertices,
+			chair_south_indices,
+		)
+	case .North, .East:
+		draw_chair_mesh(
+			chair,
+			pos,
+			y,
+			chair_north_vertices,
+			chair_north_indices,
+		)
+	}
+}
+
+draw_tile_chair :: proc(pos: m.ivec3, y: f32) {
+	if chair, ok := get_chair(pos).?; ok {
+		draw_chair(chair, pos, y)
+	}
+}
+
+get_chair :: proc(pos: m.ivec3) -> Maybe(Chair) {
+	return chairs[pos.x][pos.z][pos.y]
+}
+
+insert_chair :: proc(pos: m.ivec3, chair: Chair) {
+	chairs[pos.x][pos.z][pos.y] = chair
+}

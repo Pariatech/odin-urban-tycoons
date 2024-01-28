@@ -37,16 +37,9 @@ draw_wall_door :: proc(
     texture_map := WALL_DOOR_MODEL_TEXTURES
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 	transform := transform_map[axis][camera_rotation]
-    // transform = {
-    //     1, 0, 0, 0,
-    //     0, 1, 0, 0,
-    //     0, 0, -1, 0,
-    //     0, 0, 0, 1,
-    // }
 
 	vertices := wall_door_model_vertices[model]
 	indices := wall_door_model_indices[model]
-    // transform[2, 3] *= -1
 	for i in 0 ..< len(vertices) {
 		vertices[i].texcoords.z = f32(texture_map[model])
 		vertices[i].pos.z *= -1

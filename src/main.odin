@@ -53,6 +53,7 @@ main :: proc() {
 
     load_wall_door_models()
     load_table_models()
+    load_chair_models()
 	init_world()
     init_terrain()
 
