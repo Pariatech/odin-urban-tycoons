@@ -17,8 +17,8 @@ FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 texture_array: u32
 vbo, vao, ubo: u32
 shader_program: u32
-vertices: [dynamic]Vertex
-indices: [dynamic]u32
+world_vertices: [dynamic]Vertex
+world_indices: [dynamic]u32
 uniform_object: Uniform_Object
 
 Uniform_Object :: struct {
@@ -274,15 +274,15 @@ begin_draw :: proc() {
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	clear(&vertices)
-	clear(&indices)
+	clear(&world_vertices)
+	clear(&world_indices)
 }
 
 end_draw :: proc() {
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
-		len(vertices) * size_of(Vertex),
-		raw_data(vertices),
+		len(world_vertices) * size_of(Vertex),
+		raw_data(world_vertices),
 		gl.STATIC_DRAW,
 	)
 
@@ -295,9 +295,9 @@ end_draw :: proc() {
 
 	gl.DrawElements(
 		gl.TRIANGLES,
-		i32(len(indices)),
+		i32(len(world_indices)),
 		gl.UNSIGNED_INT,
-		raw_data(indices),
+		raw_data(world_indices),
 	)
 
 	glfw.SwapBuffers(window_handle)
@@ -309,16 +309,16 @@ end_draw :: proc() {
 }
 
 draw_triangle :: proc(v0, v1, v2: Vertex) {
-	index_offset := u32(len(vertices))
-	append(&vertices, v0, v1, v2)
-	append(&indices, index_offset + 0, index_offset + 1, index_offset + 2)
+	index_offset := u32(len(world_vertices))
+	append(&world_vertices, v0, v1, v2)
+	append(&world_indices, index_offset + 0, index_offset + 1, index_offset + 2)
 }
 
 draw_quad :: proc(v0, v1, v2, v3: Vertex) {
-	index_offset := u32(len(vertices))
-	append(&vertices, v0, v1, v2, v3)
+	index_offset := u32(len(world_vertices))
+	append(&world_vertices, v0, v1, v2, v3)
 	append(
-		&indices,
+		&world_indices,
 		index_offset + 0,
 		index_offset + 1,
 		index_offset + 2,
@@ -329,9 +329,9 @@ draw_quad :: proc(v0, v1, v2, v3: Vertex) {
 }
 
 draw_mesh :: proc(verts: []Vertex, idxs: []u32) {
-	index_offset := u32(len(vertices))
-    append(&vertices, ..verts)
+	index_offset := u32(len(world_vertices))
+    append(&world_vertices, ..verts)
     for idx in idxs {
-        append(&indices, idx + index_offset)
+        append(&world_indices, idx + index_offset)
     }
 }
