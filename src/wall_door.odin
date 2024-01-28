@@ -3,7 +3,6 @@ package main
 import "core:fmt"
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
-import "vendor:cgltf"
 
 Wall_Door_Model :: enum {
 	Wood,
@@ -25,73 +24,7 @@ wall_door_model_vertices: [Wall_Door_Model][12]Vertex
 wall_door_model_indices: [Wall_Door_Model][18]u32
 
 load_wall_door_models :: proc() {
-	model_paths := WALL_DOOR_MODEL_PATHS
-	model_textures := WALL_DOOR_MODEL_TEXTURES
-	for model_path, model in model_paths {
-		model_vertices := &wall_door_model_vertices[model]
-		options: cgltf.options
-		data, result := cgltf.parse_file(options, model_path)
-		if result != .success {
-			return
-		}
-		result = cgltf.load_buffers(options, data, model_path)
-		if result != .success {
-			return
-		}
-		defer cgltf.free(data)
-
-		fmt.println("Vertices:")
-		for mesh in data.meshes {
-			primitive := mesh.primitives[0]
-			if primitive.indices != nil {
-				accessor := primitive.indices
-				for i in 0 ..< accessor.count {
-					index := cgltf.accessor_read_index(accessor, i)
-					wall_door_model_indices[model][i] = u32(index)
-					fmt.println("Index:", index)
-				}
-			}
-
-			for attribute in primitive.attributes {
-				fmt.println("Attribute semantic:", attribute.name)
-
-				if attribute.type == .position {
-					fmt.println("Positions:")
-					accessor := attribute.data
-
-					for i in 0 ..< accessor.count {
-						// position: [3]f32 = 
-						_ = cgltf.accessor_read_float(
-							accessor,
-							i,
-							raw_data(&model_vertices[i].pos),
-							3,
-						)
-						fmt.println("Vertex", i, model_vertices[i].pos)
-					}
-				}
-				if attribute.type == .texcoord {
-					fmt.println("Texcoords:")
-
-					accessor := attribute.data
-
-					for i in 0 ..< accessor.count {
-						_ = cgltf.accessor_read_float(
-							accessor,
-							i,
-							raw_data(&model_vertices[i].texcoords),
-							2,
-						)
-						model_vertices[i].texcoords.z = f32(
-							model_textures[model],
-						)
-						model_vertices[i].light = {1, 1, 1}
-						fmt.println("Texcoord", i, model_vertices[i].texcoords)
-					}
-				}
-			}
-		}
-	}
+	load_models(WALL_DOOR_MODEL_PATHS, &wall_door_model_vertices, &wall_door_model_indices)
 }
 
 draw_wall_door :: proc(
@@ -101,6 +34,7 @@ draw_wall_door :: proc(
 	y: f32,
 ) {
 	transform_map := WALL_TRANSFORM_MAP
+    texture_map := WALL_DOOR_MODEL_TEXTURES
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 	transform := transform_map[axis][camera_rotation]
     // transform = {
@@ -114,8 +48,7 @@ draw_wall_door :: proc(
 	indices := wall_door_model_indices[model]
     // transform[2, 3] *= -1
 	for i in 0 ..< len(vertices) {
-		// vertices[i].texcoords.z = f32(texture)
-		// vertices[i].texcoords.y = 1 - vertices[i].texcoords.y
+		vertices[i].texcoords.z = f32(texture_map[model])
 		vertices[i].pos.z *= -1
 		vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
 		vertices[i].pos += position
