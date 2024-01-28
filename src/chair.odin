@@ -106,25 +106,14 @@ draw_chair_mesh :: proc(
 	vertices: ^[$T]Vertex,
 	indices: ^[$Y]u32,
 ) {
-	// vertices := vertices
-	// indices := indices
 	texture_map := CHAIR_TEXTURE_MAP
 	texture := texture_map[model][orientation]
-	// transform_map := OBJECT_TRANSFORM_MAP
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 	chair_transform_map := CHAIR_TRANSFORM_MAP
 
-	// transform := transform_map[camera_rotation]
 	transform := m.mat4Translate(position)
 	transform *= chair_transform_map[camera_rotation][orientation]
 
-	for i in 0 ..< len(vertices) {
-		// vertices[i].texcoords.z = f32(texture)
-		// vertices[i].pos.x *= -1
-		// vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-		// vertices[i].pos += position
-	}
-	// draw_mesh(vertices[:], indices[:])
 	append_draw_component(
 		 {
 			vertices = vertices[:],
