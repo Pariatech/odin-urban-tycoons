@@ -43,48 +43,6 @@ east_west_wall_doors := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 house_x: i32 = 32
 house_z: i32 = 32
 
-draw_world :: proc() {
-	width := WORLD_WIDTH
-	depth := WORLD_DEPTH
-	for x in 0 ..< width {
-		x := x
-		#partial switch camera_rotation {
-		case .South_West, .North_West:
-			x = width - x - 1
-		}
-		for z in 0 ..< depth {
-			z := z
-			#partial switch camera_rotation {
-			case .South_West, .South_East:
-				z = depth - z - 1
-			}
-
-			for side in Tile_Triangle_Side {
-				draw_terrain_tile_triangle(side, x, z)
-			}
-
-			y := get_tile_height(x, z)
-			draw_tile_diagonal_walls(i32(x), i32(z), 0, y)
-			draw_tile_walls(i32(x), i32(z), 0, y)
-			draw_tile_wall_windows({i32(x), 0, i32(z)}, y)
-			draw_tile_wall_doors({i32(x), 0, i32(z)}, y)
-            draw_tile_table({i32(x), 0, i32(z)}, y)
-            draw_tile_chair({i32(x), 0, i32(z)}, y)
-
-			for floor in 1 ..< WORLD_HEIGHT {
-				floor_y := y + f32(floor * WALL_HEIGHT)
-				draw_tile_floor_trianges({i32(x), i32(floor), i32(z)}, floor_y)
-				draw_tile_diagonal_walls(i32(x), i32(z), i32(floor), floor_y)
-				draw_tile_walls(i32(x), i32(z), i32(floor), floor_y)
-				draw_tile_wall_windows({i32(x), i32(floor), i32(z)}, floor_y)
-			    draw_tile_wall_doors({i32(x), i32(floor), i32(z)}, y)
-                draw_tile_table({i32(x), i32(floor), i32(z)}, y)
-			}
-		}
-	}
-	// }
-}
-
 init_world :: proc() {
 	for x in 0 ..< WORLD_WIDTH {
 		for z in 0 ..< WORLD_DEPTH {
@@ -816,4 +774,9 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			textures = {.Inside = .Brick, .Outside = inside_texture},
 		},
 	)
+}
+
+rotate_world :: proc() {
+    clear_draw_components()
+    rotate_chairs()
 }

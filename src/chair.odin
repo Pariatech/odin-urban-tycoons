@@ -20,7 +20,7 @@ Chair :: struct {
 	model:       Chair_Model,
 }
 
-chairs := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Chair){}
+chairs := map[m.ivec3]Chair{}
 
 chair_north_vertices: [19]Vertex
 chair_north_indices: [33]u32
@@ -52,99 +52,109 @@ CHAIR_ROTATION_MAP :: [Camera_Rotation][Chair_Orientation]Chair_Orientation {
 		.North = .North,
 		.East = .East,
 	},
-    .South_East = {
+	.South_East =  {
 		.South = .South,
 		.West = .East,
 		.North = .North,
 		.East = .West,
-    },
-    .North_East = {
+	},
+	.North_East =  {
 		.South = .North,
 		.West = .East,
 		.North = .South,
 		.East = .West,
-    },
-    .North_West = {
+	},
+	.North_West =  {
 		.South = .North,
 		.West = .West,
 		.North = .South,
 		.East = .East,
-    },
+	},
 }
 
 CHAIR_TRANSFORM_MAP :: [Camera_Rotation][Chair_Orientation]m.mat4 {
 	.South_West =  {
+		.South = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+		.North = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.East = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+	},
+	.South_East =  {
 		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.West = {0, 0, -1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
 		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.East = {0, 0, -1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+	},
+	.North_East =  {
+		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
+		.West = {0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
+		.East = {0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+	},
+	.North_West =  {
+		.South = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
+		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
 		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 	},
-    .South_East = {
-		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-    },
-    .North_East = {
-		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-    },
-    .North_West = {
-		.South = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-		.West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-		.North = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1},
-		.East = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1},
-    },
 }
 
 draw_chair_mesh :: proc(
 	using chair: Chair,
 	pos: m.ivec3,
 	y: f32,
-	vertices: [$T]Vertex,
-	indices: [$Y]u32,
+	vertices: ^[$T]Vertex,
+	indices: ^[$Y]u32,
 ) {
-	vertices := vertices
-	indices := indices
+	// vertices := vertices
+	// indices := indices
 	texture_map := CHAIR_TEXTURE_MAP
 	texture := texture_map[model][orientation]
-	transform_map := OBJECT_TRANSFORM_MAP
-	transform := transform_map[camera_rotation]
+	// transform_map := OBJECT_TRANSFORM_MAP
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
 	chair_transform_map := CHAIR_TRANSFORM_MAP
+
+	// transform := transform_map[camera_rotation]
+	transform := m.mat4Translate(position)
 	transform *= chair_transform_map[camera_rotation][orientation]
 
 	for i in 0 ..< len(vertices) {
-		vertices[i].texcoords.z = f32(texture)
-		vertices[i].pos.x *= -1
-		vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-		vertices[i].pos += position
+		// vertices[i].texcoords.z = f32(texture)
+		// vertices[i].pos.x *= -1
+		// vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
+		// vertices[i].pos += position
 	}
-	draw_mesh(vertices[:], indices[:])
+	// draw_mesh(vertices[:], indices[:])
+	append_draw_component(
+		 {
+			vertices = vertices[:],
+			indices = indices[:],
+			model = transform,
+			texture = texture,
+		},
+	)
 }
 
 draw_chair :: proc(chair: Chair, pos: m.ivec3, y: f32) {
-    chair := chair
-    rotation_map := CHAIR_ROTATION_MAP
-    chair.orientation = rotation_map[camera_rotation][chair.orientation]
+	chair := chair
+	rotation_map := CHAIR_ROTATION_MAP
+	chair.orientation = rotation_map[camera_rotation][chair.orientation]
 	switch chair.orientation {
 	case .South, .West:
 		draw_chair_mesh(
 			chair,
 			pos,
 			y,
-			chair_south_vertices,
-			chair_south_indices,
+			&chair_south_vertices,
+			&chair_south_indices,
 		)
 	case .North, .East:
 		draw_chair_mesh(
 			chair,
 			pos,
 			y,
-			chair_north_vertices,
-			chair_north_indices,
+			&chair_north_vertices,
+			&chair_north_indices,
 		)
 	}
 }
@@ -156,9 +166,21 @@ draw_tile_chair :: proc(pos: m.ivec3, y: f32) {
 }
 
 get_chair :: proc(pos: m.ivec3) -> Maybe(Chair) {
-	return chairs[pos.x][pos.z][pos.y]
+	return chairs[pos]
 }
 
 insert_chair :: proc(pos: m.ivec3, chair: Chair) {
-	chairs[pos.x][pos.z][pos.y] = chair
+	chairs[pos] = chair
+	draw_chair(chair, pos, 0)
+}
+
+rotate_chair :: proc(pos: m.ivec3, chair: Chair) {
+	draw_chair(chair, pos, 0)
+}
+
+rotate_chairs :: proc() {
+	for pos, chair in chairs {
+		fmt.println(pos)
+		rotate_chair(pos, chair)
+	}
 }
