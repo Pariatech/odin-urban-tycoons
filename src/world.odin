@@ -779,4 +779,5 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 rotate_world :: proc() {
     clear_draw_components()
     rotate_chairs()
+    rotate_tables()
 }
