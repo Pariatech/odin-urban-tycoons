@@ -30,29 +30,7 @@ draw :: proc(using component: Draw_Component) {
 }
 
 draw_world :: proc() {
-	width := WORLD_WIDTH
-	depth := WORLD_DEPTH
-	for x in 0 ..< width {
-		x := x
-		#partial switch camera_rotation {
-		case .South_West, .North_West:
-			x = width - x - 1
-		}
-		for z in 0 ..< depth {
-			z := z
-			#partial switch camera_rotation {
-			case .South_West, .South_East:
-				z = depth - z - 1
-			}
-
-			for side in Tile_Triangle_Side {
-				// draw_terrain_tile_triangle(side, x, z)
-			}
-
-			y := get_tile_height(x, z)
-		}
-	}
-
+    // sort the draw components? 
     for draw_component in draw_components {
         draw(draw_component)
     }
