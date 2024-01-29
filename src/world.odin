@@ -33,12 +33,6 @@ north_south_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 east_west_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 	Wall_Window,
 ){}
-north_south_wall_doors := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall_Door,
-){}
-east_west_wall_doors := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall_Door,
-){}
 
 house_x: i32 = 32
 house_z: i32 = 32
@@ -49,29 +43,9 @@ init_world :: proc() {
 			for side in Tile_Triangle_Side {
 				set_terrain_tile_triangle(side, x, z, .Grass, .Grid_Mask)
 			}
-			// add_half_tile(
-			// 	 {
-			// 		position = {f32(x), 0, f32(z)},
-			// 		corner = .South_West,
-			// 		corners_y = {0, 0, 0},
-			// 		corners_light = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-			// 		texture = .Grass,
-			// 		mask_texture = .Full_Mask,
-			// 	},
-			// )
-			// add_half_tile(
-			// 	 {
-			// 		position = {f32(x), 0, f32(z)},
-			// 		corner = .North_East,
-			// 		corners_y = {0, 0, 0},
-			// 		corners_light = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-			// 		texture = .Grass,
-			// 		mask_texture = .Full_Mask,
-			// 	},
-			// )
 		}
 	}
-
+	//
 	// insert_north_south_wall(
 	// 	{1, 0, 1},
 	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
@@ -81,7 +55,7 @@ init_world :: proc() {
 	// 	{3, 0, 1},
 	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
 	// )
-	//
+
 	// insert_north_south_wall(
 	// 	{7, 0, 1},
 	// 	 {
@@ -506,7 +480,8 @@ init_world :: proc() {
 	add_house_floor_triangles(2, .Wood)
 
 	// insert_wall_window(.East_West, {3, 0, 3}, {texture = .Medium_Window_Wood})
-	// insert_wall_door(.East_West, {4, 0, 4}, {model = .Wood})
+	insert_wall_door(.East_West, {2, 0, 2}, {model = .Wood})
+	insert_wall_door(.North_South, {2, 0, 2}, {model = .Wood})
 
     insert_table({4, 0, 4}, {model = .Six_Places, texture = .Table_6Places_Wood})
     insert_chair({4, 0, 6}, {model = .Wood, orientation = .South})
@@ -780,4 +755,5 @@ rotate_world :: proc() {
     clear_draw_components()
     rotate_chairs()
     rotate_tables()
+    rotate_doors()
 }

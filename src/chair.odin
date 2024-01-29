@@ -148,12 +148,6 @@ draw_chair :: proc(chair: Chair, pos: m.ivec3, y: f32) {
 	}
 }
 
-draw_tile_chair :: proc(pos: m.ivec3, y: f32) {
-	if chair, ok := get_chair(pos).?; ok {
-		draw_chair(chair, pos, y)
-	}
-}
-
 get_chair :: proc(pos: m.ivec3) -> Maybe(Chair) {
 	return chairs[pos]
 }

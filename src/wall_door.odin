@@ -20,11 +20,33 @@ WALL_DOOR_MODEL_TEXTURES :: [Wall_Door_Model]Texture {
 	.Wood = .Door_Wood,
 }
 
+WALL_DOOR_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]m.mat4 {
+	.North_South =  {
+		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
+		.North_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+	},
+	.East_West =  {
+		.South_West = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.South_East = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		.North_East = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
+		.North_West = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
+	},
+}
+
 wall_door_model_vertices: [Wall_Door_Model][12]Vertex
 wall_door_model_indices: [Wall_Door_Model][18]u32
 
+north_south_wall_doors := map[m.ivec3]Wall_Door{}
+east_west_wall_doors := map[m.ivec3]Wall_Door{}
+
 load_wall_door_models :: proc() {
-	load_models(WALL_DOOR_MODEL_PATHS, &wall_door_model_vertices, &wall_door_model_indices)
+	load_models(
+		WALL_DOOR_MODEL_PATHS,
+		&wall_door_model_vertices,
+		&wall_door_model_indices,
+	)
 }
 
 draw_wall_door :: proc(
@@ -33,20 +55,21 @@ draw_wall_door :: proc(
 	axis: Wall_Axis,
 	y: f32,
 ) {
-	transform_map := WALL_TRANSFORM_MAP
-    texture_map := WALL_DOOR_MODEL_TEXTURES
+	transform_map := WALL_DOOR_TRANSFORM_MAP
+	texture_map := WALL_DOOR_MODEL_TEXTURES
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
-	transform := transform_map[axis][camera_rotation]
+    transform := m.mat4Translate(position)
+	transform *= transform_map[axis][camera_rotation]
+    texture := texture_map[model]
 
-	vertices := wall_door_model_vertices[model]
-	indices := wall_door_model_indices[model]
-	for i in 0 ..< len(vertices) {
-		vertices[i].texcoords.z = f32(texture_map[model])
-		vertices[i].pos.z *= -1
-		vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-		vertices[i].pos += position
-	}
-	draw_mesh(vertices[:], indices[:])
+	append_draw_component(
+		 {
+			vertices = wall_door_model_vertices[model][:],
+			indices = wall_door_model_indices[model][:],
+			model = transform,
+			texture = texture,
+		},
+	)
 }
 
 draw_tile_wall_doors :: proc(pos: m.ivec3, y: f32) {
@@ -72,15 +95,14 @@ draw_tile_wall_doors :: proc(pos: m.ivec3, y: f32) {
 			draw_wall_door(wall_door, east_west_key, .East_West, y)
 		}
 	}
-
 }
 
 get_wall_door :: proc(axis: Wall_Axis, pos: m.ivec3) -> Maybe(Wall_Door) {
 	switch axis {
 	case .North_South:
-		return north_south_wall_doors[pos.x][pos.z][pos.y]
+		return north_south_wall_doors[pos]
 	case .East_West:
-		return east_west_wall_doors[pos.x][pos.z][pos.y]
+		return east_west_wall_doors[pos]
 	}
 
 	return nil
@@ -89,8 +111,22 @@ get_wall_door :: proc(axis: Wall_Axis, pos: m.ivec3) -> Maybe(Wall_Door) {
 insert_wall_door :: proc(axis: Wall_Axis, pos: m.ivec3, wall_door: Wall_Door) {
 	switch axis {
 	case .North_South:
-		north_south_wall_doors[pos.x][pos.z][pos.y] = wall_door
+		north_south_wall_doors[pos] = wall_door
 	case .East_West:
-		east_west_wall_doors[pos.x][pos.z][pos.y] = wall_door
+		east_west_wall_doors[pos] = wall_door
 	}
+    draw_wall_door(wall_door, pos, axis, 0)
+}
+
+rotate_door :: proc(pos: m.ivec3, door: Wall_Door, axis: Wall_Axis) {
+    draw_wall_door(door, pos, axis, 0)
+}
+
+rotate_doors :: proc() {
+    for pos, door in north_south_wall_doors {
+        rotate_door(pos, door, .North_South)
+    }
+    for pos, door in east_west_wall_doors {
+        rotate_door(pos, door, .East_West)
+    }
 }

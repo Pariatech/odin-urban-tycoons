@@ -53,7 +53,6 @@ draw_world :: proc() {
 			draw_tile_diagonal_walls(i32(x), i32(z), 0, y)
 			draw_tile_walls(i32(x), i32(z), 0, y)
 			draw_tile_wall_windows({i32(x), 0, i32(z)}, y)
-			draw_tile_wall_doors({i32(x), 0, i32(z)}, y)
 
 			for floor in 1 ..< WORLD_HEIGHT {
 				floor_y := y + f32(floor * WALL_HEIGHT)
@@ -61,7 +60,6 @@ draw_world :: proc() {
 				draw_tile_diagonal_walls(i32(x), i32(z), i32(floor), floor_y)
 				draw_tile_walls(i32(x), i32(z), i32(floor), floor_y)
 				draw_tile_wall_windows({i32(x), i32(floor), i32(z)}, floor_y)
-			    draw_tile_wall_doors({i32(x), i32(floor), i32(z)}, y)
 			}
 		}
 	}

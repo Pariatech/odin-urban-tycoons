@@ -39,19 +39,9 @@ draw_table :: proc(using table: Table, pos: m.ivec3, y: f32) {
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
     transform := m.mat4Translate(position)
 	transform *= transform_map[camera_rotation]
-	// transform := m.mat4{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1}
 
 	vertices := table_model_vertices[model]
 	indices := table_model_indices[model]
-	// transform[2, 3] *= -1
-	// for i in 0 ..< len(vertices) {
-	// 	vertices[i].texcoords.z = f32(texture)
-	// 	// vertices[i].texcoords.y = 1 - vertices[i].texcoords.y
-	// 	// vertices[i].pos.z *= -1
-	// 	vertices[i].pos.x *= -1
-	// 	vertices[i].pos = linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-	// 	vertices[i].pos += position
-	// }
 
 	append_draw_component(
 		 {
@@ -61,12 +51,6 @@ draw_table :: proc(using table: Table, pos: m.ivec3, y: f32) {
 			texture = texture,
 		},
 	)
-}
-
-draw_tile_table :: proc(pos: m.ivec3, y: f32) {
-	if table, ok := get_table(pos).?; ok {
-		draw_table(table, pos, y)
-	}
 }
 
 get_table :: proc(pos: m.ivec3) -> Maybe(Table) {
