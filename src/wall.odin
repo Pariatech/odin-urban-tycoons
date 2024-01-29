@@ -59,7 +59,7 @@ Wall :: struct {
 WALL_HEIGHT :: 3
 WALL_TOP_OFFSET :: 0.0001
 
-WALL_FULL_VERTICES :: [?]Vertex {
+wall_full_vertices := []Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.615, 0.0, -0.5},
@@ -83,9 +83,9 @@ WALL_FULL_VERTICES :: [?]Vertex {
 		texcoords = {0.115, 0, 0, 0},
 	},
 }
-WALL_FULL_INDICES :: [?]u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
+wall_full_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
-WALL_EXTENDED_SIDE_VERTICES :: [?]Vertex {
+wall_extended_side_vertices := []Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.615, 0.0, -0.5},
@@ -103,9 +103,9 @@ WALL_EXTENDED_SIDE_VERTICES :: [?]Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
-WALL_EXTENDED_SIDE_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+wall_extended_side_indices := []u32{0, 1, 2, 0, 2, 3}
 
-WALL_SIDE_VERTICES :: [?]Vertex {
+wall_side_vertices := []Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
@@ -119,9 +119,9 @@ WALL_SIDE_VERTICES :: [?]Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
-WALL_SIDE_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+wall_side_indices := []u32{0, 1, 2, 0, 2, 3}
 
-WALL_END_VERTICES :: [?]Vertex {
+wall_end_vertices := []Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
@@ -141,10 +141,10 @@ WALL_END_VERTICES :: [?]Vertex {
 		texcoords = {0.115, 0, 0, 0},
 	},
 }
-WALL_END_INDICES :: [?]u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
+wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
 
-WALL_FULL_TOP_VERTICES :: [?]Vertex {
+wall_full_top_vertices := []Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -166,7 +166,7 @@ WALL_FULL_TOP_VERTICES :: [?]Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
-WALL_TOP_VERTICES :: [?]Vertex {
+wall_top_vertices := []Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -188,7 +188,7 @@ WALL_TOP_VERTICES :: [?]Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
-WALL_TOP_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
 
 WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	.North_South =  {
@@ -675,13 +675,21 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-draw_wall :: proc(
+north_south_walls := map[m.ivec3]Wall{}
+east_west_walls := map[m.ivec3]Wall{}
+
+draw_wall_mesh :: proc(
 	wall: Wall,
 	pos: m.ivec3,
 	axis: Wall_Axis,
 	y: f32,
-	draw_top: bool = false,
+	vertices: [$T]Vertex,
+	indices: [$Y]u32,
 ) {
+
+}
+
+draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 	mask_map := WALL_MASK_MAP
 	side_map := WALL_SIDE_MAP
 	transform_map := WALL_TRANSFORM_MAP
@@ -693,104 +701,69 @@ draw_wall :: proc(
 	top_mesh := top_mesh_map[wall.type][axis][camera_rotation]
 
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
-	transform := transform_map[axis][camera_rotation]
+	transform := m.mat4Translate(position)
+	transform *= transform_map[axis][camera_rotation]
+
+	vertices: []Vertex
+	indices: []u32
 
 	switch mask {
 	case .Full:
-		vertices := WALL_FULL_VERTICES
-		indices := WALL_FULL_INDICES
-		for i in 0 ..< len(vertices) {
-			vertices[i].texcoords.z = f32(texture)
-			vertices[i].texcoords.w = f32(wall.mask)
-			vertices[i].pos =
-				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-			vertices[i].pos += position
-		}
-		draw_mesh(vertices[:], indices[:])
+		vertices = wall_full_vertices
+		indices = wall_full_indices
 	case .Extended_Side:
-		vertices := WALL_EXTENDED_SIDE_VERTICES
-		indices := WALL_EXTENDED_SIDE_INDICES
-		for i in 0 ..< len(vertices) {
-			vertices[i].texcoords.z = f32(texture)
-			vertices[i].texcoords.w = f32(wall.mask)
-			vertices[i].pos =
-				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-			vertices[i].pos += position
-		}
-		draw_mesh(vertices[:], indices[:])
+		vertices = wall_extended_side_vertices
+		indices = wall_extended_side_indices
 	case .Side:
-		vertices := WALL_SIDE_VERTICES
-		indices := WALL_SIDE_INDICES
-		for i in 0 ..< len(vertices) {
-			vertices[i].texcoords.z = f32(texture)
-			vertices[i].texcoords.w = f32(wall.mask)
-			vertices[i].pos =
-				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-			vertices[i].pos += position
-		}
-		draw_mesh(vertices[:], indices[:])
+		vertices = wall_side_vertices
+		indices = wall_side_indices
 	case .End:
-		vertices := WALL_END_VERTICES
-		indices := WALL_END_INDICES
-		for i in 0 ..< len(vertices) {
-			vertices[i].texcoords.z = f32(texture)
-			vertices[i].texcoords.w = f32(wall.mask)
-			vertices[i].pos =
-				linalg.mul(transform, vec4(vertices[i].pos, 1)).xyz
-			vertices[i].pos += position
-		}
-		draw_mesh(vertices[:], indices[:])
+		vertices = wall_end_vertices
+		indices = wall_end_indices
 	}
+	append_draw_component(
+		 {
+			vertices = vertices,
+			indices = indices,
+			model = transform,
+			texture = texture,
+            mask = wall.mask,
+		},
+	)
 
-	top_vertices := WALL_FULL_TOP_VERTICES
-	if top_mesh == .Side do top_vertices = WALL_TOP_VERTICES
-	top_indices := WALL_TOP_INDICES
-	for i in 0 ..< len(top_vertices) {
-		top_vertices[i].texcoords.z = f32(Texture.Wall_Top)
-		top_vertices[i].pos =
-			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
-		top_vertices[i].pos += position
-		top_vertices[i].pos.y += WALL_TOP_OFFSET * f32(axis)
-	}
-	draw_mesh(top_vertices[:], top_indices[:])
-}
+	top_vertices := wall_full_top_vertices
+	if top_mesh == .Side do top_vertices = wall_top_vertices
+    transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
-draw_tile_walls :: proc(x, z, floor: i32, y: f32) {
-	north_south_key := m.ivec3{x, floor, z}
-	#partial switch camera_rotation {
-	case .South_East, .North_East:
-		north_south_key.x += 1
-	}
-	if north_south_key.x < WORLD_WIDTH {
-		if wall, ok := north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y].?;
-		   ok {
-			draw_top :=
-				north_south_walls[north_south_key.x][north_south_key.z][north_south_key.y + 1] ==
-				nil
-			draw_wall(wall, north_south_key, .North_South, y, draw_top)
-		}
-	}
-
-	east_west_key := m.ivec3{x, floor, z}
-	#partial switch camera_rotation {
-	case .North_East, .North_West:
-		east_west_key.z += 1
-	}
-	if east_west_key.z < WORLD_DEPTH {
-		if wall, ok := east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y].?;
-		   ok {
-			draw_top :=
-				east_west_walls[east_west_key.x][east_west_key.z][east_west_key.y + 1] ==
-				nil
-			draw_wall(wall, east_west_key, .East_West, y, draw_top)
-		}
-	}
+	append_draw_component(
+		 {
+			vertices = top_vertices,
+			indices = wall_top_indices,
+			model = transform,
+			texture = .Wall_Top,
+		},
+	)
 }
 
 insert_north_south_wall :: proc(pos: m.ivec3, wall: Wall) {
-	north_south_walls[pos.x][pos.z][pos.y] = wall
+	north_south_walls[pos] = wall
+    draw_wall(wall, pos, .North_South, f32(pos.y * WALL_HEIGHT))
 }
 
 insert_east_west_wall :: proc(pos: m.ivec3, wall: Wall) {
-	east_west_walls[pos.x][pos.z][pos.y] = wall
+	east_west_walls[pos] = wall
+    draw_wall(wall, pos, .East_West, f32(pos.y * WALL_HEIGHT))
+}
+
+rotate_wall :: proc(pos: m.ivec3, wall: Wall, axis: Wall_Axis) {
+    draw_wall(wall, pos, axis, f32(pos.y * WALL_HEIGHT))
+}
+
+rotate_walls :: proc() {
+    for pos, wall in north_south_walls {
+        rotate_wall(pos, wall, .North_South)
+    }
+    for pos, wall in east_west_walls {
+        rotate_wall(pos, wall, .East_West)
+    }
 }

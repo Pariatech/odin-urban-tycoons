@@ -7,8 +7,6 @@ WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 64
 
 sun := m.vec3{0, -1, 0}
-north_south_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Wall){}
-east_west_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(Wall){}
 north_west_south_east_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 	Wall,
 ){}
@@ -751,4 +749,5 @@ rotate_world :: proc() {
     rotate_tables()
     rotate_doors()
     rotate_windows()
+    rotate_walls()
 }
