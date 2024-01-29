@@ -27,12 +27,6 @@ south_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 west_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 	Tile_Triangle,
 ){}
-north_south_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall_Window,
-){}
-east_west_wall_windows := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall_Window,
-){}
 
 house_x: i32 = 32
 house_z: i32 = 32
@@ -756,4 +750,5 @@ rotate_world :: proc() {
     rotate_chairs()
     rotate_tables()
     rotate_doors()
+    rotate_windows()
 }

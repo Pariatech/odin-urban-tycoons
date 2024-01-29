@@ -52,6 +52,7 @@ main :: proc() {
     init_cursor()
 
     load_wall_door_models()
+    load_wall_window_mesh()
     load_table_models()
     load_chair_models()
 	init_world()

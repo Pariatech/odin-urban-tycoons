@@ -72,31 +72,6 @@ draw_wall_door :: proc(
 	)
 }
 
-draw_tile_wall_doors :: proc(pos: m.ivec3, y: f32) {
-	north_south_key := pos
-	#partial switch camera_rotation {
-	case .South_East, .North_East:
-		north_south_key.x += 1
-	}
-	if north_south_key.x < WORLD_WIDTH {
-		if wall_door, ok := get_wall_door(.North_South, north_south_key).?;
-		   ok {
-			draw_wall_door(wall_door, north_south_key, .North_South, y)
-		}
-	}
-
-	east_west_key := pos
-	#partial switch camera_rotation {
-	case .North_East, .North_West:
-		east_west_key.z += 1
-	}
-	if east_west_key.z < WORLD_DEPTH {
-		if wall_door, ok := get_wall_door(.East_West, east_west_key).?; ok {
-			draw_wall_door(wall_door, east_west_key, .East_West, y)
-		}
-	}
-}
-
 get_wall_door :: proc(axis: Wall_Axis, pos: m.ivec3) -> Maybe(Wall_Door) {
 	switch axis {
 	case .North_South:
