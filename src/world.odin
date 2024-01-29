@@ -7,18 +7,6 @@ WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 64
 
 sun := m.vec3{0, -1, 0}
-north_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Tile_Triangle,
-){}
-east_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Tile_Triangle,
-){}
-south_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Tile_Triangle,
-){}
-west_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Tile_Triangle,
-){}
 
 house_x: i32 = 32
 house_z: i32 = 32

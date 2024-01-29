@@ -55,8 +55,8 @@ main :: proc() {
     load_wall_window_mesh()
     load_table_models()
     load_chair_models()
-	init_world()
     init_terrain()
+	init_world()
 
 	should_close := false
 	current_time_ns := time.now()

@@ -2,6 +2,7 @@ package main
 
 import m "core:math/linalg/glsl"
 import "core:math/noise"
+import "core:fmt"
 
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
 terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
@@ -261,6 +262,7 @@ set_terrain_tile_triangle :: proc(
 		texture      = texture,
 		mask_texture = mask,
 	}
+	draw_terrain_tile_triangle(side, x, z)
 }
 
 get_tile_height :: proc(x, z: int) -> f32 {

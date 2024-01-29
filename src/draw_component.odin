@@ -46,15 +46,10 @@ draw_world :: proc() {
 			}
 
 			for side in Tile_Triangle_Side {
-				draw_terrain_tile_triangle(side, x, z)
+				// draw_terrain_tile_triangle(side, x, z)
 			}
 
 			y := get_tile_height(x, z)
-
-			for floor in 1 ..< WORLD_HEIGHT {
-				floor_y := y + f32(floor * WALL_HEIGHT)
-				draw_tile_floor_trianges({i32(x), i32(floor), i32(z)}, floor_y)
-			}
 		}
 	}
 
