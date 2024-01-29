@@ -7,12 +7,6 @@ WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 64
 
 sun := m.vec3{0, -1, 0}
-north_west_south_east_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall,
-){}
-south_west_north_east_walls := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
-	Wall,
-){}
 north_floor_tile_triangles := [WORLD_WIDTH][WORLD_DEPTH][WORLD_HEIGHT]Maybe(
 	Tile_Triangle,
 ){}

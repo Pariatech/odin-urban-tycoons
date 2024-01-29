@@ -50,12 +50,10 @@ draw_world :: proc() {
 			}
 
 			y := get_tile_height(x, z)
-			draw_tile_diagonal_walls(i32(x), i32(z), 0, y)
 
 			for floor in 1 ..< WORLD_HEIGHT {
 				floor_y := y + f32(floor * WALL_HEIGHT)
 				draw_tile_floor_trianges({i32(x), i32(floor), i32(z)}, floor_y)
-				draw_tile_diagonal_walls(i32(x), i32(z), i32(floor), floor_y)
 			}
 		}
 	}

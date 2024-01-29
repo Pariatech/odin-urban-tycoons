@@ -19,7 +19,7 @@ Diagonal_Wall_Mask :: enum {
 DIAGONAL_WALL_TOP_CROSS_OFFSET :: 0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
-DIAGONAL_WALL_FULL_VERTICES :: [?]Vertex {
+diagonal_wall_full_vertices := []Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
@@ -42,12 +42,8 @@ DIAGONAL_WALL_FULL_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
-	 {
-		pos = {-0.5, 0.0, 0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 1, 0, 0},
-	},
+diagonal_wall_right_extension_vertices := []Vertex {
+	{pos = {-0.5, 0.0, 0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.5575, 0.0, -0.5575},
 		light = {1, 1, 1},
@@ -65,17 +61,13 @@ DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_LEFT_EXTENSION_VERTICES :: [?]Vertex {
+diagonal_wall_left_extension_vertices := []Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 1, 0, 0},
 	},
-	 {
-		pos = {0.5, 0.0, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 1, 0, 0},
-	},
+	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -88,17 +80,9 @@ DIAGONAL_WALL_LEFT_EXTENSION_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_SIDE_VERTICES :: [?]Vertex {
-	 {
-		pos = {-0.5, 0.0, 0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 1, 0, 0},
-	},
-	 {
-		pos = {0.5, 0.0, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 1, 0, 0},
-	},
+diagonal_wall_side_vertices := []Vertex {
+	{pos = {-0.5, 0.0, 0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
+	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
 		pos = {0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -111,12 +95,8 @@ DIAGONAL_WALL_SIDE_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_CROSS_VERTICES :: [?]Vertex {
-	 {
-		pos = {-0.5, 0.0, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0, 1, 0, 0},
-	},
+diagonal_wall_cross_vertices := []Vertex {
+	{pos = {-0.5, 0.0, -0.385}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {-0.385, 0.0, -0.5},
 		light = {1, 1, 1},
@@ -135,7 +115,7 @@ DIAGONAL_WALL_CROSS_VERTICES :: [?]Vertex {
 }
 
 
-DIAGONAL_WALL_TOP_CROSS_VERTICES :: [?]Vertex {
+diagonal_wall_top_cross_vertices := []Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
 		light = {1, 1, 1},
@@ -158,7 +138,7 @@ DIAGONAL_WALL_TOP_CROSS_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_TOP_FULL_VERTICES :: [?]Vertex {
+diagonal_wall_top_full_vertices := []Vertex {
 	 {
 		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
@@ -181,7 +161,7 @@ DIAGONAL_WALL_TOP_FULL_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES :: [?]Vertex {
+diagonal_wall_top_left_extension_vertices := []Vertex {
 	 {
 		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
@@ -204,7 +184,7 @@ DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
+diagonal_wall_top_right_extension_vertices := []Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
@@ -227,7 +207,7 @@ DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_TOP_SIDE_VERTICES :: [?]Vertex {
+diagonal_wall_top_side_vertices := []Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
@@ -250,7 +230,7 @@ DIAGONAL_WALL_TOP_SIDE_VERTICES :: [?]Vertex {
 	},
 }
 
-DIAGONAL_WALL_INDICES :: [?]u32{0, 1, 2, 0, 2, 3}
+diagonal_wall_indices := []u32{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
 	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
@@ -795,6 +775,10 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
 		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
 	}
 
+
+south_west_north_east_walls := map[m.ivec3]Wall{}
+north_west_south_east_walls := map[m.ivec3]Wall{}
+
 draw_diagonal_wall :: proc(
 	wall: Wall,
 	pos: m.ivec3,
@@ -814,70 +798,67 @@ draw_diagonal_wall :: proc(
 	mask := mask_map[axis][camera_rotation][wall.type]
 	top_mask := top_mask_map[axis][camera_rotation][wall.type]
 	draw := draw_map[axis][wall.type][camera_rotation]
-	transform := transform_map[camera_rotation]
 	position := m.vec3{f32(pos.x), y, f32(pos.z)}
-	wall_indices := DIAGONAL_WALL_INDICES
+	transform := m.mat4Translate(position)
+	transform *= transform_map[camera_rotation]
 
 	if draw {
-		wall_vertices: [4]Vertex
+		wall_vertices: []Vertex
 		switch mask {
 		case .Full:
-			wall_vertices = DIAGONAL_WALL_FULL_VERTICES
+			wall_vertices = diagonal_wall_full_vertices
 		case .Side:
-			wall_vertices = DIAGONAL_WALL_SIDE_VERTICES
+			wall_vertices = diagonal_wall_side_vertices
 		case .Left_Extension:
-			wall_vertices = DIAGONAL_WALL_LEFT_EXTENSION_VERTICES
+			wall_vertices = diagonal_wall_left_extension_vertices
 		case .Right_Extension:
-			wall_vertices = DIAGONAL_WALL_RIGHT_EXTENSION_VERTICES
+			wall_vertices = diagonal_wall_right_extension_vertices
 		case .Cross:
-			wall_vertices = DIAGONAL_WALL_CROSS_VERTICES
+			wall_vertices = diagonal_wall_cross_vertices
 		}
 
-		for i in 0 ..< len(wall_vertices) {
-			wall_vertices[i].texcoords.z = f32(texture)
-			wall_vertices[i].pos =
-				linalg.mul(transform, vec4(wall_vertices[i].pos, 1)).xyz
-			wall_vertices[i].pos += position
-		}
-		draw_mesh(wall_vertices[:], wall_indices[:])
+		append_draw_component(
+			 {
+				vertices = wall_vertices,
+				indices = diagonal_wall_indices,
+				model = transform,
+				texture = texture,
+				mask = wall.mask,
+			},
+		)
 	}
 
-	top_vertices: [4]Vertex
+	top_vertices: []Vertex
 	switch top_mask {
 	case .Full:
-		top_vertices = DIAGONAL_WALL_TOP_FULL_VERTICES
+		top_vertices = diagonal_wall_top_full_vertices
 	case .Side:
-		top_vertices = DIAGONAL_WALL_TOP_SIDE_VERTICES
+		top_vertices = diagonal_wall_top_side_vertices
 	case .Left_Extension:
-		top_vertices = DIAGONAL_WALL_TOP_LEFT_EXTENSION_VERTICES
+		top_vertices = diagonal_wall_top_left_extension_vertices
 	case .Right_Extension:
-		top_vertices = DIAGONAL_WALL_TOP_RIGHT_EXTENSION_VERTICES
+		top_vertices = diagonal_wall_top_right_extension_vertices
 	case .Cross:
-		top_vertices = DIAGONAL_WALL_TOP_CROSS_VERTICES
-	}
-	for i in 0 ..< len(top_vertices) {
-		top_vertices[i].texcoords.z = f32(Texture.Wall_Top)
-		top_vertices[i].pos =
-			linalg.mul(transform, vec4(top_vertices[i].pos, 1)).xyz
-		top_vertices[i].pos += position
+		top_vertices = diagonal_wall_top_cross_vertices
 	}
 
-	draw_mesh(top_vertices[:], wall_indices[:])
-}
-
-draw_tile_diagonal_walls :: proc(x, z, floor: i32, y: f32) {
-	pos := m.ivec3{x, floor, z}
-	if wall, ok := north_west_south_east_walls[x][z][floor].?; ok {
-		draw_diagonal_wall(wall, pos, .North_West_South_East, y)
-	} else if wall, ok := south_west_north_east_walls[x][z][floor].?; ok {
-		draw_diagonal_wall(wall, pos, .South_West_North_East, y)
-	}
+	append_draw_component(
+		 {
+			vertices = top_vertices,
+			indices = diagonal_wall_indices,
+			model = transform,
+			texture = .Wall_Top,
+			mask = wall.mask,
+		},
+	)
 }
 
 insert_north_west_south_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	north_west_south_east_walls[pos.x][pos.z][pos.y] = wall
+	north_west_south_east_walls[pos] = wall
+    draw_diagonal_wall(wall, pos, .North_West_South_East, f32(pos.y * WALL_HEIGHT))
 }
 
 insert_south_west_north_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	south_west_north_east_walls[pos.x][pos.z][pos.y] = wall
+	south_west_north_east_walls[pos] = wall
+    draw_diagonal_wall(wall, pos, .South_West_North_East, f32(pos.y * WALL_HEIGHT))
 }
