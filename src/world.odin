@@ -466,6 +466,18 @@ init_world :: proc() {
 
     insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
     insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
+
+    append_billboard({
+        pos = {1,0, 1},
+        texture = .Chair_North_Wood_Billboard,
+        mask = .Full_Mask, 
+        })
+
+    append_billboard({
+        pos = {1.1,0.1, 1.1},
+        texture = .Chair_North_Wood_Billboard,
+        mask = .Full_Mask, 
+        })
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {

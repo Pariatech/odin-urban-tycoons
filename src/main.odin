@@ -51,6 +51,7 @@ main :: proc() {
 	init_keyboard()
     init_cursor()
 
+    load_billboard_mesh()
     load_wall_door_models()
     load_wall_window_mesh()
     load_table_models()

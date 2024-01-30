@@ -73,7 +73,7 @@ update_camera :: proc(delta_time: f64) {
 		-1 / zoom * scale,
 		-aspect_ratio / zoom * scale,
 		aspect_ratio / zoom * scale,
-		0.1,
+		0.01,
 		100.0,
 	)
 }
