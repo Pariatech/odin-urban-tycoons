@@ -478,6 +478,12 @@ init_world :: proc() {
         texture = .Chair_North_Wood_Billboard,
         mask = .Full_Mask, 
         })
+
+    append_billboard({
+        pos = {1.0,-0.2, 0.0},
+        texture = .Chair_North_Wood_Billboard,
+        mask = .Full_Mask, 
+        })
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
