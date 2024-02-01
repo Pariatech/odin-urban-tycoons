@@ -862,3 +862,13 @@ insert_south_west_north_east_wall :: proc(pos: m.ivec3, wall: Wall) {
 	south_west_north_east_walls[pos] = wall
     draw_diagonal_wall(wall, pos, .South_West_North_East, f32(pos.y * WALL_HEIGHT))
 }
+
+
+rotate_diagonal_walls :: proc() {
+    for pos, wall in north_west_south_east_walls {
+        draw_diagonal_wall(wall, pos, .North_West_South_East, f32(pos.y * WALL_HEIGHT))
+    }
+    for pos, wall in south_west_north_east_walls {
+        draw_diagonal_wall(wall, pos, .South_West_North_East, f32(pos.y * WALL_HEIGHT))
+    }
+}

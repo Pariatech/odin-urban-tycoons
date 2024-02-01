@@ -129,3 +129,9 @@ draw_tile_triangle :: proc(
 		},
 	)
 }
+
+rotate_tile_triangles :: proc() {
+    for pos, tri in north_tile_triangles {
+        // draw_tile_triangle(tri, .North, pos.lights, pos.heights, )
+    }
+}

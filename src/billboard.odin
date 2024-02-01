@@ -23,8 +23,7 @@ load_billboard_mesh :: proc() {
 	fmt.println("Billboard Vertices:", billboard_vertices)
 }
 
-append_billboard :: proc(using billboard: Billboard) {
-	append(&billboards, billboard)
+draw_billboard :: proc(using billboard: Billboard) {
 	transform := glsl.mat4 {
 		-1,
 		0,
@@ -43,6 +42,11 @@ append_billboard :: proc(using billboard: Billboard) {
 		0,
 		1,
 	}
+
+	for v in &billboard_vertices {
+		v.depth_map = 1.0
+	}
+
 	append_draw_component(
 		 {
 			model = transform,
@@ -52,4 +56,15 @@ append_billboard :: proc(using billboard: Billboard) {
 			mask = mask,
 		},
 	)
+}
+
+append_billboard :: proc(using billboard: Billboard) {
+	append(&billboards, billboard)
+    draw_billboard(billboard)
+}
+
+rotate_billboards :: proc() {
+	for billboard in billboards {
+        draw_billboard(billboard)
+	}
 }

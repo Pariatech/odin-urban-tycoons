@@ -468,13 +468,13 @@ init_world :: proc() {
     insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
 
     append_billboard({
-        pos = {1,0, 1},
+        pos = {0,0, 0},
         texture = .Chair_North_Wood_Billboard,
         mask = .Full_Mask, 
         })
 
     append_billboard({
-        pos = {1.1,0.1, 1.1},
+        pos = {0.1,0.1, 0.2},
         texture = .Chair_North_Wood_Billboard,
         mask = .Full_Mask, 
         })
@@ -744,4 +744,7 @@ rotate_world :: proc() {
     rotate_doors()
     rotate_windows()
     rotate_walls()
+    rotate_diagonal_walls()
+    rotate_tile_triangles()
+    rotate_billboards()
 }
