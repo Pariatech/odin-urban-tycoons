@@ -144,6 +144,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 		gl.TEXTURE_2D_ARRAY,
 		1,
 		gl.R16,
+		// gl.RGBA8,
 		TEXTURE_SIZE,
 		TEXTURE_SIZE,
 		textures,
@@ -157,6 +158,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
         fmt.println("channels", channels)
         fmt.println("dimensions:", width, ",", height)
 		defer stbi.image_free(pixels)
+        fmt.println("uh??", pixels[TEXTURE_SIZE * (TEXTURE_SIZE / 2)])
 
 		if pixels == nil {
 			fmt.eprintln("Failed to load texture: ", path)
@@ -199,6 +201,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 			1,
 			gl.RED,
 			gl.UNSIGNED_SHORT,
+			// gl.UNSIGNED_BYTE,
 			pixels,
 		)
 	}

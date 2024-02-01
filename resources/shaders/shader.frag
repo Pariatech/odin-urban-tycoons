@@ -15,18 +15,6 @@ layout(location = 3) out mat4 projection;
 
 layout(location = 0) out vec4 color;
 
-float near = 0.1;
-float far = 100.0;
-float depth_to_linear(float depth) {
-    // return mix(near, far, depth);
-    // return (2.0 * near * far) / (far + near - depth * (far - near));
-    return near * far / (far - depth * (far + near));
-}
-
-float linear_to_depth(float linear_depth) {
-    return (linear_depth - near) / (far - near);
-}
-
 void main() {
     vec4 tex = texture(texture_sampler, texcoord.rgb);
     vec4 mask_tex = texture(texture_sampler, texcoord.rga);
@@ -37,6 +25,7 @@ void main() {
 
     float depth = gl_FragCoord.z;
     float depth_from_map = texture(depth_map_texture_sampler, vec3(texcoord.rg, depth_map)).r;
+    // color = vec4(vec3(depth_from_map), 1);
     depth += depth_from_map;
     gl_FragDepth = depth;
 }

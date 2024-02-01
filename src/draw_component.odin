@@ -9,6 +9,7 @@ Draw_Component :: struct {
     indices: []u32,
     texture: Texture,
     mask: Texture,
+    depth_map: Depth_Map_Texture,
 }
 
 draw_components := [dynamic]Draw_Component{}
@@ -20,6 +21,7 @@ draw :: proc(using component: Draw_Component) {
 		vertex.texcoords.z = f32(component.texture)
 		vertex.texcoords.w = f32(component.mask)
 		vertex.pos = linalg.mul(model, vec4(vertex.pos, 1)).xyz
+        vertex.depth_map = f32(component.depth_map)
 
         append(&world_vertices, vertex)
 	}

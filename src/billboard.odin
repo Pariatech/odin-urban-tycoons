@@ -11,6 +11,7 @@ Billboard :: struct {
 	pos:     glsl.vec3,
 	texture: Texture,
 	mask:    Texture,
+    depth_map: Depth_Map_Texture,
 }
 
 load_billboard_mesh :: proc() {
@@ -43,10 +44,6 @@ draw_billboard :: proc(using billboard: Billboard) {
 		1,
 	}
 
-	for v in &billboard_vertices {
-		v.depth_map = 1.0
-	}
-
 	append_draw_component(
 		 {
 			model = transform,
@@ -54,6 +51,7 @@ draw_billboard :: proc(using billboard: Billboard) {
 			indices = billboard_indices[:],
 			texture = texture,
 			mask = mask,
+            depth_map = depth_map,
 		},
 	)
 }

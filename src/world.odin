@@ -471,18 +471,21 @@ init_world :: proc() {
         pos = {0,0, 0},
         texture = .Chair_North_Wood_Billboard,
         mask = .Full_Mask, 
+        depth_map = .Chair_North,
         })
 
     append_billboard({
         pos = {0.1,0.1, 0.2},
         texture = .Chair_North_Wood_Billboard,
         mask = .Full_Mask, 
+        depth_map = .Chair_North,
         })
 
     append_billboard({
-        pos = {1.0,-0.2, 0.0},
-        texture = .Chair_North_Wood_Billboard,
+        pos = {1.0,-0.1, 0.0},
+        texture = .Chair_South_Wood_Billboard,
         mask = .Full_Mask, 
+        depth_map = .Chair_South,
         })
 }
 
