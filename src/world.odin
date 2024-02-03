@@ -757,3 +757,11 @@ rotate_world :: proc() {
     rotate_tile_triangles()
     rotate_billboards()
 }
+
+draw_world :: proc() {
+    // sort the draw components? 
+    draw_terrain()
+    for draw_component in draw_components {
+        draw(draw_component)
+    }
+}

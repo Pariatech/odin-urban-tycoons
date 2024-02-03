@@ -31,12 +31,12 @@ draw :: proc(using component: Draw_Component) {
     }
 }
 
-draw_world :: proc() {
-    // sort the draw components? 
-    for draw_component in draw_components {
-        draw(draw_component)
-    }
-}
+// draw_world :: proc() {
+//     // sort the draw components? 
+//     for draw_component in draw_components {
+//         draw(draw_component)
+//     }
+// }
 
 append_draw_component :: proc(component: Draw_Component) {
     append(&draw_components, component)

@@ -19,15 +19,6 @@ east_tile_triangles := map[m.ivec3]Tile_Triangle{}
 south_tile_triangles := map[m.ivec3]Tile_Triangle{}
 west_tile_triangles := map[m.ivec3]Tile_Triangle{}
 
-Tile_Triangle_Vertices_Key :: struct {
-	side:    Tile_Triangle_Side,
-	heights: [3]f32,
-	lights: [3]m.vec3,
-}
-
-tile_triangle_vertices := map[Tile_Triangle_Vertices_Key][]Vertex{}
-tile_triangle_indices := []u32{0, 1, 2}
-
 tile_triangle_side_vertices_map := [Tile_Triangle_Side][3]Vertex {
 	.South =  {
 		 {
@@ -106,32 +97,24 @@ draw_tile_triangle :: proc(
 	heights: [3]f32,
 	pos: m.vec2,
 ) {
-	transform := m.mat4Translate({pos.x, 0, pos.y})
-    key := Tile_Triangle_Vertices_Key{side = side, heights = heights, lights = lights}
-	vertices, ok := tile_triangle_vertices[key]
-	if !ok {
-		new_vertices := new_clone(tile_triangle_side_vertices_map[side])
-		for i in 0 ..< len(new_vertices) {
-			new_vertices[i].pos.y += heights[i]
-			new_vertices[i].light = lights[i]
-		}
-        vertices = new_vertices[:]
-        tile_triangle_vertices[key] = vertices
+	index_offset := u32(len(world_vertices))
+
+	vertices := tile_triangle_side_vertices_map[side]
+	for vertex, i in vertices {
+		vertex := vertex
+        vertex.pos.x += pos.x
+        vertex.pos.z += pos.y
+		vertex.pos.y += heights[i]
+		vertex.light = lights[i]
+        vertex.texcoords.z = f32(tri.texture)
+        vertex.texcoords.w = f32(tri.mask_texture)
+		append(&world_vertices, vertex)
 	}
 
-	append_draw_component(
-		 {
-			vertices = vertices,
-			indices = tile_triangle_indices,
-			model = transform,
-			texture = tri.texture,
-			mask = tri.mask_texture,
-		},
+	append(
+		&world_indices,
+		index_offset + 0,
+		index_offset + 1,
+		index_offset + 2,
 	)
-}
-
-rotate_tile_triangles :: proc() {
-    for pos, tri in north_tile_triangles {
-        // draw_tile_triangle(tri, .North, pos.lights, pos.heights, )
-    }
 }

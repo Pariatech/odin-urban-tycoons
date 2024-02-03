@@ -273,3 +273,13 @@ get_tile_height :: proc(x, z: int) -> f32 {
 		terrain_heights[x + 1][z + 1]
 	return total / 4
 }
+
+draw_terrain :: proc() {
+    for x in 0..<WORLD_WIDTH {
+        for z in 0..<WORLD_DEPTH {
+            for side in Tile_Triangle_Side {
+                draw_terrain_tile_triangle(side, x, z)
+            }
+        }
+    }
+}
