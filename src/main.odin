@@ -66,6 +66,15 @@ main :: proc() {
     time.stopwatch_start(&fps_stopwatch)
 	delta_time: f64
 	frames: i64 = 0
+
+	draw_world()
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(world_vertices) * size_of(Vertex),
+		raw_data(world_vertices),
+		gl.STATIC_DRAW,
+	)
+
 	for !should_close {
 		previous_time_ns = current_time_ns
 		current_time_ns = time.now()
@@ -84,7 +93,6 @@ main :: proc() {
 
 		update_camera(delta_time)
 
-		draw_world()
 
 		end_draw()
 
