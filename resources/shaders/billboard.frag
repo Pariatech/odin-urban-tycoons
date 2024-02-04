@@ -5,7 +5,7 @@ uniform sampler2DArray depth_map_texture_sampler;
 
 layout(location = 0) in vec3 light;
 layout(location = 1) in vec3 texcoord;
-layout(location = 3) in float depth_map;
+layout(location = 2) in float depth_map;
 
 layout(location = 0) out vec4 color;
 
@@ -15,6 +15,7 @@ void main() {
         discard;
     }
     color = vec4(light * tex.rgb, tex.a);
+    // color = vec4(1);
 
     float depth = gl_FragCoord.z;
     float depth_from_map = texture(depth_map_texture_sampler, vec3(texcoord.rg, depth_map)).r;

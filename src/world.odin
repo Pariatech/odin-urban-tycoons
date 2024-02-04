@@ -467,13 +467,13 @@ init_world :: proc() {
     insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
     insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
 
-    // append_billboard({
-    //     pos = {0,0, 0},
-    //     texture = .Chair_North_Wood_Billboard,
-    //     mask = .Full_Mask, 
-    //     depth_map = .Chair_North,
-    //     })
-    //
+    append_billboard({
+        position = {0,0, 0},
+        light = {1,1, 1},
+        texture = .Chair_North_Wood,
+        depth_map = .Chair_North,
+        })
+
     // append_billboard({
     //     pos = {0.1,0.1, 0.2},
     //     texture = .Chair_North_Wood_Billboard,

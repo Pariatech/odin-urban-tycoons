@@ -9,8 +9,6 @@ layout(binding = 2) uniform UniformBufferObject {
 
 layout(location = 0) in vec3 light;
 layout(location = 1) in vec4 texcoord;
-layout(location = 2) in float depth_map;
-layout(location = 3) out mat4 projection;
 
 layout(location = 0) out vec4 color;
 

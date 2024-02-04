@@ -312,28 +312,6 @@ begin_draw :: proc() {
 }
 
 end_draw :: proc() {
-	gl.BindVertexArray(vao)
-	gl.UseProgram(shader_program)
-	// gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-    gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-
-    uniform_object.view = camera_view
-    uniform_object.proj = camera_proj
-	gl.BufferSubData(
-		gl.UNIFORM_BUFFER,
-		0,
-		size_of(Uniform_Object),
-		&uniform_object,
-	)
-
-	gl.DrawElements(
-		gl.TRIANGLES,
-		i32(len(world_indices)),
-		gl.UNSIGNED_INT,
-		raw_data(world_indices),
-	)
-
 	glfw.SwapBuffers(window_handle)
 
 	gl_error := gl.GetError()
