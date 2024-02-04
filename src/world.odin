@@ -457,36 +457,45 @@ init_world :: proc() {
 	insert_wall_door(.East_West, {2, 0, 2}, {model = .Wood})
 	insert_wall_door(.North_South, {2, 0, 2}, {model = .Wood})
 
-    insert_table({4, 0, 4}, {model = .Six_Places, texture = .Table_6Places_Wood})
-    insert_chair({4, 0, 6}, {model = .Wood, orientation = .South})
-    insert_chair({4, 0, 3}, {model = .Wood, orientation = .North})
+	insert_table(
+		{4, 0, 4},
+		{model = .Six_Places, texture = .Table_6Places_Wood},
+	)
+	insert_chair({4, 0, 6}, {model = .Wood, orientation = .South})
+	insert_chair({4, 0, 3}, {model = .Wood, orientation = .North})
 
-    insert_chair({3, 0, 5}, {model = .Wood, orientation = .East})
-    insert_chair({3, 0, 4}, {model = .Wood, orientation = .East})
+	insert_chair({3, 0, 5}, {model = .Wood, orientation = .East})
+	insert_chair({3, 0, 4}, {model = .Wood, orientation = .East})
 
-    insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
-    insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
+	insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
+	insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
 
-    append_billboard({
-        position = {0,0, 0},
-        light = {1,1, 1},
-        texture = .Chair_North_Wood,
-        depth_map = .Chair_North,
-        })
+	append_billboard(
+		 {
+			position = {0, 0, 0},
+			light = {1, 1, 1},
+			texture = .Chair_North_Wood,
+			depth_map = .Chair_North,
+		},
+	)
 
-    // append_billboard({
-    //     pos = {0.1,0.1, 0.2},
-    //     texture = .Chair_North_Wood_Billboard,
-    //     mask = .Full_Mask, 
-    //     depth_map = .Chair_North,
-    //     })
-    //
-    // append_billboard({
-    //     pos = {1.0,-0.1, 0.0},
-    //     texture = .Chair_South_Wood_Billboard,
-    //     mask = .Full_Mask, 
-    //     depth_map = .Chair_South,
-    //     })
+	append_billboard(
+		 {
+			position = {0.1, 0.1, 0.2},
+			light = {1, 1, 1},
+			texture = .Chair_North_Wood,
+			depth_map = .Chair_North,
+		},
+	)
+
+	append_billboard(
+		 {
+			position = {1.0, -0.1, 0.0},
+			light = {1, 1, 1},
+			texture = .Chair_South_Wood,
+			depth_map = .Chair_South,
+		},
+	)
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
@@ -588,12 +597,12 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			{texture = .Medium_Window_Wood},
 		)
 	} else {
-	    insert_wall_door(
+		insert_wall_door(
 			.North_South,
 			{house_x + 1, floor, house_z + 5},
-            {model = .Wood},
-            )
-    }
+			{model = .Wood},
+		)
+	}
 
 	insert_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
@@ -747,20 +756,20 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 }
 
 rotate_world :: proc() {
-    clear_draw_components()
-    rotate_chairs()
-    rotate_tables()
-    rotate_doors()
-    rotate_windows()
-    rotate_walls()
-    rotate_diagonal_walls()
-    rotate_billboards()
+	clear_draw_components()
+	rotate_chairs()
+	rotate_tables()
+	rotate_doors()
+	rotate_windows()
+	rotate_walls()
+	rotate_diagonal_walls()
+	rotate_billboards()
 }
 
 draw_world :: proc() {
-    // sort the draw components? 
-    draw_terrain()
-    for draw_component in draw_components {
-        draw(draw_component)
-    }
+	// sort the draw components? 
+	draw_terrain()
+	for draw_component in draw_components {
+		draw(draw_component)
+	}
 }

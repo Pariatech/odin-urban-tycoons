@@ -248,7 +248,7 @@ draw_billboards :: proc() {
 	billboard_system.uniform_object.proj = camera_proj
 	billboard_system.uniform_object.rotation = glsl.mat4Rotate(
 		{0, 1, 0},
-		glsl.radians_f32(f32(camera_rotation) * 90.0),
+		glsl.radians_f32(f32(camera_rotation) * -90.0),
 	)
 	gl.BufferData(
 		gl.UNIFORM_BUFFER,
