@@ -148,10 +148,11 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 		&billboard_system.indices,
 	) or_return
 
+	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
+    gl.UseProgram(0)
 
     return true
 }
