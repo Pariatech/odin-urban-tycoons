@@ -28,7 +28,7 @@ void main() {
 
     frag_light = light;
 
-    float final_rotation = int(rotation + ubo.camera_rotation) % 4;
+    float final_rotation = (int(texture) % 2 * 2 + int(rotation + ubo.camera_rotation)) % 4;
     frag_texcoord = texcoord;
     if ((uint(final_rotation) % 2) == 1) {
         frag_texcoord.x = 1 - frag_texcoord.x;

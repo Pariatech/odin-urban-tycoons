@@ -535,6 +535,45 @@ init_world :: proc() {
             rotation = 3,
 		},
 	)
+
+	append_billboard(
+		 {
+			position = {0.0, 0.0, 1.0},
+			light = {1, 1, 1},
+			texture = .Chair_South_Wood,
+			depth_map = .Chair_South,
+		},
+	)
+
+	append_billboard(
+		 {
+			position = {1.0, 0.0, 1.0},
+			light = {1, 1, 1},
+			texture = .Chair_South_Wood,
+			depth_map = .Chair_South,
+            rotation = 1,
+		},
+	)
+
+	append_billboard(
+		 {
+			position = {2.0, 0.0, 1.0},
+			light = {1, 1, 1},
+			texture = .Chair_South_Wood,
+			depth_map = .Chair_South,
+            rotation = 2,
+		},
+	)
+
+	append_billboard(
+		 {
+			position = {3.0, 0.0, 1.0},
+			light = {1, 1, 1},
+			texture = .Chair_South_Wood,
+			depth_map = .Chair_South,
+            rotation = 3,
+		},
+	)
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
@@ -802,7 +841,6 @@ rotate_world :: proc() {
 	rotate_windows()
 	rotate_walls()
 	rotate_diagonal_walls()
-	rotate_billboards()
 }
 
 draw_world :: proc() {

@@ -279,48 +279,9 @@ draw_billboards :: proc() {
 	gl.BindVertexArray(0)
 }
 
-draw_billboard :: proc(using billboard: Billboard_Instance) {
-	transform := glsl.mat4 {
-		-1,
-		0,
-		0,
-		position.x,
-		0,
-		1,
-		0,
-		position.y,
-		0,
-		0,
-		1,
-		position.z,
-		0,
-		0,
-		0,
-		1,
-	}
-
-	// append_draw_component(
-	// 	 {
-	// 		model = transform,
-	// 		vertices = billboard_system.vertices[:],
-	// 		indices = billboard_system.indices[:],
-	// 		texture = texture,
-	// 		mask = mask,
-	// 		depth_map = depth_map,
-	// 	},
-	// )
-}
-
 append_billboard :: proc(using billboard: Billboard_Instance) {
 	append(&billboard_system.instances, billboard)
 	billboard_system.dirty = true
-	// draw_billboard(billboard)
-}
-
-rotate_billboards :: proc() {
-	for billboard in billboard_system.instances {
-		draw_billboard(billboard)
-	}
 }
 
 load_billboard_model :: proc() -> (ok: bool = false) {
