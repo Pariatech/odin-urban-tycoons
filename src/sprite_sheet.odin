@@ -23,10 +23,6 @@ Texture :: enum {
 	Medium_Window_Wood,
 	Door_Wood,
 	Table_6Places_Wood,
-	Chair_North_Wood,
-	Chair_South_Wood,
-	// Chair_North_Wood_Billboard,
-	// Chair_South_Wood_Billboard,
 }
 
 texture_paths :: [Texture]cstring {
@@ -52,8 +48,4 @@ texture_paths :: [Texture]cstring {
 	.Medium_Window_Wood         = "resources/textures/wood-window.png",
 	.Door_Wood                  = "resources/textures/door-wood.png",
 	.Table_6Places_Wood         = "resources/textures/table-2-places-wood.png",
-	.Chair_North_Wood           = "resources/textures/chair/north-wood.png",
-	.Chair_South_Wood           = "resources/textures/chair/south-wood.png",
-	// .Chair_North_Wood_Billboard = "resources/textures/chair-north-diffuse.png",
-	// .Chair_South_Wood_Billboard = "resources/textures/chair-south-diffuse.png",
 }

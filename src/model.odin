@@ -40,6 +40,8 @@ load_model :: proc(
 	model_path: cstring,
 	model_vertices: ^[$E]Vertex,
 	model_indices: ^[$O]u32,
+) -> (
+	ok: bool = false,
 ) {
 	options: cgltf.options
 	data, result := cgltf.parse_file(options, model_path)
@@ -95,17 +97,22 @@ load_model :: proc(
 			}
 		}
 	}
+
+	return true
 }
 
 load_models :: proc(
 	paths: [$T]cstring,
 	vertices: ^[T][$E]Vertex,
 	indices: ^[T][$O]u32,
+) -> (
+	ok: bool = false,
 ) {
 	for model_path, model in paths {
 		model_vertices := &vertices[model]
 		model_indices := &indices[model]
-		load_model(model_path, model_vertices, model_indices)
+		load_model(model_path, model_vertices, model_indices) or_return
 	}
 
+	return true
 }

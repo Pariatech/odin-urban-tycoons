@@ -36,7 +36,7 @@ load_chair_models :: proc() {
 	load_model(CHAIR_SOUTH_PATH, &chair_south_vertices, &chair_south_indices)
 }
 
-CHAIR_TEXTURE_MAP :: [Chair_Model][Chair_Orientation]Texture {
+CHAIR_TEXTURE_MAP :: [Chair_Model][Chair_Orientation]Billboard_Texture {
 	.Wood =  {
 		.South = .Chair_South_Wood,
 		.West = .Chair_South_Wood,
@@ -114,14 +114,14 @@ draw_chair_mesh :: proc(
 	transform := m.mat4Translate(position)
 	transform *= chair_transform_map[camera_rotation][orientation]
 
-	append_draw_component(
-		 {
-			vertices = vertices[:],
-			indices = indices[:],
-			model = transform,
-			texture = texture,
-		},
-	)
+	// append_draw_component(
+	// 	 {
+	// 		vertices = vertices[:],
+	// 		indices = indices[:],
+	// 		model = transform,
+	// 		texture = texture,
+	// 	},
+	// )
 }
 
 draw_chair :: proc(chair: Chair, pos: m.ivec3, y: f32) {

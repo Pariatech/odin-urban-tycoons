@@ -1,12 +1,12 @@
 package main
 
 import "core:fmt"
+import m "core:math/linalg/glsl"
 import "core:os"
 import "core:runtime"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"
-import m "core:math/linalg/glsl"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
@@ -30,7 +30,7 @@ Vertex :: struct {
 	pos:       m.vec3,
 	light:     m.vec3,
 	texcoords: m.vec4,
-    depth_map: f32,
+	depth_map: f32,
 }
 
 gl_debug_callback :: proc "c" (
@@ -139,7 +139,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-    fmt.println("depth map TexStorage3D")
+	fmt.println("depth map TexStorage3D")
 	gl.TexStorage3D(
 		gl.TEXTURE_2D_ARRAY,
 		1,
@@ -153,12 +153,12 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	for path, i in DEPTH_MAP_TEXTURE_PATHS {
 		width: i32
 		height: i32
-        channels: i32
+		channels: i32
 		pixels := stbi.load_16(path, &width, &height, &channels, 1)
-        fmt.println("channels", channels)
-        fmt.println("dimensions:", width, ",", height)
+		fmt.println("channels", channels)
+		fmt.println("dimensions:", width, ",", height)
 		defer stbi.image_free(pixels)
-        fmt.println("uh??", pixels[TEXTURE_SIZE * (TEXTURE_SIZE / 2)])
+		fmt.println("uh??", pixels[TEXTURE_SIZE * (TEXTURE_SIZE / 2)])
 
 		if pixels == nil {
 			fmt.eprintln("Failed to load texture: ", path)
@@ -189,7 +189,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 			return false
 		}
 
-        fmt.println("TexSubImage3D")
+		fmt.println("TexSubImage3D")
 		gl.TexSubImage3D(
 			gl.TEXTURE_2D_ARRAY,
 			0,
@@ -209,7 +209,7 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	gl_error := gl.GetError()
 	if (gl_error != gl.NO_ERROR) {
 		fmt.println("Error loading depth map texture array: ", gl_error)
-        return false
+		return false
 	}
 
 	return
@@ -239,7 +239,7 @@ load_shader :: proc(
 		gl.GetShaderInfoLog(shader, 512, nil, raw_data(&info_log))
 		fmt.println(
 			"ERROR::SHADER::",
-			shader_type,
+			pathname,
 			"::COMPILATION_FAILED: ",
 			string(info_log[:]),
 		)
@@ -249,33 +249,39 @@ load_shader :: proc(
 	return
 }
 
-load_shader_program :: proc() -> (ok: bool = true) {
-	shader_program = gl.CreateProgram()
+load_shader_program :: proc(
+	shader_program: ^u32,
+	vertex_shader_pathname: string,
+	fragment_shader_pathname: string,
+) -> (
+	ok: bool = true,
+) {
+	shader_program^ = gl.CreateProgram()
 	vertex_shader := load_shader(
-		VERTEX_SHADER_PATH,
+		vertex_shader_pathname,
 		gl.VERTEX_SHADER,
 	) or_return
 	fragment_shader := load_shader(
-		FRAGMENT_SHADER_PATH,
+		fragment_shader_pathname,
 		gl.FRAGMENT_SHADER,
 	) or_return
 
-	gl.AttachShader(shader_program, vertex_shader)
-	gl.AttachShader(shader_program, fragment_shader)
-	gl.LinkProgram(shader_program)
+	gl.AttachShader(shader_program^, vertex_shader)
+	gl.AttachShader(shader_program^, fragment_shader)
+	gl.LinkProgram(shader_program^)
 
 	success: i32
 	info_log: [512]u8
-	gl.GetProgramiv(shader_program, gl.LINK_STATUS, &success)
+	gl.GetProgramiv(shader_program^, gl.LINK_STATUS, &success)
 	if success == 0 {
-		gl.GetProgramInfoLog(shader_program, 512, nil, raw_data(&info_log))
+		gl.GetProgramInfoLog(shader_program^, 512, nil, raw_data(&info_log))
 		fmt.println("ERROR::LINKING::SHADER::PROGRAM\n", string(info_log[:]))
 		return false
 	}
 
 	gl.DeleteShader(vertex_shader)
 	gl.DeleteShader(fragment_shader)
-	gl.UseProgram(shader_program)
+	gl.UseProgram(shader_program^)
 	return
 }
 
@@ -285,9 +291,9 @@ init_renderer :: proc() -> (ok: bool = true) {
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.DebugMessageCallback(gl_debug_callback, nil)
 
-    gl.Enable(gl.DEPTH_TEST)
-    gl.DepthFunc(gl.LEQUAL)
-    // gl.DepthFunc(gl.ALWAYS)
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+	// gl.DepthFunc(gl.ALWAYS)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendEquation(gl.FUNC_ADD)
@@ -297,22 +303,22 @@ init_renderer :: proc() -> (ok: bool = true) {
 	gl.GenTextures(1, &texture_array)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	load_texture_array() or_return
-    // gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
+	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.GenTextures(1, &depth_map_texture_array)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
-    load_depth_map_texture_array() or_return
-    // gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
+	load_depth_map_texture_array() or_return
+	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 	// gl.ActiveTexture(gl.TEXTURE1)
 
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
+
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 
 	gl.GenBuffers(1, &ubo)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
@@ -364,10 +370,22 @@ init_renderer :: proc() -> (ok: bool = true) {
 	)
 	gl.EnableVertexAttribArray(3)
 
-	load_shader_program() or_return
+	load_shader_program(
+		&shader_program,
+		VERTEX_SHADER_PATH,
+		FRAGMENT_SHADER_PATH,
+	) or_return
 
-    gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
-    gl.Uniform1i(gl.GetUniformLocation(shader_program, "depth_map_texture_sampler"), 1)
+	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
+	gl.Uniform1i(
+		gl.GetUniformLocation(shader_program, "depth_map_texture_sampler"),
+		1,
+	)
+
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+	// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	return
 }
@@ -396,6 +414,12 @@ begin_draw :: proc() {
 }
 
 end_draw :: proc() {
+	gl.BindVertexArray(vao)
+    // fmt.println("shader program:", shader_program)
+	gl.UseProgram(shader_program)
+	// gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+    gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 
 	gl.BufferSubData(
 		gl.UNIFORM_BUFFER,
@@ -422,7 +446,12 @@ end_draw :: proc() {
 draw_triangle :: proc(v0, v1, v2: Vertex) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, v0, v1, v2)
-	append(&world_indices, index_offset + 0, index_offset + 1, index_offset + 2)
+	append(
+		&world_indices,
+		index_offset + 0,
+		index_offset + 1,
+		index_offset + 2,
+	)
 }
 
 draw_quad :: proc(v0, v1, v2, v3: Vertex) {
@@ -441,8 +470,8 @@ draw_quad :: proc(v0, v1, v2, v3: Vertex) {
 
 draw_mesh :: proc(verts: []Vertex, idxs: []u32) {
 	index_offset := u32(len(world_vertices))
-    append(&world_vertices, ..verts)
-    for idx in idxs {
-        append(&world_indices, idx + index_offset)
-    }
+	append(&world_vertices, ..verts)
+	for idx in idxs {
+		append(&world_indices, idx + index_offset)
+	}
 }

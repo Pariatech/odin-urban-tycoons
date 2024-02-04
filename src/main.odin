@@ -51,11 +51,12 @@ main :: proc() {
 	init_keyboard()
     init_cursor()
 
-    load_billboard_mesh()
     load_wall_door_models()
     load_wall_window_mesh()
     load_table_models()
     load_chair_models()
+
+    init_billboard_system()
     init_terrain()
 	init_world()
 
@@ -68,12 +69,14 @@ main :: proc() {
 	frames: i64 = 0
 
 	draw_world()
+    gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
 		len(world_vertices) * size_of(Vertex),
 		raw_data(world_vertices),
 		gl.STATIC_DRAW,
 	)
+    gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	for !should_close {
 		previous_time_ns = current_time_ns
