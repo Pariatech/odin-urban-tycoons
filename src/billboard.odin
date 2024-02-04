@@ -124,7 +124,6 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 		size_of(Billboard_Vertex),
 		offset_of(Billboard_Vertex, pos),
 	)
-	// gl.VertexAttribDivisor(0, 0)
 
 	gl.EnableVertexAttribArray(1)
 	gl.VertexAttribPointer(
@@ -135,58 +134,8 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 		size_of(Billboard_Vertex),
 		offset_of(Billboard_Vertex, texcoords),
 	)
-	// gl.VertexAttribDivisor(1, 0)
-
-	load_shader_program(
-		&billboard_system.shader_program,
-		BILLBOARD_VERTEX_SHADER_PATH,
-		BILLBOARD_FRAGMENT_SHADER_PATH,
-	) or_return
-
-
-	gl.Uniform1i(
-		gl.GetUniformLocation(
-			billboard_system.shader_program,
-			"texture_sampler",
-		),
-		0,
-	)
-	gl.Uniform1i(
-		gl.GetUniformLocation(
-			billboard_system.shader_program,
-			"depth_map_texture_sampler",
-		),
-		1,
-	)
-
-	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	gl.UseProgram(0)
-
-	return true
-}
-
-draw_billboards :: proc() {
-	if len(billboard_system.instances) == 0 do return
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
-	if billboard_system.dirty {
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			len(billboard_system.instances) * size_of(Billboard_Instance),
-			raw_data(billboard_system.instances),
-			gl.STATIC_DRAW,
-		)
-		billboard_system.dirty = false
-		// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	}
-
-	gl.UseProgram(billboard_system.shader_program)
-	gl.BindVertexArray(billboard_system.vao)
-
-	// gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
 
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointer(
@@ -233,7 +182,53 @@ draw_billboards :: proc() {
 	gl.VertexAttribDivisor(4, 1)
 	gl.VertexAttribDivisor(5, 1)
 
-	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_system.ubo)
+	load_shader_program(
+		&billboard_system.shader_program,
+		BILLBOARD_VERTEX_SHADER_PATH,
+		BILLBOARD_FRAGMENT_SHADER_PATH,
+	) or_return
+
+
+	gl.Uniform1i(
+		gl.GetUniformLocation(
+			billboard_system.shader_program,
+			"texture_sampler",
+		),
+		0,
+	)
+	gl.Uniform1i(
+		gl.GetUniformLocation(
+			billboard_system.shader_program,
+			"depth_map_texture_sampler",
+		),
+		1,
+	)
+
+	gl.BindVertexArray(0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.UseProgram(0)
+
+	return true
+}
+
+draw_billboards :: proc() {
+	if len(billboard_system.instances) == 0 do return
+
+	if billboard_system.dirty {
+	    gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(billboard_system.instances) * size_of(Billboard_Instance),
+			raw_data(billboard_system.instances),
+			gl.STATIC_DRAW,
+		)
+		billboard_system.dirty = false
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	}
+
+	gl.UseProgram(billboard_system.shader_program)
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_system.texture_array)
@@ -244,6 +239,7 @@ draw_billboards :: proc() {
 		billboard_system.depth_map_texture_array,
 	)
 
+	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_system.ubo)
 	billboard_system.uniform_object.view = camera_view
 	billboard_system.uniform_object.proj = camera_proj
 	billboard_system.uniform_object.rotation = glsl.mat4Rotate(
@@ -256,7 +252,9 @@ draw_billboards :: proc() {
 		&billboard_system.uniform_object,
 		gl.STATIC_DRAW,
 	)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 
+	gl.BindVertexArray(billboard_system.vao)
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,
 		i32(len(billboard_system.indices)),
@@ -264,19 +262,7 @@ draw_billboards :: proc() {
 		nil,
 		i32(len(billboard_system.instances)),
 	)
-
-	// gl.DrawElements(
-	// 	gl.TRIANGLES,
-	// 	i32(len(billboard_system.indices)),
-	// 	gl.UNSIGNED_BYTE,
-	// 	&billboard_system.indices,
-	// )
-
 	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	gl.UseProgram(0)
 }
 
 draw_billboard :: proc(using billboard: Billboard_Instance) {
