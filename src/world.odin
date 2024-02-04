@@ -470,9 +470,36 @@ init_world :: proc() {
 	insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
 	insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
 
+	// append_billboard(
+	// 	 {
+	// 		position = {0, 0, 0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_North_Wood,
+	// 		depth_map = .Chair_North,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {0.1, 0.1, 0.2},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_North_Wood,
+	// 		depth_map = .Chair_North,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {1.0, -0.1, 0.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_South_Wood,
+	// 		depth_map = .Chair_South,
+	// 	},
+	// )
+
 	append_billboard(
 		 {
-			position = {0, 0, 0},
+			position = {0.0, 0.0, 0.0},
 			light = {1, 1, 1},
 			texture = .Chair_North_Wood,
 			depth_map = .Chair_North,
@@ -481,19 +508,31 @@ init_world :: proc() {
 
 	append_billboard(
 		 {
-			position = {0.1, 0.1, 0.2},
+			position = {1.0, 0.0, 0.0},
 			light = {1, 1, 1},
 			texture = .Chair_North_Wood,
 			depth_map = .Chair_North,
+            rotation = 1,
 		},
 	)
 
 	append_billboard(
 		 {
-			position = {1.0, -0.1, 0.0},
+			position = {2.0, 0.0, 0.0},
 			light = {1, 1, 1},
-			texture = .Chair_South_Wood,
-			depth_map = .Chair_South,
+			texture = .Chair_North_Wood,
+			depth_map = .Chair_North,
+            rotation = 2,
+		},
+	)
+
+	append_billboard(
+		 {
+			position = {3.0, 0.0, 0.0},
+			light = {1, 1, 1},
+			texture = .Chair_North_Wood,
+			depth_map = .Chair_North,
+            rotation = 3,
 		},
 	)
 }

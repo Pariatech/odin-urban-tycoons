@@ -32,6 +32,7 @@ Billboard_Instance :: struct {
 	light:     glsl.vec3,
 	texture:   Billboard_Texture,
 	depth_map: Billboard_Depth_Map_Texture,
+	rotation:  u8,
 }
 
 Billboard_Vertex :: struct {
@@ -41,6 +42,7 @@ Billboard_Vertex :: struct {
 
 Billboard_Uniform_Object :: struct {
 	proj, view, rotation: glsl.mat4,
+    camera_rotation: u32,
 }
 
 Billboard_Texture :: enum u8 {
@@ -177,10 +179,21 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 		offset_of(Billboard_Instance, depth_map),
 	)
 
+	gl.EnableVertexAttribArray(6)
+	gl.VertexAttribPointer(
+		6,
+		1,
+		gl.UNSIGNED_BYTE,
+		gl.FALSE,
+		size_of(Billboard_Instance),
+		offset_of(Billboard_Instance, rotation),
+	)
+
 	gl.VertexAttribDivisor(2, 1)
 	gl.VertexAttribDivisor(3, 1)
 	gl.VertexAttribDivisor(4, 1)
 	gl.VertexAttribDivisor(5, 1)
+	gl.VertexAttribDivisor(6, 1)
 
 	load_shader_program(
 		&billboard_system.shader_program,
@@ -217,7 +230,7 @@ draw_billboards :: proc() {
 	if len(billboard_system.instances) == 0 do return
 
 	if billboard_system.dirty {
-	    gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(billboard_system.instances) * size_of(Billboard_Instance),
@@ -246,6 +259,7 @@ draw_billboards :: proc() {
 		{0, 1, 0},
 		glsl.radians_f32(f32(camera_rotation) * -90.0),
 	)
+    billboard_system.uniform_object.camera_rotation = u32(camera_rotation)
 	gl.BufferData(
 		gl.UNIFORM_BUFFER,
 		size_of(Billboard_Uniform_Object),
