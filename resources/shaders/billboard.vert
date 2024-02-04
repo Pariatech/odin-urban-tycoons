@@ -20,7 +20,9 @@ layout(location = 2) out float frag_texture;
 layout(location = 3) out float frag_depth_map;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * ubo.rotation * vec4(pos + instance_pos, 1.0);
+    vec4 rotated_pos = ubo.rotation * vec4(pos, 1.0);
+    vec4 translated_pos = rotated_pos + vec4(instance_pos, 0.0);
+    gl_Position = ubo.proj * ubo.view * translated_pos;
     frag_light = light;
     frag_texcoord = vec3(texcoord, texture);
     frag_depth_map = depth_map;

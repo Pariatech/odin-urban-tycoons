@@ -14,6 +14,8 @@ camera_position: m.vec3
 camera_rotation: Camera_Rotation
 camera_distance := f32(20)
 camera_translate := m.vec3{-camera_distance, camera_distance, -camera_distance}
+camera_view: m.mat4
+camera_proj: m.mat4
 
 Camera_Rotation :: enum {
 	South_West,
@@ -59,7 +61,7 @@ update_camera :: proc(delta_time: f64) {
 	camera_zoom -= cursor_scroll.y * CAMERA_ZOOM_SPEED
 	camera_zoom = math.clamp(camera_zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
 
-	uniform_object.view = m.mat4LookAt(
+	camera_view = m.mat4LookAt(
 		camera_position + camera_translate,
 		camera_position,
 		{0, 1, 0},
@@ -68,7 +70,7 @@ update_camera :: proc(delta_time: f64) {
 	aspect_ratio := f32(height) / f32(width)
 	scale := f32(width) / TEXTURE_SIZE
 	zoom := 1 / zoom_scale
-	uniform_object.proj = m.mat4Ortho3d(
+	camera_proj = m.mat4Ortho3d(
 		1 / zoom * scale,
 		-1 / zoom * scale,
 		-aspect_ratio / zoom * scale,

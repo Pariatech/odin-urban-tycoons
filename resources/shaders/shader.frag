@@ -1,7 +1,6 @@
 #version 450
 
 uniform sampler2DArray texture_sampler;
-uniform sampler2DArray depth_map_texture_sampler;
 
 layout(binding = 2) uniform UniformBufferObject {
     mat4 proj;
@@ -22,10 +21,4 @@ void main() {
         discard;
     }
     color = vec4(light * tex.rgb * mask_tex.rgb, tex.a * mask_tex.a);
-
-    float depth = gl_FragCoord.z;
-    float depth_from_map = texture(depth_map_texture_sampler, vec3(texcoord.rg, depth_map)).r;
-    // color = vec4(vec3(depth_from_map), 1);
-    depth += depth_from_map;
-    gl_FragDepth = depth;
 }

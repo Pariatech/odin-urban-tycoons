@@ -15,7 +15,6 @@ VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
 texture_array: u32
-depth_map_texture_array: u32
 vbo, vao, ubo: u32
 shader_program: u32
 world_vertices: [dynamic]Vertex
@@ -122,98 +121,6 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	return
 }
 
-load_depth_map_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
-
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-	textures :: len(DEPTH_MAP_TEXTURE_PATHS)
-
-	if (textures == 0) {
-		fmt.println("No textures to load.")
-		return true
-	}
-
-	stbi.set_flip_vertically_on_load(0)
-	stbi.set_flip_vertically_on_load_thread(false)
-
-	fmt.println("depth map TexStorage3D")
-	gl.TexStorage3D(
-		gl.TEXTURE_2D_ARRAY,
-		1,
-		gl.R16,
-		// gl.RGBA8,
-		TEXTURE_SIZE,
-		TEXTURE_SIZE,
-		textures,
-	)
-
-	for path, i in DEPTH_MAP_TEXTURE_PATHS {
-		width: i32
-		height: i32
-		channels: i32
-		pixels := stbi.load_16(path, &width, &height, &channels, 1)
-		fmt.println("channels", channels)
-		fmt.println("dimensions:", width, ",", height)
-		defer stbi.image_free(pixels)
-		fmt.println("uh??", pixels[TEXTURE_SIZE * (TEXTURE_SIZE / 2)])
-
-		if pixels == nil {
-			fmt.eprintln("Failed to load texture: ", path)
-			return false
-		}
-
-		if width != TEXTURE_SIZE {
-			fmt.eprintln(
-				"Texture: ",
-				path,
-				" is of a different width. expected: ",
-				TEXTURE_SIZE,
-				" got: ",
-				width,
-			)
-			return false
-		}
-
-		if height != TEXTURE_SIZE {
-			fmt.eprintln(
-				"Texture: ",
-				path,
-				" is of a different height. expected: ",
-				TEXTURE_SIZE,
-				" got: ",
-				height,
-			)
-			return false
-		}
-
-		fmt.println("TexSubImage3D")
-		gl.TexSubImage3D(
-			gl.TEXTURE_2D_ARRAY,
-			0,
-			0,
-			0,
-			i32(i),
-			TEXTURE_SIZE,
-			TEXTURE_SIZE,
-			1,
-			gl.RED,
-			gl.UNSIGNED_SHORT,
-			// gl.UNSIGNED_BYTE,
-			pixels,
-		)
-	}
-
-	gl_error := gl.GetError()
-	if (gl_error != gl.NO_ERROR) {
-		fmt.println("Error loading depth map texture array: ", gl_error)
-		return false
-	}
-
-	return
-}
 
 load_shader :: proc(
 	pathname: string,
@@ -305,10 +212,6 @@ init_renderer :: proc() -> (ok: bool = true) {
 	load_texture_array() or_return
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.GenTextures(1, &depth_map_texture_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
-	load_depth_map_texture_array() or_return
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
@@ -376,11 +279,6 @@ init_renderer :: proc() -> (ok: bool = true) {
 		FRAGMENT_SHADER_PATH,
 	) or_return
 
-	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
-	gl.Uniform1i(
-		gl.GetUniformLocation(shader_program, "depth_map_texture_sampler"),
-		1,
-	)
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
@@ -415,12 +313,13 @@ begin_draw :: proc() {
 
 end_draw :: proc() {
 	gl.BindVertexArray(vao)
-    // fmt.println("shader program:", shader_program)
 	gl.UseProgram(shader_program)
 	// gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
     gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 
+    uniform_object.view = camera_view
+    uniform_object.proj = camera_proj
 	gl.BufferSubData(
 		gl.UNIFORM_BUFFER,
 		0,
