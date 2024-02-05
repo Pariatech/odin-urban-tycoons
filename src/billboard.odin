@@ -48,21 +48,29 @@ Billboard_Uniform_Object :: struct {
 Billboard_Texture :: enum u8 {
 	Chair_North_Wood,
 	Chair_South_Wood,
+    Table_South_Wood,
+    Table_North_Wood,
 }
 
 BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Chair_North_Wood = "resources/textures/chair-north-diffuse.png",
 	.Chair_South_Wood = "resources/textures/chair-south-diffuse.png",
+    .Table_South_Wood = "resources/textures/billboards/table-6places-wood/south-diffuse.png",
+    .Table_North_Wood = "resources/textures/billboards/table-6places-wood/north-diffuse.png",
 }
 
 Billboard_Depth_Map_Texture :: enum u8 {
 	Chair_North,
 	Chair_South,
+    Table_South_Wood,
+    Table_North_Wood,
 }
 
 BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Depth_Map_Texture]cstring {
 	.Chair_North = "resources/textures/chair-north-depth-map.png",
 	.Chair_South = "resources/textures/chair-south-depth-map.png",
+    .Table_South_Wood = "resources/textures/billboards/table-6places-wood/south-depth-map.png",
+    .Table_North_Wood = "resources/textures/billboards/table-6places-wood/north-depth-map.png",
 }
 
 init_billboard_system :: proc() -> (ok: bool = false) {
@@ -434,6 +442,9 @@ load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
 load_billboard_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	textures :: len(BILLBOARD_TEXTURE_PATHS)
 
