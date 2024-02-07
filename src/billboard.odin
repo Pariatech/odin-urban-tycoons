@@ -10,8 +10,11 @@ import stbi "vendor:stb/image"
 BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
 BILLBOARD_MODEL_PATH :: "resources/models/billboard.glb"
+FOUR_TILES_BILLBOARD_MODEL_PATH :: "resources/models/4tiles-billboard.glb"
 BILLBOARD_TEXTURE_WIDTH :: 256
 BILLBOARD_TEXTURE_HEIGHT :: 512
+FOUR_TILES_BILLBOARD_TEXTURE_WIDTH :: 512
+FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT :: 1024
 
 Billboard_System :: struct {
 	indices:                 [6]u8,
@@ -26,12 +29,29 @@ Billboard_System :: struct {
 }
 
 billboard_system: Billboard_System
+four_tiles_billboard_system: Billboard_System
 
 Billboard_Instance :: struct {
 	position:  glsl.vec3,
 	light:     glsl.vec3,
+	texture:   f32,
+	depth_map: f32,
+	rotation:  u8,
+}
+
+One_Tile_Billboard :: struct {
+	position:  glsl.vec3,
+	light:     glsl.vec3,
 	texture:   Billboard_Texture,
-	depth_map: Billboard_Depth_Map_Texture,
+	depth_map: Billboard_Texture,
+	rotation:  u8,
+}
+
+Four_Tiles_Billboard :: struct {
+	position:  glsl.vec3,
+	light:     glsl.vec3,
+	texture:   Four_Tiles_Billboard_Texture,
+	depth_map: Four_Tiles_Billboard_Texture,
 	rotation:  u8,
 }
 
@@ -42,39 +62,102 @@ Billboard_Vertex :: struct {
 
 Billboard_Uniform_Object :: struct {
 	proj, view, rotation: glsl.mat4,
-    camera_rotation: u32,
+	camera_rotation:      u32,
 }
 
 Billboard_Texture :: enum u8 {
-	Chair_North_Wood,
-	Chair_South_Wood,
-    Table_South_Wood,
-    Table_North_Wood,
+	Chair_Wood_SW,
+	Chair_Wood_SE,
+	Chair_Wood_NE,
+	Chair_Wood_NW,
+}
+
+Four_Tiles_Billboard_Texture :: enum u8 {
+	Table_Wood_SW,
+	Table_Wood_SE,
+	Table_Wood_NE,
+	Table_Wood_NW,
+	Table_8_Places_Wood_SW,
+	Table_8_Places_Wood_SE,
+	Table_8_Places_Wood_NE,
+	Table_8_Places_Wood_NW,
 }
 
 BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
-	.Chair_North_Wood = "resources/textures/chair-north-diffuse.png",
-	.Chair_South_Wood = "resources/textures/chair-south-diffuse.png",
-    .Table_South_Wood = "resources/textures/billboards/table-6places-wood/south-diffuse.png",
-    .Table_North_Wood = "resources/textures/billboards/table-6places-wood/north-diffuse.png",
+	.Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
+	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
+	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
+	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
 }
 
-Billboard_Depth_Map_Texture :: enum u8 {
-	Chair_North,
-	Chair_South,
-    Table_South_Wood,
-    Table_North_Wood,
+FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
+	.Table_Wood_SW = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
+	.Table_Wood_SE = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
+	.Table_Wood_NE = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
+	.Table_Wood_NW = "resources/textures/billboards/table-6places-wood/nw-diffuse.png",
+
+	.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-diffuse.png",
+	.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-diffuse.png",
+	.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-diffuse.png",
+	.Table_8_Places_Wood_NW = "resources/textures/billboards/table-8places-wood/nw-diffuse.png",
 }
 
-BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Depth_Map_Texture]cstring {
-	.Chair_North = "resources/textures/chair-north-depth-map.png",
-	.Chair_South = "resources/textures/chair-south-depth-map.png",
-    .Table_South_Wood = "resources/textures/billboards/table-6places-wood/south-depth-map.png",
-    .Table_North_Wood = "resources/textures/billboards/table-6places-wood/north-depth-map.png",
+BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
+	.Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
+	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
+	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
+	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
 }
 
-init_billboard_system :: proc() -> (ok: bool = false) {
-	load_billboard_model() or_return
+FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
+	[Four_Tiles_Billboard_Texture]cstring {
+		.Table_Wood_SW = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
+		.Table_Wood_SE = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
+		.Table_Wood_NE = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
+		.Table_Wood_NW = "resources/textures/billboards/table-6places-wood/nw-depth-map.png",
+
+		.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-depth-map.png",
+		.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-depth-map.png",
+		.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-depth-map.png",
+		.Table_8_Places_Wood_NW = "resources/textures/billboards/table-8places-wood/nw-depth-map.png",
+	}
+
+init_billboard_systems :: proc() -> (ok: bool = false) {
+	init_billboard_system(
+		&billboard_system,
+		BILLBOARD_MODEL_PATH,
+		BILLBOARD_TEXTURE_PATHS,
+		BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
+		BILLBOARD_TEXTURE_WIDTH,
+		BILLBOARD_TEXTURE_HEIGHT,
+	) or_return
+
+	init_billboard_system(
+		&four_tiles_billboard_system,
+		FOUR_TILES_BILLBOARD_MODEL_PATH,
+		FOUR_TILES_BILLBOARD_TEXTURE_PATHS,
+		FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
+		FOUR_TILES_BILLBOARD_TEXTURE_WIDTH,
+		FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT,
+	) or_return
+	return true
+}
+
+init_billboard_system :: proc(
+	billboard_system: ^Billboard_System,
+	model_path: cstring,
+	texture_paths: [$T]cstring,
+	depth_map_texture_paths: [$D]cstring,
+	expected_texture_width: i32,
+	expected_texture_height: i32,
+) -> (
+	ok: bool = false,
+) {
+	load_billboard_model(
+		model_path,
+		&billboard_system.vertices,
+		&billboard_system.indices,
+	) or_return
 	fmt.println("billboard vertices:", billboard_system.vertices)
 	fmt.println("billboard indices:", billboard_system.indices)
 
@@ -84,7 +167,6 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 	gl.BindVertexArray(0)
 
 	gl.GenBuffers(1, &billboard_system.ibo)
-	// gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
 
 	gl.GenVertexArrays(1, &billboard_system.vao)
 	gl.BindVertexArray(billboard_system.vao)
@@ -115,7 +197,11 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 	gl.GenTextures(1, &billboard_system.texture_array)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_system.texture_array)
-	load_billboard_texture_array() or_return
+	load_billboard_texture_array(
+		texture_paths,
+		expected_texture_width,
+		expected_texture_height,
+	) or_return
 
 	gl.GenTextures(1, &billboard_system.depth_map_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -123,7 +209,11 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 		gl.TEXTURE_2D_ARRAY,
 		billboard_system.depth_map_texture_array,
 	)
-	load_billboard_depth_map_texture_array() or_return
+	load_billboard_depth_map_texture_array(
+		depth_map_texture_paths,
+		expected_texture_width,
+		expected_texture_height,
+	) or_return
 
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointer(
@@ -171,7 +261,7 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 	gl.VertexAttribPointer(
 		4,
 		1,
-		gl.UNSIGNED_BYTE,
+		gl.FLOAT,
 		gl.FALSE,
 		size_of(Billboard_Instance),
 		offset_of(Billboard_Instance, texture),
@@ -181,7 +271,7 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 	gl.VertexAttribPointer(
 		5,
 		1,
-		gl.UNSIGNED_BYTE,
+		gl.FLOAT,
 		gl.FALSE,
 		size_of(Billboard_Instance),
 		offset_of(Billboard_Instance, depth_map),
@@ -234,7 +324,7 @@ init_billboard_system :: proc() -> (ok: bool = false) {
 	return true
 }
 
-draw_billboards :: proc() {
+draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	if len(billboard_system.instances) == 0 do return
 
 	if billboard_system.dirty {
@@ -249,7 +339,6 @@ draw_billboards :: proc() {
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	}
 
-	gl.UseProgram(billboard_system.shader_program)
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_system.texture_array)
@@ -261,13 +350,14 @@ draw_billboards :: proc() {
 	)
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_system.ubo)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_system.ubo)
 	billboard_system.uniform_object.view = camera_view
 	billboard_system.uniform_object.proj = camera_proj
 	billboard_system.uniform_object.rotation = glsl.mat4Rotate(
 		{0, 1, 0},
 		glsl.radians_f32(f32(camera_rotation) * -90.0),
 	)
-    billboard_system.uniform_object.camera_rotation = u32(camera_rotation)
+	billboard_system.uniform_object.camera_rotation = u32(camera_rotation)
 	gl.BufferData(
 		gl.UNIFORM_BUFFER,
 		size_of(Billboard_Uniform_Object),
@@ -285,21 +375,56 @@ draw_billboards :: proc() {
 		i32(len(billboard_system.instances)),
 	)
 	gl.BindVertexArray(0)
+
 }
 
-append_billboard :: proc(using billboard: Billboard_Instance) {
-	append(&billboard_system.instances, billboard)
+draw_billboards :: proc() {
+	gl.UseProgram(billboard_system.shader_program)
+	draw_billboard_system_instances(&billboard_system)
+	draw_billboard_system_instances(&four_tiles_billboard_system)
+}
+
+append_billboard :: proc(using billboard: One_Tile_Billboard) {
+	append(
+		&billboard_system.instances,
+		Billboard_Instance {
+			position = position,
+			light = light,
+			texture = f32(texture),
+			depth_map = f32(depth_map),
+			rotation = rotation,
+		},
+	)
 	billboard_system.dirty = true
 }
 
-load_billboard_model :: proc() -> (ok: bool = false) {
+append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
+	append(&four_tiles_billboard_system.instances, 
+		Billboard_Instance {
+			position = position,
+			light = light,
+			texture = f32(texture),
+			depth_map = f32(depth_map),
+			rotation = rotation,
+		},
+    )
+	four_tiles_billboard_system.dirty = true
+}
+
+load_billboard_model :: proc(
+	path: cstring,
+	vertices: ^[4]Billboard_Vertex,
+	indices: ^[6]u8,
+) -> (
+	ok: bool = false,
+) {
 	options: cgltf.options
-	data, result := cgltf.parse_file(options, BILLBOARD_MODEL_PATH)
+	data, result := cgltf.parse_file(options, path)
 	if result != .success {
 		fmt.println("failed to parse file")
 		return
 	}
-	result = cgltf.load_buffers(options, data, BILLBOARD_MODEL_PATH)
+	result = cgltf.load_buffers(options, data, path)
 	if result != .success {
 		fmt.println("failed to load buffers")
 		return
@@ -312,7 +437,7 @@ load_billboard_model :: proc() -> (ok: bool = false) {
 			accessor := primitive.indices
 			for i in 0 ..< accessor.count {
 				index := cgltf.accessor_read_index(accessor, i)
-				billboard_system.indices[i] = u8(index)
+				indices[i] = u8(index)
 			}
 		}
 
@@ -323,10 +448,10 @@ load_billboard_model :: proc() -> (ok: bool = false) {
 					_ = cgltf.accessor_read_float(
 						accessor,
 						i,
-						raw_data(&billboard_system.vertices[i].pos),
+						raw_data(&vertices[i].pos),
 						3,
 					)
-					billboard_system.vertices[i].pos.x *= -1
+					vertices[i].pos.x *= -1
 				}
 			}
 			if attribute.type == .texcoord {
@@ -335,7 +460,7 @@ load_billboard_model :: proc() -> (ok: bool = false) {
 					_ = cgltf.accessor_read_float(
 						accessor,
 						i,
-						raw_data(&billboard_system.vertices[i].texcoords),
+						raw_data(&vertices[i].texcoords),
 						2,
 					)
 				}
@@ -346,14 +471,20 @@ load_billboard_model :: proc() -> (ok: bool = false) {
 	return true
 }
 
-load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
+load_billboard_depth_map_texture_array :: proc(
+	paths: [$T]cstring,
+	expected_width: i32,
+	expected_height: i32,
+) -> (
+	ok: bool = true,
+) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	textures :: len(BILLBOARD_DEPTH_MAP_TEXTURE_PATHS)
+	textures :: len(paths)
 
 	if (textures == 0) {
 		fmt.println("No textures to load.")
@@ -368,12 +499,12 @@ load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
 		gl.TEXTURE_2D_ARRAY,
 		1,
 		gl.R16,
-		BILLBOARD_TEXTURE_WIDTH,
-		BILLBOARD_TEXTURE_HEIGHT,
+		expected_width,
+		expected_height,
 		textures,
 	)
 
-	for path, i in BILLBOARD_DEPTH_MAP_TEXTURE_PATHS {
+	for path, i in paths {
 		width: i32
 		height: i32
 		channels: i32
@@ -387,24 +518,24 @@ load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
 			return false
 		}
 
-		if width != BILLBOARD_TEXTURE_WIDTH {
+		if width != expected_width {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
-				BILLBOARD_TEXTURE_WIDTH,
+				expected_width,
 				" got: ",
 				width,
 			)
 			return false
 		}
 
-		if height != BILLBOARD_TEXTURE_HEIGHT {
+		if height != expected_height {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
-				BILLBOARD_TEXTURE_HEIGHT,
+				expected_height,
 				" got: ",
 				height,
 			)
@@ -418,8 +549,8 @@ load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
 			0,
 			0,
 			i32(i),
-			BILLBOARD_TEXTURE_WIDTH,
-			BILLBOARD_TEXTURE_HEIGHT,
+			expected_width,
+			expected_height,
 			1,
 			gl.RED,
 			gl.UNSIGNED_SHORT,
@@ -439,14 +570,20 @@ load_billboard_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	return
 }
 
-load_billboard_texture_array :: proc() -> (ok: bool = true) {
+load_billboard_texture_array :: proc(
+	paths: [$T]cstring,
+	expected_width: i32,
+	expected_height: i32,
+) -> (
+	ok: bool = true,
+) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	textures :: len(BILLBOARD_TEXTURE_PATHS)
+	textures :: len(paths)
 
 	if (textures == 0) {
 		fmt.println("No textures to load.")
@@ -460,12 +597,12 @@ load_billboard_texture_array :: proc() -> (ok: bool = true) {
 		gl.TEXTURE_2D_ARRAY,
 		1,
 		gl.RGBA8,
-		BILLBOARD_TEXTURE_WIDTH,
-		BILLBOARD_TEXTURE_HEIGHT,
+		expected_width,
+		expected_height,
 		textures,
 	)
 
-	for path, i in BILLBOARD_TEXTURE_PATHS {
+	for path, i in paths {
 		width: i32
 		height: i32
 		pixels := stbi.load(path, &width, &height, nil, 4)
@@ -476,24 +613,24 @@ load_billboard_texture_array :: proc() -> (ok: bool = true) {
 			return false
 		}
 
-		if width != BILLBOARD_TEXTURE_WIDTH {
+		if width != expected_width {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
-				BILLBOARD_TEXTURE_WIDTH,
+				expected_width,
 				" got: ",
 				width,
 			)
 			return false
 		}
 
-		if height != BILLBOARD_TEXTURE_HEIGHT {
+		if height != expected_height {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
-				BILLBOARD_TEXTURE_HEIGHT,
+				expected_height,
 				" got: ",
 				height,
 			)
@@ -506,8 +643,8 @@ load_billboard_texture_array :: proc() -> (ok: bool = true) {
 			0,
 			0,
 			i32(i),
-			BILLBOARD_TEXTURE_WIDTH,
-			BILLBOARD_TEXTURE_HEIGHT,
+			expected_width,
+			expected_height,
 			1,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,

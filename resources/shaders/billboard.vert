@@ -28,15 +28,12 @@ void main() {
 
     frag_light = light;
 
-    float final_rotation = (int(texture) % 2 * 2 + int(rotation + ubo.camera_rotation)) % 4;
+    float final_rotation = (int(texture) % 4 + int(rotation + ubo.camera_rotation)) % 4;
     frag_texcoord = texcoord;
-    if ((uint(final_rotation) % 2) == 1) {
-        frag_texcoord.x = 1 - frag_texcoord.x;
-    }
 
-    frag_texture_index = floor(texture / 2) * 2;
-    frag_texture_index += floor(final_rotation / 2);
+    frag_texture_index = floor(texture / 4) * 4;
+    frag_texture_index += final_rotation;
 
-    frag_depth_map = floor(depth_map / 2) * 2;
-    frag_depth_map += floor(final_rotation / 2);
+    frag_depth_map = floor(depth_map / 4) * 4;
+    frag_depth_map += final_rotation;
 }

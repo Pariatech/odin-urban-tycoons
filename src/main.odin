@@ -56,7 +56,7 @@ start :: proc() -> (ok: bool = false) {
 	load_table_models()
 	load_chair_models()
 
-	init_billboard_system() or_return
+	init_billboard_systems() or_return
 	init_terrain()
 	init_world()
 
@@ -99,6 +99,7 @@ start :: proc() -> (ok: bool = false) {
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 		gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	    gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
 		uniform_object.view = camera_view
 		uniform_object.proj = camera_proj

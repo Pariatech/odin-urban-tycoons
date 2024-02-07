@@ -38,10 +38,10 @@ load_chair_models :: proc() {
 
 CHAIR_TEXTURE_MAP :: [Chair_Model][Chair_Orientation]Billboard_Texture {
 	.Wood =  {
-		.South = .Chair_South_Wood,
-		.West = .Chair_South_Wood,
-		.North = .Chair_North_Wood,
-		.East = .Chair_North_Wood,
+		.South = .Chair_Wood_SW,
+		.West = .Chair_Wood_SW,
+		.North = .Chair_Wood_NW,
+		.East = .Chair_Wood_NW,
 	},
 }
 
