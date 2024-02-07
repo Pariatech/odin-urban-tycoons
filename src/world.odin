@@ -540,8 +540,8 @@ init_world :: proc() {
 		 {
 			position = {0.0, 0.0, 1.0},
 			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
+			texture = .Chair_Wood_NE,
+			depth_map = .Chair_Wood_NE,
 		},
 	)
 
@@ -549,8 +549,8 @@ init_world :: proc() {
 		 {
 			position = {1.0, 0.0, 1.0},
 			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
+			texture = .Chair_Wood_NE,
+			depth_map = .Chair_Wood_NE,
             rotation = 1,
 		},
 	)
@@ -559,8 +559,8 @@ init_world :: proc() {
 		 {
 			position = {2.0, 0.0, 1.0},
 			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
+			texture = .Chair_Wood_NE,
+			depth_map = .Chair_Wood_NE,
             rotation = 2,
 		},
 	)
@@ -569,8 +569,8 @@ init_world :: proc() {
 		 {
 			position = {3.0, 0.0, 1.0},
 			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
+			texture = .Chair_Wood_NE,
+			depth_map = .Chair_Wood_NE,
             rotation = 3,
 		},
 	)
