@@ -327,17 +327,33 @@ init_billboard_system :: proc(
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	if len(billboard_system.instances) == 0 do return
 
-	if billboard_system.dirty {
+    // fmt.println("entered billboards:", len(billboard_system.instances))
+    visible_instances := [dynamic]Billboard_Instance{}
+    defer delete(visible_instances)
+    // visible_instances := billboard_system.instances
+
+    for instance in billboard_system.instances {
+        // fmt.println("camera_vp:", camera_vp)
+        view_space := camera_vp * vec4(instance.position, 1.0)
+        if view_space.x >= -1.2 && view_space.x <= 1.2 &&
+            view_space.y >= -1.2 && view_space.y <= 1.2 &&
+            view_space.z >= -1.2 && view_space.z <= 1.2 {
+                append(&visible_instances, instance)
+            }
+    }
+    // fmt.println("visible billboards:", len(visible_instances))
+
+	// if billboard_system.dirty {
 		gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
-			len(billboard_system.instances) * size_of(Billboard_Instance),
-			raw_data(billboard_system.instances),
+			len(visible_instances) * size_of(Billboard_Instance),
+			raw_data(visible_instances),
 			gl.STATIC_DRAW,
 		)
 		billboard_system.dirty = false
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	}
+	// }
 
 
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -372,7 +388,7 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		i32(len(billboard_system.indices)),
 		gl.UNSIGNED_BYTE,
 		nil,
-		i32(len(billboard_system.instances)),
+		i32(len(visible_instances)),
 	)
 	gl.BindVertexArray(0)
 

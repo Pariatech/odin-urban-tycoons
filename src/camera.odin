@@ -17,6 +17,12 @@ camera_translate := m.vec3{-camera_distance, camera_distance, -camera_distance}
 camera_view: m.mat4
 camera_proj: m.mat4
 
+camera_vp: m.mat4
+camera_left: f32
+camera_right: f32
+camera_top: f32
+camera_bottom: f32
+
 Camera_Rotation :: enum {
 	South_West,
 	South_East,
@@ -70,12 +76,20 @@ update_camera :: proc(delta_time: f64) {
 	aspect_ratio := f32(height) / f32(width)
 	scale := f32(width) / TEXTURE_SIZE
 	zoom := 1 / zoom_scale
+
+    camera_left = 1 / zoom * scale
+    camera_right = -1 / zoom * scale
+    camera_bottom = -aspect_ratio / zoom * scale
+    camera_top = aspect_ratio / zoom * scale
+
 	camera_proj = m.mat4Ortho3d(
-		1 / zoom * scale,
-		-1 / zoom * scale,
-		-aspect_ratio / zoom * scale,
-		aspect_ratio / zoom * scale,
+		camera_left,
+		camera_right,
+		camera_bottom,
+		camera_top,
 		0.1,
 		100.0,
 	)
+
+    camera_vp = camera_proj * camera_view 
 }

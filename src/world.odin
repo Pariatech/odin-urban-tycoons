@@ -2,9 +2,9 @@ package main
 
 import m "core:math/linalg/glsl"
 
-WORLD_WIDTH :: 64
+WORLD_WIDTH :: 128
 WORLD_HEIGHT :: 4
-WORLD_DEPTH :: 64
+WORLD_DEPTH :: 128
 
 sun := m.vec3{0, -1, 0}
 
@@ -497,104 +497,109 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	append_billboard(
-		 {
-			position = {0.0, 0.0, 0.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {1.0, 0.0, 0.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
-            rotation = 1,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {2.0, 0.0, 0.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
-            rotation = 2,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {3.0, 0.0, 0.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_SW,
-			depth_map = .Chair_Wood_SW,
-            rotation = 3,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {0.0, 0.0, 1.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_NE,
-			depth_map = .Chair_Wood_NE,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {1.0, 0.0, 1.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_NE,
-			depth_map = .Chair_Wood_NE,
-            rotation = 1,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {2.0, 0.0, 1.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_NE,
-			depth_map = .Chair_Wood_NE,
-            rotation = 2,
-		},
-	)
-
-	append_billboard(
-		 {
-			position = {3.0, 0.0, 1.0},
-			light = {1, 1, 1},
-			texture = .Chair_Wood_NE,
-			depth_map = .Chair_Wood_NE,
-            rotation = 3,
-		},
-	)
+	for x in 0 ..< WORLD_WIDTH {
+		for z in 0 ..< WORLD_DEPTH {
+			append_billboard(
+				 {
+					position = {f32(x), 0.0, f32(z)},
+					light = {1, 1, 1},
+					texture = .Chair_Wood_SW,
+					depth_map = .Chair_Wood_SW,
+				},
+			)
+		}
+	}
 
 
-	append_four_tiles_billboard(
-		 {
-			position = {0.5, 0.0, 3.5},
-			light = {1, 1, 1},
-			texture = .Table_Wood_SW,
-			depth_map = .Table_Wood_SW,
-            rotation = 0,
-		},
-	)
-
-	append_four_tiles_billboard(
-		 {
-			position = {3.5, 0.0, 3.5},
-			light = {1, 1, 1},
-			texture = .Table_8_Places_Wood_SW,
-			depth_map = .Table_8_Places_Wood_SW,
-            rotation = 0,
-		},
-	)
+	// append_billboard(
+	// 	 {
+	// 		position = {1.0, 0.0, 0.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_SW,
+	// 		depth_map = .Chair_Wood_SW,
+	//            rotation = 1,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {2.0, 0.0, 0.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_SW,
+	// 		depth_map = .Chair_Wood_SW,
+	//            rotation = 2,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {3.0, 0.0, 0.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_SW,
+	// 		depth_map = .Chair_Wood_SW,
+	//            rotation = 3,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {0.0, 0.0, 1.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_NE,
+	// 		depth_map = .Chair_Wood_NE,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {1.0, 0.0, 1.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_NE,
+	// 		depth_map = .Chair_Wood_NE,
+	//            rotation = 1,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {2.0, 0.0, 1.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_NE,
+	// 		depth_map = .Chair_Wood_NE,
+	//            rotation = 2,
+	// 	},
+	// )
+	//
+	// append_billboard(
+	// 	 {
+	// 		position = {3.0, 0.0, 1.0},
+	// 		light = {1, 1, 1},
+	// 		texture = .Chair_Wood_NE,
+	// 		depth_map = .Chair_Wood_NE,
+	//            rotation = 3,
+	// 	},
+	// )
+	//
+	//
+	// append_four_tiles_billboard(
+	// 	 {
+	// 		position = {0.5, 0.0, 3.5},
+	// 		light = {1, 1, 1},
+	// 		texture = .Table_Wood_SW,
+	// 		depth_map = .Table_Wood_SW,
+	//            rotation = 0,
+	// 	},
+	// )
+	//
+	// append_four_tiles_billboard(
+	// 	 {
+	// 		position = {3.5, 0.0, 3.5},
+	// 		light = {1, 1, 1},
+	// 		texture = .Table_8_Places_Wood_SW,
+	// 		depth_map = .Table_8_Places_Wood_SW,
+	//            rotation = 0,
+	// 	},
+	// )
 
 	// append_billboard(
 	// 	 {
@@ -602,7 +607,7 @@ init_world :: proc() {
 	// 		light = {1, 1, 1},
 	// 		texture = .Table_North_Wood,
 	// 		depth_map = .Table_North_Wood,
- //            rotation = 0,
+	//            rotation = 0,
 	// 	},
 	// )
 }
