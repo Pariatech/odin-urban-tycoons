@@ -1,14 +1,41 @@
 package main
 
+import "core:fmt"
 import m "core:math/linalg/glsl"
 import "core:math/noise"
-import "core:fmt"
 
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
 terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
-terrain_tile_triangles: [WORLD_WIDTH][WORLD_DEPTH][Tile_Triangle_Side]Tile_Triangle
+
+terrain_quad_tree_nodes: [dynamic]Terrain_Quad_Tree_Node
+terrain_quad_tree_tile_triangles: [dynamic]Tile_Triangle
+
+Terrain_Quad_Tree_Node_Children_Type :: enum {
+	Node,
+	Tile_Triangle,
+}
+
+Terrain_Quad_Tree_Node :: struct {
+	children_type: Terrain_Quad_Tree_Node_Children_Type,
+	children:      [4]u32,
+}
 
 init_terrain :: proc() {
+	append(
+		&terrain_quad_tree_nodes,
+		Terrain_Quad_Tree_Node {
+			children_type = .Tile_Triangle,
+			children = {0, 1, 2, 3},
+		},
+	)
+	append(
+		&terrain_quad_tree_tile_triangles,
+		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+	)
+
 	// SEED :: 694201337
 	// for x in 0 ..= WORLD_WIDTH {
 	// 	for z in 0 ..= WORLD_DEPTH {
@@ -169,7 +196,7 @@ calculate_terrain_light :: proc(x, z: int) {
 
 get_terrain_tile_triangle_lights :: proc(
 	side: Tile_Triangle_Side,
-	x, z: int,
+	x, z, w: int,
 ) -> (
 	lights: [3]m.vec3,
 ) {
@@ -177,9 +204,9 @@ get_terrain_tile_triangle_lights :: proc(
 
 	tile_lights := [4]m.vec3 {
 		terrain_lights[x][z],
-		terrain_lights[x + 1][z],
-		terrain_lights[x + 1][z + 1],
-		terrain_lights[x][z + 1],
+		terrain_lights[x + w][z],
+		terrain_lights[x + w][z + w],
+		terrain_lights[x][z + w],
 	}
 
 	lights[2] = {0, 0, 0}
@@ -207,7 +234,7 @@ get_terrain_tile_triangle_lights :: proc(
 
 get_terrain_tile_triangle_heights :: proc(
 	side: Tile_Triangle_Side,
-	x, z: int,
+	x, z, w: int,
 ) -> (
 	heights: [3]f32,
 ) {
@@ -215,9 +242,9 @@ get_terrain_tile_triangle_heights :: proc(
 
 	tile_heights := [4]f32 {
 		terrain_heights[x][z],
-		terrain_heights[x + 1][z],
-		terrain_heights[x + 1][z + 1],
-		terrain_heights[x][z + 1],
+		terrain_heights[x + w][z],
+		terrain_heights[x + w][z + w],
+		terrain_heights[x][z + w],
 	}
 
 	heights[2] = 0
@@ -243,28 +270,6 @@ get_terrain_tile_triangle_heights :: proc(
 	return
 }
 
-draw_terrain_tile_triangle :: proc(side: Tile_Triangle_Side, x, z: int) {
-	tri := terrain_tile_triangles[x][z][side]
-
-	lights := get_terrain_tile_triangle_lights(side, x, z)
-	heights := get_terrain_tile_triangle_heights(side, x, z)
-
-	draw_tile_triangle(tri, side, lights, heights, {f32(x), f32(z)})
-}
-
-set_terrain_tile_triangle :: proc(
-	side: Tile_Triangle_Side,
-	x, z: int,
-	texture: Texture,
-	mask: Texture,
-) {
-	terrain_tile_triangles[x][z][side] = Tile_Triangle {
-		texture      = texture,
-		mask_texture = mask,
-	}
-	draw_terrain_tile_triangle(side, x, z)
-}
-
 get_tile_height :: proc(x, z: int) -> f32 {
 	total :=
 		terrain_heights[x][z] +
@@ -274,12 +279,40 @@ get_tile_height :: proc(x, z: int) -> f32 {
 	return total / 4
 }
 
+draw_terrain_quad_tree_node :: proc(
+	node: Terrain_Quad_Tree_Node,
+	x, z, w: int,
+) {
+	switch node.children_type {
+	case .Node:
+		draw_terrain_quad_tree_node(
+			terrain_quad_tree_nodes[node.children[0]],
+			x,
+			z,
+			w / 2,
+		)
+	case .Tile_Triangle:
+		for child, i in node.children {
+			tri := terrain_quad_tree_tile_triangles[child]
+			side := Tile_Triangle_Side(i)
+
+			lights := get_terrain_tile_triangle_lights(side, x, z, w)
+			heights := get_terrain_tile_triangle_heights(side, x, z, w)
+            fmt.println("wtf!?")
+
+			draw_tile_triangle(
+				tri,
+				side,
+				lights,
+				heights,
+				{f32(x + w / 2) - 0.5, f32(z + w / 2) - 0.5},
+				f32(w),
+			)
+		}
+	}
+}
+
 draw_terrain :: proc() {
-    for x in 0..<WORLD_WIDTH {
-        for z in 0..<WORLD_DEPTH {
-            for side in Tile_Triangle_Side {
-                draw_terrain_tile_triangle(side, x, z)
-            }
-        }
-    }
+	root := terrain_quad_tree_nodes[0]
+    draw_terrain_quad_tree_node(root, 0, 0, WORLD_WIDTH)
 }

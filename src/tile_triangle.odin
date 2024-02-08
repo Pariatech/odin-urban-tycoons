@@ -1,6 +1,7 @@
 package main
 
 import m "core:math/linalg/glsl"
+import "core:fmt"
 
 Tile_Triangle_Side :: enum {
 	South,
@@ -96,18 +97,22 @@ draw_tile_triangle :: proc(
 	lights: [3]m.vec3,
 	heights: [3]f32,
 	pos: m.vec2,
+    size: f32,
 ) {
+    fmt.println("wtf!!!")
 	index_offset := u32(len(world_vertices))
 
 	vertices := tile_triangle_side_vertices_map[side]
 	for vertex, i in vertices {
 		vertex := vertex
+        vertex.pos *= size
         vertex.pos.x += pos.x
         vertex.pos.z += pos.y
 		vertex.pos.y += heights[i]
 		vertex.light = lights[i]
         vertex.texcoords.z = f32(tri.texture)
         vertex.texcoords.w = f32(tri.mask_texture)
+        vertex.texcoords.xy *= size
 		append(&world_vertices, vertex)
 	}
 

@@ -12,13 +12,6 @@ house_x: i32 = 32
 house_z: i32 = 32
 
 init_world :: proc() {
-	for x in 0 ..< WORLD_WIDTH {
-		for z in 0 ..< WORLD_DEPTH {
-			for side in Tile_Triangle_Side {
-				set_terrain_tile_triangle(side, x, z, .Grass, .Grid_Mask)
-			}
-		}
-	}
 	//
 	// insert_north_south_wall(
 	// 	{1, 0, 1},
