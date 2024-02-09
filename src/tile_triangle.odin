@@ -99,7 +99,6 @@ draw_tile_triangle :: proc(
 	pos: m.vec2,
     size: f32,
 ) {
-    fmt.println("wtf!!!")
 	index_offset := u32(len(world_vertices))
 
 	vertices := tile_triangle_side_vertices_map[side]

@@ -16,7 +16,6 @@ draw_components := [dynamic]Draw_Component{}
 
 draw :: proc(using component: Draw_Component) {
 	index_offset := u32(len(world_vertices))
-    fmt.println("vertices:", len(world_vertices))
 	for i in 0 ..< len(vertices) {
         vertex := vertices[i]
 		vertex.texcoords.z = f32(component.texture)
