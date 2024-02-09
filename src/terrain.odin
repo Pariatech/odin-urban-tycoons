@@ -292,7 +292,7 @@ draw_terrain_quad_tree_node :: proc(
 ) {
 	switch node.children_type {
 	case .Node:
-        fmt.println("draw nodes----")
+		fmt.println("draw nodes----")
 		for child, i in node.children {
 			draw_terrain_quad_tree_node(
 				terrain_quad_tree_nodes[child],
@@ -303,7 +303,7 @@ draw_terrain_quad_tree_node :: proc(
 		}
 	case .Tile_Triangle:
 		for child, i in node.children {
-            fmt.println(node)
+			fmt.println(node)
 			tri := terrain_quad_tree_tile_triangles[child]
 			side := Tile_Triangle_Side(i)
 
@@ -333,7 +333,7 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 	tri: Tile_Triangle,
 	side: Tile_Triangle_Side,
 ) {
-    node := terrain_quad_tree_nodes[node_index]
+	node := terrain_quad_tree_nodes[node_index]
 	switch node.children_type {
 	case .Node:
 		i := x / (node_x + node_w) + z / (node_z + node_w) * 2
@@ -348,11 +348,19 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 			side,
 		)
 	case .Tile_Triangle:
+		existing_tri :=
+			terrain_quad_tree_tile_triangles[node.children[int(side)]]
+		if existing_tri.texture == tri.texture &&
+		   existing_tri.mask_texture == tri.mask_texture {
+            return
+		}
 		if node_w > 1 {
-            fmt.println("split nodes----")
+			fmt.println("split nodes----")
 			for i in 0 ..< 4 {
-				terrain_quad_tree_nodes[node_index].children[i] = len(terrain_quad_tree_nodes)
-                append(
+				terrain_quad_tree_nodes[node_index].children[i] = len(
+					terrain_quad_tree_nodes,
+				)
+				append(
 					&terrain_quad_tree_nodes,
 					Terrain_Quad_Tree_Node {
 						children_type = .Tile_Triangle,
@@ -376,9 +384,11 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 			)
 		} else {
 			i := int(side)
-            fmt.println("HEELLLLLO!!!")
-            terrain_quad_tree_nodes[node_index].children[i] = len(terrain_quad_tree_tile_triangles)
-            append(&terrain_quad_tree_tile_triangles, tri)
+			fmt.println("HEELLLLLO!!!")
+			terrain_quad_tree_nodes[node_index].children[i] = len(
+				terrain_quad_tree_tile_triangles,
+			)
+			append(&terrain_quad_tree_tile_triangles, tri)
 		}
 	}
 }
@@ -399,5 +409,5 @@ set_terrain_tile_triangle :: proc(
 		side,
 	)
 
-    fmt.println(terrain_quad_tree_nodes)
+	fmt.println(terrain_quad_tree_nodes)
 }
