@@ -8,32 +8,31 @@ terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
 terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
 
 terrain_quad_tree_nodes: [dynamic]Terrain_Quad_Tree_Node
-terrain_quad_tree_tile_triangles: [dynamic]Tile_Triangle
 
-Terrain_Quad_Tree_Node_Children_Type :: enum {
-	Node,
-	Tile_Triangle,
+Terrain_Quad_Tree_Node_Indices :: struct {
+	children: [4]int,
 }
 
-Terrain_Quad_Tree_Node :: struct {
-	children_type: Terrain_Quad_Tree_Node_Children_Type,
-	children:      [4]int,
+Terrain_Quad_Tree_Node_Tile_Triangles :: struct {
+	children: [4]Tile_Triangle,
+}
+
+Terrain_Quad_Tree_Node :: union {
+	Terrain_Quad_Tree_Node_Indices,
+	Terrain_Quad_Tree_Node_Tile_Triangles,
 }
 
 init_terrain :: proc() {
 	append(
 		&terrain_quad_tree_nodes,
-		Terrain_Quad_Tree_Node {
-			children_type = .Tile_Triangle,
-			children = {0, 1, 2, 3},
+		Terrain_Quad_Tree_Node_Tile_Triangles {
+			children =  {
+				{texture = .Grass, mask_texture = .Grid_Mask},
+				{texture = .Grass, mask_texture = .Grid_Mask},
+				{texture = .Grass, mask_texture = .Grid_Mask},
+				{texture = .Grass, mask_texture = .Grid_Mask},
+			},
 		},
-	)
-	append(
-		&terrain_quad_tree_tile_triangles,
-		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
-		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
-		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
-		Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
 	)
 
 	set_terrain_tile_triangle(
@@ -290,10 +289,10 @@ draw_terrain_quad_tree_node :: proc(
 	node: Terrain_Quad_Tree_Node,
 	x, z, w: int,
 ) {
-	switch node.children_type {
-	case .Node:
+	switch value in node {
+	case Terrain_Quad_Tree_Node_Indices:
 		fmt.println("draw nodes----")
-		for child, i in node.children {
+		for child, i in value.children {
 			draw_terrain_quad_tree_node(
 				terrain_quad_tree_nodes[child],
 				x + (i % 2) * (w / 2),
@@ -301,10 +300,8 @@ draw_terrain_quad_tree_node :: proc(
 				w / 2,
 			)
 		}
-	case .Tile_Triangle:
-		for child, i in node.children {
-			fmt.println(node)
-			tri := terrain_quad_tree_tile_triangles[child]
+	case Terrain_Quad_Tree_Node_Tile_Triangles:
+		for tri, i in value.children {
 			side := Tile_Triangle_Side(i)
 
 			lights := get_terrain_tile_triangle_lights(side, x, z, w)
@@ -333,12 +330,12 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 	tri: Tile_Triangle,
 	side: Tile_Triangle_Side,
 ) {
-	node := terrain_quad_tree_nodes[node_index]
-	switch node.children_type {
-	case .Node:
+	node := &terrain_quad_tree_nodes[node_index]
+	switch value in node {
+	case Terrain_Quad_Tree_Node_Indices:
 		i := x / (node_x + node_w) + z / (node_z + node_w) * 2
 		set_terrain_quad_tree_node_tile_triangle(
-			node.children[i],
+			value.children[i],
 			node_x + (i % 2) * (node_w / 2),
 			node_z + (i / 2) * (node_w / 2),
 			node_w / 2,
@@ -347,33 +344,32 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 			tri,
 			side,
 		)
-	case .Tile_Triangle:
-		existing_tri :=
-			terrain_quad_tree_tile_triangles[node.children[int(side)]]
+	case Terrain_Quad_Tree_Node_Tile_Triangles:
+		existing_tri := value.children[int(side)]
 		if existing_tri.texture == tri.texture &&
 		   existing_tri.mask_texture == tri.mask_texture {
-            return
+			return
 		}
 		if node_w > 1 {
 			fmt.println("split nodes----")
+            index := len(terrain_quad_tree_nodes)
+            children := value.children
+            indices := Terrain_Quad_Tree_Node_Indices{
+                children = { index, index + 1, index + 2, index + 3, }
+            }
+            terrain_quad_tree_nodes[node_index] = indices
 			for i in 0 ..< 4 {
-				terrain_quad_tree_nodes[node_index].children[i] = len(
-					terrain_quad_tree_nodes,
-				)
 				append(
 					&terrain_quad_tree_nodes,
-					Terrain_Quad_Tree_Node {
-						children_type = .Tile_Triangle,
-						children = node.children,
+					Terrain_Quad_Tree_Node_Tile_Triangles {
+						children = children,
 					},
 				)
 			}
 
-			terrain_quad_tree_nodes[node_index].children_type = .Node
-
 			i := x / (node_x + node_w) + z / (node_z + node_w) * 2
 			set_terrain_quad_tree_node_tile_triangle(
-				terrain_quad_tree_nodes[node_index].children[i],
+				indices.children[i],
 				node_x + (i % 2) * (node_w / 2),
 				node_z + (i / 2) * (node_w / 2),
 				node_w / 2,
@@ -385,10 +381,7 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 		} else {
 			i := int(side)
 			fmt.println("HEELLLLLO!!!")
-			terrain_quad_tree_nodes[node_index].children[i] = len(
-				terrain_quad_tree_tile_triangles,
-			)
-			append(&terrain_quad_tree_tile_triangles, tri)
+            value.children[i] = tri
 		}
 	}
 }
