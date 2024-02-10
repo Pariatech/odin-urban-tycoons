@@ -307,8 +307,8 @@ begin_draw :: proc() {
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	// clear(&world_vertices)
-	// clear(&world_indices)
+	clear(&world_vertices)
+	clear(&world_indices)
 }
 
 end_draw :: proc() {

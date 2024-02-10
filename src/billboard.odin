@@ -91,11 +91,10 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
-	.Table_Wood_SW = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
-	.Table_Wood_SE = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
-	.Table_Wood_NE = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
-	.Table_Wood_NW = "resources/textures/billboards/table-6places-wood/nw-diffuse.png",
-
+	.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
+	.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
+	.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
+	.Table_Wood_NW          = "resources/textures/billboards/table-6places-wood/nw-diffuse.png",
 	.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-diffuse.png",
 	.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-diffuse.png",
 	.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-diffuse.png",
@@ -111,11 +110,10 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
 	[Four_Tiles_Billboard_Texture]cstring {
-		.Table_Wood_SW = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
-		.Table_Wood_SE = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
-		.Table_Wood_NE = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
-		.Table_Wood_NW = "resources/textures/billboards/table-6places-wood/nw-depth-map.png",
-
+		.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
+		.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
+		.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
+		.Table_Wood_NW          = "resources/textures/billboards/table-6places-wood/nw-depth-map.png",
 		.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-depth-map.png",
 		.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-depth-map.png",
 		.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-depth-map.png",
@@ -327,32 +325,35 @@ init_billboard_system :: proc(
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	if len(billboard_system.instances) == 0 do return
 
-    // fmt.println("entered billboards:", len(billboard_system.instances))
-    visible_instances := [dynamic]Billboard_Instance{}
-    defer delete(visible_instances)
-    // visible_instances := billboard_system.instances
+	// fmt.println("entered billboards:", len(billboard_system.instances))
+	visible_instances := [dynamic]Billboard_Instance{}
+	defer delete(visible_instances)
+	// visible_instances := billboard_system.instances
 
-    for instance in billboard_system.instances {
-        // fmt.println("camera_vp:", camera_vp)
-        view_space := camera_vp * vec4(instance.position, 1.0)
-        if view_space.x >= -1.2 && view_space.x <= 1.2 &&
-            view_space.y >= -1.2 && view_space.y <= 1.2 &&
-            view_space.z >= -1.2 && view_space.z <= 1.2 {
-                append(&visible_instances, instance)
-            }
-    }
-    // fmt.println("visible billboards:", len(visible_instances))
+	for instance in billboard_system.instances {
+		// fmt.println("camera_vp:", camera_vp)
+		view_space := camera_vp * vec4(instance.position, 1.0)
+		if view_space.x >= -1.2 &&
+		   view_space.x <= 1.2 &&
+		   view_space.y >= -1.2 &&
+		   view_space.y <= 1.2 &&
+		   view_space.z >= -1.2 &&
+		   view_space.z <= 1.2 {
+			append(&visible_instances, instance)
+		}
+	}
+	// fmt.println("visible billboards:", len(visible_instances))
 
 	// if billboard_system.dirty {
-		gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			len(visible_instances) * size_of(Billboard_Instance),
-			raw_data(visible_instances),
-			gl.STATIC_DRAW,
-		)
-		billboard_system.dirty = false
-		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(visible_instances) * size_of(Billboard_Instance),
+		raw_data(visible_instances),
+		gl.STATIC_DRAW,
+	)
+	billboard_system.dirty = false
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	// }
 
 
@@ -415,7 +416,8 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) {
 }
 
 append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
-	append(&four_tiles_billboard_system.instances, 
+	append(
+		&four_tiles_billboard_system.instances,
 		Billboard_Instance {
 			position = position,
 			light = light,
@@ -423,7 +425,7 @@ append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
 			depth_map = f32(depth_map),
 			rotation = rotation,
 		},
-    )
+	)
 	four_tiles_billboard_system.dirty = true
 }
 

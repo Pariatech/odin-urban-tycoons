@@ -295,10 +295,137 @@ get_tile_height :: proc(x, z: int) -> f32 {
 	return total / 4
 }
 
+point_in_rhombus :: proc(
+	point: m.vec2,
+	center: m.vec2,
+	top: m.vec2,
+	right: m.vec2,
+	bottom: m.vec2,
+	left: m.vec2,
+) -> bool {
+	center_to_top := top - center
+	center_to_right := right - center
+	center_to_bottom := bottom - center
+	center_to_left := left - center
+	center_to_point := point - center
+
+	return(
+		m.dot(center_to_point, center_to_top) <=
+			m.dot(center_to_top, center_to_top) &&
+		m.dot(center_to_point, center_to_right) <=
+			m.dot(center_to_right, center_to_right) &&
+		m.dot(center_to_point, center_to_bottom) <=
+			m.dot(center_to_bottom, center_to_bottom) &&
+		m.dot(center_to_point, center_to_left) <=
+			m.dot(center_to_left, center_to_left) \
+	)
+}
+
+point_in_square :: proc(point: m.vec2, center: m.vec2, size: f32) -> bool {
+	half_size := size / 2
+
+	return(
+		point.x >= center.x - half_size &&
+		point.x <= center.x + half_size &&
+		point.y >= center.y - half_size &&
+		point.y <= center.y + half_size \
+	)
+}
+
 draw_terrain_quad_tree_node :: proc(
 	node: Terrain_Quad_Tree_Node,
 	x, z, w: int,
 ) {
+	// fmt.println("uh?")
+	// p0 := m.vec4{f32(x), terrain_heights[x][z], f32(z), 1}
+	// p1 := m.vec4{f32(x + 1), terrain_heights[x + w][z], f32(z), 1}
+	// p2 := m.vec4{f32(x + 1), terrain_heights[x + w][z + w], f32(z + w), 1}
+	// p3 := m.vec4{f32(x), terrain_heights[x][z + w], f32(z + w), 1}
+	p0 := m.vec4{f32(x), 0, f32(z), 1}
+	p1 := m.vec4{f32(x + w), 0, f32(z), 1}
+	p2 := m.vec4{f32(x + w), 0, f32(z + w), 1}
+	p3 := m.vec4{f32(x), 0, f32(z + w), 1}
+	draw := false
+	p0_view_space := camera_vp * p0
+	if !draw && point_in_square(p0_view_space.xy, {0, 0}, 2.4) {
+		draw = true
+	}
+
+	p1_view_space := camera_vp * p1
+	if !draw && point_in_square(p1_view_space.xy, {0, 0}, 2.4) {
+		draw = true
+	}
+
+	p2_view_space := camera_vp * p2
+	if !draw && point_in_square(p2_view_space.xy, {0, 0}, 2.4) {
+		draw = true
+	}
+
+	p3_view_space := camera_vp * p3
+	if !draw && point_in_square(p3_view_space.xy, {0, 0}, 2.4) {
+		draw = true
+	}
+
+	center :=
+		(p0_view_space.xy +
+			p1_view_space.xy +
+			p2_view_space.xy +
+			p3_view_space.xy) /
+		4
+
+	if !draw &&
+	   point_in_rhombus(
+		   {-1.2, -1.2},
+		   m.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		draw = true
+	}
+
+	if !draw &&
+	   point_in_rhombus(
+		   {1.2, -1.2},
+		   m.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		draw = true
+	}
+
+	if !draw &&
+	   point_in_rhombus(
+		   {1.2, 1.2},
+		   m.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		draw = true
+	}
+
+	if !draw &&
+	   point_in_rhombus(
+		   {-1.2, 1.2},
+		   m.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		draw = true
+	}
+
+	if !draw {
+		// fmt.println("don't draw!")
+		return
+	}
+
 	switch value in node {
 	case Terrain_Quad_Tree_Node_Indices:
 		for child, i in value.children {
@@ -410,7 +537,7 @@ set_terrain_quad_tree_node_height :: proc(
 					break
 				}
 			}
-            if !flat do break
+			if !flat do break
 		}
 		if !flat && node_w > 1 {
 			index := len(terrain_quad_tree_nodes)

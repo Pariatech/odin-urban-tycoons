@@ -68,15 +68,6 @@ start :: proc() -> (ok: bool = false) {
 	delta_time: f64
 	frames: i64 = 0
 
-	draw_world()
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(
-		gl.ARRAY_BUFFER,
-		len(world_vertices) * size_of(Vertex),
-		raw_data(world_vertices),
-		gl.STATIC_DRAW,
-	)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	for !should_close {
 		previous_time_ns = current_time_ns
@@ -94,12 +85,23 @@ start :: proc() -> (ok: bool = false) {
 
 		begin_draw()
 		update_camera(delta_time)
+
+		draw_world()
+		gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(world_vertices) * size_of(Vertex),
+			raw_data(world_vertices),
+			gl.STATIC_DRAW,
+		)
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+
 		gl.BindVertexArray(vao)
 		gl.UseProgram(shader_program)
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 		gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	    gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+		gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
 		uniform_object.view = camera_view
 		uniform_object.proj = camera_proj
@@ -116,8 +118,8 @@ start :: proc() -> (ok: bool = false) {
 			gl.UNSIGNED_INT,
 			raw_data(world_indices),
 		)
-	    gl.BindVertexArray(0)
-	    gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+		gl.BindVertexArray(0)
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 		draw_billboards()
 		end_draw()
@@ -133,9 +135,9 @@ start :: proc() -> (ok: bool = false) {
 		frames += 1
 	}
 
-    return true
+	return true
 }
 
 main :: proc() {
-    start()
+	start()
 }

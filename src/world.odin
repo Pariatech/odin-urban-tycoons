@@ -2,9 +2,9 @@ package main
 
 import m "core:math/linalg/glsl"
 
-WORLD_WIDTH :: 128
+WORLD_WIDTH :: 1024
 WORLD_HEIGHT :: 4
-WORLD_DEPTH :: 128
+WORLD_DEPTH :: 1024
 
 sun := m.vec3{0, -1, 0}
 
