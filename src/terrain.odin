@@ -35,19 +35,22 @@ init_terrain :: proc() {
 		},
 	)
 
-	set_terrain_tile_triangle(
-		0,
-		0,
-		{texture = .Gravel, mask_texture = .Grid_Mask},
-		.South,
-	)
+	// set_terrain_tile_triangle(
+	// 	2,
+	// 	2,
+	// 	{texture = .Gravel, mask_texture = .Grid_Mask},
+	// 	.South,
+	// )
 
-	set_terrain_tile_triangle(
-		0,
-		0,
-		{texture = .Grass, mask_texture = .Grid_Mask},
-		.South,
-	)
+	// set_terrain_tile_triangle(
+	// 	0,
+	// 	0,
+	// 	{texture = .Grass, mask_texture = .Grid_Mask},
+	// 	.South,
+	// )
+
+	set_terrain_height(1, 1, .5)
+	// set_terrain_height(1, 1, 0)
 
 	// SEED :: 694201337
 	// for x in 0 ..= WORLD_WIDTH {
@@ -331,21 +334,118 @@ draw_terrain :: proc() {
 }
 
 set_terrain_height :: proc(x, z: int, height: f32) {
-	set_terrain_quad_tree_node_height(0, 0, 0, WORLD_WIDTH, x, z, height)
+	terrain_heights[x][z] = height
+	if x > 0 && z > 0 {
+		set_terrain_quad_tree_node_height(
+			0,
+			0,
+			0,
+			WORLD_WIDTH,
+			x - 1,
+			z - 1,
+			height,
+		)
+	}
+	if x > 0 && z < WORLD_DEPTH {
+		set_terrain_quad_tree_node_height(
+			0,
+			0,
+			0,
+			WORLD_WIDTH,
+			x - 1,
+			z,
+			height,
+		)
+	}
+
+	if x < WORLD_WIDTH && z > 0 {
+		set_terrain_quad_tree_node_height(
+			0,
+			0,
+			0,
+			WORLD_WIDTH,
+			x,
+			z - 1,
+			height,
+		)
+	}
+
+	if x < WORLD_WIDTH && z < WORLD_DEPTH {
+		set_terrain_quad_tree_node_height(0, 0, 0, WORLD_WIDTH, x, z, height)
+	}
 }
 
 set_terrain_quad_tree_node_height :: proc(
 	node_index, node_x, node_z, node_w, x, z: int,
 	height: f32,
 ) {
+	node := &terrain_quad_tree_nodes[node_index]
+	switch value in node {
+	case Terrain_Quad_Tree_Node_Indices:
+		i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
+		set_terrain_quad_tree_node_height(
+			value.children[i],
+			node_x + (i % 2) * (node_w / 2),
+			node_z + (i / 2) * (node_w / 2),
+			node_w / 2,
+			x,
+			z,
+			height,
+		)
 
+		collapse_terrain_quad_tree_node(
+			node_index,
+			node_x,
+			node_z,
+			node_w,
+			&value,
+		)
+
+	case Terrain_Quad_Tree_Node_Tile_Triangles:
+		flat := true
+		for i in 0 ..= node_w {
+			for j in 0 ..= node_w {
+				if terrain_heights[node_x + i][node_z + j] != height {
+					flat = false
+					break
+				}
+			}
+            if !flat do break
+		}
+		if !flat && node_w > 1 {
+			index := len(terrain_quad_tree_nodes)
+			children := value.children
+			indices := Terrain_Quad_Tree_Node_Indices {
+				children = {index, index + 1, index + 2, index + 3},
+			}
+			terrain_quad_tree_nodes[node_index] = indices
+			for i in 0 ..< 4 {
+				append(
+					&terrain_quad_tree_nodes,
+					Terrain_Quad_Tree_Node_Tile_Triangles{children = children},
+				)
+			}
+
+			// i := x / (node_x + node_w) + z / (node_z + node_w) * 2
+			i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
+			set_terrain_quad_tree_node_height(
+				indices.children[i],
+				node_x + (i % 2) * (node_w / 2),
+				node_z + (i / 2) * (node_w / 2),
+				node_w / 2,
+				x,
+				z,
+				height,
+			)
+		}
+	}
 }
 
 collapse_terrain_quad_tree_node :: proc(
 	node_index, node_x, node_z, node_w: int,
 	value: ^Terrain_Quad_Tree_Node_Indices,
 ) {
-    // value := terrain_quad_tree_nodes[node_index].(Terrain_Quad_Tree_Node_Indices)
+	// value := terrain_quad_tree_nodes[node_index].(Terrain_Quad_Tree_Node_Indices)
 	triangles, ok := terrain_quad_tree_nodes[value.children[0]].(Terrain_Quad_Tree_Node_Tile_Triangles)
 	fmt.println("\nCheck for collapse-----\n")
 	if !ok {return}
@@ -365,9 +465,9 @@ collapse_terrain_quad_tree_node :: proc(
 	}
 
 	height := terrain_heights[node_x][node_z]
-	for i in node_x ..= node_w {
-		for j in node_z ..= node_w {
-			if terrain_heights[i][j] != height {
+	for i in 0 ..= node_w {
+		for j in 0 ..= node_w {
+			if terrain_heights[node_x + i][node_z + j] != height {
 				// not flat!
 				return
 			}
@@ -377,7 +477,7 @@ collapse_terrain_quad_tree_node :: proc(
 	// colapse children?
 	fmt.println("\ncolapse?--------------\n", value.children)
 	for child in value.children {
-        fmt.println("removing", child)
+		fmt.println("removing", child)
 		ordered_remove(&terrain_quad_tree_nodes, child)
 		for n in &terrain_quad_tree_nodes {
 			if indices, ok := &n.(Terrain_Quad_Tree_Node_Indices); ok {
@@ -400,7 +500,7 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 	node := &terrain_quad_tree_nodes[node_index]
 	switch value in node {
 	case Terrain_Quad_Tree_Node_Indices:
-		i := x / (node_x + node_w) + z / (node_z + node_w) * 2
+		i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
 		set_terrain_quad_tree_node_tile_triangle(
 			value.children[i],
 			node_x + (i % 2) * (node_w / 2),
@@ -440,7 +540,7 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 					)
 				}
 
-				i := x / (node_x + node_w) + z / (node_z + node_w) * 2
+				i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
 				set_terrain_quad_tree_node_tile_triangle(
 					indices.children[i],
 					node_x + (i % 2) * (node_w / 2),
