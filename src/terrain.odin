@@ -419,50 +419,6 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 			node_w,
 			&value,
 		)
-	// triangles, ok := terrain_quad_tree_nodes[value.children[0]].(Terrain_Quad_Tree_Node_Tile_Triangles)
-	// fmt.println("\nCheck for collapse-----\n")
-	// if !ok {return}
-	// triangle := triangles.children[0]
-	// fmt.println(triangle)
-	// for child in value.children {
-	// 	triangles, ok =
-	// 	terrain_quad_tree_nodes[child].(Terrain_Quad_Tree_Node_Tile_Triangles)
-	// 	if !ok {return}
-	//
-	// 	for tri in triangles.children {
-	// 		if tri.texture != triangle.texture ||
-	// 		   tri.mask_texture != triangle.mask_texture {
-	// 			return
-	// 		}
-	// 	}
-	// }
-	//
-	// height := terrain_heights[node_x][node_z]
-	// for i in node_x ..= node_w {
-	// 	for j in node_z ..= node_w {
-	// 		if terrain_heights[i][j] != height {
-	// 			// not flat!
-	// 			return
-	// 		}
-	// 	}
-	// }
-	//
-	// // colapse children?
-	// fmt.println("\ncolapse?--------------\n", value.children)
-	// for child in value.children {
- //        fmt.println("removing", child)
-	// 	ordered_remove(&terrain_quad_tree_nodes, child)
-	// 	for n in &terrain_quad_tree_nodes {
-	// 		if indices, ok := &n.(Terrain_Quad_Tree_Node_Indices); ok {
-	// 			for idx, i in &indices.children {
-	// 				if idx > child {
-	// 					idx -= 1
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// terrain_quad_tree_nodes[node_index] = triangles
 
 	case Terrain_Quad_Tree_Node_Tile_Triangles:
 		existing_tri := value.children[int(side)]
