@@ -42,6 +42,13 @@ init_terrain :: proc() {
 		.South,
 	)
 
+	// set_terrain_tile_triangle(
+	// 	0,
+	// 	0,
+	// 	{texture = .Grass, mask_texture = .Grid_Mask},
+	// 	.South,
+	// )
+
 	// SEED :: 694201337
 	// for x in 0 ..= WORLD_WIDTH {
 	// 	for z in 0 ..= WORLD_DEPTH {
@@ -291,7 +298,6 @@ draw_terrain_quad_tree_node :: proc(
 ) {
 	switch value in node {
 	case Terrain_Quad_Tree_Node_Indices:
-		fmt.println("draw nodes----")
 		for child, i in value.children {
 			draw_terrain_quad_tree_node(
 				terrain_quad_tree_nodes[child],
@@ -344,44 +350,76 @@ set_terrain_quad_tree_node_tile_triangle :: proc(
 			tri,
 			side,
 		)
+
+		triangles, ok := terrain_quad_tree_nodes[value.children[0]].(Terrain_Quad_Tree_Node_Tile_Triangles)
+		fmt.println("\nCheck for collapse-----\n")
+		if !ok {return}
+		triangle := triangles.children[0]
+		fmt.println(triangle)
+		for child in value.children {
+			triangles, ok =
+			terrain_quad_tree_nodes[child].(Terrain_Quad_Tree_Node_Tile_Triangles)
+			if !ok {return}
+
+			for tri in triangles.children {
+				if tri.texture != triangle.texture ||
+				   tri.mask_texture != triangle.mask_texture {
+					return
+				}
+			}
+		}
+
+		// colapse children?
+		fmt.println("\ncolapse?--------------\n")
+		for child in value.children {
+            ordered_remove(&terrain_quad_tree_nodes, child)
+            for n in &terrain_quad_tree_nodes {
+                if indices, ok := &n.(Terrain_Quad_Tree_Node_Indices); ok {
+                    for idx, i in &indices.children {
+                        if idx > child {
+                            idx -= 1
+                        }
+                    }
+                }
+            }
+		}
+		terrain_quad_tree_nodes[node_index] = triangles
+
 	case Terrain_Quad_Tree_Node_Tile_Triangles:
 		existing_tri := value.children[int(side)]
-		if existing_tri.texture == tri.texture &&
-		   existing_tri.mask_texture == tri.mask_texture {
-			return
-		}
-		if node_w > 1 {
-			fmt.println("split nodes----")
-            index := len(terrain_quad_tree_nodes)
-            children := value.children
-            indices := Terrain_Quad_Tree_Node_Indices{
-                children = { index, index + 1, index + 2, index + 3, }
-            }
-            terrain_quad_tree_nodes[node_index] = indices
-			for i in 0 ..< 4 {
-				append(
-					&terrain_quad_tree_nodes,
-					Terrain_Quad_Tree_Node_Tile_Triangles {
-						children = children,
-					},
-				)
-			}
+		if existing_tri.texture != tri.texture ||
+		   existing_tri.mask_texture != tri.mask_texture {
+			if node_w > 1 {
+				index := len(terrain_quad_tree_nodes)
+				children := value.children
+				indices := Terrain_Quad_Tree_Node_Indices {
+						children = {index, index + 1, index + 2, index + 3},
+					}
+				terrain_quad_tree_nodes[node_index] = indices
+				for i in 0 ..< 4 {
+					append(
+						&terrain_quad_tree_nodes,
+						Terrain_Quad_Tree_Node_Tile_Triangles {
+							children = children,
+						},
+					)
+				}
 
-			i := x / (node_x + node_w) + z / (node_z + node_w) * 2
-			set_terrain_quad_tree_node_tile_triangle(
-				indices.children[i],
-				node_x + (i % 2) * (node_w / 2),
-				node_z + (i / 2) * (node_w / 2),
-				node_w / 2,
-				x,
-				z,
-				tri,
-				side,
-			)
-		} else {
-			i := int(side)
-			fmt.println("HEELLLLLO!!!")
-            value.children[i] = tri
+				i := x / (node_x + node_w) + z / (node_z + node_w) * 2
+				set_terrain_quad_tree_node_tile_triangle(
+					indices.children[i],
+					node_x + (i % 2) * (node_w / 2),
+					node_z + (i / 2) * (node_w / 2),
+					node_w / 2,
+					x,
+					z,
+					tri,
+					side,
+				)
+			} else {
+				i := int(side)
+				value.children[i] = tri
+			}
 		}
 	}
 }
@@ -401,6 +439,4 @@ set_terrain_tile_triangle :: proc(
 		tri,
 		side,
 	)
-
-	fmt.println(terrain_quad_tree_nodes)
 }
