@@ -332,11 +332,7 @@ point_in_square :: proc(point: m.vec2, center: m.vec2, size: f32) -> bool {
 	)
 }
 
-draw_terrain_quad_tree_node :: proc(
-	node: Terrain_Quad_Tree_Node,
-	x, z, w: int,
-) {
-	// fmt.println("uh?")
+cull_draw_terrain_quad_tree_node :: proc(x, z, w: int) -> bool {
 	// p0 := m.vec4{f32(x), terrain_heights[x][z], f32(z), 1}
 	// p1 := m.vec4{f32(x + 1), terrain_heights[x + w][z], f32(z), 1}
 	// p2 := m.vec4{f32(x + 1), terrain_heights[x + w][z + w], f32(z + w), 1}
@@ -345,25 +341,24 @@ draw_terrain_quad_tree_node :: proc(
 	p1 := m.vec4{f32(x + w), 0, f32(z), 1}
 	p2 := m.vec4{f32(x + w), 0, f32(z + w), 1}
 	p3 := m.vec4{f32(x), 0, f32(z + w), 1}
-	draw := false
 	p0_view_space := camera_vp * p0
-	if !draw && point_in_square(p0_view_space.xy, {0, 0}, 2.4) {
-		draw = true
+	if point_in_square(p0_view_space.xy, {0, 0}, 2.4) {
+		return false
 	}
 
 	p1_view_space := camera_vp * p1
-	if !draw && point_in_square(p1_view_space.xy, {0, 0}, 2.4) {
-		draw = true
+	if point_in_square(p1_view_space.xy, {0, 0}, 2.4) {
+		return false
 	}
 
 	p2_view_space := camera_vp * p2
-	if !draw && point_in_square(p2_view_space.xy, {0, 0}, 2.4) {
-		draw = true
+	if point_in_square(p2_view_space.xy, {0, 0}, 2.4) {
+		return false
 	}
 
 	p3_view_space := camera_vp * p3
-	if !draw && point_in_square(p3_view_space.xy, {0, 0}, 2.4) {
-		draw = true
+	if point_in_square(p3_view_space.xy, {0, 0}, 2.4) {
+		return false
 	}
 
 	center :=
@@ -373,8 +368,7 @@ draw_terrain_quad_tree_node :: proc(
 			p3_view_space.xy) /
 		4
 
-	if !draw &&
-	   point_in_rhombus(
+	if point_in_rhombus(
 		   {-1.2, -1.2},
 		   m.vec2(center),
 		   p2_view_space.xy,
@@ -382,11 +376,10 @@ draw_terrain_quad_tree_node :: proc(
 		   p0_view_space.xy,
 		   p3_view_space.xy,
 	   ) {
-		draw = true
+		return false
 	}
 
-	if !draw &&
-	   point_in_rhombus(
+	if point_in_rhombus(
 		   {1.2, -1.2},
 		   m.vec2(center),
 		   p2_view_space.xy,
@@ -394,11 +387,10 @@ draw_terrain_quad_tree_node :: proc(
 		   p0_view_space.xy,
 		   p3_view_space.xy,
 	   ) {
-		draw = true
+		return false
 	}
 
-	if !draw &&
-	   point_in_rhombus(
+	if point_in_rhombus(
 		   {1.2, 1.2},
 		   m.vec2(center),
 		   p2_view_space.xy,
@@ -406,11 +398,10 @@ draw_terrain_quad_tree_node :: proc(
 		   p0_view_space.xy,
 		   p3_view_space.xy,
 	   ) {
-		draw = true
+		return false
 	}
 
-	if !draw &&
-	   point_in_rhombus(
+	if point_in_rhombus(
 		   {-1.2, 1.2},
 		   m.vec2(center),
 		   p2_view_space.xy,
@@ -418,11 +409,17 @@ draw_terrain_quad_tree_node :: proc(
 		   p0_view_space.xy,
 		   p3_view_space.xy,
 	   ) {
-		draw = true
+		return false
 	}
 
-	if !draw {
-		// fmt.println("don't draw!")
+	return true
+}
+
+draw_terrain_quad_tree_node :: proc(
+	node: Terrain_Quad_Tree_Node,
+	x, z, w: int,
+) {
+	if cull_draw_terrain_quad_tree_node(x, z, w) {
 		return
 	}
 
