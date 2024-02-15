@@ -19,6 +19,7 @@ FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT :: 1024
 Billboard_System :: struct {
 	indices:                 [6]u8,
 	vertices:                [4]Billboard_Vertex,
+	nodes:                   [dynamic]Billboard_Quad_Tree_Node,
 	instances:               [dynamic]Billboard_Instance,
 	uniform_object:          Billboard_Uniform_Object,
 	vbo, ebo, vao, ibo, ubo: u32,
@@ -26,6 +27,20 @@ Billboard_System :: struct {
 	texture_array:           u32,
 	depth_map_texture_array: u32,
 	dirty:                   bool,
+}
+
+Billboard_Quad_Tree_Node_Children :: struct {
+	children: [4]int,
+}
+
+Billboard_Quad_Tree_Node_Instances :: struct {
+	index: int,
+	len:   int,
+}
+
+Billboard_Quad_Tree_Node :: union {
+	Billboard_Quad_Tree_Node_Children,
+	Billboard_Quad_Tree_Node_Instances,
 }
 
 billboard_system: Billboard_System
@@ -319,7 +334,121 @@ init_billboard_system :: proc(
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	gl.UseProgram(0)
 
+	append(&billboard_system.nodes, Billboard_Quad_Tree_Node_Instances{})
+
 	return true
+}
+
+cull_draw_billboard_quad_tree_node :: proc(x, z, w: int) -> bool {
+	// p0 := m.vec4{f32(x), terrain_heights[x][z], f32(z), 1}
+	// p1 := m.vec4{f32(x + 1), terrain_heights[x + w][z], f32(z), 1}
+	// p2 := m.vec4{f32(x + 1), terrain_heights[x + w][z + w], f32(z + w), 1}
+	// p3 := m.vec4{f32(x), terrain_heights[x][z + w], f32(z + w), 1}
+	p0 := glsl.vec4{f32(x), 0, f32(z), 1}
+	p1 := glsl.vec4{f32(x + w), 0, f32(z), 1}
+	p2 := glsl.vec4{f32(x + w), 0, f32(z + w), 1}
+	p3 := glsl.vec4{f32(x), 0, f32(z + w), 1}
+	p0_view_space := camera_vp * p0
+	if point_in_square(p0_view_space.xy, {0, 0}, 2.4) {
+		return false
+	}
+
+	p1_view_space := camera_vp * p1
+	if point_in_square(p1_view_space.xy, {0, 0}, 2.4) {
+		return false
+	}
+
+	p2_view_space := camera_vp * p2
+	if point_in_square(p2_view_space.xy, {0, 0}, 2.4) {
+		return false
+	}
+
+	p3_view_space := camera_vp * p3
+	if point_in_square(p3_view_space.xy, {0, 0}, 2.4) {
+		return false
+	}
+
+	center :=
+		(p0_view_space.xy +
+			p1_view_space.xy +
+			p2_view_space.xy +
+			p3_view_space.xy) /
+		4
+
+	if point_in_rhombus(
+		   {-1.2, -1.2},
+		   glsl.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		return false
+	}
+
+	if point_in_rhombus(
+		   {1.2, -1.2},
+		   glsl.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		return false
+	}
+
+	if point_in_rhombus(
+		   {1.2, 1.2},
+		   glsl.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		return false
+	}
+
+	if point_in_rhombus(
+		   {-1.2, 1.2},
+		   glsl.vec2(center),
+		   p2_view_space.xy,
+		   p1_view_space.xy,
+		   p0_view_space.xy,
+		   p3_view_space.xy,
+	   ) {
+		return false
+	}
+
+	return true
+}
+
+cull_draw_billboard_system_instances :: proc(
+	system: ^Billboard_System,
+	visible_instances: ^[dynamic]Billboard_Instance,
+	node_index, node_x, node_z, node_w: int,
+) {
+	if cull_draw_billboard_quad_tree_node(node_x, node_z, node_w) {
+		return
+	}
+	node := system.nodes[node_index]
+	switch &v in node {
+	case Billboard_Quad_Tree_Node_Children:
+		for child, i in v.children {
+			cull_draw_billboard_system_instances(
+				system,
+				visible_instances,
+				node_index + child,
+				node_x + (i % 2) * (node_w / 2),
+				node_z + (i / 2) * (node_w / 2),
+				node_w / 2,
+			)
+		}
+	case Billboard_Quad_Tree_Node_Instances:
+		for i in v.index ..< v.index + v.len {
+			// fmt.println("i:", i)
+			append(visible_instances, system.instances[i])
+		}
+	}
 }
 
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
@@ -330,19 +459,28 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	defer delete(visible_instances)
 	// visible_instances := billboard_system.instances
 
-	for instance in billboard_system.instances {
-		// fmt.println("camera_vp:", camera_vp)
-		view_space := camera_vp * vec4(instance.position, 1.0)
-		if view_space.x >= -1.2 &&
-		   view_space.x <= 1.2 &&
-		   view_space.y >= -1.2 &&
-		   view_space.y <= 1.2 &&
-		   view_space.z >= -1.2 &&
-		   view_space.z <= 1.2 {
-			append(&visible_instances, instance)
-		}
-	}
+	cull_draw_billboard_system_instances(
+		billboard_system,
+		&visible_instances,
+		0,
+		0,
+		0,
+		WORLD_WIDTH,
+	)
+	// for instance in billboard_system.instances {
+	// 	// fmt.println("camera_vp:", camera_vp)
+	// 	view_space := camera_vp * vec4(instance.position, 1.0)
+	// 	if view_space.x >= -1.2 &&
+	// 	   view_space.x <= 1.2 &&
+	// 	   view_space.y >= -1.2 &&
+	// 	   view_space.y <= 1.2 &&
+	// 	   view_space.z >= -1.2 &&
+	// 	   view_space.z <= 1.2 {
+	// 		append(&visible_instances, instance)
+	// 	}
+	// }
 	// fmt.println("visible billboards:", len(visible_instances))
+	if len(visible_instances) == 0 do return
 
 	// if billboard_system.dirty {
 	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
@@ -402,31 +540,172 @@ draw_billboards :: proc() {
 }
 
 append_billboard :: proc(using billboard: One_Tile_Billboard) {
-	append(
-		&billboard_system.instances,
-		Billboard_Instance {
-			position = position,
-			light = light,
-			texture = f32(texture),
-			depth_map = f32(depth_map),
-			rotation = rotation,
-		},
+	instance := Billboard_Instance {
+		position  = position,
+		light     = light,
+		texture   = f32(texture),
+		depth_map = f32(depth_map),
+		rotation  = rotation,
+	}
+	// fmt.println("-------------")
+	append_billboard_instance_to_quad_tree_node(
+		&billboard_system,
+		instance,
+		0,
+		0,
+		0,
+		WORLD_WIDTH,
 	)
-	billboard_system.dirty = true
+
+	// for node in billboard_system.nodes {
+	// 	switch v in node {
+	// 	case Billboard_Quad_Tree_Node_Children:
+	// 		fmt.println("children:", v.children)
+	// 	case Billboard_Quad_Tree_Node_Instances:
+	// 		fmt.println("index:", v.index, "len:", v.len)
+	// 	}
+	// }
 }
 
 append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
-	append(
-		&four_tiles_billboard_system.instances,
-		Billboard_Instance {
-			position = position,
-			light = light,
-			texture = f32(texture),
-			depth_map = f32(depth_map),
-			rotation = rotation,
-		},
+	instance := Billboard_Instance {
+		position  = position,
+		light     = light,
+		texture   = f32(texture),
+		depth_map = f32(depth_map),
+		rotation  = rotation,
+	}
+	append_billboard_instance_to_quad_tree_node(
+		&four_tiles_billboard_system,
+		instance,
+		0,
+		0,
+		0,
+		WORLD_WIDTH,
 	)
-	four_tiles_billboard_system.dirty = true
+}
+
+increment_other_billboard_node_index :: proc(
+	system: ^Billboard_System,
+	node_index: int,
+) {
+	if node_index + 1 < len(system.nodes) {
+		for i in node_index + 1 ..< len(system.nodes) {
+			node := &system.nodes[i]
+			if v, ok := &node.(Billboard_Quad_Tree_Node_Instances); ok {
+				v.index += 1
+			}
+		}
+	}
+}
+
+increment_billboard_quad_tree_node_childrens_past_target :: proc(
+	system: ^Billboard_System,
+	node_index, target_index: int,
+) {
+	node := &system.nodes[node_index]
+
+	if v, ok := &node.(Billboard_Quad_Tree_Node_Children); ok {
+		for i in 0 ..< 4 {
+			child := node_index + v.children[3 - i]
+			if child == target_index do return
+
+			if child > target_index {
+				v.children[3 - i] += 4
+			} else if child < target_index {
+				increment_billboard_quad_tree_node_childrens_past_target(
+					system,
+					child,
+					target_index,
+				)
+				return
+			}
+		}
+	}
+}
+
+append_billboard_instance_to_quad_tree_node :: proc(
+	system: ^Billboard_System,
+	instance: Billboard_Instance,
+	node_index, node_x, node_z, node_w: int,
+) {
+	node := &system.nodes[node_index]
+	x := int(instance.position.x + 0.5)
+	z := int(instance.position.z + 0.5)
+	switch &v in node {
+	case Billboard_Quad_Tree_Node_Children:
+		i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
+		append_billboard_instance_to_quad_tree_node(
+			system,
+			instance,
+			node_index + v.children[i],
+			node_x + (i % 2) * (node_w / 2),
+			node_z + (i / 2) * (node_w / 2),
+			node_w / 2,
+		)
+	case Billboard_Quad_Tree_Node_Instances:
+		copy_value: Billboard_Quad_Tree_Node_Instances = v
+		if v.len == 0 || node_w == 1 {
+			inject_at(&system.instances, v.index + v.len, instance)
+			v.len += 1
+			increment_other_billboard_node_index(system, node_index)
+			return
+		}
+
+		existing_instance := system.instances[v.index]
+		existing_instance_x := int(existing_instance.position.x + 0.5)
+		existing_instance_z := int(existing_instance.position.z + 0.5)
+		existing_instance_i :=
+			existing_instance_x / (node_x + node_w / 2) +
+			existing_instance_z / (node_z + node_w / 2) * 2
+		if existing_instance_x == x && existing_instance_z == z {
+			inject_at(&system.instances, v.index + v.len, instance)
+			v.len += 1
+			increment_other_billboard_node_index(system, node_index)
+			return
+		}
+
+		children: [4]int
+		indices: [4]int
+		for i in 0 ..< 4 {
+			children[i] = i + 1
+			indices[i] = v.index
+			if i > existing_instance_i {
+				indices[i] += v.len
+			}
+		}
+
+		inject_at(
+			&system.nodes,
+			node_index + children[0],
+			Billboard_Quad_Tree_Node_Instances{index = indices[0]},
+			Billboard_Quad_Tree_Node_Instances{index = indices[1]},
+			Billboard_Quad_Tree_Node_Instances{index = indices[2]},
+			Billboard_Quad_Tree_Node_Instances{index = indices[3]},
+		)
+
+
+		increment_billboard_quad_tree_node_childrens_past_target(
+			system,
+			0,
+			node_index,
+		)
+
+		system.nodes[node_index + children[existing_instance_i]] = copy_value
+		system.nodes[node_index] = Billboard_Quad_Tree_Node_Children {
+			children = children,
+		}
+		i := x / (node_x + node_w / 2) + z / (node_z + node_w / 2) * 2
+		// fmt.println("x:", x, "z:", z, "i:", i)
+		append_billboard_instance_to_quad_tree_node(
+			system,
+			instance,
+			node_index + children[i],
+			node_x + (i % 2) * (node_w / 2),
+			node_z + (i / 2) * (node_w / 2),
+			node_w / 2,
+		)
+	}
 }
 
 load_billboard_model :: proc(

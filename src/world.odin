@@ -1,6 +1,7 @@
 package main
 
 import m "core:math/linalg/glsl"
+import "core:fmt"
 
 WORLD_WIDTH :: 1024
 WORLD_HEIGHT :: 4
@@ -490,18 +491,22 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	// for x in 0 ..< WORLD_WIDTH {
-	// 	for z in 0 ..< WORLD_DEPTH {
-	// 		append_billboard(
-	// 			 {
-	// 				position = {f32(x), 0.0, f32(z)},
-	// 				light = {1, 1, 1},
-	// 				texture = .Chair_Wood_SW,
-	// 				depth_map = .Chair_Wood_SW,
-	// 			},
-	// 		)
-	// 	}
-	// }
+	for x in 0 ..< 100 {
+		for z in 0 ..< 100 {
+            fmt.println("x:", x, "z:", z)
+			append_billboard(
+				 {
+					position = {f32(x), 0.0, f32(z)},
+					light = {1, 1, 1},
+					texture = .Chair_Wood_SW,
+					depth_map = .Chair_Wood_SW,
+				},
+			)
+		}
+	}
+
+    fmt.println("finished adding chairs")
+    
 
 
 	// append_billboard(

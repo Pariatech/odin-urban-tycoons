@@ -295,43 +295,6 @@ get_tile_height :: proc(x, z: int) -> f32 {
 	return total / 4
 }
 
-point_in_rhombus :: proc(
-	point: m.vec2,
-	center: m.vec2,
-	top: m.vec2,
-	right: m.vec2,
-	bottom: m.vec2,
-	left: m.vec2,
-) -> bool {
-	center_to_top := top - center
-	center_to_right := right - center
-	center_to_bottom := bottom - center
-	center_to_left := left - center
-	center_to_point := point - center
-
-	return(
-		m.dot(center_to_point, center_to_top) <=
-			m.dot(center_to_top, center_to_top) &&
-		m.dot(center_to_point, center_to_right) <=
-			m.dot(center_to_right, center_to_right) &&
-		m.dot(center_to_point, center_to_bottom) <=
-			m.dot(center_to_bottom, center_to_bottom) &&
-		m.dot(center_to_point, center_to_left) <=
-			m.dot(center_to_left, center_to_left) \
-	)
-}
-
-point_in_square :: proc(point: m.vec2, center: m.vec2, size: f32) -> bool {
-	half_size := size / 2
-
-	return(
-		point.x >= center.x - half_size &&
-		point.x <= center.x + half_size &&
-		point.y >= center.y - half_size &&
-		point.y <= center.y + half_size \
-	)
-}
-
 cull_draw_terrain_quad_tree_node :: proc(x, z, w: int) -> bool {
 	// p0 := m.vec4{f32(x), terrain_heights[x][z], f32(z), 1}
 	// p1 := m.vec4{f32(x + 1), terrain_heights[x + w][z], f32(z), 1}
