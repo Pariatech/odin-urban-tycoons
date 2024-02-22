@@ -479,7 +479,7 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	// 		append(&visible_instances, instance)
 	// 	}
 	// }
-	// fmt.println("visible billboards:", len(visible_instances))
+	fmt.println("visible billboards:", len(visible_instances))
 	if len(visible_instances) == 0 do return
 
 	// if billboard_system.dirty {
