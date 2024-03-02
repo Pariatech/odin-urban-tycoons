@@ -1,8 +1,8 @@
 package main
 
+import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:testing"
-import "core:fmt"
 
 Quadtree_Node_Child_Type :: enum {
 	Empty,
@@ -78,7 +78,7 @@ quadtree_append :: proc(qt: ^Quadtree($T), pos: glsl.ivec2, item: T) {
 
 				child.type = .Node
 				child.index = len(qt.nodes)
-                child_index := child.index
+				child_index := child.index
 				append(&qt.nodes, node)
 
 				recur(
@@ -154,7 +154,7 @@ quadtree_update_node :: proc(
 	pos: glsl.ivec2,
 	old, new: int,
 ) {
-    if old == new {return}
+	if old == new {return}
 	node_index: int = 0
 	node_size: i32 = qt.size
 	node_pos: glsl.ivec2 = {0, 0}
@@ -190,10 +190,7 @@ quadtree_shake :: proc(qt: ^Quadtree($T), pos: glsl.ivec2) {
 	i := pos.x / (qt.size / 2) + pos.y / (qt.size / 2) * 2
 	if qt.nodes[0].children[i].type != .Node {return}
 	node_index := qt.nodes[0].children[i].index
-	node_pos := glsl.ivec2 {
-		(i % 2) * qt.size / 2,
-		(i / 2) * qt.size / 2,
-	}
+	node_pos := glsl.ivec2{(i % 2) * qt.size / 2, (i / 2) * qt.size / 2}
 
 	for {
 		all_empty := true
@@ -212,7 +209,7 @@ quadtree_shake :: proc(qt: ^Quadtree($T), pos: glsl.ivec2) {
 			unordered_remove(&qt.nodes, node_index)
 			quadtree_update_node(qt, pos, len(qt.nodes), node_index)
 			quadtree_shake(qt, pos)
-            return
+			return
 		} else {
 			i =
 				pos.x / (node_pos.x + node_size / 2) +
@@ -228,8 +225,8 @@ quadtree_shake :: proc(qt: ^Quadtree($T), pos: glsl.ivec2) {
 			if child.type != .Node {
 				return
 			}
-            
-            previous_index = node_index
+
+			previous_index = node_index
 			node_index = child.index
 			node_size /= 2
 			node_pos = child_pos
@@ -276,11 +273,11 @@ quadtree_remove :: proc(qt: ^Quadtree($T), pos: glsl.ivec2, item: T) {
 						child.index = next
 					} else {
 						child.type = .Empty
-			            quadtree_shake(qt, pos)
+						quadtree_shake(qt, pos)
 					}
 
 					unordered_remove(&qt.points, next)
-                    if len(qt.points) == next {return}
+					if len(qt.points) == next {return}
 
 					quadtree_update_point(
 						qt,
@@ -331,7 +328,7 @@ quadtree_search :: proc(qt: ^Quadtree($T), aabb: Rectangle) -> []T {
 			case .Point:
 				point_pos := qt.points[child.index].pos
 				point_aabb := Rectangle{point_pos.x, point_pos.y, 1, 1}
-				if !aabb_intersection(point_aabb, aabb) {return}
+				if !aabb_intersection(point_aabb, aabb) {continue}
 
 				append(result, qt.points[child.index].item)
 

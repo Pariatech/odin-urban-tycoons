@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:math/linalg/glsl"
+import "core:math"
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
 import stbi "vendor:stb/image"
@@ -380,8 +381,8 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		aabb = Rectangle {
 				x = i32(bottom_left.x),
 				y = i32(bottom_right.y),
-				w = i32(width),
-				h = i32(height),
+				w = i32(math.ceil(width)),
+				h = i32(math.ceil(height)),
 			}
 	case .South_East:
 		width := bottom_right.x - top_left.x
@@ -390,8 +391,8 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		aabb = Rectangle {
 				x = i32(top_left.x),
 				y = i32(bottom_left.y),
-				w = i32(width),
-				h = i32(height),
+				w = i32(math.ceil(width)),
+				h = i32(math.ceil(height)),
 			}
 	case .North_East:
 		width := bottom_left.x - top_right.x
@@ -400,8 +401,8 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		aabb = Rectangle {
 				x = i32(top_right.x),
 				y = i32(top_left.y),
-				w = i32(width),
-				h = i32(height),
+				w = i32(math.ceil(width)),
+				h = i32(math.ceil(height)),
 			}
 	case .North_West:
 		width := top_left.x - bottom_right.x
@@ -410,16 +411,32 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		aabb = Rectangle {
 				x = i32(bottom_right.x),
 				y = i32(top_right.y),
-				w = i32(width),
-				h = i32(height),
+				w = i32(math.ceil(width)),
+				h = i32(math.ceil(height)),
 			}
 	}
+
+    // fmt.println("aabb:", aabb)
+
+	// test := quadtree_search(&billboard_system.quadtree, {19, 1, 1, 1})
+ //    defer delete(test)
+ //    fmt.println(test)
+ //    fmt.println(billboard_system.instances[195])
 
 	indices := quadtree_search(&billboard_system.quadtree, aabb)
 	defer delete(indices)
 	for index in indices {
 		append(&visible_instances, billboard_system.instances[index])
 	}
+
+    // for index in indices {
+    //     if index == 195 {
+    //         fmt.println("drawing 195")
+    //     }
+    //     if index == 194 {
+    //         fmt.println("drawing 194")
+    //     }
+    // }
 
 	// fmt.println("visible billboards:", len(visible_instances))
 	if len(visible_instances) == 0 do return

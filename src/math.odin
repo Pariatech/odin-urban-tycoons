@@ -83,6 +83,9 @@ aabb_intersection :: proc(a: Rectangle, b: Rectangle) -> bool {
     x_overlap := a_left <= b_right && a_right >= b_left
     y_overlap := a_bottom <= b_top && a_top >= b_bottom
 
+    // x_overlap := a_left >= b_left && a_right <= b_right
+    // y_overlap := a_bottom >= b_bottom && a_top <= b_top
+
     return x_overlap && y_overlap
 }
 
@@ -93,6 +96,6 @@ aabb_intersection_test :: proc(t: ^testing.T) {
     testing.expect_value(t, aabb_intersection({0, 0, 1, 1}, {0, 0, 2, 2}), true)
     testing.expect_value(t, aabb_intersection({0, 0, 1, 1}, {2, 2, 2, 2}), false)
     testing.expect_value(t, aabb_intersection({1, 1, 1, 1}, {0, 0, 2, 2}), true)
-    testing.expect_value(t, aabb_intersection({2, 2, 1, 1}, {0, 0, 2, 2}), true)
-    testing.expect_value(t, aabb_intersection({0, 0, 2, 2}, {2, 2, 2, 2}), true)
+    testing.expect_value(t, aabb_intersection({2, 2, 1, 1}, {0, 0, 3, 3}), true)
+    testing.expect_value(t, aabb_intersection({1, 1, 2, 2}, {0, 0, 3, 3}), true)
 }

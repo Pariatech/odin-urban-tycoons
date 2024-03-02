@@ -491,18 +491,18 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	// for x in 0 ..< 1000 {
-	// 	for z in 0 ..< 1000 {
-	// 		append_billboard(
-	// 			 {
-	// 				position = {f32(x), 0.0, f32(z)},
-	// 				light = {1, 1, 1},
-	// 				texture = .Door_Wood_SW,
-	// 				depth_map = .Door_Wood_SW,
-	// 			},
-	// 		)
-	// 	}
-	// }
+	for x in 0 ..< 20 {
+		for z in 0 ..< 10 {
+			append_billboard(
+				 {
+					position = {f32(x), 0.0, f32(z)},
+					light = {1, 1, 1},
+					texture = .Chair_Wood_SW,
+					depth_map = .Chair_Wood_SW,
+				},
+			)
+		}
+	}
 	//    fmt.println("finished adding chairs", len(billboard_system.nodes))
 
 	// for x in 0 ..< 100 {
