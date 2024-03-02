@@ -12,7 +12,7 @@ CAMERA_ZOOM_MIN :: 0
 camera_zoom: f32 = 0
 camera_position: m.vec3
 camera_rotation: Camera_Rotation
-camera_distance := f32(20)
+camera_distance := f32(30)
 camera_translate := m.vec3{-camera_distance, camera_distance, -camera_distance}
 camera_view: m.mat4
 camera_proj: m.mat4

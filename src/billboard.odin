@@ -371,32 +371,41 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	top_left := get_view_corner({-1, 1})
 	bottom_right := get_view_corner({1, -1})
 	top_right := get_view_corner({1, 1})
+    camera := camera_position + camera_translate
 
 	aabb: Rectangle
 	switch camera_rotation {
 	case .South_West:
-		width := top_right.x - bottom_left.x
-		height := top_left.y - bottom_right.y
+        camera.x = math.min(camera.x, bottom_left.x)
+        camera.z = math.min(camera.z, bottom_right.y)
+		width := top_right.x - camera.x
+		height := top_left.y - camera.z
 
 		aabb = Rectangle {
-				x = i32(bottom_left.x),
-				y = i32(bottom_right.y),
+				x = i32(camera.x),
+				y = i32(camera.z),
 				w = i32(math.ceil(width)),
 				h = i32(math.ceil(height)),
 			}
 	case .South_East:
-		width := bottom_right.x - top_left.x
-		height := top_right.y - bottom_left.y
+        camera.x = math.max(camera.x, bottom_right.x)
+        camera.z = math.min(camera.z, bottom_left.y)
+		width := camera.x - top_left.x
+		height := top_right.y - camera.z
 
 		aabb = Rectangle {
 				x = i32(top_left.x),
-				y = i32(bottom_left.y),
+				y = i32(camera.z),
 				w = i32(math.ceil(width)),
 				h = i32(math.ceil(height)),
 			}
 	case .North_East:
-		width := bottom_left.x - top_right.x
-		height := bottom_right.y - top_left.y
+        camera.x = math.max(camera.x, bottom_left.x)
+        camera.z = math.max(camera.z, bottom_right.y)
+		width := camera.x - top_right.x
+		height := camera.z - top_left.y
+        fmt.println("camera.xz:", camera.xz)
+        fmt.println("bottom_left.x:", bottom_left.x, "bottom_right.y:", bottom_right.y)
 
 		aabb = Rectangle {
 				x = i32(top_right.x),
@@ -405,38 +414,24 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 				h = i32(math.ceil(height)),
 			}
 	case .North_West:
-		width := top_left.x - bottom_right.x
-		height := bottom_left.y - top_right.y
+        camera.x = math.min(camera.x, bottom_right.x)
+        camera.z = math.max(camera.z, bottom_left.y)
+		width := top_left.x - camera.x
+		height := camera.z - top_right.y
 
 		aabb = Rectangle {
-				x = i32(bottom_right.x),
+				x = i32(camera.x),
 				y = i32(top_right.y),
 				w = i32(math.ceil(width)),
 				h = i32(math.ceil(height)),
 			}
 	}
 
-    // fmt.println("aabb:", aabb)
-
-	// test := quadtree_search(&billboard_system.quadtree, {19, 1, 1, 1})
- //    defer delete(test)
- //    fmt.println(test)
- //    fmt.println(billboard_system.instances[195])
-
 	indices := quadtree_search(&billboard_system.quadtree, aabb)
 	defer delete(indices)
 	for index in indices {
 		append(&visible_instances, billboard_system.instances[index])
 	}
-
-    // for index in indices {
-    //     if index == 195 {
-    //         fmt.println("drawing 195")
-    //     }
-    //     if index == 194 {
-    //         fmt.println("drawing 194")
-    //     }
-    // }
 
 	// fmt.println("visible billboards:", len(visible_instances))
 	if len(visible_instances) == 0 do return
