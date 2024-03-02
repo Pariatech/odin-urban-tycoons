@@ -1,7 +1,7 @@
 package main
 
-import m "core:math/linalg/glsl"
 import "core:fmt"
+import m "core:math/linalg/glsl"
 
 WORLD_WIDTH :: 1024
 WORLD_HEIGHT :: 4
@@ -491,19 +491,19 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	for x in 0 ..< 1000 {
-		for z in 0 ..< 1000 {
-			append_billboard(
-				 {
-					position = {f32(x), 0.0, f32(z)},
-					light = {1, 1, 1},
-					texture = .Chair_Wood_SW,
-					depth_map = .Chair_Wood_SW,
-				},
-			)
-		}
-	}
- //    fmt.println("finished adding chairs", len(billboard_system.nodes))
+	// for x in 0 ..< 1000 {
+	// 	for z in 0 ..< 1000 {
+	// 		append_billboard(
+	// 			 {
+	// 				position = {f32(x), 0.0, f32(z)},
+	// 				light = {1, 1, 1},
+	// 				texture = .Door_Wood_SW,
+	// 				depth_map = .Door_Wood_SW,
+	// 			},
+	// 		)
+	// 	}
+	// }
+	//    fmt.println("finished adding chairs", len(billboard_system.nodes))
 
 	// for x in 0 ..< 100 {
 	// 	for z in 0 ..< 100 {
@@ -517,7 +517,6 @@ init_world :: proc() {
 	// 		)
 	// 	}
 	// }
-    
 
 
 	// append_billboard(
@@ -714,16 +713,22 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 		},
 	)
 	if floor > 0 {
-		insert_wall_window(
-			.North_South,
-			{house_x + 1, floor, house_z + 5},
-			{texture = .Medium_Window_Wood},
+		append_billboard(
+			 {
+				position = {f32(house_x + 1), f32(floor * WALL_HEIGHT), f32(house_z + 5)},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SE,
+				depth_map = .Window_Wood_SE,
+			},
 		)
 	} else {
-		insert_wall_door(
-			.North_South,
-			{house_x + 1, floor, house_z + 5},
-			{model = .Wood},
+		append_billboard(
+			 {
+				position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
+				light = {1, 1, 1},
+				texture = .Door_Wood_SE,
+				depth_map = .Door_Wood_SE,
+			},
 		)
 	}
 
@@ -752,10 +757,13 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 				mask = .Window_Opening,
 			},
 		)
-		insert_wall_window(
-			.North_South,
-			{house_x, floor, house_z + i32(i) + 8},
-			{texture = .Medium_Window_Wood},
+		append_billboard(
+			 {
+				position = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + i32(i) + 8)},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SE,
+				depth_map = .Window_Wood_SE,
+			},
 		)
 	}
 
@@ -786,10 +794,13 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			},
 		)
 
-		insert_wall_window(
-			.East_West,
-			{house_x + i32(i) + 1, floor, house_z},
-			{texture = .Medium_Window_Wood},
+		append_billboard(
+			 {
+				position = {f32(house_x + i32(i) + 1), f32(floor * WALL_HEIGHT), f32(house_z)},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SW,
+				depth_map = .Window_Wood_SW,
+			},
 		)
 	}
 
@@ -820,10 +831,13 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			},
 		)
 
-		insert_wall_window(
-			.East_West,
-			{house_x + i32(i) + 1, floor, house_z + 11},
-			{texture = .Medium_Window_Wood},
+		append_billboard(
+			 {
+				position = {f32(house_x + i32(i) + 1), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SW,
+				depth_map = .Window_Wood_SW,
+			},
 		)
 	}
 	insert_east_west_wall(
@@ -880,10 +894,6 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 
 rotate_world :: proc() {
 	clear_draw_components()
-	rotate_chairs()
-	rotate_tables()
-	rotate_doors()
-	rotate_windows()
 	rotate_walls()
 	rotate_diagonal_walls()
 }

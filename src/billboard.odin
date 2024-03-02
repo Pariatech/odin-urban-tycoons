@@ -70,6 +70,16 @@ Billboard_Texture :: enum u8 {
 	Chair_Wood_SE,
 	Chair_Wood_NE,
 	Chair_Wood_NW,
+
+	Door_Wood_SW,
+	Door_Wood_SE,
+	Door_Wood_NE,
+	Door_Wood_NW,
+
+	Window_Wood_SW,
+	Window_Wood_SE,
+	Window_Wood_NE,
+	Window_Wood_NW,
 }
 
 Four_Tiles_Billboard_Texture :: enum u8 {
@@ -88,6 +98,16 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
 	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
 	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
+
+	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-diffuse.png",
+	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-diffuse.png",
+	.Door_Wood_NE = "resources/textures/billboards/door-wood/ne-diffuse.png",
+	.Door_Wood_NW = "resources/textures/billboards/door-wood/nw-diffuse.png",
+
+	.Window_Wood_SW = "resources/textures/billboards/window-wood/sw-diffuse.png",
+	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-diffuse.png",
+	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-diffuse.png",
+	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-diffuse.png",
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
@@ -106,6 +126,16 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
 	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
 	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
+
+	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-depth-map.png",
+	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-depth-map.png",
+	.Door_Wood_NE = "resources/textures/billboards/door-wood/ne-depth-map.png",
+	.Door_Wood_NW = "resources/textures/billboards/door-wood/nw-depth-map.png",
+
+	.Window_Wood_SW = "resources/textures/billboards/window-wood/sw-depth-map.png",
+	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-depth-map.png",
+	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-depth-map.png",
+	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-depth-map.png",
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::

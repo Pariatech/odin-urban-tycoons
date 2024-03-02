@@ -51,11 +51,6 @@ start :: proc() -> (ok: bool = false) {
 	init_keyboard()
 	init_cursor()
 
-	load_wall_door_models()
-	load_wall_window_mesh()
-	load_table_models()
-	load_chair_models()
-
 	init_billboard_systems() or_return
 	init_terrain()
 	init_world()
