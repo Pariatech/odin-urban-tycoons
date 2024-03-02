@@ -26,7 +26,6 @@ Billboard_System :: struct {
 	shader_program:          u32,
 	texture_array:           u32,
 	depth_map_texture_array: u32,
-	dirty:                   bool,
 }
 
 billboard_system: Billboard_System
@@ -334,31 +333,8 @@ get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	if len(billboard_system.instances) == 0 do return
 
-	// fmt.println("entered billboards:", len(billboard_system.instances))
 	visible_instances := [dynamic]Billboard_Instance{}
 	defer delete(visible_instances)
-	// visible_instances := billboard_system.instances
-
-	// cull_draw_billboard_system_instances(
-	// 	billboard_system,
-	// 	&visible_instances,
-	// 	0,
-	// 	0,
-	// 	0,
-	// 	WORLD_WIDTH,
-	// )
-	// for instance in billboard_system.instances {
-	// 	// fmt.println("camera_vp:", camera_vp)
-	// 	view_space := camera_vp * vec4(instance.position, 1.0)
-	// 	if view_space.x >= -1.2 &&
-	// 	   view_space.x <= 1.2 &&
-	// 	   view_space.y >= -1.2 &&
-	// 	   view_space.y <= 1.2 &&
-	// 	   view_space.z >= -1.2 &&
-	// 	   view_space.z <= 1.2 {
-	// 		append(&visible_instances, instance)
-	// 	}
-	// }
 
 	bottom_left := get_view_corner({-1, -1})
 	top_left := get_view_corner({-1, 1})
@@ -409,33 +385,15 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 			}
 	}
 
-	// fmt.println("bottom_left:", bottom_left)
-	// fmt.println("top_left:", top_left)
-	// fmt.println("bottom_right:", bottom_right)
-	// fmt.println("top_right:", top_right)
-	// fmt.println("aabb:", aabb)
-
-
 	indices := quadtree_search(&billboard_system.quadtree, aabb)
 	defer delete(indices)
 	for index in indices {
 		append(&visible_instances, billboard_system.instances[index])
 	}
 
-	// p1 := inverse(camera_vp) * glsl.vec4{-1, -1, -1, 1}
-	// p2 := inverse(camera_vp) * glsl.vec4{-1, -1, 1, 1}
-	// fmt.println("near:", p1)
-	// fmt.println("far:", p2)
-	// t := -p1.y / (p2.y - p1.y)
-	// p3 := glsl.vec4{0, 0, 0, 1}
-	// p3.x = p1.x + t * (p2.x - p1.x)
-	// p3.z = p1.z + t * (p2.z - p1.z)
-	// fmt.println("point:", p3)
-
 	// fmt.println("visible billboards:", len(visible_instances))
 	if len(visible_instances) == 0 do return
 
-	// if billboard_system.dirty {
 	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
@@ -443,9 +401,7 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 		raw_data(visible_instances),
 		gl.STATIC_DRAW,
 	)
-	billboard_system.dirty = false
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	// }
 
 
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -500,15 +456,6 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) {
 		depth_map = f32(depth_map),
 		rotation  = rotation,
 	}
-	// fmt.println("-------------")
-	// append_billboard_instance_to_quad_tree_node(
-	// 	&billboard_system,
-	// 	instance,
-	// 	0,
-	// 	0,
-	// 	0,
-	// 	WORLD_WIDTH,
-	// )
 
 	index := len(billboard_system.instances)
 	append(&billboard_system.instances, instance)
@@ -517,15 +464,6 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) {
 		{i32(position.x + 0.5), i32(position.z + 0.5)},
 		index,
 	)
-
-	// for node in billboard_system.nodes {
-	// 	switch v in node {
-	// 	case Billboard_Quad_Tree_Node_Children:
-	// 		fmt.println("children:", v.children)
-	// 	case Billboard_Quad_Tree_Node_Instances:
-	// 		fmt.println("index:", v.index, "len:", v.len)
-	// 	}
-	// }
 }
 
 append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
