@@ -624,6 +624,8 @@ increment_billboard_quad_tree_node_childrens_past_target :: proc(
 	}
 }
 
+// remove_billboard_instance_to_quad_tree_node :: proc()
+
 append_billboard_instance_to_quad_tree_node :: proc(
 	system: ^Billboard_System,
 	instance: Billboard_Instance,
