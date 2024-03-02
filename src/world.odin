@@ -491,32 +491,32 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	// for x in 0 ..< 100 {
-	// 	for z in 0 ..< 100 {
-	// 		append_billboard(
-	// 			 {
-	// 				position = {f32(x), 0.0, f32(z)},
-	// 				light = {1, 1, 1},
-	// 				texture = .Chair_Wood_SW,
-	// 				depth_map = .Chair_Wood_SW,
-	// 			},
-	// 		)
-	// 	}
-	// }
- //    fmt.println("finished adding chairs", len(billboard_system.nodes))
-
-	for x in 0 ..< 100 {
-		for z in 0 ..< 100 {
-			append_four_tiles_billboard(
+	for x in 0 ..< 1000 {
+		for z in 0 ..< 1000 {
+			append_billboard(
 				 {
-					position = {f32(x * 2) + 0.5, 0.0, f32(z * 2) + 0.5},
+					position = {f32(x), 0.0, f32(z)},
 					light = {1, 1, 1},
-					texture = .Table_Wood_SW,
-					depth_map = .Table_Wood_SW,
+					texture = .Chair_Wood_SW,
+					depth_map = .Chair_Wood_SW,
 				},
 			)
 		}
 	}
+ //    fmt.println("finished adding chairs", len(billboard_system.nodes))
+
+	// for x in 0 ..< 100 {
+	// 	for z in 0 ..< 100 {
+	// 		append_four_tiles_billboard(
+	// 			 {
+	// 				position = {f32(x * 2) + 0.5, 0.0, f32(z * 2) + 0.5},
+	// 				light = {1, 1, 1},
+	// 				texture = .Table_Wood_SW,
+	// 				depth_map = .Table_Wood_SW,
+	// 			},
+	// 		)
+	// 	}
+	// }
     
 
 

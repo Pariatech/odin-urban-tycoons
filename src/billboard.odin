@@ -21,6 +21,7 @@ Billboard_System :: struct {
 	vertices:                [4]Billboard_Vertex,
 	nodes:                   [dynamic]Billboard_Quad_Tree_Node,
 	instances:               [dynamic]Billboard_Instance,
+	quadtree:                Quadtree(int),
 	uniform_object:          Billboard_Uniform_Object,
 	vbo, ebo, vao, ibo, ubo: u32,
 	shader_program:          u32,
@@ -166,6 +167,7 @@ init_billboard_system :: proc(
 ) -> (
 	ok: bool = false,
 ) {
+    billboard_system.quadtree.size = WORLD_WIDTH
 	load_billboard_model(
 		model_path,
 		&billboard_system.vertices,
@@ -451,6 +453,13 @@ cull_draw_billboard_system_instances :: proc(
 	}
 }
 
+get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
+	p1 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, -1, 1}
+	p2 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, 1, 1}
+	t := -p1.y / (p2.y - p1.y)
+	return glsl.vec2{p1.x + t * (p2.x - p1.x), p1.z + t * (p2.z - p1.z)}
+}
+
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	if len(billboard_system.instances) == 0 do return
 
@@ -459,14 +468,14 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	defer delete(visible_instances)
 	// visible_instances := billboard_system.instances
 
-	cull_draw_billboard_system_instances(
-		billboard_system,
-		&visible_instances,
-		0,
-		0,
-		0,
-		WORLD_WIDTH,
-	)
+	// cull_draw_billboard_system_instances(
+	// 	billboard_system,
+	// 	&visible_instances,
+	// 	0,
+	// 	0,
+	// 	0,
+	// 	WORLD_WIDTH,
+	// )
 	// for instance in billboard_system.instances {
 	// 	// fmt.println("camera_vp:", camera_vp)
 	// 	view_space := camera_vp * vec4(instance.position, 1.0)
@@ -479,7 +488,45 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	// 		append(&visible_instances, instance)
 	// 	}
 	// }
-	fmt.println("visible billboards:", len(visible_instances))
+
+	bottom_left := get_view_corner({-1, -1})
+	top_left := get_view_corner({-1, 1})
+	bottom_right := get_view_corner({1, -1})
+	top_right := get_view_corner({1, 1})
+    width := top_right.x - bottom_left.x
+    height := top_left.y - bottom_right.y
+    
+	aabb := Rectangle {
+			x = i32(bottom_left.x),
+			y = i32(bottom_right.y),
+			w = i32(width),
+			h = i32(height),
+		}
+
+	// fmt.println("bottom_left:", bottom_left)
+	// fmt.println("top_left:", top_left)
+	// fmt.println("bottom_right:", bottom_right)
+	// fmt.println("top_right:", top_right)
+	// fmt.println("aabb:", aabb)
+
+
+    indices := quadtree_search(&billboard_system.quadtree, aabb)
+    defer delete(indices)
+    for index in indices {
+        append(&visible_instances, billboard_system.instances[index])
+    }
+
+	// p1 := inverse(camera_vp) * glsl.vec4{-1, -1, -1, 1}
+	// p2 := inverse(camera_vp) * glsl.vec4{-1, -1, 1, 1}
+	// fmt.println("near:", p1)
+	// fmt.println("far:", p2)
+	// t := -p1.y / (p2.y - p1.y)
+	// p3 := glsl.vec4{0, 0, 0, 1}
+	// p3.x = p1.x + t * (p2.x - p1.x)
+	// p3.z = p1.z + t * (p2.z - p1.z)
+	// fmt.println("point:", p3)
+
+	// fmt.println("visible billboards:", len(visible_instances))
 	if len(visible_instances) == 0 do return
 
 	// if billboard_system.dirty {
@@ -548,13 +595,21 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) {
 		rotation  = rotation,
 	}
 	// fmt.println("-------------")
-	append_billboard_instance_to_quad_tree_node(
-		&billboard_system,
-		instance,
-		0,
-		0,
-		0,
-		WORLD_WIDTH,
+	// append_billboard_instance_to_quad_tree_node(
+	// 	&billboard_system,
+	// 	instance,
+	// 	0,
+	// 	0,
+	// 	0,
+	// 	WORLD_WIDTH,
+	// )
+
+	index := len(billboard_system.instances)
+	append(&billboard_system.instances, instance)
+	quadtree_append(
+		&billboard_system.quadtree,
+		{i32(position.x + 0.5), i32(position.z + 0.5)},
+		index,
 	)
 
 	// for node in billboard_system.nodes {

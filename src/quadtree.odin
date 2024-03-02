@@ -78,11 +78,12 @@ quadtree_append :: proc(qt: ^Quadtree($T), pos: glsl.ivec2, item: T) {
 
 				child.type = .Node
 				child.index = len(qt.nodes)
+                child_index := child.index
 				append(&qt.nodes, node)
 
 				recur(
 					qt,
-					child.index,
+					child_index,
 					point_index,
 					node_size / 2,
 					child_pos,
