@@ -2,6 +2,7 @@ package main
 
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
+import "core:fmt"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
@@ -776,15 +777,17 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
 	}
 
 
-south_west_north_east_walls := map[m.ivec3]Wall{}
-north_west_south_east_walls := map[m.ivec3]Wall{}
+south_west_north_east_walls := [dynamic]Wall{}
+north_west_south_east_walls := [dynamic]Wall{}
 
-draw_diagonal_wall :: proc(
-	wall: Wall,
-	pos: m.ivec3,
-	axis: Diagonal_Wall_Axis,
-	y: f32,
-) {
+south_west_north_east_walls_quadtree := Quadtree(int) {
+		size = WORLD_WIDTH,
+	}
+north_west_south_east_walls_quadtree := Quadtree(int) {
+		size = WORLD_WIDTH,
+	}
+
+draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 	mask_map := DIAGONAL_WALL_MASK_MAP
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
@@ -798,7 +801,7 @@ draw_diagonal_wall :: proc(
 	mask := mask_map[axis][camera_rotation][wall.type]
 	top_mask := top_mask_map[axis][camera_rotation][wall.type]
 	draw := draw_map[axis][wall.type][camera_rotation]
-	position := m.vec3{f32(pos.x), y, f32(pos.z)}
+	position := wall.pos
 	transform := m.mat4Translate(position)
 	transform *= transform_map[camera_rotation]
 
@@ -817,14 +820,12 @@ draw_diagonal_wall :: proc(
 			wall_vertices = diagonal_wall_cross_vertices
 		}
 
-		append_draw_component(
-			 {
-				vertices = wall_vertices,
-				indices = diagonal_wall_indices,
-				model = transform,
-				texture = texture,
-				mask = wall.mask,
-			},
+		draw_wall_mesh(
+			wall_vertices,
+			diagonal_wall_indices,
+			transform,
+			texture,
+			wall.mask,
 		)
 	}
 
@@ -842,33 +843,59 @@ draw_diagonal_wall :: proc(
 		top_vertices = diagonal_wall_top_cross_vertices
 	}
 
-	append_draw_component(
-		 {
-			vertices = top_vertices,
-			indices = diagonal_wall_indices,
-			model = transform,
-			texture = .Wall_Top,
-			mask = wall.mask,
-		},
+	draw_wall_mesh(
+		top_vertices,
+		diagonal_wall_indices,
+		transform,
+		.Wall_Top,
+		wall.mask,
 	)
 }
 
-insert_north_west_south_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	north_west_south_east_walls[pos] = wall
-    draw_diagonal_wall(wall, pos, .North_West_South_East, f32(pos.y * WALL_HEIGHT))
+draw_diagonal_walls :: proc() {
+	aabb := get_camera_aabb()
+
+	north_west_south_east_walls_indices := quadtree_search(
+		&north_west_south_east_walls_quadtree,
+		aabb,
+	)
+	defer delete(north_west_south_east_walls_indices)
+	for index in north_west_south_east_walls_indices {
+		draw_diagonal_wall(
+			north_west_south_east_walls[index],
+			.North_West_South_East,
+		)
+	}
+
+	south_west_north_east_walls_indices := quadtree_search(
+		&south_west_north_east_walls_quadtree,
+		aabb,
+	)
+	defer delete(south_west_north_east_walls_indices)
+	for index in south_west_north_east_walls_indices {
+		draw_diagonal_wall(
+			south_west_north_east_walls[index],
+			.South_West_North_East,
+		)
+	}
 }
 
-insert_south_west_north_east_wall :: proc(pos: m.ivec3, wall: Wall) {
-	south_west_north_east_walls[pos] = wall
-    draw_diagonal_wall(wall, pos, .South_West_North_East, f32(pos.y * WALL_HEIGHT))
+insert_north_west_south_east_wall :: proc(wall: Wall) {
+	index := len(north_west_south_east_walls)
+	append(&north_west_south_east_walls, wall)
+	quadtree_append(
+		&north_west_south_east_walls_quadtree,
+		{i32(wall.pos.x), i32(wall.pos.z)},
+		index,
+	)
 }
 
-
-rotate_diagonal_walls :: proc() {
-    for pos, wall in north_west_south_east_walls {
-        draw_diagonal_wall(wall, pos, .North_West_South_East, f32(pos.y * WALL_HEIGHT))
-    }
-    for pos, wall in south_west_north_east_walls {
-        draw_diagonal_wall(wall, pos, .South_West_North_East, f32(pos.y * WALL_HEIGHT))
-    }
+insert_south_west_north_east_wall :: proc(wall: Wall) {
+	index := len(south_west_north_east_walls)
+	append(&south_west_north_east_walls, wall)
+	quadtree_append(
+		&south_west_north_east_walls_quadtree,
+		{i32(wall.pos.x), i32(wall.pos.z)},
+		index,
+	)
 }

@@ -51,6 +51,7 @@ Wall_Side :: enum {
 }
 
 Wall :: struct {
+	pos:      m.vec3,
 	type:     Wall_Type,
 	textures: [Wall_Side]Texture,
 	mask:     Texture,
@@ -675,21 +676,38 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-north_south_walls := map[m.ivec3]Wall{}
-east_west_walls := map[m.ivec3]Wall{}
-
-draw_wall_mesh :: proc(
-	wall: Wall,
-	pos: m.ivec3,
-	axis: Wall_Axis,
-	y: f32,
-	vertices: [$T]Vertex,
-	indices: [$Y]u32,
-) {
-
+north_south_walls := [dynamic]Wall{}
+east_west_walls := [dynamic]Wall{}
+north_south_walls_quadtree := Quadtree(int) {
+	size = WORLD_WIDTH,
+}
+east_west_walls_quadtree := Quadtree(int) {
+	size = WORLD_WIDTH,
 }
 
-draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
+draw_wall_mesh :: proc(
+	vertices: []Vertex,
+	indices: []u32,
+	model: m.mat4,
+	texture: Texture,
+	mask: Texture,
+) {
+	index_offset := u32(len(world_vertices))
+	for i in 0 ..< len(vertices) {
+		vertex := vertices[i]
+		vertex.texcoords.z = f32(texture)
+		vertex.texcoords.w = f32(mask)
+		vertex.pos = linalg.mul(model, vec4(vertex.pos, 1)).xyz
+
+		append(&world_vertices, vertex)
+	}
+
+	for idx in indices {
+		append(&world_indices, idx + index_offset)
+	}
+}
+
+draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 	mask_map := WALL_MASK_MAP
 	side_map := WALL_SIDE_MAP
 	transform_map := WALL_TRANSFORM_MAP
@@ -700,7 +718,7 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 	mask := mask_map[wall.type][axis][camera_rotation]
 	top_mesh := top_mesh_map[wall.type][axis][camera_rotation]
 
-	position := m.vec3{f32(pos.x), y, f32(pos.z)}
+	position := wall.pos
 	transform := m.mat4Translate(position)
 	transform *= transform_map[axis][camera_rotation]
 
@@ -721,49 +739,58 @@ draw_wall :: proc(wall: Wall, pos: m.ivec3, axis: Wall_Axis, y: f32) {
 		vertices = wall_end_vertices
 		indices = wall_end_indices
 	}
-	append_draw_component(
-		 {
-			vertices = vertices,
-			indices = indices,
-			model = transform,
-			texture = texture,
-            mask = wall.mask,
-		},
-	)
+	draw_wall_mesh(vertices, indices, transform, texture, wall.mask)
 
 	top_vertices := wall_full_top_vertices
 	if top_mesh == .Side do top_vertices = wall_top_vertices
-    transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
+	transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
-	append_draw_component(
-		 {
-			vertices = top_vertices,
-			indices = wall_top_indices,
-			model = transform,
-			texture = .Wall_Top,
-		},
+	draw_wall_mesh(
+		top_vertices,
+		wall_top_indices,
+		transform,
+		.Wall_Top,
+		.Full_Mask,
 	)
 }
 
-insert_north_south_wall :: proc(pos: m.ivec3, wall: Wall) {
-	north_south_walls[pos] = wall
-    draw_wall(wall, pos, .North_South, f32(pos.y * WALL_HEIGHT))
+draw_walls :: proc() {
+	aabb := get_camera_aabb()
+	north_south_walls_indices := quadtree_search(
+		&north_south_walls_quadtree,
+		aabb,
+	)
+	defer delete(north_south_walls_indices)
+	for index in north_south_walls_indices {
+		draw_wall(north_south_walls[index], .North_South)
+	}
+
+	east_west_walls_indices := quadtree_search(
+		&east_west_walls_quadtree,
+		aabb,
+	)
+	defer delete(east_west_walls_indices)
+	for index in east_west_walls_indices {
+		draw_wall(east_west_walls[index], .East_West)
+	}
 }
 
-insert_east_west_wall :: proc(pos: m.ivec3, wall: Wall) {
-	east_west_walls[pos] = wall
-    draw_wall(wall, pos, .East_West, f32(pos.y * WALL_HEIGHT))
+insert_north_south_wall :: proc(wall: Wall) {
+	index := len(north_south_walls)
+	append(&north_south_walls, wall)
+	quadtree_append(
+		&north_south_walls_quadtree,
+		{i32(wall.pos.x), i32(wall.pos.z)},
+		index,
+	)
 }
 
-rotate_wall :: proc(pos: m.ivec3, wall: Wall, axis: Wall_Axis) {
-    draw_wall(wall, pos, axis, f32(pos.y * WALL_HEIGHT))
-}
-
-rotate_walls :: proc() {
-    for pos, wall in north_south_walls {
-        rotate_wall(pos, wall, .North_South)
-    }
-    for pos, wall in east_west_walls {
-        rotate_wall(pos, wall, .East_West)
-    }
+insert_east_west_wall :: proc(wall: Wall) {
+	index := len(east_west_walls)
+	append(&east_west_walls, wall)
+	quadtree_append(
+		&east_west_walls_quadtree,
+		{i32(wall.pos.x), i32(wall.pos.z)},
+		index,
+	)
 }

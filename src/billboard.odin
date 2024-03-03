@@ -361,12 +361,7 @@ get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
 	return glsl.vec2{p1.x + t * (p2.x - p1.x), p1.z + t * (p2.z - p1.z)}
 }
 
-draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
-	if len(billboard_system.instances) == 0 do return
-
-	visible_instances := [dynamic]Billboard_Instance{}
-	defer delete(visible_instances)
-
+get_camera_aabb :: proc() -> Rectangle {
 	bottom_left := get_view_corner({-1, -1})
 	top_left := get_view_corner({-1, 1})
 	bottom_right := get_view_corner({1, -1})
@@ -427,6 +422,16 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 			}
 	}
 
+    return aabb
+}
+
+draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
+	if len(billboard_system.instances) == 0 do return
+
+	visible_instances := [dynamic]Billboard_Instance{}
+	defer delete(visible_instances)
+
+    aabb := get_camera_aabb()
 	indices := quadtree_search(&billboard_system.quadtree, aabb)
 	defer delete(indices)
 	for index in indices {
