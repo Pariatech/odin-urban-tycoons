@@ -83,9 +83,6 @@ aabb_intersection :: proc(a: Rectangle, b: Rectangle) -> bool {
     x_overlap := a_left <= b_right && a_right >= b_left
     y_overlap := a_bottom <= b_top && a_top >= b_bottom
 
-    // x_overlap := a_left >= b_left && a_right <= b_right
-    // y_overlap := a_bottom >= b_bottom && a_top <= b_top
-
     return x_overlap && y_overlap
 }
 
