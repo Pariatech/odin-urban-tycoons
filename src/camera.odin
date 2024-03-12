@@ -4,16 +4,22 @@ import "core:math"
 import m "core:math/linalg/glsl"
 import "vendor:glfw"
 
-CAMERA_SPEED :: 4.0
+CAMERA_SPEED :: 8.0
 CAMERA_ZOOM_SPEED :: 0.05
 CAMERA_ZOOM_MAX :: 2
-CAMERA_ZOOM_MIN :: 0
+CAMERA_ZOOM_MIN :: 1
 
-camera_zoom: f32 = 0
+CAMERA_ANGLE :: (math.RAD_PER_DEG * 30)
+
+camera_zoom: f32 = 1
 camera_position: m.vec3
 camera_rotation: Camera_Rotation
 camera_distance := f32(30)
-camera_translate := m.vec3{-camera_distance, camera_distance, -camera_distance}
+camera_translate := m.vec3 {
+	-camera_distance,
+	math.sqrt(math.pow(camera_distance, 2) * 2) * math.tan_f32(CAMERA_ANGLE),
+	-camera_distance,
+}
 camera_view: m.mat4
 camera_proj: m.mat4
 
@@ -31,7 +37,12 @@ Camera_Rotation :: enum {
 }
 
 update_camera :: proc(delta_time: f64) {
-	zoom_scale := math.pow(2, camera_zoom)
+	camera_zoom -= cursor_scroll.y * CAMERA_ZOOM_SPEED
+	camera_zoom = math.clamp(camera_zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
+
+	width, height := glfw.GetWindowSize(window_handle)
+	// camera_distance = width 
+
 	camera_movement := m.vec3 {
 		f32(CAMERA_SPEED * delta_time) * (camera_zoom + 1),
 		0,
@@ -62,23 +73,21 @@ update_camera :: proc(delta_time: f64) {
 		camera_position += m.vec3{-camera_movement.z, 0, camera_movement.x}
 	}
 
-	camera_zoom -= cursor_scroll.y * CAMERA_ZOOM_SPEED
-	camera_zoom = math.clamp(camera_zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
-
 	camera_view = m.mat4LookAt(
 		camera_position + camera_translate,
 		camera_position,
 		{0, 1, 0},
 	)
-	width, height := glfw.GetWindowSize(window_handle)
 	aspect_ratio := f32(height) / f32(width)
-	scale := f32(width) / TEXTURE_SIZE
-	zoom := 1 / zoom_scale
+	// scale := f32(width) / (128 / camera_zoom) / 1.4142
+	// scale := f32(width) / (128 / camera_zoom)
+	scale := f32(width) / (176.775 / camera_zoom)
+	// scale := f32(width) / (128 / camera_zoom)
 
-    camera_left = 1 / zoom * scale
-    camera_right = -1 / zoom * scale
-    camera_bottom = -aspect_ratio / zoom * scale
-    camera_top = aspect_ratio / zoom * scale
+	camera_left = scale
+	camera_right = -scale
+	camera_bottom = -aspect_ratio * scale
+	camera_top = aspect_ratio * scale
 
 	camera_proj = m.mat4Ortho3d(
 		camera_left,
@@ -89,5 +98,5 @@ update_camera :: proc(delta_time: f64) {
 		100.0,
 	)
 
-    camera_vp = camera_proj * camera_view 
+	camera_vp = camera_proj * camera_view
 }

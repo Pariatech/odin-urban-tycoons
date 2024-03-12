@@ -49,7 +49,7 @@ init_terrain :: proc() {
 	// 	.South,
 	// )
 
-	set_terrain_height(1, 1, .5)
+	// set_terrain_height(1, 1, .5)
 	// set_terrain_height(1, 1, 0)
 
 	// SEED :: 694201337

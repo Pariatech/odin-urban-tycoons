@@ -10,7 +10,7 @@ import stbi "vendor:stb/image"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
-TEXTURE_SIZE :: 512
+TEXTURE_SIZE :: 128
 VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
@@ -48,6 +48,10 @@ gl_debug_callback :: proc "c" (
 load_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+    // gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    // gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	textures :: len(texture_paths)
 
@@ -61,7 +65,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 
 	gl.TexStorage3D(
 		gl.TEXTURE_2D_ARRAY,
-		1,
+		3,
 		gl.RGBA8,
 		TEXTURE_SIZE,
 		TEXTURE_SIZE,
@@ -117,6 +121,8 @@ load_texture_array :: proc() -> (ok: bool = true) {
 			pixels,
 		)
 	}
+
+	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
 }
@@ -195,10 +201,13 @@ load_shader_program :: proc(
 init_renderer :: proc() -> (ok: bool = true) {
 	gl.load_up_to(GL_MAJOR_VERSION, GL_MINOR_VERSION, glfw.gl_set_proc_address)
 
+    gl.Enable(gl.MULTISAMPLE)
+
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.DebugMessageCallback(gl_debug_callback, nil)
 
 	gl.Enable(gl.DEPTH_TEST)
+	// gl.DepthFunc(gl.LEQUAL)
 	gl.DepthFunc(gl.LEQUAL)
 	// gl.DepthFunc(gl.ALWAYS)
 

@@ -9,8 +9,8 @@ WORLD_DEPTH :: 1024
 
 sun := m.vec3{0, -1, 0}
 
-house_x: i32 = 32
-house_z: i32 = 32
+house_x: i32 = 12
+house_z: i32 = 12
 
 init_world :: proc() {
 	//
@@ -443,9 +443,70 @@ init_world :: proc() {
 
 
 	// The house
-	add_house_floor_walls(0, .Varg)
-	add_house_floor_walls(1, .Nyana)
-	add_house_floor_triangles(2, .Wood)
+	// add_house_floor_walls(0, .Varg)
+	// add_house_floor_walls(1, .Nyana)
+	// add_house_floor_triangles(2, .Wood)
+
+	for x in 0 ..< WORLD_WIDTH {
+		for z in 1 ..= 3 {
+			insert_floor_tile(
+				{i32(x), 0, i32(z)},
+				{texture = .Asphalt, mask_texture = .Full_Mask},
+			)
+		}
+
+		insert_floor_tile(
+			{i32(x), 0, 4},
+			{texture = .Asphalt_Horizontal_Line, mask_texture = .Full_Mask},
+		)
+		for z in 5 ..= 7 {
+			insert_floor_tile(
+				{i32(x), 0, i32(z)},
+				{texture = .Asphalt, mask_texture = .Full_Mask},
+			)
+		}
+	}
+
+	for x in 1 ..= 7 {
+		insert_floor_tile(
+			{i32(x), 0, 4},
+			{texture = .Asphalt, mask_texture = .Full_Mask},
+		)
+	}
+
+	for z in 8 ..< WORLD_WIDTH {
+		for x in 1 ..= 3 {
+			insert_floor_tile(
+				{i32(x), 0, i32(z)},
+				{texture = .Asphalt, mask_texture = .Full_Mask},
+			)
+		}
+
+		insert_floor_tile(
+			{4, 0, i32(z)},
+			{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
+		)
+		for x in 5 ..= 7 {
+			insert_floor_tile(
+				{i32(x), 0, i32(z)},
+				{texture = .Asphalt, mask_texture = .Full_Mask},
+			)
+		}
+	}
+
+	for x in 8 ..< WORLD_WIDTH {
+		insert_floor_tile(
+			{i32(x), 0, 8},
+			{texture = .Sidewalk, mask_texture = .Full_Mask},
+		)
+	}
+
+	for z in 9 ..< WORLD_WIDTH {
+		insert_floor_tile(
+			{8, 0, i32(z)},
+			{texture = .Sidewalk, mask_texture = .Full_Mask},
+		)
+	}
 
 	// insert_wall_window(.East_West, {3, 0, 3}, {texture = .Medium_Window_Wood})
 	// insert_wall_door(.East_West, {2, 0, 2}, {model = .Wood})
@@ -491,18 +552,18 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	for x in 0 ..< 20 {
-		for z in 0 ..< 10 {
-			append_billboard(
-				 {
-					position = {f32(x), 0.0, f32(z)},
-					light = {1, 1, 1},
-					texture = .Chair_Wood_SW,
-					depth_map = .Chair_Wood_SW,
-				},
-			)
-		}
-	}
+	// for x in 0 ..< 20 {
+	// 	for z in 0 ..< 10 {
+	// 		append_billboard(
+	// 			 {
+	// 				position = {f32(x), 0.0, f32(z)},
+	// 				light = {1, 1, 1},
+	// 				texture = .Chair_Wood_SW,
+	// 				depth_map = .Chair_Wood_SW,
+	// 			},
+	// 		)
+	// 	}
+	// }
 	//    fmt.println("finished adding chairs", len(billboard_system.nodes))
 
 	// for x in 0 ..< 100 {
@@ -668,289 +729,290 @@ add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
 }
 
 add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
-	// The house's front wall
-	insert_north_south_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
-			type = .Side_Right_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-	for i in 0 ..< 2 {
-		insert_north_south_wall(
-			 {
-				pos =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 1),
-				},
-				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
-			},
-		)
-	}
-	insert_north_south_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 3)},
-			type = .Right_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	insert_south_west_north_east_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 4)},
-			type = .Side_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	// door?
-	mask := Texture.Window_Opening
-	if floor == 0 do mask = .Door_Opening
-	insert_north_south_wall(
-		 {
-			pos =  {
-				f32(house_x + 1),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 5),
-			},
-			type = .Left_Corner_Left_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-			mask = mask,
-		},
-	)
-	if floor > 0 {
-		append_billboard(
-			 {
-				position =  {
-					f32(house_x + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 5),
-				},
-				light = {1, 1, 1},
-				texture = .Window_Wood_SE,
-				depth_map = .Window_Wood_SE,
-			},
-		)
-	} else {
-		append_billboard(
-			 {
-				position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
-				light = {1, 1, 1},
-				texture = .Door_Wood_SE,
-				depth_map = .Door_Wood_SE,
-			},
-		)
-	}
-
-	insert_north_west_south_east_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 6)},
-			type = .End_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	insert_north_south_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 7)},
-			type = .Side_Right_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	for i in 0 ..< 2 {
-		insert_north_south_wall(
-			 {
-				pos =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
-				},
-				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
-				mask = .Window_Opening,
-			},
-		)
-		append_billboard(
-			 {
-				position =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
-				},
-				light = {1, 1, 1},
-				texture = .Window_Wood_SE,
-				depth_map = .Window_Wood_SE,
-			},
-		)
-	}
-
-	insert_north_south_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 10)},
-			type = .Right_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	// The house's right side wall
-	insert_east_west_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
-			type = .Left_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	for i in 0 ..< 2 {
-		insert_east_west_wall(
-			 {
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z),
-				},
-				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
-				mask = .Window_Opening,
-			},
-		)
-
-		append_billboard(
-			 {
-				position =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z),
-				},
-				light = {1, 1, 1},
-				texture = .Window_Wood_SW,
-				depth_map = .Window_Wood_SW,
-			},
-		)
-	}
-
-	insert_east_west_wall(
-		 {
-			pos = {f32(house_x + 3), f32(floor * WALL_HEIGHT), f32(house_z)},
-			type = .Side_Left_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
-		},
-	)
-
-	// The house's left side wall
-	insert_east_west_wall(
-		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
-			type = .Right_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
-
-	for i in 0 ..< 2 {
-		insert_east_west_wall(
-			 {
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 11),
-				},
-				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = inside_texture},
-				mask = .Window_Opening,
-			},
-		)
-
-		append_billboard(
-			 {
-				position =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 11),
-				},
-				light = {1, 1, 1},
-				texture = .Window_Wood_SW,
-				depth_map = .Window_Wood_SW,
-			},
-		)
-	}
-	insert_east_west_wall(
-		 {
-			pos =  {
-				f32(house_x + 3),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 11),
-			},
-			type = .Side_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
-
-	// The house's back wall
-	insert_south_west_north_east_wall(
-		 {
-			pos = {f32(house_x + 4), f32(floor * WALL_HEIGHT), f32(house_z)},
-			type = .Side_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
-
-	insert_north_south_wall(
-		 {
-			pos =  {
-				f32(house_x + 5),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 1),
-			},
-			type = .Side_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
-
-	for i in 0 ..< 7 {
-		insert_north_south_wall(
-			 {
-				pos =  {
-					f32(house_x + 5),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 2),
-				},
-				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = inside_texture},
-			},
-		)
-	}
-
-	insert_north_south_wall(
-		 {
-			pos =  {
-				f32(house_x + 5),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 9),
-			},
-			type = .Left_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
-
-	insert_north_west_south_east_wall(
-		 {
-			pos =  {
-				f32(house_x + 4),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 10),
-			},
-			type = .End_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
-		},
-	)
+	// // The house's front wall
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
+	// 		type = .Side_Right_Corner,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	// for i in 0 ..< 2 {
+	// 	insert_north_south_wall(
+	// 		 {
+	// 			pos =  {
+	// 				f32(house_x),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + i32(i) + 1),
+	// 			},
+	// 			type = .Side_Side,
+	// 			textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 		},
+	// 	)
+	// }
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 3)},
+	// 		type = .Right_Corner_Side,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// insert_south_west_north_east_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 4)},
+	// 		type = .Side_Side,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// // door?
+	// mask := Texture.Window_Opening
+	// if floor == 0 do mask = .Door_Opening
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos =  {
+	// 			f32(house_x + 1),
+	// 			f32(floor * WALL_HEIGHT),
+	// 			f32(house_z + 5),
+	// 		},
+	// 		type = .Left_Corner_Left_Corner,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 		mask = mask,
+	// 	},
+	// )
+	// if floor > 0 {
+	// 	append_billboard(
+	// 		 {
+	// 			position =  {
+	// 				f32(house_x + 1),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + 5),
+	// 			},
+	// 			light = {1, 1, 1},
+	// 			texture = .Window_Wood_SE,
+	// 			depth_map = .Window_Wood_SE,
+	// 		},
+	// 	)
+	// } else {
+	// 	append_billboard(
+	// 		 {
+	// 			position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
+	// 			light = {1, 1, 1},
+	// 			texture = .Door_Wood_SE,
+	// 			depth_map = .Door_Wood_SE,
+	// 		},
+	// 	)
+	// }
+	//
+	// insert_north_west_south_east_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 6)},
+	// 		type = .End_Side,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 7)},
+	// 		type = .Side_Right_Corner,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// for i in 0 ..< 2 {
+	// 	insert_north_south_wall(
+	// 		 {
+	// 			pos =  {
+	// 				f32(house_x),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + i32(i) + 8),
+	// 			},
+	// 			type = .Side_Side,
+	// 			textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 			mask = .Window_Opening,
+	// 		},
+	// 	)
+	// 	append_billboard(
+	// 		 {
+	// 			position =  {
+	// 				f32(house_x),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + i32(i) + 8),
+	// 			},
+	// 			light = {1, 1, 1},
+	// 			texture = .Window_Wood_SE,
+	// 			depth_map = .Window_Wood_SE,
+	// 		},
+	// 	)
+	// }
+	//
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 10)},
+	// 		type = .Right_Corner_Side,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// // The house's right side wall
+	// insert_east_west_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
+	// 		type = .Left_Corner_Side,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// for i in 0 ..< 2 {
+	// 	insert_east_west_wall(
+	// 		 {
+	// 			pos =  {
+	// 				f32(house_x + i32(i) + 1),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z),
+	// 			},
+	// 			type = .Side_Side,
+	// 			textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 			mask = .Window_Opening,
+	// 		},
+	// 	)
+	//
+	// 	append_billboard(
+	// 		 {
+	// 			position =  {
+	// 				f32(house_x + i32(i) + 1),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z),
+	// 			},
+	// 			light = {1, 1, 1},
+	// 			texture = .Window_Wood_SW,
+	// 			depth_map = .Window_Wood_SW,
+	// 		},
+	// 	)
+	// }
+	//
+	// insert_east_west_wall(
+	// 	 {
+	// 		pos = {f32(house_x + 3), f32(floor * WALL_HEIGHT), f32(house_z)},
+	// 		type = .Side_Left_Corner,
+	// 		textures = {.Inside = inside_texture, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// // The house's left side wall
+	// insert_east_west_wall(
+	// 	 {
+	// 		pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
+	// 		type = .Right_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
+	//
+	// for i in 0 ..< 2 {
+	// 	insert_east_west_wall(
+	// 		 {
+	// 			pos =  {
+	// 				f32(house_x + i32(i) + 1),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + 11),
+	// 			},
+	// 			type = .Side_Side,
+	// 			textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 			mask = .Window_Opening,
+	// 		},
+	// 	)
+	//
+	// 	append_billboard(
+	// 		 {
+	// 			position =  {
+	// 				f32(house_x + i32(i) + 1),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + 11),
+	// 			},
+	// 			light = {1, 1, 1},
+	// 			texture = .Window_Wood_SW,
+	// 			depth_map = .Window_Wood_SW,
+	// 		},
+	// 	)
+	// }
+	// insert_east_west_wall(
+	// 	 {
+	// 		pos =  {
+	// 			f32(house_x + 3),
+	// 			f32(floor * WALL_HEIGHT),
+	// 			f32(house_z + 11),
+	// 		},
+	// 		type = .Side_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
+	//
+	// // The house's back wall
+	// insert_south_west_north_east_wall(
+	// 	 {
+	// 		pos = {f32(house_x + 4), f32(floor * WALL_HEIGHT), f32(house_z)},
+	// 		type = .Side_Side,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
+	//
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos =  {
+	// 			f32(house_x + 5),
+	// 			f32(floor * WALL_HEIGHT),
+	// 			f32(house_z + 1),
+	// 		},
+	// 		type = .Side_Left_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
+	//
+	// for i in 0 ..< 7 {
+	// 	insert_north_south_wall(
+	// 		 {
+	// 			pos =  {
+	// 				f32(house_x + 5),
+	// 				f32(floor * WALL_HEIGHT),
+	// 				f32(house_z + i32(i) + 2),
+	// 			},
+	// 			type = .Side_Side,
+	// 			textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 		},
+	// 	)
+	// }
+	//
+	// insert_north_south_wall(
+	// 	 {
+	// 		pos =  {
+	// 			f32(house_x + 5),
+	// 			f32(floor * WALL_HEIGHT),
+	// 			f32(house_z + 9),
+	// 		},
+	// 		type = .Left_Corner_Side,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
+	//
+	// insert_north_west_south_east_wall(
+	// 	 {
+	// 		pos =  {
+	// 			f32(house_x + 4),
+	// 			f32(floor * WALL_HEIGHT),
+	// 			f32(house_z + 10),
+	// 		},
+	// 		type = .End_Side,
+	// 		textures = {.Inside = .Brick, .Outside = inside_texture},
+	// 	},
+	// )
 }
 
 draw_world :: proc() {
 	// sort the draw components? 
 	draw_terrain()
-    draw_walls()
-    draw_diagonal_walls()
+	draw_walls()
+	draw_diagonal_walls()
+	draw_floor_tiles()
 }

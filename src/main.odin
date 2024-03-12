@@ -31,6 +31,7 @@ start :: proc() -> (ok: bool = false) {
 		return
 	}
 
+    glfw.WindowHint(glfw.SAMPLES, 4)
 	window_handle = glfw.CreateWindow(WIDTH, HEIGHT, TITLE, nil, nil)
 
 	defer glfw.DestroyWindow(window_handle)

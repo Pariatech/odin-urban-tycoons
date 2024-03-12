@@ -745,13 +745,13 @@ draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 	if top_mesh == .Side do top_vertices = wall_top_vertices
 	transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
-	draw_wall_mesh(
-		top_vertices,
-		wall_top_indices,
-		transform,
-		.Wall_Top,
-		.Full_Mask,
-	)
+	// draw_wall_mesh(
+	// 	top_vertices,
+	// 	wall_top_indices,
+	// 	transform,
+	// 	.Wall_Top,
+	// 	.Full_Mask,
+	// )
 }
 
 draw_walls :: proc() {
