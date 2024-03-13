@@ -12,8 +12,8 @@ BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
 BILLBOARD_MODEL_PATH :: "resources/models/billboard.glb"
 FOUR_TILES_BILLBOARD_MODEL_PATH :: "resources/models/4tiles-billboard.glb"
-BILLBOARD_TEXTURE_WIDTH :: 256
-BILLBOARD_TEXTURE_HEIGHT :: 512
+BILLBOARD_TEXTURE_WIDTH :: 128
+BILLBOARD_TEXTURE_HEIGHT :: 256
 FOUR_TILES_BILLBOARD_TEXTURE_WIDTH :: 512
 FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT :: 1024
 
@@ -67,10 +67,10 @@ Billboard_Uniform_Object :: struct {
 }
 
 Billboard_Texture :: enum u8 {
-	Chair_Wood_SW,
-	Chair_Wood_SE,
-	Chair_Wood_NE,
-	Chair_Wood_NW,
+	// Chair_Wood_SW,
+	// Chair_Wood_SE,
+	// Chair_Wood_NE,
+	// Chair_Wood_NW,
 
 	Door_Wood_SW,
 	Door_Wood_SE,
@@ -95,10 +95,10 @@ Four_Tiles_Billboard_Texture :: enum u8 {
 }
 
 BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
-	.Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
-	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
-	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
-	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
+	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
+	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
+	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
+	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
 
 	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-diffuse.png",
 	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-diffuse.png",
@@ -123,10 +123,10 @@ FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
 }
 
 BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
-	.Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
-	.Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
-	.Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
-	.Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
+	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
+	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
+	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
+	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
 
 	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-depth-map.png",
 	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-depth-map.png",

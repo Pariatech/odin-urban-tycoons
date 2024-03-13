@@ -783,27 +783,27 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 		},
 	)
 	if floor > 0 {
-		// append_billboard(
-		// 	 {
-		// 		position =  {
-		// 			f32(house_x + 1),
-		// 			f32(floor * WALL_HEIGHT),
-		// 			f32(house_z + 5),
-		// 		},
-		// 		light = {1, 1, 1},
-		// 		texture = .Window_Wood_SE,
-		// 		depth_map = .Window_Wood_SE,
-		// 	},
-		// )
+		append_billboard(
+			 {
+				position =  {
+					f32(house_x + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + 5),
+				},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SE,
+				depth_map = .Window_Wood_SE,
+			},
+		)
 	} else {
-		// append_billboard(
-		// 	 {
-		// 		position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
-		// 		light = {1, 1, 1},
-		// 		texture = .Door_Wood_SE,
-		// 		depth_map = .Door_Wood_SE,
-		// 	},
-		// )
+		append_billboard(
+			 {
+				position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
+				light = {1, 1, 1},
+				texture = .Door_Wood_SE,
+				depth_map = .Door_Wood_SE,
+			},
+		)
 	}
 
 	insert_north_west_south_east_wall(
@@ -835,18 +835,18 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 				mask = .Window_Opening,
 			},
 		)
-		// append_billboard(
-		// 	 {
-		// 		position =  {
-		// 			f32(house_x),
-		// 			f32(floor * WALL_HEIGHT),
-		// 			f32(house_z + i32(i) + 8),
-		// 		},
-		// 		light = {1, 1, 1},
-		// 		texture = .Window_Wood_SE,
-		// 		depth_map = .Window_Wood_SE,
-		// 	},
-		// )
+		append_billboard(
+			 {
+				position =  {
+					f32(house_x),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + i32(i) + 8),
+				},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SE,
+				depth_map = .Window_Wood_SE,
+			},
+		)
 	}
 
 	insert_north_south_wall(
@@ -880,18 +880,18 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			},
 		)
 
-		// append_billboard(
-		// 	 {
-		// 		position =  {
-		// 			f32(house_x + i32(i) + 1),
-		// 			f32(floor * WALL_HEIGHT),
-		// 			f32(house_z),
-		// 		},
-		// 		light = {1, 1, 1},
-		// 		texture = .Window_Wood_SW,
-		// 		depth_map = .Window_Wood_SW,
-		// 	},
-		// )
+		append_billboard(
+			 {
+				position =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z),
+				},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SW,
+				depth_map = .Window_Wood_SW,
+			},
+		)
 	}
 
 	insert_east_west_wall(
@@ -925,18 +925,18 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 			},
 		)
 
-		// append_billboard(
-		// 	 {
-		// 		position =  {
-		// 			f32(house_x + i32(i) + 1),
-		// 			f32(floor * WALL_HEIGHT),
-		// 			f32(house_z + 11),
-		// 		},
-		// 		light = {1, 1, 1},
-		// 		texture = .Window_Wood_SW,
-		// 		depth_map = .Window_Wood_SW,
-		// 	},
-		// )
+		append_billboard(
+			 {
+				position =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + 11),
+				},
+				light = {1, 1, 1},
+				texture = .Window_Wood_SW,
+				depth_map = .Window_Wood_SW,
+			},
+		)
 	}
 	insert_east_west_wall(
 		 {
