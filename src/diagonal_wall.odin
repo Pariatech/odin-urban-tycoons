@@ -843,13 +843,13 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 		top_vertices = diagonal_wall_top_cross_vertices
 	}
 
-	// draw_wall_mesh(
-	// 	top_vertices,
-	// 	diagonal_wall_indices,
-	// 	transform,
-	// 	.Wall_Top,
-	// 	wall.mask,
-	// )
+	draw_wall_mesh(
+		top_vertices,
+		diagonal_wall_indices,
+		transform,
+		.Wall_Top,
+		wall.mask,
+	)
 }
 
 draw_diagonal_walls :: proc() {

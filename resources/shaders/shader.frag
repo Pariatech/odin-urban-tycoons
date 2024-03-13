@@ -1,6 +1,7 @@
 #version 450
 
 uniform sampler2DArray texture_sampler;
+uniform sampler2DArray mask_sampler;
 
 layout(binding = 2) uniform UniformBufferObject {
     mat4 proj;
@@ -14,7 +15,8 @@ layout(location = 0) out vec4 color;
 
 void main() {
     vec4 tex = texture(texture_sampler, texcoord.rgb);
-    vec4 mask_tex = texture(texture_sampler, texcoord.rga);
+    vec4 mask_tex = texture(mask_sampler, texcoord.rga);
+    // vec4 mask_tex = vec4(1);
     if (tex.a * mask_tex.a < 0.01) {
         discard;
     }

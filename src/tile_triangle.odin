@@ -12,7 +12,7 @@ Tile_Triangle_Side :: enum {
 
 Tile_Triangle :: struct {
 	texture:      Texture,
-	mask_texture: Texture,
+	mask_texture: Mask,
 }
 
 north_tile_triangles := map[m.ivec3]Tile_Triangle{}

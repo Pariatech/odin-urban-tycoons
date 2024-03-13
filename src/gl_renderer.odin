@@ -15,6 +15,7 @@ VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
 texture_array: u32
+mask_array: u32
 vbo, vao, ubo: u32
 shader_program: u32
 world_vertices: [dynamic]Vertex
@@ -45,15 +46,8 @@ gl_debug_callback :: proc "c" (
 	fmt.println("OpenGL Debug: ", message)
 }
 
-load_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
-    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-    // gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    // gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-	textures :: len(texture_paths)
+load_texture_2D_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
+	textures :: len(paths)
 
 	if (textures == 0) {
 		fmt.println("No textures to load.")
@@ -72,7 +66,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 		textures,
 	)
 
-	for path, i in texture_paths {
+	for path, i in paths {
 		width: i32
 		height: i32
 		pixels := stbi.load(path, &width, &height, nil, 4)
@@ -125,6 +119,41 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
+}
+
+load_mask_array :: proc() -> (ok: bool) {
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.GenTextures(1, &mask_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	return load_texture_2D_array(mask_paths)
+}
+
+load_texture_array :: proc() -> (ok: bool = true) {
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.GenTextures(1, &texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
+	gl.TexParameteri(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MIN_FILTER,
+		gl.LINEAR_MIPMAP_LINEAR,
+	)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	return load_texture_2D_array(texture_paths)
 }
 
 
@@ -201,24 +230,20 @@ load_shader_program :: proc(
 init_renderer :: proc() -> (ok: bool = true) {
 	gl.load_up_to(GL_MAJOR_VERSION, GL_MINOR_VERSION, glfw.gl_set_proc_address)
 
-    gl.Enable(gl.MULTISAMPLE)
+	gl.Enable(gl.MULTISAMPLE)
 
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.DebugMessageCallback(gl_debug_callback, nil)
 
 	gl.Enable(gl.DEPTH_TEST)
-	// gl.DepthFunc(gl.LEQUAL)
 	gl.DepthFunc(gl.LEQUAL)
-	// gl.DepthFunc(gl.ALWAYS)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendEquation(gl.FUNC_ADD)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.GenTextures(1, &texture_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	load_texture_array() or_return
+	load_mask_array() or_return
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
@@ -288,6 +313,18 @@ init_renderer :: proc() -> (ok: bool = true) {
 		FRAGMENT_SHADER_PATH,
 	) or_return
 
+	texture_sampler_loc := gl.GetUniformLocation(
+		shader_program,
+		"texture_sampler",
+	)
+
+	mask_sampler_loc := gl.GetUniformLocation(
+		shader_program,
+		"mask_sampler",
+	)
+
+    gl.Uniform1i(texture_sampler_loc, 0)
+    gl.Uniform1i(mask_sampler_loc, 1)
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
@@ -299,6 +336,7 @@ init_renderer :: proc() -> (ok: bool = true) {
 
 deinit_renderer :: proc() {
 	gl.DeleteTextures(1, &texture_array)
+	gl.DeleteTextures(1, &mask_array)
 	gl.DeleteBuffers(1, &vao)
 	gl.DeleteBuffers(1, &vbo)
 	gl.DeleteBuffers(1, &ubo)

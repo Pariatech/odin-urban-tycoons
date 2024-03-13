@@ -54,7 +54,7 @@ Wall :: struct {
 	pos:      m.vec3,
 	type:     Wall_Type,
 	textures: [Wall_Side]Texture,
-	mask:     Texture,
+	mask:     Mask,
 }
 
 WALL_HEIGHT :: 3
@@ -690,7 +690,7 @@ draw_wall_mesh :: proc(
 	indices: []u32,
 	model: m.mat4,
 	texture: Texture,
-	mask: Texture,
+	mask: Mask,
 ) {
 	index_offset := u32(len(world_vertices))
 	for i in 0 ..< len(vertices) {
@@ -745,13 +745,13 @@ draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 	if top_mesh == .Side do top_vertices = wall_top_vertices
 	transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
-	// draw_wall_mesh(
-	// 	top_vertices,
-	// 	wall_top_indices,
-	// 	transform,
-	// 	.Wall_Top,
-	// 	.Full_Mask,
-	// )
+	draw_wall_mesh(
+		top_vertices,
+		wall_top_indices,
+		transform,
+		.Wall_Top,
+		.Full_Mask,
+	)
 }
 
 draw_walls :: proc() {

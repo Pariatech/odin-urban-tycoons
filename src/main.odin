@@ -96,6 +96,8 @@ start :: proc() -> (ok: bool = false) {
 		gl.UseProgram(shader_program)
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
+		gl.ActiveTexture(gl.TEXTURE1)
+		gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
 		gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 		gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
