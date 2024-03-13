@@ -3,7 +3,6 @@ package main
 import "core:fmt"
 import "core:runtime"
 import "core:time"
-import gl "vendor:OpenGL"
 import "vendor:glfw"
 
 WIDTH :: 1600
@@ -83,41 +82,6 @@ start :: proc() -> (ok: bool = false) {
 		update_camera(delta_time)
 
 		draw_world()
-		gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			len(world_vertices) * size_of(Vertex),
-			raw_data(world_vertices),
-			gl.STATIC_DRAW,
-		)
-		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-
-		gl.BindVertexArray(vao)
-		gl.UseProgram(shader_program)
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
-		gl.ActiveTexture(gl.TEXTURE1)
-		gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
-		gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-		gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
-
-		uniform_object.view = camera_view
-		uniform_object.proj = camera_proj
-		gl.BufferSubData(
-			gl.UNIFORM_BUFFER,
-			0,
-			size_of(Uniform_Object),
-			&uniform_object,
-		)
-
-		gl.DrawElements(
-			gl.TRIANGLES,
-			i32(len(world_indices)),
-			gl.UNSIGNED_INT,
-			raw_data(world_indices),
-		)
-		gl.BindVertexArray(0)
-		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 		draw_billboards()
 		end_draw()
