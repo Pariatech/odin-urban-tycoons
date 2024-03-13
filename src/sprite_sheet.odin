@@ -2,7 +2,8 @@ package main
 
 Texture :: enum (u16) {
 	// Terrain_Leveling_Mask,
-	// Wood,
+	Wood,
+
 	Brick,
 	Varg,
 	Nyana,
@@ -43,7 +44,7 @@ texture_paths :: [Texture]cstring {
 	// .Shovel_Base             = "resources/textures/shovel-base.png",
 	// .Shovel_Top              = "resources/textures/shovel-top.png",
 	// .Floor_Marker            = "resources/textures/floors/floor-marker.png",
-	// .Wood                    = "resources/textures/floors/wood.png",
+	.Wood                    = "resources/textures/floors/wood.png",
 	// .Cursors_Wall_Tool_Base  = "resources/textures/cursors/wall-tool-base.png",
 	// .Cursors_Wall_Tool_Top   = "resources/textures/cursors/wall-tool-top.png",
 

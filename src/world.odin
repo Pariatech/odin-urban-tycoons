@@ -446,7 +446,7 @@ init_world :: proc() {
 	// The house
 	add_house_floor_walls(0, .Varg)
 	add_house_floor_walls(1, .Nyana)
-	// add_house_floor_triangles(2, .Wood)
+	add_house_floor_triangles(2, .Wood)
 
 	for x in 0 ..< WORLD_WIDTH {
 		for z in 1 ..= 3 {
