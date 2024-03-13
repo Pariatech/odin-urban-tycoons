@@ -31,6 +31,10 @@ Mask :: enum(u16) {
 	Window_Opening,
 }
 
+Wall_Texture :: enum(u16) {
+
+}
+
 texture_paths :: [Texture]cstring {
 	// .Full_Mask               = "resources/textures/full-mask.png",
 	// .Grid_Mask               = "resources/textures/grid-mask.png",

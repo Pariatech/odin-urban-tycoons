@@ -149,6 +149,10 @@ load_texture_array :: proc() -> (ok: bool = true) {
 		gl.LINEAR_MIPMAP_LINEAR,
 	)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    max_anisotropy: f32
+    gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+    fmt.println("max_anisotropy:", max_anisotropy)
+    gl.TexParameterf(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_ANISOTROPY, max_anisotropy)
 
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
@@ -318,13 +322,10 @@ init_renderer :: proc() -> (ok: bool = true) {
 		"texture_sampler",
 	)
 
-	mask_sampler_loc := gl.GetUniformLocation(
-		shader_program,
-		"mask_sampler",
-	)
+	mask_sampler_loc := gl.GetUniformLocation(shader_program, "mask_sampler")
 
-    gl.Uniform1i(texture_sampler_loc, 0)
-    gl.Uniform1i(mask_sampler_loc, 1)
+	gl.Uniform1i(texture_sampler_loc, 0)
+	gl.Uniform1i(mask_sampler_loc, 1)
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
