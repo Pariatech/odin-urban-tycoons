@@ -46,7 +46,7 @@ gl_debug_callback :: proc "c" (
 	fmt.println("OpenGL Debug: ", message)
 }
 
-load_texture_2D_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
+load_texture_2D_array :: proc(paths: [$T]cstring, texture_size: i32 = TEXTURE_SIZE) -> (ok: bool = true) {
 	textures :: len(paths)
 
 	if (textures == 0) {
@@ -61,8 +61,8 @@ load_texture_2D_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
 		gl.TEXTURE_2D_ARRAY,
 		3,
 		gl.RGBA8,
-		TEXTURE_SIZE,
-		TEXTURE_SIZE,
+		texture_size,
+		texture_size,
 		textures,
 	)
 
@@ -77,24 +77,24 @@ load_texture_2D_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
 			return false
 		}
 
-		if width != TEXTURE_SIZE {
+		if width != texture_size {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
-				TEXTURE_SIZE,
+				texture_size,
 				" got: ",
 				width,
 			)
 			return false
 		}
 
-		if height != TEXTURE_SIZE {
+		if height != texture_size {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
-				TEXTURE_SIZE,
+				texture_size,
 				" got: ",
 				height,
 			)
@@ -107,8 +107,8 @@ load_texture_2D_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
 			0,
 			0,
 			i32(i),
-			TEXTURE_SIZE,
-			TEXTURE_SIZE,
+			texture_size,
+			texture_size,
 			1,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,

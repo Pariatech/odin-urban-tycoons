@@ -48,6 +48,9 @@ start :: proc() -> (ok: bool = false) {
 
 	if (!init_renderer()) do return
 	defer deinit_renderer()
+
+    init_wall_renderer() or_return
+
 	init_keyboard()
 	init_cursor()
 

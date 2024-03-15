@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
+import gl "vendor:OpenGL"
 
 Wall_Axis :: enum {
 	North_South,
@@ -53,8 +54,8 @@ Wall_Side :: enum {
 Wall :: struct {
 	pos:      m.vec3,
 	type:     Wall_Type,
-	textures: [Wall_Side]Texture,
-	mask:     Mask,
+	textures: [Wall_Side]Wall_Texture,
+	mask:     Wall_Mask_Texture,
 }
 
 WALL_HEIGHT :: 3
@@ -685,25 +686,102 @@ east_west_walls_quadtree := Quadtree(int) {
 	size = WORLD_WIDTH,
 }
 
+wall_texture_array: u32
+wall_mask_array: u32
+wall_vertices: [dynamic]Vertex
+wall_indices: [dynamic]u32
+
+
+load_wall_mask_array :: proc() -> (ok: bool) {
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.GenTextures(1, &wall_mask_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	return load_texture_2D_array(wall_mask_paths)
+}
+
+load_wall_texture_array :: proc() -> (ok: bool = true) {
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.GenTextures(1, &wall_texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
+
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+
+	gl.TexParameteri(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MIN_FILTER,
+		gl.LINEAR_MIPMAP_LINEAR,
+	)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    max_anisotropy: f32
+    gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+    gl.TexParameterf(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_ANISOTROPY, max_anisotropy)
+
+	return load_texture_2D_array(wall_texture_paths)
+}
+
+init_wall_renderer :: proc() -> (ok: bool) {
+	load_wall_texture_array() or_return
+	load_wall_mask_array() or_return
+    return true
+}
+
+start_wall_rendering :: proc() {
+	clear(&wall_vertices)
+	clear(&wall_indices)
+}
+
+finish_wall_rendering :: proc() {
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(wall_vertices) * size_of(Vertex),
+		raw_data(wall_vertices),
+		gl.STATIC_DRAW,
+	)
+
+	gl.BindVertexArray(vao)
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
+
+	gl.DrawElements(
+		gl.TRIANGLES,
+		i32(len(wall_indices)),
+		gl.UNSIGNED_INT,
+		raw_data(wall_indices),
+	)
+	gl.BindVertexArray(0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+}
+
 draw_wall_mesh :: proc(
 	vertices: []Vertex,
 	indices: []u32,
 	model: m.mat4,
-	texture: Texture,
-	mask: Mask,
+	texture: Wall_Texture,
+	mask: Wall_Mask_Texture,
 ) {
-	index_offset := u32(len(world_vertices))
+	index_offset := u32(len(wall_vertices))
 	for i in 0 ..< len(vertices) {
 		vertex := vertices[i]
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, vec4(vertex.pos, 1)).xyz
 
-		append(&world_vertices, vertex)
+		append(&wall_vertices, vertex)
 	}
 
 	for idx in indices {
-		append(&world_indices, idx + index_offset)
+		append(&wall_indices, idx + index_offset)
 	}
 }
 

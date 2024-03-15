@@ -4,12 +4,8 @@ Texture :: enum (u16) {
 	// Terrain_Leveling_Mask,
 	Wood,
 
-	Brick,
-	Varg,
-	Nyana,
 	// Light_Post_Base,
 	// Light_Post_Top,
-	Wall_Top,
 	// Shovel_Base,
 	// Shovel_Top,
 	// Floor_Marker,
@@ -27,24 +23,27 @@ Texture :: enum (u16) {
 Mask :: enum(u16) {
 	Full_Mask,
 	Grid_Mask,
-	Door_Opening,
-	Window_Opening,
 }
 
 Wall_Texture :: enum(u16) {
+	Wall_Top,
+	Brick,
+	Varg,
+	Nyana,
+}
 
+Wall_Mask_Texture :: enum(u16) {
+	Full_Mask,
+	Door_Opening,
+	Window_Opening,
 }
 
 texture_paths :: [Texture]cstring {
 	// .Full_Mask               = "resources/textures/full-mask.png",
 	// .Grid_Mask               = "resources/textures/grid-mask.png",
 	// .Terrain_Leveling_Mask   = "resources/textures/leveling-mask.png",
-	.Brick                   = "resources/textures/walls/brick-wall.png",
-	.Varg                    = "resources/textures/walls/varg-wall.png",
-	.Nyana                   = "resources/textures/walls/nyana-wall.png",
 	// .Light_Post_Base         = "resources/textures/light-pole-base.png",
 	// .Light_Post_Top          = "resources/textures/light-pole-top.png",
-	.Wall_Top                = "resources/textures/walls/wall-top.png",
 	// .Shovel_Base             = "resources/textures/shovel-base.png",
 	// .Shovel_Top              = "resources/textures/shovel-top.png",
 	// .Floor_Marker            = "resources/textures/floors/floor-marker.png",
@@ -64,6 +63,17 @@ texture_paths :: [Texture]cstring {
 mask_paths :: [Mask]cstring {
 	.Full_Mask               = "resources/textures/masks/full.png",
 	.Grid_Mask               = "resources/textures/masks/grid.png",
-	.Door_Opening            = "resources/textures/walls/door-opening.png",
-	.Window_Opening          = "resources/textures/walls/window-opening.png",
+}
+
+wall_texture_paths :: [Wall_Texture]cstring {
+	.Wall_Top                = "resources/textures/walls/wall-top.png",
+	.Brick                   = "resources/textures/walls/brick-wall.png",
+	.Varg                    = "resources/textures/walls/varg-wall.png",
+	.Nyana                   = "resources/textures/walls/nyana-wall.png",
+}
+
+wall_mask_paths :: [Wall_Mask_Texture]cstring {
+	.Full_Mask               = "resources/textures/wall-masks/full.png",
+	.Door_Opening            = "resources/textures/wall-masks/door-opening.png",
+	.Window_Opening          = "resources/textures/wall-masks/window-opening.png",
 }

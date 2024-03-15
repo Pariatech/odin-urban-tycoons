@@ -729,7 +729,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
 	}
 }
 
-add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
+add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 	// The house's front wall
 	insert_north_south_wall(
 		 {
@@ -768,7 +768,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 	)
 
 	// door?
-	mask := Mask.Window_Opening
+	mask := Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
 	insert_north_south_wall(
 		 {
@@ -1013,9 +1013,27 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Texture) {
 draw_world :: proc() {
 	// sort the draw components? 
 	draw_terrain()
+	draw_floor_tiles()
+
+	uniform_object.view = camera_view
+	uniform_object.proj = camera_proj
+
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+	gl.BufferSubData(
+		gl.UNIFORM_BUFFER,
+		0,
+		size_of(Uniform_Object),
+		&uniform_object,
+	)
+
+	gl.UseProgram(shader_program)
+
+    start_wall_rendering()
 	draw_walls()
 	draw_diagonal_walls()
-	draw_floor_tiles()
+    finish_wall_rendering()
+
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(
@@ -1027,22 +1045,10 @@ draw_world :: proc() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	gl.BindVertexArray(vao)
-	gl.UseProgram(shader_program)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
-
-	uniform_object.view = camera_view
-	uniform_object.proj = camera_proj
-	gl.BufferSubData(
-		gl.UNIFORM_BUFFER,
-		0,
-		size_of(Uniform_Object),
-		&uniform_object,
-	)
 
 	gl.DrawElements(
 		gl.TRIANGLES,
