@@ -444,8 +444,8 @@ init_world :: proc() {
 
 
 	// The house
-	add_house_floor_walls(0, .Varg)
-	add_house_floor_walls(1, .Nyana)
+	add_house_floor_walls(0, .Varg, .Varg)
+	add_house_floor_walls(1, .Nyana, .Nyana)
 	add_house_floor_triangles(2, .Wood)
 
 	for x in 0 ..< WORLD_WIDTH {
@@ -729,13 +729,17 @@ add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
 	}
 }
 
-add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
+add_house_floor_walls :: proc(
+	floor: i32,
+	inside_texture: Wall_Texture,
+	outside_texture: Wall_Texture,
+) {
 	// The house's front wall
 	insert_north_south_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Right_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 	for i in 0 ..< 2 {
@@ -747,7 +751,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 					f32(house_z + i32(i) + 1),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = outside_texture},
 			},
 		)
 	}
@@ -755,7 +759,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 3)},
 			type = .Right_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -763,7 +767,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 4)},
 			type = .Side_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -778,7 +782,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 				f32(house_z + 5),
 			},
 			type = .Left_Corner_Left_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 			mask = mask,
 		},
 	)
@@ -810,7 +814,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 6)},
 			type = .End_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -818,7 +822,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 7)},
 			type = .Side_Right_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -831,7 +835,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 					f32(house_z + i32(i) + 8),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = outside_texture},
 				mask = .Window_Opening,
 			},
 		)
@@ -853,7 +857,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 10)},
 			type = .Right_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -862,7 +866,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Left_Corner_Side,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -875,7 +879,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 					f32(house_z),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = .Brick},
+				textures = {.Inside = inside_texture, .Outside = outside_texture},
 				mask = .Window_Opening,
 			},
 		)
@@ -898,7 +902,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x + 3), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Left_Corner,
-			textures = {.Inside = inside_texture, .Outside = .Brick},
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
@@ -907,7 +911,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
 			type = .Right_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
@@ -920,7 +924,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 					f32(house_z + 11),
 				},
 				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = inside_texture},
+				textures = {.Inside = outside_texture, .Outside = inside_texture},
 				mask = .Window_Opening,
 			},
 		)
@@ -946,7 +950,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 				f32(house_z + 11),
 			},
 			type = .Side_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
@@ -955,7 +959,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 		 {
 			pos = {f32(house_x + 4), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
@@ -967,7 +971,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 				f32(house_z + 1),
 			},
 			type = .Side_Left_Corner,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
@@ -980,7 +984,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 					f32(house_z + i32(i) + 2),
 				},
 				type = .Side_Side,
-				textures = {.Inside = .Brick, .Outside = inside_texture},
+				textures = {.Inside = outside_texture, .Outside = inside_texture},
 			},
 		)
 	}
@@ -993,7 +997,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 				f32(house_z + 9),
 			},
 			type = .Left_Corner_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
@@ -1005,7 +1009,7 @@ add_house_floor_walls :: proc(floor: i32, inside_texture: Wall_Texture) {
 				f32(house_z + 10),
 			},
 			type = .End_Side,
-			textures = {.Inside = .Brick, .Outside = inside_texture},
+			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 }
@@ -1029,10 +1033,10 @@ draw_world :: proc() {
 
 	gl.UseProgram(shader_program)
 
-    start_wall_rendering()
+	start_wall_rendering()
 	draw_walls()
 	draw_diagonal_walls()
-    finish_wall_rendering()
+	finish_wall_rendering()
 
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)

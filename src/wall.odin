@@ -60,6 +60,8 @@ Wall :: struct {
 
 WALL_HEIGHT :: 3
 WALL_TOP_OFFSET :: 0.0001
+WALL_TEXTURE_HEIGHT :: 384
+WALL_TEXTURE_WIDTH :: 128
 
 wall_full_vertices := []Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
@@ -704,7 +706,7 @@ load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(wall_mask_paths)
+	return load_texture_2D_array(wall_mask_paths, WALL_TEXTURE_WIDTH, WALL_TEXTURE_HEIGHT)
 }
 
 load_wall_texture_array :: proc() -> (ok: bool = true) {
@@ -725,7 +727,7 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
     gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
     gl.TexParameterf(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_ANISOTROPY, max_anisotropy)
 
-	return load_texture_2D_array(wall_texture_paths)
+	return load_texture_2D_array(wall_texture_paths, WALL_TEXTURE_WIDTH, WALL_TEXTURE_HEIGHT)
 }
 
 init_wall_renderer :: proc() -> (ok: bool) {

@@ -46,7 +46,13 @@ gl_debug_callback :: proc "c" (
 	fmt.println("OpenGL Debug: ", message)
 }
 
-load_texture_2D_array :: proc(paths: [$T]cstring, texture_size: i32 = TEXTURE_SIZE) -> (ok: bool = true) {
+load_texture_2D_array :: proc(
+	paths: [$T]cstring,
+	width: i32 = TEXTURE_SIZE,
+	height: i32 = TEXTURE_SIZE,
+) -> (
+	ok: bool = true,
+) {
 	textures :: len(paths)
 
 	if (textures == 0) {
@@ -61,15 +67,14 @@ load_texture_2D_array :: proc(paths: [$T]cstring, texture_size: i32 = TEXTURE_SI
 		gl.TEXTURE_2D_ARRAY,
 		3,
 		gl.RGBA8,
-		texture_size,
-		texture_size,
+		width,
+		height,
 		textures,
 	)
 
 	for path, i in paths {
-		width: i32
-		height: i32
-		pixels := stbi.load(path, &width, &height, nil, 4)
+		w, h: i32
+		pixels := stbi.load(path, &w, &h, nil, 4)
 		defer stbi.image_free(pixels)
 
 		if pixels == nil {
@@ -77,26 +82,26 @@ load_texture_2D_array :: proc(paths: [$T]cstring, texture_size: i32 = TEXTURE_SI
 			return false
 		}
 
-		if width != texture_size {
+		if w != width {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
-				texture_size,
-				" got: ",
 				width,
+				" got: ",
+				w,
 			)
 			return false
 		}
 
-		if height != texture_size {
+		if h != height {
 			fmt.eprintln(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
-				texture_size,
-				" got: ",
 				height,
+				" got: ",
+				h,
 			)
 			return false
 		}
@@ -107,8 +112,8 @@ load_texture_2D_array :: proc(paths: [$T]cstring, texture_size: i32 = TEXTURE_SI
 			0,
 			0,
 			i32(i),
-			texture_size,
-			texture_size,
+			width,
+			height,
 			1,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
@@ -149,10 +154,14 @@ load_texture_array :: proc() -> (ok: bool = true) {
 		gl.LINEAR_MIPMAP_LINEAR,
 	)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    max_anisotropy: f32
-    gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
-    fmt.println("max_anisotropy:", max_anisotropy)
-    gl.TexParameterf(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_ANISOTROPY, max_anisotropy)
+	max_anisotropy: f32
+	gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+	fmt.println("max_anisotropy:", max_anisotropy)
+	gl.TexParameterf(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MAX_ANISOTROPY,
+		max_anisotropy,
+	)
 
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
