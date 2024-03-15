@@ -688,6 +688,7 @@ east_west_walls_quadtree := Quadtree(int) {
 
 wall_texture_array: u32
 wall_mask_array: u32
+wall_vbo, wall_vao: u32
 wall_vertices: [dynamic]Vertex
 wall_indices: [dynamic]u32
 
@@ -728,8 +729,58 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 }
 
 init_wall_renderer :: proc() -> (ok: bool) {
+	gl.GenVertexArrays(1, &wall_vao)
+	gl.BindVertexArray(wall_vao)
+
+	gl.GenBuffers(1, &wall_vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, wall_vbo)
+
+	gl.VertexAttribPointer(
+		0,
+		3,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, pos),
+	)
+	gl.EnableVertexAttribArray(0)
+
+	gl.VertexAttribPointer(
+		1,
+		3,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, light),
+	)
+	gl.EnableVertexAttribArray(1)
+
+	gl.VertexAttribPointer(
+		2,
+		4,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, texcoords),
+	)
+	gl.EnableVertexAttribArray(2)
+
+	gl.VertexAttribPointer(
+		3,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Vertex),
+		offset_of(Vertex, depth_map),
+	)
+	gl.EnableVertexAttribArray(3)
+
 	load_wall_texture_array() or_return
 	load_wall_mask_array() or_return
+
+	gl.BindVertexArray(0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+
     return true
 }
 
@@ -739,7 +790,9 @@ start_wall_rendering :: proc() {
 }
 
 finish_wall_rendering :: proc() {
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindVertexArray(wall_vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, wall_vbo)
+
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
 		len(wall_vertices) * size_of(Vertex),
@@ -747,7 +800,6 @@ finish_wall_rendering :: proc() {
 		gl.STATIC_DRAW,
 	)
 
-	gl.BindVertexArray(vao)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
