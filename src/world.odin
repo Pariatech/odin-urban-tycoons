@@ -680,6 +680,16 @@ init_world :: proc() {
 	//            rotation = 0,
 	// 	},
 	// )
+
+	append_billboard(
+		 {
+			position = {0.0, 0.0, 0.0},
+			light = {1, 1, 1},
+			texture = .Shovel_SW,
+			depth_map = .Shovel_SW,
+			rotation = 0,
+		},
+	)
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
@@ -751,7 +761,10 @@ add_house_floor_walls :: proc(
 					f32(house_z + i32(i) + 1),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = outside_texture},
+				textures =  {
+					.Inside = inside_texture,
+					.Outside = outside_texture,
+				},
 			},
 		)
 	}
@@ -835,7 +848,10 @@ add_house_floor_walls :: proc(
 					f32(house_z + i32(i) + 8),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = outside_texture},
+				textures =  {
+					.Inside = inside_texture,
+					.Outside = outside_texture,
+				},
 				mask = .Window_Opening,
 			},
 		)
@@ -879,7 +895,10 @@ add_house_floor_walls :: proc(
 					f32(house_z),
 				},
 				type = .Side_Side,
-				textures = {.Inside = inside_texture, .Outside = outside_texture},
+				textures =  {
+					.Inside = inside_texture,
+					.Outside = outside_texture,
+				},
 				mask = .Window_Opening,
 			},
 		)
@@ -924,7 +943,10 @@ add_house_floor_walls :: proc(
 					f32(house_z + 11),
 				},
 				type = .Side_Side,
-				textures = {.Inside = outside_texture, .Outside = inside_texture},
+				textures =  {
+					.Inside = outside_texture,
+					.Outside = inside_texture,
+				},
 				mask = .Window_Opening,
 			},
 		)
@@ -984,7 +1006,10 @@ add_house_floor_walls :: proc(
 					f32(house_z + i32(i) + 2),
 				},
 				type = .Side_Side,
-				textures = {.Inside = outside_texture, .Outside = inside_texture},
+				textures =  {
+					.Inside = outside_texture,
+					.Outside = inside_texture,
+				},
 			},
 		)
 	}

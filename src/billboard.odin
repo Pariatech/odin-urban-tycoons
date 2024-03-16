@@ -81,6 +81,11 @@ Billboard_Texture :: enum u8 {
 	Window_Wood_SE,
 	Window_Wood_NE,
 	Window_Wood_NW,
+
+    Shovel_SW,
+    Shovel_SE,
+    Shovel_NE,
+    Shovel_NW,
 }
 
 Four_Tiles_Billboard_Texture :: enum u8 {
@@ -109,6 +114,11 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-diffuse.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-diffuse.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-diffuse.png",
+
+	.Shovel_SW = "resources/textures/billboards/shovel/sw-diffuse.png",
+	.Shovel_SE = "resources/textures/billboards/shovel/se-diffuse.png",
+	.Shovel_NE = "resources/textures/billboards/shovel/ne-diffuse.png",
+	.Shovel_NW = "resources/textures/billboards/shovel/nw-diffuse.png",
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
@@ -137,6 +147,11 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-depth-map.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-depth-map.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-depth-map.png",
+
+	.Shovel_SW = "resources/textures/billboards/shovel/sw-depth-map.png",
+	.Shovel_SE = "resources/textures/billboards/shovel/se-depth-map.png",
+	.Shovel_NE = "resources/textures/billboards/shovel/ne-depth-map.png",
+	.Shovel_NW = "resources/textures/billboards/shovel/nw-depth-map.png",
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
