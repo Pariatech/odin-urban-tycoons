@@ -58,6 +58,8 @@ start :: proc() -> (ok: bool = false) {
 	init_terrain()
 	init_world()
 
+    terrain_tool_init()
+
 	should_close := false
 	current_time_ns := time.now()
 	previous_time_ns := time.now()
@@ -80,6 +82,8 @@ start :: proc() -> (ok: bool = false) {
 		}
 
 		glfw.PollEvents()
+
+        terrain_tool_update()
 
 		begin_draw()
 		update_camera(delta_time)

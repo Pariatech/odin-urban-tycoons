@@ -49,7 +49,7 @@ init_terrain :: proc() {
 	// 	.South,
 	// )
 
-	// set_terrain_height(1, 1, .5)
+	set_terrain_height(3, 3, .5)
 	// set_terrain_height(1, 1, 0)
 
 	// SEED :: 694201337
@@ -416,49 +416,127 @@ draw_terrain_quad_tree_node :: proc(
 }
 
 draw_terrain :: proc() {
+	// terrain_on_visible(draw_tile_triangle)
+}
+
+terrain_quad_tree_node_on_visible :: proc(
+	node: Terrain_Quad_Tree_Node,
+	x, z, w: int,
+	aabb: Rectangle,
+	fn: proc(
+		tri: Tile_Triangle,
+		side: Tile_Triangle_Side,
+		lights: [3]m.vec3,
+		heights: [3]f32,
+		pos: m.vec2,
+		size: f32,
+	),
+) {
+	node_aabb := Rectangle{i32(x), i32(z), i32(w), i32(w)}
+	if !aabb_intersection(node_aabb, aabb) {return}
+
+	switch value in node {
+	case Terrain_Quad_Tree_Node_Indices:
+		for child, i in value.children {
+			draw_terrain_quad_tree_node(
+				terrain_quad_tree_nodes[child],
+				x + (i % 2) * (w / 2),
+				z + (i / 2) * (w / 2),
+				w / 2,
+			)
+		}
+	case Terrain_Quad_Tree_Node_Tile_Triangles:
+		for tri, i in value.children {
+			side := Tile_Triangle_Side(i)
+
+			lights := get_terrain_tile_triangle_lights(side, x, z, w)
+			heights := get_terrain_tile_triangle_heights(side, x, z, w)
+
+			draw_tile_triangle(
+				tri,
+				side,
+				lights,
+				heights,
+				{f32(x) + f32(w) / 2 - 0.5, f32(z) + f32(w) / 2 - 0.5},
+				f32(w),
+			)
+		}
+	}
+}
+
+terrain_on_visible :: proc(
+	fn: proc(
+		tri: Tile_Triangle,
+		side: Tile_Triangle_Side,
+		lights: [3]m.vec3,
+		heights: [3]f32,
+		pos: m.vec2,
+		size: f32,
+	),
+) {
+	aabb := get_camera_aabb()
 	root := terrain_quad_tree_nodes[0]
-	draw_terrain_quad_tree_node(root, 0, 0, WORLD_WIDTH)
+
+	terrain_quad_tree_node_on_visible(root, 0, 0, WORLD_WIDTH, aabb, fn)
 }
 
 set_terrain_height :: proc(x, z: int, height: f32) {
+	// terrain_heights[x][z] = height
+	// if x > 0 && z > 0 {
+	// 	set_terrain_quad_tree_node_height(
+	// 		0,
+	// 		0,
+	// 		0,
+	// 		WORLD_WIDTH,
+	// 		x - 1,
+	// 		z - 1,
+	// 		height,
+	// 	)
+	// }
+	// if x > 0 && z < WORLD_DEPTH {
+	// 	set_terrain_quad_tree_node_height(
+	// 		0,
+	// 		0,
+	// 		0,
+	// 		WORLD_WIDTH,
+	// 		x - 1,
+	// 		z,
+	// 		height,
+	// 	)
+	// }
+	//
+	// if x < WORLD_WIDTH && z > 0 {
+	// 	set_terrain_quad_tree_node_height(
+	// 		0,
+	// 		0,
+	// 		0,
+	// 		WORLD_WIDTH,
+	// 		x,
+	// 		z - 1,
+	// 		height,
+	// 	)
+	// }
+	//
+	// if x < WORLD_WIDTH && z < WORLD_DEPTH {
+	// 	set_terrain_quad_tree_node_height(0, 0, 0, WORLD_WIDTH, x, z, height)
+	// }
+
+	if terrain_heights[x][z] == height {return}
 	terrain_heights[x][z] = height
+
 	if x > 0 && z > 0 {
-		set_terrain_quad_tree_node_height(
-			0,
-			0,
-			0,
-			WORLD_WIDTH,
-			x - 1,
-			z - 1,
-			height,
-		)
+		tile_quadtrees_set_height({i32(x - 1), 0, i32(z - 1)}, height)
 	}
 	if x > 0 && z < WORLD_DEPTH {
-		set_terrain_quad_tree_node_height(
-			0,
-			0,
-			0,
-			WORLD_WIDTH,
-			x - 1,
-			z,
-			height,
-		)
+		tile_quadtrees_set_height({i32(x - 1), 0, i32(z)}, height)
 	}
 
 	if x < WORLD_WIDTH && z > 0 {
-		set_terrain_quad_tree_node_height(
-			0,
-			0,
-			0,
-			WORLD_WIDTH,
-			x,
-			z - 1,
-			height,
-		)
+		tile_quadtrees_set_height({i32(x), 0, i32(z - 1)}, height)
 	}
 
 	if x < WORLD_WIDTH && z < WORLD_DEPTH {
-		set_terrain_quad_tree_node_height(0, 0, 0, WORLD_WIDTH, x, z, height)
+		tile_quadtrees_set_height({i32(x), 0, i32(z)}, height)
 	}
 }
 
@@ -661,4 +739,19 @@ set_terrain_tile_triangle :: proc(
 		tri,
 		side,
 	)
+}
+
+terrain_set_tile :: proc(x, z: int, tri: Tile_Triangle) {
+	for side in Tile_Triangle_Side {
+		set_terrain_quad_tree_node_tile_triangle(
+			0,
+			0,
+			0,
+			WORLD_WIDTH,
+			x,
+			z,
+			tri,
+			side,
+		)
+	}
 }

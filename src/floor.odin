@@ -6,16 +6,27 @@ import "core:testing"
 
 FLOOR_OFFSET :: 0.0004
 
-floor_quadtrees := [WORLD_HEIGHT]Floor_Quadtree{{{{}}}, {{{}}}, {{{}}}, {{{}}}}
+floor_quadtrees := [WORLD_HEIGHT]Floor_Quadtree {
+	 {
+		nodes =  {
+			 {
+				parent = 0,
+				children =  {
+					Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+					Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+					Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+					Tile_Triangle{texture = .Grass, mask_texture = .Grid_Mask},
+				},
+			},
+		},
+	},
+	{{{}}},
+	{{{}}},
+	{{{}}},
+}
 
 Floor_Quadtree :: struct {
 	nodes: [dynamic]Floor_Quadtree_Node,
-}
-
-Floor_Quadtree_Node_Child_Type :: enum {
-	Empty,
-	Node,
-	Triangle,
 }
 
 Floor_Quadtree_Node_Index :: int
@@ -61,12 +72,17 @@ floor_quadtree_shake_node :: proc(
 		for child in floor_quadtree.nodes[node_index].children {
 			#partial switch value in child {
 			case Floor_Quadtree_Node_Index:
-                floor_quadtree.nodes[value].parent = node_index
+				floor_quadtree.nodes[value].parent = node_index
 			}
 		}
 	}
 
-	if !floor_quadtree_shakable(floor_quadtree, parent_index) {return}
+	if !floor_quadtree_shakable(
+		   floor_quadtree,
+		   parent_index,
+		   parent_pos,
+		   parent_size,
+	   ) {return}
 
 	floor_quadtree_shake_node(
 		floor_quadtree,
@@ -79,8 +95,19 @@ floor_quadtree_shake_node :: proc(
 floor_quadtree_shakable :: proc(
 	floor_quadtree: ^Floor_Quadtree,
 	node_index: int,
+	node_pos: m.ivec2,
+	node_size: i32,
 ) -> bool {
 	if node_index == 0 {return false}
+	if terrain_heights[node_pos.x][node_pos.y + node_size] !=
+		   terrain_heights[node_pos.x][node_pos.y] ||
+	   terrain_heights[node_pos.x + node_size][node_pos.y + node_size] !=
+		   terrain_heights[node_pos.x][node_pos.y] ||
+	   terrain_heights[node_pos.x + node_size][node_pos.y] !=
+		   terrain_heights[node_pos.x][node_pos.y] {
+		return false
+	}
+
 	node := floor_quadtree.nodes[node_index]
 	all_same_triangle := true
 	all_nil := true
@@ -143,7 +170,12 @@ floor_quadtrees_remove :: proc(pos: m.ivec3, side: Tile_Triangle_Side) {
 			if node_size == 1 {
 				floor_quadtree.nodes[node_index].children[i] = nil
 
-				if floor_quadtree_shakable(floor_quadtree, node_index) {
+				if floor_quadtree_shakable(
+					   floor_quadtree,
+					   node_index,
+					   node_pos,
+					   node_size,
+				   ) {
 					floor_quadtree_shake_node(
 						floor_quadtree,
 						node_index,
@@ -172,7 +204,71 @@ floor_quadtrees_remove :: proc(pos: m.ivec3, side: Tile_Triangle_Side) {
 			}
 		}
 	}
+}
 
+tile_quadtrees_set_height :: proc(pos: m.ivec3, height: f32) {
+	if pos.y != 0 {return}
+
+	floor_quadtree := &floor_quadtrees[0]
+	node_index: int = 0
+	node_pos: m.ivec2 = {0, 0}
+	node_size: i32 = WORLD_WIDTH
+
+	for {
+		node := floor_quadtree.nodes[node_index]
+
+		i :=
+			pos.x / (node_pos.x + node_size / 2) +
+			pos.z / (node_pos.y + node_size / 2) * 2
+
+		child := node.children[i]
+
+		switch value in child {
+		case nil:
+			return
+		case Floor_Quadtree_Node_Index:
+			node_index = value
+			node_pos = m.ivec2 {
+				node_pos.x + (i % 2) * node_size / 2,
+				node_pos.y + (i / 2) * node_size / 2,
+			}
+			node_size /= 2
+		case Tile_Triangle:
+			if node_size == 1 {
+				if floor_quadtree_shakable(
+					   floor_quadtree,
+					   node_index,
+					   node_pos,
+					   node_size,
+				   ) {
+					floor_quadtree_shake_node(
+						floor_quadtree,
+						node_index,
+						node_pos,
+						node_size,
+					)
+				}
+				return
+			} else {
+				new_index := len(floor_quadtree.nodes)
+				append(
+					&floor_quadtree.nodes,
+					Floor_Quadtree_Node {
+						parent = node_index,
+						children = {value, value, value, value},
+					},
+				)
+				floor_quadtree.nodes[node_index].children[i] = new_index
+
+				node_index = new_index
+				node_pos = m.ivec2 {
+					node_pos.x + (i % 2) * node_size / 2,
+					node_pos.y + (i / 2) * node_size / 2,
+				}
+				node_size /= 2
+			}
+		}
+	}
 }
 
 floor_quadtrees_append :: proc(
@@ -204,7 +300,12 @@ floor_quadtrees_append :: proc(
 		case nil:
 			if node_size == 1 {
 				floor_quadtree.nodes[node_index].children[i] = tri
-				if floor_quadtree_shakable(floor_quadtree, node_index) {
+				if floor_quadtree_shakable(
+					   floor_quadtree,
+					   node_index,
+					   node_pos,
+					   node_size,
+				   ) {
 					floor_quadtree_shake_node(
 						floor_quadtree,
 						node_index,
@@ -239,7 +340,12 @@ floor_quadtrees_append :: proc(
 			if node_size == 1 {
 				floor_quadtree.nodes[node_index].children[i] = tri
 
-				if floor_quadtree_shakable(floor_quadtree, node_index) {
+				if floor_quadtree_shakable(
+					   floor_quadtree,
+					   node_index,
+					   node_pos,
+					   node_size,
+				   ) {
 					floor_quadtree_shake_node(
 						floor_quadtree,
 						node_index,
@@ -307,13 +413,25 @@ draw_floor_quadtree_node :: proc(
 			y: f32 = terrain_heights[node_pos.x][node_pos.y]
 			y += f32(floor) * WALL_HEIGHT
 			lights := [3]m.vec3{1, 1, 1}
-			heights := [3]f32 {
-				y + FLOOR_OFFSET,
-				y + FLOOR_OFFSET,
-				y + FLOOR_OFFSET,
-			}
+
+
+			// heights := [3]f32 {
+			// 	y + FLOOR_OFFSET,
+			// 	y + FLOOR_OFFSET,
+			// 	y + FLOOR_OFFSET,
+			// }
 
 			if node_size == 1 {
+				heights := get_terrain_tile_triangle_heights(
+					Tile_Triangle_Side(i),
+					int(node_pos.x),
+					int(node_pos.y),
+					int(1),
+				)
+
+				heights[0] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
+				heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
+				heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 				draw_tile_triangle(
 					value,
 					Tile_Triangle_Side(i),
@@ -331,6 +449,16 @@ draw_floor_quadtree_node :: proc(
 					node_pos.y + (i32(i) / 2) * node_size / 2,
 				}
 				for j in 0 ..< 4 {
+					heights := get_terrain_tile_triangle_heights(
+						Tile_Triangle_Side(j),
+						int(child_node_pos.x),
+						int(child_node_pos.y),
+						int(node_size / 4),
+					)
+					heights[0] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
+					heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
+					heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
+
 					draw_tile_triangle(
 						value,
 						Tile_Triangle_Side(j),
@@ -365,66 +493,18 @@ draw_floor_tiles :: proc() {
 
 insert_north_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	floor_quadtrees_append(pos, .North, tri)
-	// y := f32(pos.y * WALL_HEIGHT)
-	// north_tile_triangles[pos] = tri
-	// lights := [3]m.vec3{1, 1, 1}
-	// heights := [3]f32{y + FLOOR_OFFSET, y + FLOOR_OFFSET, y + FLOOR_OFFSET}
-	// draw_tile_triangle(
-	// 	tri,
-	// 	.North,
-	// 	lights,
-	// 	heights,
-	// 	{f32(pos.x), f32(pos.z)},
-	// 	1,
-	// )
 }
 
 insert_east_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	floor_quadtrees_append(pos, .East, tri)
-	// y := f32(pos.y * WALL_HEIGHT)
-	// east_tile_triangles[pos] = tri
-	// lights := [3]m.vec3{1, 1, 1}
-	// heights := [3]f32{y + FLOOR_OFFSET, y + FLOOR_OFFSET, y + FLOOR_OFFSET}
-	// draw_tile_triangle(
-	// 	tri,
-	// 	.East,
-	// 	lights,
-	// 	heights,
-	// 	{f32(pos.x), f32(pos.z)},
-	// 	1,
-	// )
 }
 
 insert_west_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	floor_quadtrees_append(pos, .West, tri)
-	// y := f32(pos.y * WALL_HEIGHT)
-	// west_tile_triangles[pos] = tri
-	// lights := [3]m.vec3{1, 1, 1}
-	// heights := [3]f32{y + FLOOR_OFFSET, y + FLOOR_OFFSET, y + FLOOR_OFFSET}
-	// draw_tile_triangle(
-	// 	tri,
-	// 	.West,
-	// 	lights,
-	// 	heights,
-	// 	{f32(pos.x), f32(pos.z)},
-	// 	1,
-	// )
 }
 
 insert_south_floor_tile_triangle :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	floor_quadtrees_append(pos, .South, tri)
-	// y := f32(pos.y * WALL_HEIGHT)
-	// south_tile_triangles[pos] = tri
-	// lights := [3]m.vec3{1, 1, 1}
-	// heights := [3]f32{y + FLOOR_OFFSET, y + FLOOR_OFFSET, y + FLOOR_OFFSET}
-	// draw_tile_triangle(
-	// 	tri,
-	// 	.South,
-	// 	lights,
-	// 	heights,
-	// 	{f32(pos.x), f32(pos.z)},
-	// 	1,
-	// )
 }
 
 insert_floor_tile :: proc(pos: m.ivec3, tri: Tile_Triangle) {

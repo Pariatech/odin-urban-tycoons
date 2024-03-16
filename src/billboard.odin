@@ -510,7 +510,7 @@ draw_billboards :: proc() {
 	draw_billboard_system_instances(&four_tiles_billboard_system)
 }
 
-append_billboard :: proc(using billboard: One_Tile_Billboard) {
+append_billboard :: proc(using billboard: One_Tile_Billboard) -> int {
 	instance := Billboard_Instance {
 		position  = position,
 		light     = light,
@@ -526,6 +526,8 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) {
 		{i32(position.x + 0.5), i32(position.z + 0.5)},
 		index,
 	)
+
+    return index
 }
 
 append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {

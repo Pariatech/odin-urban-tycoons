@@ -681,15 +681,6 @@ init_world :: proc() {
 	// 	},
 	// )
 
-	append_billboard(
-		 {
-			position = {0.0, 0.0, 0.0},
-			light = {1, 1, 1},
-			texture = .Shovel_SW,
-			depth_map = .Shovel_SW,
-			rotation = 0,
-		},
-	)
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
