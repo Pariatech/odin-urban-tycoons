@@ -1031,8 +1031,6 @@ add_house_floor_walls :: proc(
 }
 
 draw_world :: proc() {
-	// sort the draw components? 
-	draw_terrain()
 	draw_floor_tiles()
 
 	uniform_object.view = camera_view
