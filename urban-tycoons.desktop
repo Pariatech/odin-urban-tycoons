@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=Utility;
 Type=Application
-Icon=application-vnd.appimage.png
+Icon=application-vnd.appimage
 Exec=urban-tycoons
 Name=urban-tycoons
 

@@ -1,0 +1,140 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+AppDir:
+  path: /home/gabriel/pariatech/odin-urban-tycoons/AppDir
+  app_info:
+    id: urban-tycoons
+    name: urban-tycoons
+    icon: application-vnd.appimage
+    version: latest
+    exec: usr/bin/urban-tycoons
+    exec_args: $@
+  apt:
+    arch:
+    - amd64
+    allow_unauthenticated: true
+    sources:
+    - sourceline: deb http://ftp.us.debian.org/debian unstable main contrib non-free
+    - sourceline: deb http://deb.debian.org/debian/ sid main non-free non-free-firmware
+        contrib
+    - sourceline: deb https://packagecloud.io/slacktechnologies/slack/debian/ jessie
+        main
+    - sourceline: deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg
+        arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main
+    - sourceline: deb [arch=amd64] https://packages.microsoft.com/repos/ms-teams stable
+        main
+    - sourceline: deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg
+        ] https://download.vscodium.com/debs vscodium main
+    - sourceline: deb [arch=amd64] https://repo.jellyfin.org/debian bullseye main
+    include:
+    - libxcursor1:amd64
+    - libxdmcp6:amd64
+    - libxext6:amd64
+    - libxfixes3:amd64
+    - libxi6:amd64
+    - libxinerama1:amd64
+    - libxrandr2:amd64
+    - libxrender1:amd64
+    - libxxf86vm1:amd64
+    - nvidia-driver-bin
+  files:
+    include:
+    - /lib/x86_64-linux-gnu/libGLX.so.0
+    - /lib/x86_64-linux-gnu/libGLX_nvidia.so.0
+    - /lib/x86_64-linux-gnu/libXcursor.so.1
+    - /lib/x86_64-linux-gnu/libXi.so.6
+    - /lib/x86_64-linux-gnu/libXinerama.so.1
+    - /lib/x86_64-linux-gnu/libXrandr.so.2
+    - /lib/x86_64-linux-gnu/libXxf86vm.so.1
+    - /usr/lib/locale/locale-archive
+    - /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+    - /usr/lib/x86_64-linux-gnu/libc.so.6
+    - /usr/lib/x86_64-linux-gnu/libdl.so.2
+    - /usr/lib/x86_64-linux-gnu/libm.so.6
+    - /usr/lib/x86_64-linux-gnu/libpthread.so.0
+    - /usr/lib/x86_64-linux-gnu/librt.so.1
+    - resources/models/4tiles-billboard.glb
+    - resources/models/billboard.glb
+    - resources/textures/billboards/door-wood/ne-depth-map.png
+    - resources/textures/billboards/door-wood/ne-diffuse.png
+    - resources/textures/billboards/door-wood/nw-depth-map.png
+    - resources/textures/billboards/door-wood/nw-diffuse.png
+    - resources/textures/billboards/door-wood/se-depth-map.png
+    - resources/textures/billboards/door-wood/se-diffuse.png
+    - resources/textures/billboards/door-wood/sw-depth-map.png
+    - resources/textures/billboards/door-wood/sw-diffuse.png
+    - resources/textures/billboards/shovel/ne-depth-map.png
+    - resources/textures/billboards/shovel/ne-diffuse.png
+    - resources/textures/billboards/shovel/nw-depth-map.png
+    - resources/textures/billboards/shovel/nw-diffuse.png
+    - resources/textures/billboards/shovel/se-depth-map.png
+    - resources/textures/billboards/shovel/se-diffuse.png
+    - resources/textures/billboards/shovel/sw-depth-map.png
+    - resources/textures/billboards/shovel/sw-diffuse.png
+    - resources/textures/billboards/table-6places-wood/ne-depth-map.png
+    - resources/textures/billboards/table-6places-wood/ne-diffuse.png
+    - resources/textures/billboards/table-6places-wood/nw-depth-map.png
+    - resources/textures/billboards/table-6places-wood/nw-diffuse.png
+    - resources/textures/billboards/table-6places-wood/se-depth-map.png
+    - resources/textures/billboards/table-6places-wood/se-diffuse.png
+    - resources/textures/billboards/table-6places-wood/sw-depth-map.png
+    - resources/textures/billboards/table-6places-wood/sw-diffuse.png
+    - resources/textures/billboards/table-8places-wood/ne-depth-map.png
+    - resources/textures/billboards/table-8places-wood/ne-diffuse.png
+    - resources/textures/billboards/table-8places-wood/nw-depth-map.png
+    - resources/textures/billboards/table-8places-wood/nw-diffuse.png
+    - resources/textures/billboards/table-8places-wood/se-depth-map.png
+    - resources/textures/billboards/table-8places-wood/se-diffuse.png
+    - resources/textures/billboards/table-8places-wood/sw-depth-map.png
+    - resources/textures/billboards/table-8places-wood/sw-diffuse.png
+    - resources/textures/billboards/window-wood/ne-depth-map.png
+    - resources/textures/billboards/window-wood/ne-diffuse.png
+    - resources/textures/billboards/window-wood/nw-depth-map.png
+    - resources/textures/billboards/window-wood/nw-diffuse.png
+    - resources/textures/billboards/window-wood/se-depth-map.png
+    - resources/textures/billboards/window-wood/se-diffuse.png
+    - resources/textures/billboards/window-wood/sw-depth-map.png
+    - resources/textures/billboards/window-wood/sw-diffuse.png
+    - resources/textures/floors/wood.png
+    - resources/textures/masks/full.png
+    - resources/textures/masks/grid.png
+    - resources/textures/masks/leveling-brush.png
+    - resources/textures/tiles/asphalt-horizontal-line.png
+    - resources/textures/tiles/asphalt-vertical-line.png
+    - resources/textures/tiles/asphalt.png
+    - resources/textures/tiles/concrete.png
+    - resources/textures/tiles/gravel.png
+    - resources/textures/tiles/lawn.png
+    - resources/textures/tiles/sidewalk.png
+    - resources/textures/wall-masks/door-opening.png
+    - resources/textures/wall-masks/full.png
+    - resources/textures/wall-masks/window-opening.png
+    - resources/textures/walls/brick-wall.png
+    - resources/textures/walls/nyana-wall.png
+    - resources/textures/walls/varg-wall.png
+    - resources/textures/walls/wall-top.png
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+AppImage:
+  arch: x86_64
+  update-information: guess
