@@ -13,6 +13,7 @@ TITLE :: "My Window!"
 window_handle: glfw.WindowHandle
 framebuffer_resized: bool
 window_size := glsl.vec2{WIDTH, HEIGHT}
+delta_time: f64
 
 framebuffer_size_callback :: proc "c" (
 	window: glfw.WindowHandle,
@@ -69,7 +70,6 @@ start :: proc() -> (ok: bool = false) {
 	previous_time_ns := time.now()
 	fps_stopwatch: time.Stopwatch
 	time.stopwatch_start(&fps_stopwatch)
-	delta_time: f64
 	frames: i64 = 0
 
 

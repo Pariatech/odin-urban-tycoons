@@ -3,7 +3,7 @@
 stop_ffmpeg() {
     if [ -n "$pid" ]; then
         echo "Stopping process..."
-        kill -TERM "$pid"
+        kill -INT "$pid"
     fi
 }
 

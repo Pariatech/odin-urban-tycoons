@@ -395,29 +395,33 @@ tile_quadtree_node_on_visilbe :: proc(
 		heights: [3]f32,
 		pos: m.vec2,
 		size: f32,
+	) -> (
+		stop: bool = true
 	),
-) {
+) -> bool {
 	node := floor_quadtree.nodes[node_index]
 
 	node_aabb := Rectangle{node_pos.x, node_pos.y, node_size, node_size}
-	if !aabb_intersection(node_aabb, aabb) {return}
+	if !aabb_intersection(node_aabb, aabb) {return false}
 
 	for child, i in node.children {
 		switch value in child {
 		case nil:
 		case Floor_Quadtree_Node_Index:
-			tile_quadtree_node_on_visilbe(
-				floor_quadtree,
-				floor,
-				value,
-				m.ivec2 {
-					node_pos.x + (i32(i) % 2) * node_size / 2,
-					node_pos.y + (i32(i) / 2) * node_size / 2,
-				},
-				node_size / 2,
-				aabb,
-				fn,
-			)
+			if tile_quadtree_node_on_visilbe(
+				   floor_quadtree,
+				   floor,
+				   value,
+				   m.ivec2 {
+					   node_pos.x + (i32(i) % 2) * node_size / 2,
+					   node_pos.y + (i32(i) / 2) * node_size / 2,
+				   },
+				   node_size / 2,
+				   aabb,
+				   fn,
+			   ) {
+				return true
+			}
 		case Tile_Triangle:
 			y: f32 = terrain_heights[node_pos.x][node_pos.y]
 			y += f32(floor) * WALL_HEIGHT
@@ -441,17 +445,19 @@ tile_quadtree_node_on_visilbe :: proc(
 				heights[0] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 				heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 				heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
-				fn(
-					value,
-					Tile_Triangle_Side(i),
-					lights,
-					heights,
-					 {
-						f32(node_pos.x + node_size / 2),
-						f32(node_pos.y + node_size / 2),
-					},
-					f32(node_size),
-				)
+				if fn(
+					   value,
+					   Tile_Triangle_Side(i),
+					   lights,
+					   heights,
+					    {
+						   f32(node_pos.x + node_size / 2),
+						   f32(node_pos.y + node_size / 2),
+					   },
+					   f32(node_size),
+				   ) {
+					return true
+				}
 			} else {
 				child_node_pos := m.ivec2 {
 					node_pos.x + (i32(i) % 2) * node_size / 2,
@@ -468,21 +474,29 @@ tile_quadtree_node_on_visilbe :: proc(
 					heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 					heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 
-					fn(
-						value,
-						Tile_Triangle_Side(j),
-						lights,
-						heights,
-						 {
-							f32(child_node_pos.x) + f32(node_size) / 4 - 0.5,
-							f32(child_node_pos.y) + f32(node_size) / 4 - 0.5,
-						},
-						f32(node_size / 2),
-					)
+					if fn(
+						   value,
+						   Tile_Triangle_Side(j),
+						   lights,
+						   heights,
+						    {
+							   f32(child_node_pos.x) +
+							   f32(node_size) / 4 -
+							   0.5,
+							   f32(child_node_pos.y) +
+							   f32(node_size) / 4 -
+							   0.5,
+						   },
+						   f32(node_size / 2),
+					   ) {
+						return true
+					}
 				}
 			}
 		}
 	}
+
+	return false
 }
 
 draw_floor_tiles :: proc() {
@@ -533,6 +547,8 @@ tile_on_visible :: proc(
 		heights: [3]f32,
 		pos: m.vec2,
 		size: f32,
+	) -> (
+		stop: bool = true
 	),
 ) {
 	aabb := get_camera_aabb()

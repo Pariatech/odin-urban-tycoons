@@ -98,7 +98,7 @@ draw_tile_triangle :: proc(
 	heights: [3]f32,
 	pos: m.vec2,
     size: f32,
-) {
+) -> (skip: bool = false) {
 	index_offset := u32(len(world_vertices))
 
 	vertices := tile_triangle_side_vertices_map[side]
@@ -121,4 +121,6 @@ draw_tile_triangle :: proc(
 		index_offset + 1,
 		index_offset + 2,
 	)
+
+    return false
 }
