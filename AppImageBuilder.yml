@@ -17,15 +17,6 @@ AppDir:
     - sourceline: deb http://ftp.us.debian.org/debian unstable main contrib non-free
     - sourceline: deb http://deb.debian.org/debian/ sid main non-free non-free-firmware
         contrib
-    - sourceline: deb https://packagecloud.io/slacktechnologies/slack/debian/ jessie
-        main
-    - sourceline: deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg
-        arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main
-    - sourceline: deb [arch=amd64] https://packages.microsoft.com/repos/ms-teams stable
-        main
-    - sourceline: deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg
-        ] https://download.vscodium.com/debs vscodium main
-    - sourceline: deb [arch=amd64] https://repo.jellyfin.org/debian bullseye main
     include:
     - libxcursor1:amd64
     - libxdmcp6:amd64
