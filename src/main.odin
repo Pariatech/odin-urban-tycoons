@@ -1,6 +1,7 @@
 package main
 
 import "core:fmt"
+import "core:math/linalg/glsl"
 import "core:runtime"
 import "core:time"
 import "vendor:glfw"
@@ -11,6 +12,7 @@ TITLE :: "My Window!"
 
 window_handle: glfw.WindowHandle
 framebuffer_resized: bool
+window_size := glsl.vec2{WIDTH, HEIGHT}
 
 framebuffer_size_callback :: proc "c" (
 	window: glfw.WindowHandle,
@@ -20,6 +22,8 @@ framebuffer_size_callback :: proc "c" (
 
 	fmt.println("Window resized")
 	framebuffer_resized = true
+	window_size.x = f32(width)
+	window_size.y = f32(height)
 }
 
 start :: proc() -> (ok: bool = false) {
@@ -30,7 +34,7 @@ start :: proc() -> (ok: bool = false) {
 		return
 	}
 
-    glfw.WindowHint(glfw.SAMPLES, 4)
+	glfw.WindowHint(glfw.SAMPLES, 4)
 	window_handle = glfw.CreateWindow(WIDTH, HEIGHT, TITLE, nil, nil)
 
 	defer glfw.DestroyWindow(window_handle)
@@ -49,7 +53,7 @@ start :: proc() -> (ok: bool = false) {
 	if (!init_renderer()) do return
 	defer deinit_renderer()
 
-    init_wall_renderer() or_return
+	init_wall_renderer() or_return
 
 	init_keyboard()
 	init_cursor()
@@ -58,7 +62,7 @@ start :: proc() -> (ok: bool = false) {
 	init_terrain()
 	init_world()
 
-    terrain_tool_init()
+	terrain_tool_init()
 
 	should_close := false
 	current_time_ns := time.now()
@@ -83,7 +87,7 @@ start :: proc() -> (ok: bool = false) {
 
 		glfw.PollEvents()
 
-        terrain_tool_update()
+		terrain_tool_update()
 
 		begin_draw()
 		update_camera(delta_time)

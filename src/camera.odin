@@ -24,6 +24,7 @@ camera_view: m.mat4
 camera_proj: m.mat4
 
 camera_vp: m.mat4
+icamera_vp: m.mat4
 camera_left: f32
 camera_right: f32
 camera_top: f32
@@ -99,4 +100,5 @@ update_camera :: proc(delta_time: f64) {
 	)
 
 	camera_vp = camera_proj * camera_view
+    icamera_vp = inverse(camera_vp)
 }

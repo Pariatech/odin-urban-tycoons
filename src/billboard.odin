@@ -1,8 +1,8 @@
 package main
 
 import "core:fmt"
-import "core:math/linalg/glsl"
 import "core:math"
+import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
 import stbi "vendor:stb/image"
@@ -71,21 +71,18 @@ Billboard_Texture :: enum u8 {
 	// Chair_Wood_SE,
 	// Chair_Wood_NE,
 	// Chair_Wood_NW,
-
 	Door_Wood_SW,
 	Door_Wood_SE,
 	Door_Wood_NE,
 	Door_Wood_NW,
-
 	Window_Wood_SW,
 	Window_Wood_SE,
 	Window_Wood_NE,
 	Window_Wood_NW,
-
-    Shovel_SW,
-    Shovel_SE,
-    Shovel_NE,
-    Shovel_NW,
+	Shovel_SW,
+	Shovel_SE,
+	Shovel_NE,
+	Shovel_NW,
 }
 
 Four_Tiles_Billboard_Texture :: enum u8 {
@@ -104,21 +101,18 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
 	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
 	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
-
-	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-diffuse.png",
-	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-diffuse.png",
-	.Door_Wood_NE = "resources/textures/billboards/door-wood/ne-diffuse.png",
-	.Door_Wood_NW = "resources/textures/billboards/door-wood/nw-diffuse.png",
-
+	.Door_Wood_SW   = "resources/textures/billboards/door-wood/sw-diffuse.png",
+	.Door_Wood_SE   = "resources/textures/billboards/door-wood/se-diffuse.png",
+	.Door_Wood_NE   = "resources/textures/billboards/door-wood/ne-diffuse.png",
+	.Door_Wood_NW   = "resources/textures/billboards/door-wood/nw-diffuse.png",
 	.Window_Wood_SW = "resources/textures/billboards/window-wood/sw-diffuse.png",
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-diffuse.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-diffuse.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-diffuse.png",
-
-	.Shovel_SW = "resources/textures/billboards/shovel/sw-diffuse.png",
-	.Shovel_SE = "resources/textures/billboards/shovel/se-diffuse.png",
-	.Shovel_NE = "resources/textures/billboards/shovel/ne-diffuse.png",
-	.Shovel_NW = "resources/textures/billboards/shovel/nw-diffuse.png",
+	.Shovel_SW      = "resources/textures/billboards/shovel/sw-diffuse.png",
+	.Shovel_SE      = "resources/textures/billboards/shovel/se-diffuse.png",
+	.Shovel_NE      = "resources/textures/billboards/shovel/ne-diffuse.png",
+	.Shovel_NW      = "resources/textures/billboards/shovel/nw-diffuse.png",
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
@@ -137,21 +131,18 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
 	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
 	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
-
-	.Door_Wood_SW = "resources/textures/billboards/door-wood/sw-depth-map.png",
-	.Door_Wood_SE = "resources/textures/billboards/door-wood/se-depth-map.png",
-	.Door_Wood_NE = "resources/textures/billboards/door-wood/ne-depth-map.png",
-	.Door_Wood_NW = "resources/textures/billboards/door-wood/nw-depth-map.png",
-
+	.Door_Wood_SW   = "resources/textures/billboards/door-wood/sw-depth-map.png",
+	.Door_Wood_SE   = "resources/textures/billboards/door-wood/se-depth-map.png",
+	.Door_Wood_NE   = "resources/textures/billboards/door-wood/ne-depth-map.png",
+	.Door_Wood_NW   = "resources/textures/billboards/door-wood/nw-depth-map.png",
 	.Window_Wood_SW = "resources/textures/billboards/window-wood/sw-depth-map.png",
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-depth-map.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-depth-map.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-depth-map.png",
-
-	.Shovel_SW = "resources/textures/billboards/shovel/sw-depth-map.png",
-	.Shovel_SE = "resources/textures/billboards/shovel/se-depth-map.png",
-	.Shovel_NE = "resources/textures/billboards/shovel/ne-depth-map.png",
-	.Shovel_NW = "resources/textures/billboards/shovel/nw-depth-map.png",
+	.Shovel_SW      = "resources/textures/billboards/shovel/sw-depth-map.png",
+	.Shovel_SE      = "resources/textures/billboards/shovel/se-depth-map.png",
+	.Shovel_NE      = "resources/textures/billboards/shovel/ne-depth-map.png",
+	.Shovel_NW      = "resources/textures/billboards/shovel/nw-depth-map.png",
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
@@ -381,13 +372,13 @@ get_camera_aabb :: proc() -> Rectangle {
 	top_left := get_view_corner({-1, 1})
 	bottom_right := get_view_corner({1, -1})
 	top_right := get_view_corner({1, 1})
-    camera := camera_position + camera_translate
+	camera := camera_position + camera_translate
 
 	aabb: Rectangle
 	switch camera_rotation {
 	case .South_West:
-        camera.x = math.min(camera.x, bottom_left.x)
-        camera.z = math.min(camera.z, bottom_right.y)
+		camera.x = math.min(camera.x, bottom_left.x)
+		camera.z = math.min(camera.z, bottom_right.y)
 		width := top_right.x - camera.x
 		height := top_left.y - camera.z
 
@@ -398,8 +389,8 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .South_East:
-        camera.x = math.max(camera.x, bottom_right.x)
-        camera.z = math.min(camera.z, bottom_left.y)
+		camera.x = math.max(camera.x, bottom_right.x)
+		camera.z = math.min(camera.z, bottom_left.y)
 		width := camera.x - top_left.x
 		height := top_right.y - camera.z
 
@@ -410,12 +401,17 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_East:
-        camera.x = math.max(camera.x, bottom_left.x)
-        camera.z = math.max(camera.z, bottom_right.y)
+		camera.x = math.max(camera.x, bottom_left.x)
+		camera.z = math.max(camera.z, bottom_right.y)
 		width := camera.x - top_right.x
 		height := camera.z - top_left.y
-        fmt.println("camera.xz:", camera.xz)
-        fmt.println("bottom_left.x:", bottom_left.x, "bottom_right.y:", bottom_right.y)
+		fmt.println("camera.xz:", camera.xz)
+		fmt.println(
+			"bottom_left.x:",
+			bottom_left.x,
+			"bottom_right.y:",
+			bottom_right.y,
+		)
 
 		aabb = Rectangle {
 				x = i32(top_right.x),
@@ -424,8 +420,8 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_West:
-        camera.x = math.min(camera.x, bottom_right.x)
-        camera.z = math.max(camera.z, bottom_left.y)
+		camera.x = math.min(camera.x, bottom_right.x)
+		camera.z = math.max(camera.z, bottom_left.y)
 		width := top_left.x - camera.x
 		height := camera.z - top_right.y
 
@@ -437,7 +433,7 @@ get_camera_aabb :: proc() -> Rectangle {
 			}
 	}
 
-    return aabb
+	return aabb
 }
 
 draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
@@ -446,7 +442,7 @@ draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
 	visible_instances := [dynamic]Billboard_Instance{}
 	defer delete(visible_instances)
 
-    aabb := get_camera_aabb()
+	aabb := get_camera_aabb()
 	indices := quadtree_search(&billboard_system.quadtree, aabb)
 	defer delete(indices)
 	for index in indices {
@@ -527,7 +523,20 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) -> int {
 		index,
 	)
 
-    return index
+	return index
+}
+
+move_billboard :: proc(index: int, to: glsl.vec3) {
+	position := billboard_system.instances[index].position
+	billboard_system.instances[index].position = to
+
+	old := glsl.ivec2{i32(position.x + 0.5), i32(position.z + 0.5)}
+	new := glsl.ivec2{i32(to.x + 0.5), i32(to.z + 0.5)}
+
+	if old != new {
+		quadtree_remove(&billboard_system.quadtree, old, index)
+		quadtree_append(&billboard_system.quadtree, new, index)
+	}
 }
 
 append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {

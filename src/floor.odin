@@ -381,13 +381,21 @@ floor_quadtrees_append :: proc(
 	}
 }
 
-draw_floor_quadtree_node :: proc(
+tile_quadtree_node_on_visilbe :: proc(
 	floor_quadtree: Floor_Quadtree,
 	floor: int,
 	node_index: int,
 	node_pos: m.ivec2,
 	node_size: i32,
 	aabb: Rectangle,
+	fn: proc(
+		tri: Tile_Triangle,
+		side: Tile_Triangle_Side,
+		lights: [3]m.vec3,
+		heights: [3]f32,
+		pos: m.vec2,
+		size: f32,
+	),
 ) {
 	node := floor_quadtree.nodes[node_index]
 
@@ -398,7 +406,7 @@ draw_floor_quadtree_node :: proc(
 		switch value in child {
 		case nil:
 		case Floor_Quadtree_Node_Index:
-			draw_floor_quadtree_node(
+			tile_quadtree_node_on_visilbe(
 				floor_quadtree,
 				floor,
 				value,
@@ -408,6 +416,7 @@ draw_floor_quadtree_node :: proc(
 				},
 				node_size / 2,
 				aabb,
+				fn,
 			)
 		case Tile_Triangle:
 			y: f32 = terrain_heights[node_pos.x][node_pos.y]
@@ -432,7 +441,7 @@ draw_floor_quadtree_node :: proc(
 				heights[0] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 				heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 				heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
-				draw_tile_triangle(
+				fn(
 					value,
 					Tile_Triangle_Side(i),
 					lights,
@@ -459,7 +468,7 @@ draw_floor_quadtree_node :: proc(
 					heights[1] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 					heights[2] += f32(floor) * WALL_HEIGHT + FLOOR_OFFSET
 
-					draw_tile_triangle(
+					fn(
 						value,
 						Tile_Triangle_Side(j),
 						lights,
@@ -480,13 +489,14 @@ draw_floor_tiles :: proc() {
 	aabb := get_camera_aabb()
 
 	for floor_quadtree, floor in floor_quadtrees {
-		draw_floor_quadtree_node(
+		tile_quadtree_node_on_visilbe(
 			floor_quadtree,
 			floor,
 			0,
 			{0, 0},
 			WORLD_WIDTH,
 			aabb,
+			draw_tile_triangle,
 		)
 	}
 }
@@ -512,6 +522,31 @@ insert_floor_tile :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	insert_south_floor_tile_triangle(pos, tri)
 	insert_east_floor_tile_triangle(pos, tri)
 	insert_west_floor_tile_triangle(pos, tri)
+}
+
+tile_on_visible :: proc(
+	floor: int,
+	fn: proc(
+		tri: Tile_Triangle,
+		side: Tile_Triangle_Side,
+		lights: [3]m.vec3,
+		heights: [3]f32,
+		pos: m.vec2,
+		size: f32,
+	),
+) {
+	aabb := get_camera_aabb()
+	floor_quadtree := floor_quadtrees[floor]
+
+	tile_quadtree_node_on_visilbe(
+		floor_quadtree,
+		floor,
+		0,
+		{0, 0},
+		WORLD_WIDTH,
+		aabb,
+		fn,
+	)
 }
 
 @(test)
