@@ -9,6 +9,7 @@ terrain_tool_billboard: int
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
+terrain_tool_drag_end: Maybe(glsl.ivec2)
 terrain_tool_drag_start_billboard: int
 
 TERRAIN_TOOL_TICK_SPEED :: 0.25
@@ -27,6 +28,23 @@ terrain_tool_init :: proc() {
 		},
 	)
 }
+
+terrain_tool_clear_masks :: proc(
+	drag_start: glsl.ivec2,
+	start_x, start_z: i32,
+) {
+	if previous_end, ok := terrain_tool_drag_end.?; ok {
+		previous_end_x := max(drag_start.x, previous_end.x)
+		previous_end_z := max(drag_start.y, previous_end.y)
+
+		for x in start_x ..< previous_end_x {
+			for z in start_z ..< previous_end_z {
+				tile_update_tile({x, 0, z}, nil, .Grid_Mask)
+			}
+		}
+	}
+}
+
 
 terrain_tool_tile_cursor :: proc(
 	tri: Tile_Triangle,
@@ -70,11 +88,12 @@ terrain_tool_tile_cursor :: proc(
 
 		if shift_down {
 			if drag_start, ok := terrain_tool_drag_start.?; ok {
+				start_x := min(drag_start.x, terrain_tool_position.x)
+				start_z := min(drag_start.y, terrain_tool_position.y)
+				end_x := max(drag_start.x, terrain_tool_position.x)
+				end_z := max(drag_start.y, terrain_tool_position.y)
+
 				if left_mouse_button == glfw.RELEASE {
-					start_x := min(drag_start.x, terrain_tool_position.x)
-					start_z := min(drag_start.y, terrain_tool_position.y)
-					end_x := max(drag_start.x, terrain_tool_position.x)
-					end_z := max(drag_start.y, terrain_tool_position.y)
 					height := terrain_heights[drag_start.x][drag_start.y]
 					for x in start_x ..= end_x {
 						for z in start_z ..= end_z {
@@ -82,7 +101,18 @@ terrain_tool_tile_cursor :: proc(
 						}
 					}
 					terrain_tool_drag_start = nil
-                    remove_billboard(terrain_tool_drag_start_billboard)
+					remove_billboard(terrain_tool_drag_start_billboard)
+
+					terrain_tool_clear_masks(drag_start, start_x, start_z)
+				} else if terrain_tool_drag_end != terrain_tool_position {
+					terrain_tool_clear_masks(drag_start, start_x, start_z)
+
+					terrain_tool_drag_end = terrain_tool_position
+					for x in start_x ..< end_x {
+						for z in start_z ..< end_z {
+							tile_update_tile({x, 0, z}, nil, .Leveling_Brush)
+						}
+					}
 				}
 			} else if left_mouse_button == glfw.PRESS {
 				terrain_tool_drag_start = terrain_tool_position

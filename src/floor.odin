@@ -63,9 +63,9 @@ floor_quadtree_shake_node :: proc(
 	unordered_remove(&floor_quadtree.nodes, node_index)
 	if node_index != len(floor_quadtree.nodes) {
 		moved_index_parent := floor_quadtree.nodes[node_index].parent
-		for child in &floor_quadtree.nodes[moved_index_parent].children {
+		for child, i in &floor_quadtree.nodes[moved_index_parent].children {
 			if child == len(floor_quadtree.nodes) {
-				child = node_index
+				floor_quadtree.nodes[moved_index_parent].children[i] = node_index
 			}
 		}
 
@@ -170,19 +170,19 @@ floor_quadtrees_remove :: proc(pos: m.ivec3, side: Tile_Triangle_Side) {
 			if node_size == 1 {
 				floor_quadtree.nodes[node_index].children[i] = nil
 
-				if floor_quadtree_shakable(
-					   floor_quadtree,
-					   node_index,
-					   node_pos,
-					   node_size,
-				   ) {
-					floor_quadtree_shake_node(
-						floor_quadtree,
-						node_index,
-						node_pos,
-						node_size,
-					)
-				}
+				// if floor_quadtree_shakable(
+				// 	   floor_quadtree,
+				// 	   node_index,
+				// 	   node_pos,
+				// 	   node_size,
+				//    ) {
+				// 	floor_quadtree_shake_node(
+				// 		floor_quadtree,
+				// 		node_index,
+				// 		node_pos,
+				// 		node_size,
+				// 	)
+				// }
 				return
 			} else {
 				new_index := len(floor_quadtree.nodes)
@@ -235,19 +235,19 @@ tile_quadtrees_set_height :: proc(pos: m.ivec3, height: f32) {
 			node_size /= 2
 		case Tile_Triangle:
 			if node_size == 1 {
-				if floor_quadtree_shakable(
-					   floor_quadtree,
-					   node_index,
-					   node_pos,
-					   node_size,
-				   ) {
-					floor_quadtree_shake_node(
-						floor_quadtree,
-						node_index,
-						node_pos,
-						node_size,
-					)
-				}
+				// if floor_quadtree_shakable(
+				// 	   floor_quadtree,
+				// 	   node_index,
+				// 	   node_pos,
+				// 	   node_size,
+				//    ) {
+				// 	floor_quadtree_shake_node(
+				// 		floor_quadtree,
+				// 		node_index,
+				// 		node_pos,
+				// 		node_size,
+				// 	)
+				// }
 				return
 			} else {
 				new_index := len(floor_quadtree.nodes)
@@ -276,6 +276,18 @@ floor_quadtrees_append :: proc(
 	side: Tile_Triangle_Side,
 	tri: Tile_Triangle,
 ) {
+	floor_quadtrees_update(pos, side, tri.texture, tri.mask_texture)
+}
+
+floor_quadtrees_update :: proc(
+	pos: m.ivec3,
+	side: Tile_Triangle_Side,
+	texture: Maybe(Texture),
+	mask_texture: Maybe(Mask),
+) {
+	if texture == nil && mask_texture == nil {
+		return
+	}
 	floor_quadtree := &floor_quadtrees[pos.y]
 
 	node_index: int = 0
@@ -299,20 +311,23 @@ floor_quadtrees_append :: proc(
 		switch value in child {
 		case nil:
 			if node_size == 1 {
-				floor_quadtree.nodes[node_index].children[i] = tri
-				if floor_quadtree_shakable(
-					   floor_quadtree,
-					   node_index,
-					   node_pos,
-					   node_size,
-				   ) {
-					floor_quadtree_shake_node(
-						floor_quadtree,
-						node_index,
-						node_pos,
-						node_size,
-					)
+				floor_quadtree.nodes[node_index].children[i] = Tile_Triangle {
+					texture      = texture.? or_else .Grass,
+					mask_texture = mask_texture.? or_else .Full_Mask,
 				}
+				// if floor_quadtree_shakable(
+				// 	   floor_quadtree,
+				// 	   node_index,
+				// 	   node_pos,
+				// 	   node_size,
+				//    ) {
+				// 	floor_quadtree_shake_node(
+				// 		floor_quadtree,
+				// 		node_index,
+				// 		node_pos,
+				// 		node_size,
+				// 	)
+				// }
 				return
 			} else {
 				new_index := len(floor_quadtree.nodes)
@@ -338,25 +353,33 @@ floor_quadtrees_append :: proc(
 			node_size /= 2
 		case Tile_Triangle:
 			if node_size == 1 {
-				floor_quadtree.nodes[node_index].children[i] = tri
-
-				if floor_quadtree_shakable(
-					   floor_quadtree,
-					   node_index,
-					   node_pos,
-					   node_size,
-				   ) {
-					floor_quadtree_shake_node(
-						floor_quadtree,
-						node_index,
-						node_pos,
-						node_size,
-					)
+				tri := &floor_quadtree.nodes[node_index].children[i].(Tile_Triangle)
+				if tex, ok := texture.?; ok {
+					tri.texture = tex
 				}
+
+				if mask, ok := mask_texture.?; ok {
+					tri.mask_texture = mask
+				}
+
+				// if floor_quadtree_shakable(
+				// 	   floor_quadtree,
+				// 	   node_index,
+				// 	   node_pos,
+				// 	   node_size,
+				//    ) {
+				// 	floor_quadtree_shake_node(
+				// 		floor_quadtree,
+				// 		node_index,
+				// 		node_pos,
+				// 		node_size,
+				// 	)
+				// }
 				return
 			} else {
-				if value.texture == tri.texture &&
-				   value.mask_texture == tri.mask_texture {
+				if (value.texture == texture || texture == nil) &&
+				   (value.mask_texture == mask_texture ||
+						   mask_texture == nil) {
 					return
 				}
 
@@ -536,6 +559,17 @@ insert_floor_tile :: proc(pos: m.ivec3, tri: Tile_Triangle) {
 	insert_south_floor_tile_triangle(pos, tri)
 	insert_east_floor_tile_triangle(pos, tri)
 	insert_west_floor_tile_triangle(pos, tri)
+}
+
+tile_update_tile :: proc(
+	pos: m.ivec3,
+	texture: Maybe(Texture),
+	mask_texture: Maybe(Mask),
+) {
+	floor_quadtrees_update(pos, .North, texture, mask_texture)
+	floor_quadtrees_update(pos, .East, texture, mask_texture)
+	floor_quadtrees_update(pos, .West, texture, mask_texture)
+	floor_quadtrees_update(pos, .South, texture, mask_texture)
 }
 
 tile_on_visible :: proc(
