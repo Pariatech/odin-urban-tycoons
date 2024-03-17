@@ -526,6 +526,12 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) -> int {
 	return index
 }
 
+remove_billboard :: proc(index: int) {
+	position := billboard_system.instances[index].position
+	old := glsl.ivec2{i32(position.x + 0.5), i32(position.z + 0.5)}
+	quadtree_remove(&billboard_system.quadtree, old, index)
+}
+
 move_billboard :: proc(index: int, to: glsl.vec3) {
 	position := billboard_system.instances[index].position
 	billboard_system.instances[index].position = to
