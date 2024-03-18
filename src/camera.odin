@@ -1,6 +1,7 @@
 package main
 
 import "core:math"
+import "core:math/linalg"
 import m "core:math/linalg/glsl"
 import "vendor:glfw"
 
@@ -100,5 +101,5 @@ update_camera :: proc(delta_time: f64) {
 	)
 
 	camera_vp = camera_proj * camera_view
-    icamera_vp = inverse(camera_vp)
+    icamera_vp = linalg.inverse(camera_vp)
 }

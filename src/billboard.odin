@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:math"
+import "core:math/linalg"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
@@ -361,8 +362,8 @@ init_billboard_system :: proc(
 }
 
 get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
-	p1 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, -1, 1}
-	p2 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, 1, 1}
+	p1 := linalg.inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, -1, 1}
+	p2 := linalg.inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, 1, 1}
 	t := -p1.y / (p2.y - p1.y)
 	return glsl.vec2{p1.x + t * (p2.x - p1.x), p1.z + t * (p2.z - p1.z)}
 }
