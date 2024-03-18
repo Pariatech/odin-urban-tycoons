@@ -2,6 +2,6 @@
 Categories=Utility;
 Type=Application
 Icon=application-vnd.appimage
-Exec=usr/bin/urban-tycoons
+Exec=urban-tycoons
 Name=urban-tycoons
 
