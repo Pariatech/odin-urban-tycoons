@@ -31,9 +31,10 @@ terrain_tool_init :: proc() {
 
 terrain_tool_clear_masks :: proc(
 	drag_start: glsl.ivec2,
-	start_x, start_z: i32,
 ) {
 	if previous_end, ok := terrain_tool_drag_end.?; ok {
+		start_x := min(drag_start.x, previous_end.x)
+		start_z := min(drag_start.y, previous_end.y)
 		previous_end_x := max(drag_start.x, previous_end.x)
 		previous_end_z := max(drag_start.y, previous_end.y)
 
@@ -70,6 +71,7 @@ terrain_tool_tile_cursor :: proc(
 		position := intersect
 		position.x = math.ceil(position.x) - 0.5
 		position.z = math.ceil(position.z) - 0.5
+        previous_tool_position := terrain_tool_position
 		terrain_tool_position.x = i32(position.x + 0.5)
 		terrain_tool_position.y = i32(position.z + 0.5)
 		position.y =
@@ -103,9 +105,9 @@ terrain_tool_tile_cursor :: proc(
 					terrain_tool_drag_start = nil
 					remove_billboard(terrain_tool_drag_start_billboard)
 
-					terrain_tool_clear_masks(drag_start, start_x, start_z)
+					terrain_tool_clear_masks(drag_start)
 				} else if terrain_tool_drag_end != terrain_tool_position {
-					terrain_tool_clear_masks(drag_start, start_x, start_z)
+					terrain_tool_clear_masks(drag_start)
 
 					terrain_tool_drag_end = terrain_tool_position
 					for x in start_x ..< end_x {
