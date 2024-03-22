@@ -8,7 +8,9 @@ WORLD_WIDTH :: 1024
 WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 1024
 
-sun := m.vec3{0, -1, 0}
+SUN_POWER :: 1.5
+
+sun := m.vec3{1, -2, 1}
 
 house_x: i32 = 12
 house_z: i32 = 12

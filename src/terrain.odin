@@ -207,6 +207,7 @@ calculate_terrain_light :: proc(x, z: int) {
 
 	normal = m.normalize(normal)
 	light := m.dot(m.normalize(sun), normal)
+	// light :f32 = 1.0
 	terrain_lights[x][z] = {light, light, light}
 }
 
@@ -264,11 +265,18 @@ get_terrain_tile_triangle_heights :: proc(
 	}
 
 	heights[2] = 0
-    lowest := min(tile_heights[0], tile_heights[1], tile_heights[2], tile_heights[3])
-    highest := max(tile_heights[0], tile_heights[1], tile_heights[2], tile_heights[3])
-	// for height in tile_heights {
-	// 	heights[2] += height
-	// }
+	lowest := min(
+		tile_heights[0],
+		tile_heights[1],
+		tile_heights[2],
+		tile_heights[3],
+	)
+	highest := max(
+		tile_heights[0],
+		tile_heights[1],
+		tile_heights[2],
+		tile_heights[3],
+	)
 	heights[2] = (lowest + highest) / 2
 
 	switch side {

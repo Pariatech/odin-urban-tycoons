@@ -65,7 +65,8 @@ floor_quadtree_shake_node :: proc(
 		moved_index_parent := floor_quadtree.nodes[node_index].parent
 		for child, i in &floor_quadtree.nodes[moved_index_parent].children {
 			if child == len(floor_quadtree.nodes) {
-				floor_quadtree.nodes[moved_index_parent].children[i] = node_index
+				floor_quadtree.nodes[moved_index_parent].children[i] =
+					node_index
 			}
 		}
 
@@ -216,6 +217,9 @@ tile_quadtrees_set_height :: proc(pos: m.ivec3, height: f32) {
 
 	for {
 		node := floor_quadtree.nodes[node_index]
+		if node_size == 1 {
+			return
+		}
 
 		i :=
 			pos.x / (node_pos.x + node_size / 2) +
@@ -450,7 +454,6 @@ tile_quadtree_node_on_visilbe :: proc(
 			y += f32(floor) * WALL_HEIGHT
 			lights := [3]m.vec3{1, 1, 1}
 
-
 			// heights := [3]f32 {
 			// 	y + FLOOR_OFFSET,
 			// 	y + FLOOR_OFFSET,
@@ -458,6 +461,13 @@ tile_quadtree_node_on_visilbe :: proc(
 			// }
 
 			if node_size == 1 {
+				lights = get_terrain_tile_triangle_lights(
+					Tile_Triangle_Side(i),
+					int(node_pos.x),
+					int(node_pos.y),
+					int(node_size),
+				)
+
 				heights := get_terrain_tile_triangle_heights(
 					Tile_Triangle_Side(i),
 					int(node_pos.x),
@@ -487,6 +497,13 @@ tile_quadtree_node_on_visilbe :: proc(
 					node_pos.y + (i32(i) / 2) * node_size / 2,
 				}
 				for j in 0 ..< 4 {
+					lights = get_terrain_tile_triangle_lights(
+						Tile_Triangle_Side(j),
+						int(child_node_pos.x),
+						int(child_node_pos.y),
+						int(node_size / 4),
+					)
+
 					heights := get_terrain_tile_triangle_heights(
 						Tile_Triangle_Side(j),
 						int(child_node_pos.x),

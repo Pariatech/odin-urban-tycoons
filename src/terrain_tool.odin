@@ -101,6 +101,11 @@ terrain_tool_tile_cursor :: proc(
 							set_terrain_height(int(x), int(z), height)
 						}
 					}
+					for x in start_x ..= end_x {
+						for z in start_z ..= end_z {
+							calculate_terrain_light(int(x), int(z))
+						}
+					}
 					terrain_tool_drag_start = nil
 					remove_billboard(terrain_tool_drag_start_billboard)
 
@@ -150,16 +155,16 @@ terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
 
 	if terrain_tool_tick_timer == delta_time ||
 	   terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
-		terrain_tool_move_point_height(
-			int(terrain_tool_position.x),
-			int(terrain_tool_position.y),
-			movement,
-		)
 		fmt.println(
 			"x:",
 			terrain_tool_position.x,
 			"z:",
 			terrain_tool_position.y,
+		)
+		terrain_tool_move_point_height(
+			int(terrain_tool_position.x),
+			int(terrain_tool_position.y),
+			movement,
 		)
 		terrain_tool_adjust_points(
 			int(terrain_tool_position.x - 1),
@@ -297,6 +302,16 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int) {
 			z -= 1
 			w += 2
 			h += 2
+		}
+	}
+
+	start_z := max(z, 0)
+	end_z := min(z + h, WORLD_DEPTH)
+	start_x := max(x, 0)
+	end_x := min(x + w, WORLD_WIDTH)
+	for x in start_x ..= end_x {
+		for z in start_z ..= end_z {
+			calculate_terrain_light(int(x), int(z))
 		}
 	}
 }
