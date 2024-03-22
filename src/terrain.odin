@@ -264,10 +264,13 @@ get_terrain_tile_triangle_heights :: proc(
 	}
 
 	heights[2] = 0
-	for height in tile_heights {
-		heights[2] += height
-	}
-	heights[2] /= 4
+    lowest := min(tile_heights[0], tile_heights[1], tile_heights[2], tile_heights[3])
+    highest := max(tile_heights[0], tile_heights[1], tile_heights[2], tile_heights[3])
+	// for height in tile_heights {
+	// 	heights[2] += height
+	// }
+	heights[2] = (lowest + highest) / 2
+
 	switch side {
 	case .South:
 		heights[0] = tile_heights[0]
