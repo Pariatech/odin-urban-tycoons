@@ -101,6 +101,14 @@ terrain_tool_tile_cursor :: proc(
 							set_terrain_height(int(x), int(z), height)
 						}
 					}
+
+					terrain_tool_adjust_points(
+						int(start_x - 1),
+						int(start_z - 1),
+						int(end_x - start_x + 2),
+						int(end_z - start_z + 2),
+					)
+
 					for x in start_x ..= end_x {
 						for z in start_z ..= end_z {
 							calculate_terrain_light(int(x), int(z))
@@ -155,12 +163,6 @@ terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
 
 	if terrain_tool_tick_timer == delta_time ||
 	   terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
-		fmt.println(
-			"x:",
-			terrain_tool_position.x,
-			"z:",
-			terrain_tool_position.y,
-		)
 		terrain_tool_move_point_height(
 			int(terrain_tool_position.x),
 			int(terrain_tool_position.y),
@@ -196,13 +198,17 @@ terrain_tool_slope_points :: proc(x, z, rx, rz: int) -> bool {
 	point_height := terrain_heights[x][z]
 
 	if ref_height - point_height > TERRAIN_TOOL_MAX_SLOPE {
-		fmt.println("x:", x, "z:", z)
-		terrain_tool_move_point_height(x, z, TERRAIN_TOOL_MOVEMENT)
+		terrain_tool_move_point_height(
+			x,
+			z,
+			ref_height - point_height - TERRAIN_TOOL_MAX_SLOPE,
+		)
 		return true
 	}
 
 	if point_height - ref_height > TERRAIN_TOOL_MAX_SLOPE {
-		terrain_tool_move_point_height(x, z, -TERRAIN_TOOL_MOVEMENT)
+		terrain_tool_move_point_height(x, z, 
+        point_height - ref_height - TERRAIN_TOOL_MOVEMENT)
 		return true
 	}
 
