@@ -90,70 +90,84 @@ terrain_tool_tile_cursor :: proc(
 		shift_down := is_key_down(.Key_Left_Shift)
 
 		if shift_down {
-			if drag_start, ok := terrain_tool_drag_start.?; ok {
-				start_x := min(drag_start.x, terrain_tool_position.x)
-				start_z := min(drag_start.y, terrain_tool_position.y)
-				end_x := max(drag_start.x, terrain_tool_position.x)
-				end_z := max(drag_start.y, terrain_tool_position.y)
-
-				if left_mouse_button == glfw.RELEASE {
-					height := terrain_heights[drag_start.x][drag_start.y]
-					for x in start_x ..= end_x {
-						for z in start_z ..= end_z {
-							set_terrain_height(int(x), int(z), height)
-						}
-					}
-
-					// terrain_tool_adjust_points(
-					// 	int(start_x - 1),
-					// 	int(start_z - 1),
-					// 	int(end_x - start_x + 2),
-					// 	int(end_z - start_z + 2),
-					// )
-					terrain_tool_adjust_points_v2(
-						int(start_x),
-						int(start_z),
-						int(end_x - start_x),
-						int(end_z - start_z),
-					)
-
-					for x in start_x ..= end_x {
-						for z in start_z ..= end_z {
-							calculate_terrain_light(int(x), int(z))
-						}
-					}
-					terrain_tool_drag_start = nil
-					remove_billboard(terrain_tool_drag_start_billboard)
-
-					terrain_tool_clear_masks(drag_start)
-				} else if terrain_tool_drag_end != terrain_tool_position {
-					terrain_tool_clear_masks(drag_start)
-
-					terrain_tool_drag_end = terrain_tool_position
-					for x in start_x ..< end_x {
-						for z in start_z ..< end_z {
-							tile_update_tile({x, 0, z}, nil, .Leveling_Brush)
-						}
-					}
-				}
-			} else if left_mouse_button == glfw.PRESS {
-				terrain_tool_drag_start = terrain_tool_position
-				terrain_tool_drag_start_billboard = append_billboard(
-					 {
-						position = position,
-						light = {1, 1, 1},
-						texture = .Shovel_SW,
-						depth_map = .Shovel_SW,
-						rotation = 0,
-					},
-				)
-			}
+			terrain_tool_move_points(
+				left_mouse_button,
+				right_mouse_button,
+				position,
+			)
 		} else {
 			terrain_tool_move_point(left_mouse_button, right_mouse_button)
 		}
 	}
 
 	return ok
+}
+
+terrain_tool_move_points :: proc(
+	left_mouse_button, right_mouse_button: i32,
+	position: glsl.vec3,
+) {
+	if drag_start, ok := terrain_tool_drag_start.?; ok {
+		start_x := min(drag_start.x, terrain_tool_position.x)
+		start_z := min(drag_start.y, terrain_tool_position.y)
+		end_x := max(drag_start.x, terrain_tool_position.x)
+		end_z := max(drag_start.y, terrain_tool_position.y)
+
+		if left_mouse_button == glfw.RELEASE {
+			if is_key_down(.Key_Left_Control) {
+				terrain_tool_adjust_inward_points(
+					int(start_x),
+					int(start_z),
+					int(end_x - start_x),
+					int(end_z - start_z),
+				)
+			} else {
+				height := terrain_heights[drag_start.x][drag_start.y]
+				for x in start_x ..= end_x {
+					for z in start_z ..= end_z {
+						set_terrain_height(int(x), int(z), height)
+					}
+				}
+
+				terrain_tool_adjust_points(
+					int(start_x),
+					int(start_z),
+					int(end_x - start_x),
+					int(end_z - start_z),
+				)
+			}
+
+			for x in start_x ..= end_x {
+				for z in start_z ..= end_z {
+					calculate_terrain_light(int(x), int(z))
+				}
+			}
+			terrain_tool_drag_start = nil
+			remove_billboard(terrain_tool_drag_start_billboard)
+
+			terrain_tool_clear_masks(drag_start)
+		} else if terrain_tool_drag_end != terrain_tool_position {
+			terrain_tool_clear_masks(drag_start)
+
+			terrain_tool_drag_end = terrain_tool_position
+			for x in start_x ..< end_x {
+				for z in start_z ..< end_z {
+					tile_update_tile({x, 0, z}, nil, .Leveling_Brush)
+				}
+			}
+		}
+	} else if left_mouse_button == glfw.PRESS {
+		terrain_tool_drag_start = terrain_tool_position
+		terrain_tool_drag_start_billboard = append_billboard(
+			 {
+				position = position,
+				light = {1, 1, 1},
+				texture = .Shovel_SW,
+				depth_map = .Shovel_SW,
+				rotation = 0,
+			},
+		)
+	}
 }
 
 terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
@@ -176,13 +190,7 @@ terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
 			int(terrain_tool_position.y),
 			movement,
 		)
-		// terrain_tool_adjust_points(
-		// 	int(terrain_tool_position.x - 1),
-		// 	int(terrain_tool_position.y - 1),
-		// 	2,
-		// 	2,
-		// )
-		terrain_tool_adjust_points_v2(
+		terrain_tool_adjust_points(
 			int(terrain_tool_position.x),
 			int(terrain_tool_position.y),
 			0,
@@ -342,115 +350,35 @@ terrain_tool_adjust_corner_points :: proc(x, z, w, h: int) {
 	}
 }
 
-terrain_tool_adjust_points_v2 :: proc(x, z, w, h: int) {
-    terrain_tool_adjust_side_points(x, z, w, h)
-    if !is_key_down(.Key_Left_Control) {
-        terrain_tool_adjust_corner_points(x, z, w, h)
-    }
+terrain_tool_adjust_points :: proc(x, z, w, h: int) {
+	terrain_tool_adjust_side_points(x, z, w, h)
+	terrain_tool_adjust_corner_points(x, z, w, h)
 }
 
-terrain_tool_adjust_points :: proc(x, z, w, h: int) {
-	x := x
-	z := z
-	w := w
-	h := h
-
-	cont := true
-	for cont {
-		cont = false
-		right := x + w
-		top := z + h
-		start_z := max(z, 0)
-		end_z := min(z + h, WORLD_DEPTH)
-		start_x := max(x + 1, 0)
-		end_x := min(x + w - 1, WORLD_WIDTH)
-		if x >= 0 {
-			if z == start_z {
-				if terrain_tool_slope_points(x, start_z, x + 1, start_z + 1) {
-					cont = true
-				}
-				start_z += 1
-			}
-
-			if end_z == z + h {
-				if terrain_tool_slope_points(x, end_z, x + 1, end_z - 1) {
-					cont = true
-				}
-				end_z -= 1
-			}
-
-			for z in start_z ..= end_z {
-				if terrain_tool_slope_points(x, z, x + 1, z) {
-					cont = true
-				}
+terrain_tool_adjust_inward_points :: proc(x, z, w, h: int) {
+	for i in x ..= x + w {
+		for j in z + 1 ..< z + h {
+			if !terrain_tool_slope_points(i, j, i, j - 1) {
+				break
 			}
 		}
-
-		start_z = max(z, 0)
-		end_z = min(z + h, WORLD_DEPTH)
-		if right <= WORLD_WIDTH {
-			if z == start_z {
-				if terrain_tool_slope_points(
-					   right,
-					   start_z,
-					   right - 1,
-					   start_z + 1,
-				   ) {
-					cont = true
-				}
-				start_z += 1
+		for j := z + h - 1; j > z; j -= 1 {
+			if !terrain_tool_slope_points(i, j, i, j + 1) {
+				break
 			}
-
-			if end_z == z + h {
-				if terrain_tool_slope_points(
-					   right,
-					   end_z,
-					   right - 1,
-					   end_z - 1,
-				   ) {
-					cont = true
-				}
-				end_z -= 1
-			}
-
-			for z in start_z ..= end_z {
-				if terrain_tool_slope_points(right, z, right - 1, z) {
-					cont = true
-				}
-			}
-		}
-
-		if z >= 0 {
-			for x in start_x ..= end_x {
-				if terrain_tool_slope_points(x, z, x, z + 1) {
-					cont = true
-				}
-			}
-		}
-
-		if top <= WORLD_DEPTH {
-			for x in start_x ..= end_x {
-				if terrain_tool_slope_points(x, top, x, top - 1) {
-					cont = true
-				}
-			}
-		}
-
-		if cont {
-			x -= 1
-			z -= 1
-			w += 2
-			h += 2
 		}
 	}
 
-	start_z := max(z, 0)
-	end_z := min(z + h, WORLD_DEPTH)
-	start_x := max(x, 0)
-	end_x := min(x + w, WORLD_WIDTH)
-	for x in start_x ..= end_x {
-		for z in start_z ..= end_z {
-			calculate_terrain_light(int(x), int(z))
+	for j in z ..= z + h {
+		for i in x + 1 ..< x + w {
+			if !terrain_tool_slope_points(i, j, i - 1, j) {
+				break
+			}
+		}
+		for i := x + w - 1; i > x; i -= 1 {
+			if !terrain_tool_slope_points(i, j, i + 1, j) {
+				break
+			}
 		}
 	}
 }
