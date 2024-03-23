@@ -207,8 +207,12 @@ terrain_tool_slope_points :: proc(x, z, rx, rz: int) -> bool {
 	}
 
 	if point_height - ref_height > TERRAIN_TOOL_MAX_SLOPE {
-		terrain_tool_move_point_height(x, z, 
-        point_height - ref_height - TERRAIN_TOOL_MOVEMENT)
+		terrain_tool_move_point_height(
+			x,
+			z,
+			ref_height - point_height + TERRAIN_TOOL_MAX_SLOPE,
+			// ref_height - point_height - TERRAIN_TOOL_MAX_SLOPE,
+		)
 		return true
 	}
 
