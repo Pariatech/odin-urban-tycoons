@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:math/rand"
 import "vendor:glfw"
 
 terrain_tool_billboard: int
@@ -11,6 +12,7 @@ terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
 terrain_tool_drag_end: Maybe(glsl.ivec2)
 terrain_tool_drag_start_billboard: int
+terrain_tool_drag_clip: bool
 terrain_tool_slope: f32 = 0.5
 
 TERRAIN_TOOL_TICK_SPEED :: 0.125
@@ -19,6 +21,7 @@ TERRAIN_TOOL_LOW :: 0
 TERRAIN_TOOL_HIGH :: 6
 TERRAIN_TOOL_MIN_SLOPE :: 0.1
 TERRAIN_TOOL_MAX_SLOPE :: 1.0
+TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 terrain_tool_init :: proc() {
 	terrain_tool_billboard = append_billboard(
@@ -113,7 +116,8 @@ terrain_tool_move_points :: proc(
 		end_x := max(drag_start.x, terrain_tool_position.x)
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
-		if left_mouse_button == glfw.RELEASE {
+		if left_mouse_button == glfw.RELEASE &&
+		   right_mouse_button == glfw.RELEASE {
 			if is_key_down(.Key_Left_Control) {
 				terrain_tool_adjust_inward_points(
 					int(start_x),
@@ -125,7 +129,14 @@ terrain_tool_move_points :: proc(
 				height := terrain_heights[drag_start.x][drag_start.y]
 				for x in start_x ..= end_x {
 					for z in start_z ..= end_z {
-						set_terrain_height(int(x), int(z), height)
+						if terrain_tool_drag_clip {
+							point_height := terrain_heights[x][z]
+							if point_height > height {
+								set_terrain_height(int(x), int(z), height)
+							}
+						} else {
+							set_terrain_height(int(x), int(z), height)
+						}
 					}
 				}
 
@@ -156,7 +167,9 @@ terrain_tool_move_points :: proc(
 				}
 			}
 		}
-	} else if left_mouse_button == glfw.PRESS {
+	} else if left_mouse_button == glfw.PRESS ||
+	   right_mouse_button == glfw.PRESS {
+		terrain_tool_drag_clip = right_mouse_button == glfw.PRESS
 		terrain_tool_drag_start = terrain_tool_position
 		terrain_tool_drag_start_billboard = append_billboard(
 			 {
@@ -185,17 +198,50 @@ terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
 
 	if terrain_tool_tick_timer == delta_time ||
 	   terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
-		terrain_tool_move_point_height(
-			int(terrain_tool_position.x),
-			int(terrain_tool_position.y),
-			movement,
-		)
-		terrain_tool_adjust_points(
-			int(terrain_tool_position.x),
-			int(terrain_tool_position.y),
-			0,
-			0,
-		)
+		if is_key_down(.Key_Left_Control) {
+			for _ in 0 ..< 10 {
+				o := rand.float32() * 2 * math.PI
+				r := rand.float32() * TERRAIN_TOOL_RANDOM_RADIUS
+				x := int(f32(terrain_tool_position.x) + r * math.cos(o) + 0.5)
+				y := int(f32(terrain_tool_position.y) + r * math.sin(o) + 0.5)
+
+				if x >= 0 && y >= 0 && x <= WORLD_WIDTH && y <= WORLD_DEPTH {
+					terrain_tool_move_point_height(x, y, movement)
+					terrain_tool_adjust_points(x, y, 0, 0)
+				}
+			}
+
+			for i in 0 ..= 2 * TERRAIN_TOOL_RANDOM_RADIUS {
+				for j in 0 ..= 2 * TERRAIN_TOOL_RANDOM_RADIUS {
+					x :=
+						int(terrain_tool_position.x) -
+						TERRAIN_TOOL_RANDOM_RADIUS +
+						i
+					z :=
+						int(terrain_tool_position.y) -
+						TERRAIN_TOOL_RANDOM_RADIUS +
+						j
+					if x <= WORLD_WIDTH &&
+					   z <= WORLD_DEPTH &&
+					   x >= 0 &&
+					   z >= 0 {
+						calculate_terrain_light(x, z)
+					}
+				}
+			}
+		} else {
+			terrain_tool_move_point_height(
+				int(terrain_tool_position.x),
+				int(terrain_tool_position.y),
+				movement,
+			)
+			terrain_tool_adjust_points(
+				int(terrain_tool_position.x),
+				int(terrain_tool_position.y),
+				0,
+				0,
+			)
+		}
 
 		if terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 			terrain_tool_tick_timer = math.max(
