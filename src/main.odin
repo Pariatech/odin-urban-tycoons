@@ -6,8 +6,8 @@ import "core:runtime"
 import "core:time"
 import "vendor:glfw"
 
-WIDTH :: 1600
-HEIGHT :: 900
+WIDTH :: 1920
+HEIGHT :: 1080
 TITLE :: "My Window!"
 
 window_handle: glfw.WindowHandle
@@ -63,6 +63,8 @@ start :: proc() -> (ok: bool = false) {
 	init_terrain()
 	init_world()
 
+    gui_init() or_return
+
 	terrain_tool_init()
 
 	should_close := false
@@ -95,6 +97,8 @@ start :: proc() -> (ok: bool = false) {
 		draw_world()
 
 		draw_billboards()
+        gui_draw()
+
 		end_draw()
 
 
