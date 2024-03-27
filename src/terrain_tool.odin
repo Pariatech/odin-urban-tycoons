@@ -92,7 +92,7 @@ terrain_tool_tile_cursor :: proc(
 		)
 		shift_down := is_key_down(.Key_Left_Shift)
 
-		if shift_down {
+		if shift_down || terrain_tool_drag_start != nil {
 			terrain_tool_move_points(
 				left_mouse_button,
 				right_mouse_button,
