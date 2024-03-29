@@ -1,7 +1,7 @@
 package main
 
-import "vendor:glfw"
 import "core:runtime"
+import "vendor:glfw"
 
 Mouse_Button_State :: enum {
 	Press,
@@ -12,17 +12,17 @@ Mouse_Button_State :: enum {
 }
 
 Mouse_Button :: enum {
-    Left,
-    Right,
-    Middle,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
+	Left,
+	Right,
+	Middle,
+	Four,
+	Five,
+	Six,
+	Seven,
+	Eight,
 }
 
-mouse_buttons: [Mouse_Button]Mouse_Button_State;
+mouse_buttons: [Mouse_Button]Mouse_Button_State
 
 mouse_on_button :: proc "c" (
 	window: glfw.WindowHandle,
@@ -42,7 +42,7 @@ mouse_on_button :: proc "c" (
 }
 
 mouse_init :: proc() {
-    glfw.SetMouseButtonCallback(window_handle, mouse_on_button)
+	glfw.SetMouseButtonCallback(window_handle, mouse_on_button)
 	key_map = make(map[Key_Value]Key_State)
 }
 
@@ -58,5 +58,17 @@ mouse_update :: proc() {
 }
 
 mouse_is_button_press :: proc(button: Mouse_Button) -> bool {
-    return mouse_buttons[button] == .Press
+	return mouse_buttons[button] == .Press
+}
+
+mouse_is_button_down :: proc(button: Mouse_Button) -> bool {
+	return(
+		mouse_buttons[button] == .Press ||
+		mouse_buttons[button] == .Down ||
+		mouse_buttons[button] == .Repeat \
+	)
+}
+
+mouse_is_button_release :: proc(button: Mouse_Button) -> bool {
+	return mouse_buttons[button] == .Release
 }

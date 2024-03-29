@@ -91,26 +91,36 @@ terrain_tool_tile_cursor :: proc(
 			terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 		move_billboard(terrain_tool_billboard, position)
 
-		right_mouse_button := glfw.GetMouseButton(
-			window_handle,
-			glfw.MOUSE_BUTTON_RIGHT,
-		)
-		shift_down := is_key_down(.Key_Left_Shift)
-
-		if shift_down || terrain_tool_drag_start != nil {
-			terrain_tool_move_points(
-				left_mouse_button,
-				right_mouse_button,
-				position,
+		if mouse_is_button_press(.Left) {
+			terrain_tool_drag_start = terrain_tool_position
+			terrain_tool_drag_start_billboard = append_billboard(
+				 {
+					position = position,
+					light = {1, 1, 1},
+					texture = .Shovel_SW,
+					depth_map = .Shovel_SW,
+					rotation = 0,
+				},
 			)
-		} else {
-			// terrain_tool_move_point(left_mouse_button, right_mouse_button)
-			if mouse_is_button_press(.Left) {
-				terrain_tool_point = intersect
-				terrain_tool_point_height = position.y
-			}
-		}
+		} else if mouse_is_button_down(.Left) {
+			if drag_start, ok := terrain_tool_drag_start.?; ok {
+				start_x := min(drag_start.x, terrain_tool_position.x)
+				start_z := min(drag_start.y, terrain_tool_position.y)
+				end_x := max(drag_start.x, terrain_tool_position.x)
+				end_z := max(drag_start.y, terrain_tool_position.y)
+				terrain_tool_clear_masks(drag_start)
 
+				terrain_tool_drag_end = terrain_tool_position
+				for x in start_x ..< end_x {
+					for z in start_z ..< end_z {
+						tile_update_tile({x, 0, z}, nil, .Leveling_Brush)
+					}
+				}
+			}
+		} else if mouse_is_button_release(.Left) {
+			terrain_tool_point = intersect
+			terrain_tool_point_height = position.y
+		}
 
 		start_x := max(
 			terrain_tool_position.x - terrain_tool_brush_size / 2,
@@ -501,11 +511,23 @@ terrain_tool_update :: proc() {
 			fmt.println("intersect:", intersect)
 			dy := intersect.y - point.y
 			fmt.println("dy:", dy)
-			terrain_tool_set_point_height(
-				int(terrain_tool_position.x),
-				int(terrain_tool_position.y),
-				terrain_tool_point_height + dy,
-			)
+
+			if drag_start, ok := terrain_tool_drag_start.?; ok {
+				start_x := min(drag_start.x, terrain_tool_position.x)
+				start_z := min(drag_start.y, terrain_tool_position.y)
+				end_x := max(drag_start.x, terrain_tool_position.x)
+				end_z := max(drag_start.y, terrain_tool_position.y)
+
+				for x in start_x ..= end_x {
+					for z in start_z ..= end_z {
+						terrain_tool_set_point_height(
+							int(x),
+							int(z),
+							terrain_tool_point_height + dy,
+						)
+					}
+				}
+			}
 			position := glsl.vec3 {
 				f32(terrain_tool_position.x) - 0.5,
 				terrain_heights[terrain_tool_position.x][terrain_tool_position.y],
@@ -514,7 +536,7 @@ terrain_tool_update :: proc() {
 			move_billboard(terrain_tool_billboard, position)
 
 
-			if mouse_is_button_press(.Left) {
+			if mouse_is_button_release(.Left) {
 				terrain_tool_point = nil
 			}
 		}
