@@ -62,6 +62,21 @@ update_cursor :: proc() {
 	cursor_scroll = {0, 0}
 }
 
+cursor_ray_intersect_plane :: proc(pos: glsl.vec3, normal: glsl.vec3) -> Maybe(glsl.vec3) {
+    dot_product := glsl.dot(cursor_ray.direction, normal)
+
+    if dot_product == 0 {
+        return nil
+    }
+
+    t := glsl.dot(pos - cursor_ray.origin, normal) / dot_product
+    if t < 0 {
+        return nil
+    }
+
+    return cursor_ray.origin + t * cursor_ray.direction
+}
+
 cursor_ray_intersect_triangle :: proc(
 	triangle: [3]glsl.vec3,
 ) -> Maybe(glsl.vec3) {

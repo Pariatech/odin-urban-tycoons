@@ -15,6 +15,8 @@ terrain_tool_drag_start_billboard: int
 terrain_tool_drag_clip: bool
 terrain_tool_slope: f32 = 0.5
 
+terrain_tool_point: Maybe(glsl.ivec2)
+
 TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_MOVEMENT :: 0.1
 TERRAIN_TOOL_LOW :: 0
@@ -70,40 +72,58 @@ terrain_tool_tile_cursor :: proc(
 		triangle[i].y += heights[i]
 	}
 
-	intersect, ok := cursor_ray_intersect_triangle(triangle).?
-	if ok {
-		position := intersect
-		position.x = math.ceil(position.x) - 0.5
-		position.z = math.ceil(position.z) - 0.5
-		previous_tool_position := terrain_tool_position
-		terrain_tool_position.x = i32(position.x + 0.5)
-		terrain_tool_position.y = i32(position.z + 0.5)
-		position.y =
-			terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-		move_billboard(terrain_tool_billboard, position)
+	left_mouse_button := glfw.GetMouseButton(
+		window_handle,
+		glfw.MOUSE_BUTTON_LEFT,
+	)
 
-		left_mouse_button := glfw.GetMouseButton(
-			window_handle,
-			glfw.MOUSE_BUTTON_LEFT,
-		)
-		right_mouse_button := glfw.GetMouseButton(
-			window_handle,
-			glfw.MOUSE_BUTTON_RIGHT,
-		)
-		shift_down := is_key_down(.Key_Left_Shift)
+	if point, ok := terrain_tool_point.?; ok {
+		if height, ok := cursor_ray_intersect_plane(
+			   glsl.vec3{f32(point.x), 0, f32(point.y)},
+			   glsl.normalize(glsl.vec3{-1, 0, -1}),
+		   ).?; ok {
+			fmt.println("height:", height)
 
-		if shift_down || terrain_tool_drag_start != nil {
-			terrain_tool_move_points(
-				left_mouse_button,
-				right_mouse_button,
-				position,
-			)
-		} else {
-			terrain_tool_move_point(left_mouse_button, right_mouse_button)
+			if mouse_is_button_press(.Left) {
+				terrain_tool_point = nil
+			}
 		}
-	}
+		return true
+	} else {
+		intersect, ok := cursor_ray_intersect_triangle(triangle).?
+		if ok {
+			position := intersect
+			position.x = math.ceil(position.x) - 0.5
+			position.z = math.ceil(position.z) - 0.5
+			previous_tool_position := terrain_tool_position
+			terrain_tool_position.x = i32(position.x + 0.5)
+			terrain_tool_position.y = i32(position.z + 0.5)
+			position.y =
+				terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+			move_billboard(terrain_tool_billboard, position)
 
-	return ok
+			right_mouse_button := glfw.GetMouseButton(
+				window_handle,
+				glfw.MOUSE_BUTTON_RIGHT,
+			)
+			shift_down := is_key_down(.Key_Left_Shift)
+
+			if shift_down || terrain_tool_drag_start != nil {
+				terrain_tool_move_points(
+					left_mouse_button,
+					right_mouse_button,
+					position,
+				)
+			} else {
+				// terrain_tool_move_point(left_mouse_button, right_mouse_button)
+				if mouse_is_button_press(.Left) {
+					terrain_tool_point = terrain_tool_position
+				}
+			}
+		}
+
+		return ok
+	}
 }
 
 terrain_tool_move_points :: proc(

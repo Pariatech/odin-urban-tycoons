@@ -57,6 +57,7 @@ start :: proc() -> (ok: bool = false) {
 	init_wall_renderer() or_return
 
 	init_keyboard()
+    mouse_init()
 	init_cursor()
 
 	init_billboard_systems() or_return
@@ -107,6 +108,7 @@ start :: proc() -> (ok: bool = false) {
 			is_key_down(.Key_Escape)
 
 		update_keyboard()
+        mouse_update()
 		update_cursor()
 
 		frames += 1
