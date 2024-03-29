@@ -7,7 +7,7 @@ import "core:math/rand"
 import "vendor:glfw"
 
 terrain_tool_billboard: int
-terrain_tool_position: glsl.ivec2
+terrain_tool_position: glsl.ivec2 = {0, 0}
 terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
 terrain_tool_drag_end: Maybe(glsl.ivec2)
@@ -17,6 +17,7 @@ terrain_tool_slope: f32 = 0.5
 
 terrain_tool_point: Maybe(glsl.vec3)
 terrain_tool_point_height: f32
+terrain_tool_brush_size: i32 = 2
 
 TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_MOVEMENT :: 0.1
@@ -78,67 +79,64 @@ terrain_tool_tile_cursor :: proc(
 		glfw.MOUSE_BUTTON_LEFT,
 	)
 
-	if point, ok := terrain_tool_point.?; ok {
-		if intersect, ok := cursor_ray_intersect_plane(
-			   glsl.vec3{point.x, 0, point.z},
-			   glsl.normalize(glsl.vec3{-1, 0, -1}),
-		   ).?; ok {
-			fmt.println("intersect:", intersect)
-            dy := intersect.y - point.y
-            fmt.println("dy:", dy)
-			terrain_tool_set_point_height(
-				int(terrain_tool_position.x),
-				int(terrain_tool_position.y),
-				terrain_tool_point_height + dy,
-			)
-			position := glsl.vec3 {
-				f32(terrain_tool_position.x) - 0.5,
-				terrain_heights[terrain_tool_position.x][terrain_tool_position.y],
-				f32(terrain_tool_position.y) - 0.5,
-			}
-			move_billboard(terrain_tool_billboard, position)
+	intersect, ok := cursor_ray_intersect_triangle(triangle).?
+	if ok {
+		position := intersect
+		position.x = math.ceil(position.x) - 0.5
+		position.z = math.ceil(position.z) - 0.5
+		previous_tool_position := terrain_tool_position
+		terrain_tool_position.x = i32(position.x + 0.5)
+		terrain_tool_position.y = i32(position.z + 0.5)
+		position.y =
+			terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+		move_billboard(terrain_tool_billboard, position)
 
+		right_mouse_button := glfw.GetMouseButton(
+			window_handle,
+			glfw.MOUSE_BUTTON_RIGHT,
+		)
+		shift_down := is_key_down(.Key_Left_Shift)
+
+		if shift_down || terrain_tool_drag_start != nil {
+			terrain_tool_move_points(
+				left_mouse_button,
+				right_mouse_button,
+				position,
+			)
+		} else {
+			// terrain_tool_move_point(left_mouse_button, right_mouse_button)
 			if mouse_is_button_press(.Left) {
-				terrain_tool_point = nil
-			}
-		}
-		return true
-	} else {
-		intersect, ok := cursor_ray_intersect_triangle(triangle).?
-		if ok {
-			position := intersect
-			position.x = math.ceil(position.x) - 0.5
-			position.z = math.ceil(position.z) - 0.5
-			previous_tool_position := terrain_tool_position
-			terrain_tool_position.x = i32(position.x + 0.5)
-			terrain_tool_position.y = i32(position.z + 0.5)
-			position.y =
-				terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-			move_billboard(terrain_tool_billboard, position)
-
-			right_mouse_button := glfw.GetMouseButton(
-				window_handle,
-				glfw.MOUSE_BUTTON_RIGHT,
-			)
-			shift_down := is_key_down(.Key_Left_Shift)
-
-			if shift_down || terrain_tool_drag_start != nil {
-				terrain_tool_move_points(
-					left_mouse_button,
-					right_mouse_button,
-					position,
-				)
-			} else {
-				// terrain_tool_move_point(left_mouse_button, right_mouse_button)
-				if mouse_is_button_press(.Left) {
-					terrain_tool_point = intersect
-                    terrain_tool_point_height = position.y
-				}
+				terrain_tool_point = intersect
+				terrain_tool_point_height = position.y
 			}
 		}
 
-		return ok
+
+		start_x := max(
+			terrain_tool_position.x - terrain_tool_brush_size / 2,
+			0,
+		)
+		start_y := max(
+			terrain_tool_position.y - terrain_tool_brush_size / 2,
+			0,
+		)
+		end_x := min(
+			terrain_tool_position.x + terrain_tool_brush_size / 2,
+			WORLD_WIDTH,
+		)
+		end_y := min(
+			terrain_tool_position.y + terrain_tool_brush_size / 2,
+			WORLD_DEPTH,
+		)
+
+		for x in start_x ..< end_x {
+			for y in start_y ..< end_y {
+				tile_update_tile({x, 0, y}, nil, .Dotted_Grid)
+			}
+		}
 	}
+
+	return ok
 }
 
 terrain_tool_move_points :: proc(
@@ -478,5 +476,49 @@ terrain_tool_update :: proc() {
 		terrain_tool_slope = max(terrain_tool_slope, TERRAIN_TOOL_MIN_SLOPE)
 	}
 
-	tile_on_visible(0, terrain_tool_tile_cursor)
+	start_x := max(terrain_tool_position.x - terrain_tool_brush_size / 2, 0)
+	start_y := max(terrain_tool_position.y - terrain_tool_brush_size / 2, 0)
+	end_x := min(
+		terrain_tool_position.x + terrain_tool_brush_size / 2,
+		WORLD_WIDTH,
+	)
+	end_y := min(
+		terrain_tool_position.y + terrain_tool_brush_size / 2,
+		WORLD_DEPTH,
+	)
+
+	for x in start_x ..< end_x {
+		for y in start_y ..< end_y {
+			tile_update_tile({x, 0, y}, nil, .Grid_Mask)
+		}
+	}
+
+	if point, ok := terrain_tool_point.?; ok {
+		if intersect, ok := cursor_ray_intersect_plane(
+			   glsl.vec3{point.x, 0, point.z},
+			   glsl.normalize(glsl.vec3{-1, 0, -1}),
+		   ).?; ok {
+			fmt.println("intersect:", intersect)
+			dy := intersect.y - point.y
+			fmt.println("dy:", dy)
+			terrain_tool_set_point_height(
+				int(terrain_tool_position.x),
+				int(terrain_tool_position.y),
+				terrain_tool_point_height + dy,
+			)
+			position := glsl.vec3 {
+				f32(terrain_tool_position.x) - 0.5,
+				terrain_heights[terrain_tool_position.x][terrain_tool_position.y],
+				f32(terrain_tool_position.y) - 0.5,
+			}
+			move_billboard(terrain_tool_billboard, position)
+
+
+			if mouse_is_button_press(.Left) {
+				terrain_tool_point = nil
+			}
+		}
+	} else {
+		tile_on_visible(0, terrain_tool_tile_cursor)
+	}
 }
