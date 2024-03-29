@@ -15,7 +15,8 @@ terrain_tool_drag_start_billboard: int
 terrain_tool_drag_clip: bool
 terrain_tool_slope: f32 = 0.5
 
-terrain_tool_point: Maybe(glsl.ivec2)
+terrain_tool_point: Maybe(glsl.vec3)
+terrain_tool_point_height: f32
 
 TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_MOVEMENT :: 0.1
@@ -78,11 +79,24 @@ terrain_tool_tile_cursor :: proc(
 	)
 
 	if point, ok := terrain_tool_point.?; ok {
-		if height, ok := cursor_ray_intersect_plane(
-			   glsl.vec3{f32(point.x), 0, f32(point.y)},
+		if intersect, ok := cursor_ray_intersect_plane(
+			   glsl.vec3{point.x, 0, point.z},
 			   glsl.normalize(glsl.vec3{-1, 0, -1}),
 		   ).?; ok {
-			fmt.println("height:", height)
+			fmt.println("intersect:", intersect)
+            dy := intersect.y - point.y
+            fmt.println("dy:", dy)
+			terrain_tool_set_point_height(
+				int(terrain_tool_position.x),
+				int(terrain_tool_position.y),
+				terrain_tool_point_height + dy,
+			)
+			position := glsl.vec3 {
+				f32(terrain_tool_position.x) - 0.5,
+				terrain_heights[terrain_tool_position.x][terrain_tool_position.y],
+				f32(terrain_tool_position.y) - 0.5,
+			}
+			move_billboard(terrain_tool_billboard, position)
 
 			if mouse_is_button_press(.Left) {
 				terrain_tool_point = nil
@@ -117,7 +131,8 @@ terrain_tool_tile_cursor :: proc(
 			} else {
 				// terrain_tool_move_point(left_mouse_button, right_mouse_button)
 				if mouse_is_button_press(.Left) {
-					terrain_tool_point = terrain_tool_position
+					terrain_tool_point = intersect
+                    terrain_tool_point_height = position.y
 				}
 			}
 		}
@@ -278,6 +293,11 @@ terrain_tool_move_point_height :: proc(x, z: int, movement: f32) {
 
 	height = clamp(height, TERRAIN_TOOL_LOW, TERRAIN_TOOL_HIGH)
 
+	set_terrain_height(x, z, height)
+}
+
+terrain_tool_set_point_height :: proc(x, z: int, height: f32) {
+	height := clamp(height, TERRAIN_TOOL_LOW, TERRAIN_TOOL_HIGH)
 	set_terrain_height(x, z, height)
 }
 
