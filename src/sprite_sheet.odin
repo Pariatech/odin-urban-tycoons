@@ -24,6 +24,7 @@ Mask :: enum (u16) {
 	Full_Mask,
 	Grid_Mask,
 	Leveling_Brush,
+    Dotted_Grid,
 }
 
 Wall_Texture :: enum (u16) {
@@ -64,6 +65,7 @@ mask_paths :: [Mask]cstring {
 	.Full_Mask      = "resources/textures/masks/full.png",
 	.Grid_Mask      = "resources/textures/masks/grid.png",
 	.Leveling_Brush = "resources/textures/masks/leveling-brush.png",
+	.Dotted_Grid      = "resources/textures/masks/dotted-grid.png",
 }
 
 wall_texture_paths :: [Wall_Texture]cstring {

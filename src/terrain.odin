@@ -206,7 +206,7 @@ calculate_terrain_light :: proc(x, z: int) {
 	}
 
 	normal = m.normalize(normal)
-	light := m.dot(m.normalize(sun), normal)
+	light := clamp(m.dot(m.normalize(sun), normal), 0.2, 1)
 	// light :f32 = 1.0
 	terrain_lights[x][z] = {light, light, light}
 }
