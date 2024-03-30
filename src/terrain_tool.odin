@@ -30,8 +30,8 @@ terrain_tool_init :: proc() {
 		 {
 			position = {0.0, 0.0, 0.0},
 			light = {1, 1, 1},
-			texture = .Shovel_SW,
-			depth_map = .Shovel_SW,
+			texture = .Shovel_1_SW,
+			depth_map = .Shovel_1_SW,
 			rotation = 0,
 		},
 	)
@@ -178,8 +178,8 @@ terrain_tool_move_points :: proc(
 			 {
 				position = position,
 				light = {1, 1, 1},
-				texture = .Shovel_SW,
-				depth_map = .Shovel_SW,
+				texture = .Shovel_1_SW,
+				depth_map = .Shovel_1_SW,
 				rotation = 0,
 			},
 		)
@@ -504,6 +504,12 @@ terrain_tool_update :: proc() {
 				terrain_tool_brush_strength,
 				TERRAIN_TOOL_BRUSH_MAX_STRENGTH,
 			)
+
+			t := int(terrain_tool_brush_strength * 10 - 1)
+			billboard_set_texture(
+				terrain_tool_billboard,
+				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
+			)
 		}
 	} else if is_key_press(.Key_Minus) {
 		if is_key_down(.Key_Left_Shift) {
@@ -514,6 +520,12 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_strength = max(
 				terrain_tool_brush_strength,
 				TERRAIN_TOOL_BRUSH_MIN_STRENGTH,
+			)
+
+			t := int(terrain_tool_brush_strength * 10 - 1)
+			billboard_set_texture(
+				terrain_tool_billboard,
+				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
 			)
 		}
 	}

@@ -80,10 +80,46 @@ Billboard_Texture :: enum u8 {
 	Window_Wood_SE,
 	Window_Wood_NE,
 	Window_Wood_NW,
-	Shovel_SW,
-	Shovel_SE,
-	Shovel_NE,
-	Shovel_NW,
+	Shovel_1_SW,
+	Shovel_1_SE,
+	Shovel_1_NE,
+	Shovel_1_NW,
+	Shovel_2_SW,
+	Shovel_2_SE,
+	Shovel_2_NE,
+	Shovel_2_NW,
+	Shovel_3_SW,
+	Shovel_3_SE,
+	Shovel_3_NE,
+	Shovel_3_NW,
+	Shovel_4_SW,
+	Shovel_4_SE,
+	Shovel_4_NE,
+	Shovel_4_NW,
+	Shovel_5_SW,
+	Shovel_5_SE,
+	Shovel_5_NE,
+	Shovel_5_NW,
+	Shovel_6_SW,
+	Shovel_6_SE,
+	Shovel_6_NE,
+	Shovel_6_NW,
+	Shovel_7_SW,
+	Shovel_7_SE,
+	Shovel_7_NE,
+	Shovel_7_NW,
+	Shovel_8_SW,
+	Shovel_8_SE,
+	Shovel_8_NE,
+	Shovel_8_NW,
+	Shovel_9_SW,
+	Shovel_9_SE,
+	Shovel_9_NE,
+	Shovel_9_NW,
+	Shovel_10_SW,
+	Shovel_10_SE,
+	Shovel_10_NE,
+	Shovel_10_NW,
 }
 
 Four_Tiles_Billboard_Texture :: enum u8 {
@@ -110,10 +146,46 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-diffuse.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-diffuse.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-diffuse.png",
-	.Shovel_SW      = "resources/textures/billboards/shovel/sw-diffuse.png",
-	.Shovel_SE      = "resources/textures/billboards/shovel/se-diffuse.png",
-	.Shovel_NE      = "resources/textures/billboards/shovel/ne-diffuse.png",
-	.Shovel_NW      = "resources/textures/billboards/shovel/nw-diffuse.png",
+	.Shovel_1_SW    = "resources/textures/billboards/shovel/1-diffuse.png",
+	.Shovel_1_SE    = "resources/textures/billboards/shovel/1-diffuse.png",
+	.Shovel_1_NE    = "resources/textures/billboards/shovel/1-diffuse.png",
+	.Shovel_1_NW    = "resources/textures/billboards/shovel/1-diffuse.png",
+	.Shovel_2_SW    = "resources/textures/billboards/shovel/2-diffuse.png",
+	.Shovel_2_SE    = "resources/textures/billboards/shovel/2-diffuse.png",
+	.Shovel_2_NE    = "resources/textures/billboards/shovel/2-diffuse.png",
+	.Shovel_2_NW    = "resources/textures/billboards/shovel/2-diffuse.png",
+	.Shovel_3_SW    = "resources/textures/billboards/shovel/3-diffuse.png",
+	.Shovel_3_SE    = "resources/textures/billboards/shovel/3-diffuse.png",
+	.Shovel_3_NE    = "resources/textures/billboards/shovel/3-diffuse.png",
+	.Shovel_3_NW    = "resources/textures/billboards/shovel/3-diffuse.png",
+	.Shovel_4_SW    = "resources/textures/billboards/shovel/4-diffuse.png",
+	.Shovel_4_SE    = "resources/textures/billboards/shovel/4-diffuse.png",
+	.Shovel_4_NE    = "resources/textures/billboards/shovel/4-diffuse.png",
+	.Shovel_4_NW    = "resources/textures/billboards/shovel/4-diffuse.png",
+	.Shovel_5_SW    = "resources/textures/billboards/shovel/5-diffuse.png",
+	.Shovel_5_SE    = "resources/textures/billboards/shovel/5-diffuse.png",
+	.Shovel_5_NE    = "resources/textures/billboards/shovel/5-diffuse.png",
+	.Shovel_5_NW    = "resources/textures/billboards/shovel/5-diffuse.png",
+	.Shovel_6_SW    = "resources/textures/billboards/shovel/6-diffuse.png",
+	.Shovel_6_SE    = "resources/textures/billboards/shovel/6-diffuse.png",
+	.Shovel_6_NE    = "resources/textures/billboards/shovel/6-diffuse.png",
+	.Shovel_6_NW    = "resources/textures/billboards/shovel/6-diffuse.png",
+	.Shovel_7_SW    = "resources/textures/billboards/shovel/7-diffuse.png",
+	.Shovel_7_SE    = "resources/textures/billboards/shovel/7-diffuse.png",
+	.Shovel_7_NE    = "resources/textures/billboards/shovel/7-diffuse.png",
+	.Shovel_7_NW    = "resources/textures/billboards/shovel/7-diffuse.png",
+	.Shovel_8_SW    = "resources/textures/billboards/shovel/8-diffuse.png",
+	.Shovel_8_SE    = "resources/textures/billboards/shovel/8-diffuse.png",
+	.Shovel_8_NE    = "resources/textures/billboards/shovel/8-diffuse.png",
+	.Shovel_8_NW    = "resources/textures/billboards/shovel/8-diffuse.png",
+	.Shovel_9_SW    = "resources/textures/billboards/shovel/9-diffuse.png",
+	.Shovel_9_SE    = "resources/textures/billboards/shovel/9-diffuse.png",
+	.Shovel_9_NE    = "resources/textures/billboards/shovel/9-diffuse.png",
+	.Shovel_9_NW    = "resources/textures/billboards/shovel/9-diffuse.png",
+	.Shovel_10_SW   = "resources/textures/billboards/shovel/10-diffuse.png",
+	.Shovel_10_SE   = "resources/textures/billboards/shovel/10-diffuse.png",
+	.Shovel_10_NE   = "resources/textures/billboards/shovel/10-diffuse.png",
+	.Shovel_10_NW   = "resources/textures/billboards/shovel/10-diffuse.png",
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
@@ -140,10 +212,46 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Window_Wood_SE = "resources/textures/billboards/window-wood/se-depth-map.png",
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-depth-map.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-depth-map.png",
-	.Shovel_SW      = "resources/textures/billboards/shovel/sw-depth-map.png",
-	.Shovel_SE      = "resources/textures/billboards/shovel/se-depth-map.png",
-	.Shovel_NE      = "resources/textures/billboards/shovel/ne-depth-map.png",
-	.Shovel_NW      = "resources/textures/billboards/shovel/nw-depth-map.png",
+	.Shovel_1_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_1_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_1_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_1_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_2_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_2_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_2_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_2_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_3_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_3_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_3_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_3_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_4_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_4_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_4_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_4_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_5_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_5_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_5_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_5_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_6_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_6_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_6_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_6_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_7_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_7_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_7_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_7_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_8_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_8_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_8_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_8_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_9_SW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_9_SE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_9_NE    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_9_NW    = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_10_SW   = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_10_SE   = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_10_NE   = "resources/textures/billboards/shovel/depth-map.png",
+	.Shovel_10_NW   = "resources/textures/billboards/shovel/depth-map.png",
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
@@ -362,8 +470,12 @@ init_billboard_system :: proc(
 }
 
 get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
-	p1 := linalg.inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, -1, 1}
-	p2 := linalg.inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, 1, 1}
+	p1 :=
+		linalg.inverse(camera_vp) *
+		glsl.vec4{screen_point.x, screen_point.y, -1, 1}
+	p2 :=
+		linalg.inverse(camera_vp) *
+		glsl.vec4{screen_point.x, screen_point.y, 1, 1}
 	t := -p1.y / (p2.y - p1.y)
 	return glsl.vec2{p1.x + t * (p2.x - p1.x), p1.z + t * (p2.z - p1.z)}
 }
@@ -525,6 +637,10 @@ append_billboard :: proc(using billboard: One_Tile_Billboard) -> int {
 	)
 
 	return index
+}
+
+billboard_set_texture :: proc(index: int, texture: Billboard_Texture) {
+	billboard_system.instances[index].texture = f32(texture)
 }
 
 remove_billboard :: proc(index: int) {
