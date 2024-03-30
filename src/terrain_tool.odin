@@ -494,6 +494,22 @@ terrain_tool_adjust_inward_points :: proc(x, z, w, h: int) {
 }
 
 terrain_tool_update :: proc() {
+	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
+	end_x := min(
+		terrain_tool_position.x + terrain_tool_brush_size,
+		WORLD_WIDTH,
+	)
+	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
+	end_z := min(
+		terrain_tool_position.y + terrain_tool_brush_size,
+		WORLD_DEPTH,
+	)
+	for x in start_x ..< end_x {
+		for z in start_z ..< end_z {
+			tile_update_tile({x, 0, z}, nil, .Grid_Mask)
+		}
+	}
+
 	if is_key_press(.Key_Equal) {
 		if is_key_down(.Key_Left_Shift) {
 			terrain_tool_brush_size += 1
@@ -527,22 +543,6 @@ terrain_tool_update :: proc() {
 				terrain_tool_billboard,
 				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
 			)
-		}
-	}
-
-	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
-	end_x := min(
-		terrain_tool_position.x + terrain_tool_brush_size,
-		WORLD_WIDTH,
-	)
-	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
-	end_z := min(
-		terrain_tool_position.y + terrain_tool_brush_size,
-		WORLD_DEPTH,
-	)
-	for x in start_x ..< end_x {
-		for z in start_z ..< end_z {
-			tile_update_tile({x, 0, z}, nil, .Grid_Mask)
 		}
 	}
 
