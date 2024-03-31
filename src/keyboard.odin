@@ -160,7 +160,7 @@ is_key_down :: proc(key: Key_Value) -> bool {
 
 is_key_up :: proc(key: Key_Value) -> bool {
 	state, ok := key_map[key]
-	return ok && (state == .Release || state == .Up)
+	return !ok || (state == .Release || state == .Up)
 }
 
 is_key_press :: proc(key: Key_Value) -> bool {

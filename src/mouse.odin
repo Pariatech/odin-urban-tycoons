@@ -4,11 +4,11 @@ import "core:runtime"
 import "vendor:glfw"
 
 Mouse_Button_State :: enum {
+	Up,
 	Press,
 	Repeat,
 	Release,
 	Down,
-	Up,
 }
 
 Mouse_Button :: enum {

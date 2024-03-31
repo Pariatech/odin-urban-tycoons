@@ -6,7 +6,9 @@ import "core:math/linalg/glsl"
 import "core:math/rand"
 import "vendor:glfw"
 
+terrain_tool_cursor_pos: glsl.vec2
 terrain_tool_billboard: int
+terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
@@ -58,54 +60,20 @@ terrain_tool_tile_cursor :: proc(
 
 	intersect, ok := cursor_ray_intersect_triangle(triangle).?
 	if ok {
-		position := intersect
-		position.x = math.ceil(position.x) - 0.5
-		position.z = math.ceil(position.z) - 0.5
-		previous_tool_position := terrain_tool_position
-		terrain_tool_position.x = i32(position.x + 0.5)
-		terrain_tool_position.y = i32(position.z + 0.5)
-		position.y =
-			terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-		move_billboard(terrain_tool_billboard, position)
-
-		left_mouse_button := glfw.GetMouseButton(
-			window_handle,
-			glfw.MOUSE_BUTTON_LEFT,
-		)
-		right_mouse_button := glfw.GetMouseButton(
-			window_handle,
-			glfw.MOUSE_BUTTON_RIGHT,
-		)
-		shift_down := is_key_down(.Key_Left_Shift)
-
-		if shift_down || terrain_tool_drag_start != nil {
-			terrain_tool_move_points(
-				left_mouse_button,
-				right_mouse_button,
-				position,
-			)
-		} else if is_key_down(.Key_Left_Control) {
-			terrain_tool_smooth_brush()
-		} else {
-			terrain_tool_move_point(left_mouse_button, right_mouse_button)
-		}
+		terrain_tool_intersect = intersect
 	}
 
 	return ok
 }
 
-terrain_tool_move_points :: proc(
-	left_mouse_button, right_mouse_button: i32,
-	position: glsl.vec3,
-) {
+terrain_tool_move_points :: proc(position: glsl.vec3) {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
 		start_z := min(drag_start.y, terrain_tool_position.y)
 		end_x := max(drag_start.x, terrain_tool_position.x)
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
-		if left_mouse_button == glfw.RELEASE &&
-		   right_mouse_button == glfw.RELEASE {
+		if mouse_is_button_release(.Left) && mouse_is_button_release(.Right) {
 			height := terrain_heights[drag_start.x][drag_start.y]
 			for x in start_x ..= end_x {
 				for z in start_z ..= end_z {
@@ -130,9 +98,8 @@ terrain_tool_move_points :: proc(
 		} else if terrain_tool_drag_end != terrain_tool_position {
 			terrain_tool_drag_end = terrain_tool_position
 		}
-	} else if left_mouse_button == glfw.PRESS ||
-	   right_mouse_button == glfw.PRESS {
-		terrain_tool_drag_clip = right_mouse_button == glfw.PRESS
+	} else if mouse_is_button_down(.Left) || mouse_is_button_down(.Right) {
+		terrain_tool_drag_clip = mouse_is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
 		terrain_tool_drag_start_billboard = append_billboard(
 			 {
@@ -164,8 +131,14 @@ terrain_tool_smooth_brush :: proc() {
 			terrain_tool_position.y - terrain_tool_brush_size + 1,
 			0,
 		)
-		end_x := min(terrain_tool_position.x + terrain_tool_brush_size - 1, WORLD_WIDTH)
-		end_z := min(terrain_tool_position.y + terrain_tool_brush_size - 1, WORLD_DEPTH)
+		end_x := min(
+			terrain_tool_position.x + terrain_tool_brush_size - 1,
+			WORLD_WIDTH,
+		)
+		end_z := min(
+			terrain_tool_position.y + terrain_tool_brush_size - 1,
+			WORLD_DEPTH,
+		)
 
 		for x in start_x ..= end_x {
 			for z in start_z ..= end_z {
@@ -173,17 +146,17 @@ terrain_tool_smooth_brush :: proc() {
 				start_z := max(z - 1, 0)
 				end_x := min(x + 1, WORLD_WIDTH)
 				end_z := min(z + 1, WORLD_DEPTH)
-                points := f32((end_x - start_x + 1) * (end_z - start_z + 1))
+				points := f32((end_x - start_x + 1) * (end_z - start_z + 1))
 				average: f32 = 0
 
 				for x in start_x ..= end_x {
 					for z in start_z ..= end_z {
-                        average += terrain_heights[x][z] / points
+						average += terrain_heights[x][z] / points
 					}
 				}
 
-                movement := average - terrain_heights[x][z]
-                terrain_heights[x][z] += movement * terrain_tool_brush_strength
+				movement := average - terrain_heights[x][z]
+				terrain_heights[x][z] += movement * terrain_tool_brush_strength
 			}
 		}
 
@@ -196,16 +169,15 @@ terrain_tool_smooth_brush :: proc() {
 	}
 }
 
-terrain_tool_move_point :: proc(left_mouse_button, right_mouse_button: i32) {
+terrain_tool_move_point :: proc() {
 	movement: f32 = 0
-	if left_mouse_button == glfw.PRESS {
+	if mouse_is_button_down(.Left) {
 		movement = terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
-	} else if right_mouse_button == glfw.PRESS {
+	} else if mouse_is_button_down(.Right) {
 		movement = -terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
-	} else if left_mouse_button == glfw.RELEASE &&
-	   terrain_tool_tick_timer > 0 {
+	} else if mouse_is_button_release(.Left) && terrain_tool_tick_timer > 0 {
 		terrain_tool_tick_timer = 0
 	}
 
@@ -370,7 +342,29 @@ terrain_tool_update :: proc() {
 		}
 	}
 
-	tile_on_visible(0, terrain_tool_tile_cursor)
+	if cursor_pos != terrain_tool_cursor_pos {
+		tile_on_visible(0, terrain_tool_tile_cursor)
+		terrain_tool_cursor_pos = cursor_pos
+	} 
+
+	position := terrain_tool_intersect
+	position.x = math.ceil(position.x) - 0.5
+	position.z = math.ceil(position.z) - 0.5
+	previous_tool_position := terrain_tool_position
+	terrain_tool_position.x = i32(position.x + 0.5)
+	terrain_tool_position.y = i32(position.z + 0.5)
+	position.y =
+		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+	move_billboard(terrain_tool_billboard, position)
+	shift_down := is_key_down(.Key_Left_Shift)
+
+	if shift_down || terrain_tool_drag_start != nil {
+		terrain_tool_move_points(position)
+	} else if is_key_down(.Key_Left_Control) {
+		terrain_tool_smooth_brush()
+	} else {
+		terrain_tool_move_point()
+	}
 
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
