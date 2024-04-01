@@ -42,17 +42,14 @@ terrain_tool_init :: proc() {
 terrain_tool_tile_cursor :: proc(
 	tri: Tile_Triangle,
 	side: Tile_Triangle_Side,
-	lights: [3]glsl.vec3,
 	heights: [3]f32,
 	pos: glsl.vec2,
-	size: f32,
 ) -> bool {
 	triangle: [3]glsl.vec3
 
 	vertices := tile_triangle_side_vertices_map[side]
 	for vertex, i in vertices {
 		triangle[i] = vertex.pos
-		triangle[i] *= size
 		triangle[i].x += pos.x
 		triangle[i].z += pos.y
 		triangle[i].y += heights[i]
@@ -295,7 +292,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-                world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	} else {
@@ -311,7 +308,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-                world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	}
@@ -353,7 +350,25 @@ terrain_tool_update :: proc() {
 	}
 
 	if cursor_pos != terrain_tool_cursor_pos {
-		tile_on_visible(0, terrain_tool_tile_cursor)
+		it := world_iterate_visible_ground_tile_triangles()
+		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+			side := index.side
+			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+
+			x := int(index.pos.x)
+			z := int(index.pos.z)
+			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+
+			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+
+			for i in 0 ..< 3 {
+				heights[i] += f32(index.pos.y * WALL_HEIGHT)
+			}
+
+            if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
+                break
+            }
+		}
 		terrain_tool_cursor_pos = cursor_pos
 	}
 
@@ -384,7 +399,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-                world_set_tile_mask_texture({x, 0, z}, .Leveling_Brush)
+				world_set_tile_mask_texture({x, 0, z}, .Leveling_Brush)
 			}
 		}
 	} else {
@@ -400,7 +415,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-                world_set_tile_mask_texture({x, 0, z}, .Dotted_Grid)
+				world_set_tile_mask_texture({x, 0, z}, .Dotted_Grid)
 			}
 		}
 	}

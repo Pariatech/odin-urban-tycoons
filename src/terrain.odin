@@ -7,58 +7,8 @@ import "core:math/noise"
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
 terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
 
-// terrain_quad_tree_nodes: [dynamic]Terrain_Quad_Tree_Node
-//
-// Terrain_Quad_Tree_Node_Indices :: struct {
-// 	children: [4]int,
-// }
-//
-// Terrain_Quad_Tree_Node_Tile_Triangles :: struct {
-// 	children: [4]Tile_Triangle,
-// }
-//
-// Terrain_Quad_Tree_Node :: union {
-// 	Terrain_Quad_Tree_Node_Indices,
-// 	Terrain_Quad_Tree_Node_Tile_Triangles,
-// }
-
 init_terrain :: proc() {
-	// append(
-	// 	&terrain_quad_tree_nodes,
-	// 	Terrain_Quad_Tree_Node_Tile_Triangles {
-	// 		children =  {
-	// 			{texture = .Grass, mask_texture = .Grid_Mask},
-	// 			{texture = .Grass, mask_texture = .Grid_Mask},
-	// 			{texture = .Grass, mask_texture = .Grid_Mask},
-	// 			{texture = .Grass, mask_texture = .Grid_Mask},
-	// 		},
-	// 	},
-	// )
-
-	// set_terrain_tile_triangle(
-	// 	2,
-	// 	2,
-	// 	{texture = .Gravel, mask_texture = .Grid_Mask},
-	// 	.South,
-	// )
-
-	// set_terrain_tile_triangle(
-	// 	0,
-	// 	0,
-	// 	{texture = .Grass, mask_texture = .Grid_Mask},
-	// 	.South,
-	// )
-
 	set_terrain_height(3, 3, .5)
-	// set_terrain_height(1, 1, 0)
-
-	// SEED :: 694201337
-	// for x in 0 ..= WORLD_WIDTH {
-	// 	for z in 0 ..= WORLD_DEPTH {
-	// 		terrain_heights[x][z] =
-	// 			noise.noise_2d(SEED, {f64(x), f64(z)}) / 2.0
-	// 	}
-	// }
 
 	for x in 0 ..= WORLD_WIDTH {
 		for z in 0 ..= WORLD_DEPTH {
@@ -309,19 +259,4 @@ get_tile_height :: proc(x, z: int) -> f32 {
 set_terrain_height :: proc(x, z: int, height: f32) {
 	if terrain_heights[x][z] == height {return}
 	terrain_heights[x][z] = height
-
-	if x > 0 && z > 0 {
-		tile_quadtrees_set_height({i32(x - 1), 0, i32(z - 1)}, height)
-	}
-	if x > 0 && z < WORLD_DEPTH {
-		tile_quadtrees_set_height({i32(x - 1), 0, i32(z)}, height)
-	}
-
-	if x < WORLD_WIDTH && z > 0 {
-		tile_quadtrees_set_height({i32(x), 0, i32(z - 1)}, height)
-	}
-
-	if x < WORLD_WIDTH && z < WORLD_DEPTH {
-		tile_quadtrees_set_height({i32(x), 0, i32(z)}, height)
-	}
 }

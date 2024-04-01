@@ -42,18 +42,47 @@ world_set_tile_triangle :: proc(
 	chunk_set_tile_triangle(world_get_chunk(pos), pos, side, tile_triangle)
 }
 
-world_draw_tiles :: proc() {
-	aabb := get_camera_aabb()
-	x := max(int(aabb.x / CHUNK_WIDTH), 0)
-	z := max(int(aabb.y / CHUNK_DEPTH), 0)
-	endx := min(int((aabb.x + aabb.w) / CHUNK_WIDTH), WORLD_CHUNK_WIDTH - 1)
-	endz := min(int((aabb.y + aabb.h) / CHUNK_DEPTH), WORLD_CHUNK_DEPTH - 1)
+world_iterate_all_chunks :: proc() -> Chunk_Iterator {
+	return {0, 0, 0, 0, WORLD_CHUNK_WIDTH, WORLD_CHUNK_DEPTH}
+}
 
-	for x in x ..= endx {
-		for z in z ..= endz {
-			pos := glsl.ivec3{i32(x) * CHUNK_WIDTH, 0, i32(z) * CHUNK_DEPTH}
-			chunk_draw_tiles(&world_chunks[x][z], pos)
+world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
+	aabb := get_camera_aabb()
+	start_x := max(int(aabb.x / CHUNK_WIDTH), 0)
+	start_z := max(int(aabb.y / CHUNK_DEPTH), 0)
+	end_x := min(int((aabb.x + aabb.w) / CHUNK_WIDTH) + 1, WORLD_CHUNK_WIDTH)
+	end_z := min(int((aabb.y + aabb.h) / CHUNK_DEPTH) + 1, WORLD_CHUNK_DEPTH)
+
+	return {start_x, start_z, start_x, start_z, end_x, end_z}
+}
+
+world_iterate_visible_ground_tile_triangles :: proc(
+) -> Chunk_Tile_Triangle_Iterator {
+	return chunk_iterate_all_ground_tile_triangle(world_iterate_visible_chunks())
+}
+
+world_iterate_visible_tile_triangles :: proc(
+) -> Chunk_Tile_Triangle_Iterator {
+	return chunk_iterate_all_tile_triangle(world_iterate_visible_chunks())
+}
+
+world_draw_tiles :: proc() {
+	it := world_iterate_visible_tile_triangles()
+	for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+		side := index.side
+		pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+
+		x := int(index.pos.x)
+		z := int(index.pos.z)
+		lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+
+		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+
+		for i in 0 ..< 3 {
+			heights[i] += f32(index.pos.y * WALL_HEIGHT)
 		}
+
+		draw_tile_triangle(tile_triangle^, side, lights, heights, pos, 1)
 	}
 }
 
