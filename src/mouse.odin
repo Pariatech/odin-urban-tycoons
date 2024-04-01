@@ -72,3 +72,7 @@ mouse_is_button_down :: proc(button: Mouse_Button) -> bool {
 mouse_is_button_release :: proc(button: Mouse_Button) -> bool {
 	return mouse_buttons[button] == .Release
 }
+
+mouse_is_button_up :: proc(button: Mouse_Button) -> bool {
+	return mouse_buttons[button] == .Release || mouse_buttons[button] == .Up
+}

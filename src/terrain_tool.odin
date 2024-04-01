@@ -73,7 +73,7 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 		end_x := max(drag_start.x, terrain_tool_position.x)
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
-		if mouse_is_button_release(.Left) && mouse_is_button_release(.Right) {
+		if mouse_is_button_up(.Left) && mouse_is_button_up(.Right) {
 			height := terrain_heights[drag_start.x][drag_start.y]
 			for x in start_x ..= end_x {
 				for z in start_z ..= end_z {
@@ -308,9 +308,6 @@ terrain_tool_update :: proc() {
 
 	if is_key_press(.Key_Equal) {
 		if is_key_down(.Key_Left_Shift) {
-			terrain_tool_brush_size += 1
-			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
-		} else {
 			terrain_tool_brush_strength += TERRAIN_TOOL_BRUSH_MIN_STRENGTH
 			terrain_tool_brush_strength = min(
 				terrain_tool_brush_strength,
@@ -322,12 +319,12 @@ terrain_tool_update :: proc() {
 				terrain_tool_billboard,
 				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
 			)
+		} else {
+			terrain_tool_brush_size += 1
+			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
 		}
 	} else if is_key_press(.Key_Minus) {
 		if is_key_down(.Key_Left_Shift) {
-			terrain_tool_brush_size -= 1
-			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
-		} else {
 			terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
 			terrain_tool_brush_strength = max(
 				terrain_tool_brush_strength,
@@ -339,6 +336,9 @@ terrain_tool_update :: proc() {
 				terrain_tool_billboard,
 				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
 			)
+		} else {
+			terrain_tool_brush_size -= 1
+			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
 		}
 	}
 
