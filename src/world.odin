@@ -19,6 +19,11 @@ house_z: i32 = 12
 
 world_chunks: [WORLD_CHUNK_WIDTH][WORLD_CHUNK_DEPTH]Chunk
 
+world_previously_visible_chunks_start: glsl.ivec2
+world_previously_visible_chunks_end: glsl.ivec2
+world_visible_chunks_start: glsl.ivec2
+world_visible_chunks_end: glsl.ivec2
+
 world_get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
 	return &world_chunks[pos.x / CHUNK_WIDTH][pos.z / CHUNK_DEPTH]
 }
@@ -43,22 +48,24 @@ world_set_tile_triangle :: proc(
 }
 
 world_iterate_all_chunks :: proc() -> Chunk_Iterator {
-	return {0, 0, 0, 0, WORLD_CHUNK_WIDTH, WORLD_CHUNK_DEPTH}
+	return {{0, 0}, {0, 0}, {WORLD_CHUNK_WIDTH, WORLD_CHUNK_DEPTH}}
 }
 
 world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
-	aabb := get_camera_aabb()
-	start_x := max(int(aabb.x / CHUNK_WIDTH), 0)
-	start_z := max(int(aabb.y / CHUNK_DEPTH), 0)
-	end_x := min(int((aabb.x + aabb.w) / CHUNK_WIDTH) + 1, WORLD_CHUNK_WIDTH)
-	end_z := min(int((aabb.y + aabb.h) / CHUNK_DEPTH) + 1, WORLD_CHUNK_DEPTH)
-
-	return {start_x, start_z, start_x, start_z, end_x, end_z}
+	return(
+		 {
+			world_visible_chunks_start,
+			world_visible_chunks_start,
+			world_visible_chunks_end,
+		} \
+	)
 }
 
 world_iterate_visible_ground_tile_triangles :: proc(
 ) -> Chunk_Tile_Triangle_Iterator {
-	return chunk_iterate_all_ground_tile_triangle(world_iterate_visible_chunks())
+	return chunk_iterate_all_ground_tile_triangle(
+		world_iterate_visible_chunks(),
+	)
 }
 
 world_iterate_visible_tile_triangles :: proc(
@@ -84,6 +91,22 @@ world_draw_tiles :: proc() {
 
 		draw_tile_triangle(tile_triangle^, side, lights, heights, pos, 1)
 	}
+}
+
+world_update :: proc() {
+	aabb := get_camera_aabb()
+	world_previously_visible_chunks_start = world_visible_chunks_start
+	world_previously_visible_chunks_end = world_visible_chunks_end
+	world_visible_chunks_start.x = max(aabb.x / CHUNK_WIDTH - 1, 0)
+	world_visible_chunks_start.y = max(aabb.y / CHUNK_DEPTH - 1, 0)
+	world_visible_chunks_end.x = min(
+		(aabb.x + aabb.w) / CHUNK_WIDTH + 1,
+		WORLD_CHUNK_WIDTH,
+	)
+	world_visible_chunks_end.y = min(
+		(aabb.y + aabb.h) / CHUNK_DEPTH + 1,
+		WORLD_CHUNK_DEPTH,
+	)
 }
 
 init_world :: proc() {
@@ -540,14 +563,20 @@ draw_world :: proc() {
 	draw_diagonal_walls()
 	finish_wall_rendering()
 
-	world_draw_tiles()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(
-		gl.ARRAY_BUFFER,
-		len(world_vertices) * size_of(Vertex),
-		raw_data(world_vertices),
-		gl.STATIC_DRAW,
-	)
+	if world_previously_visible_chunks_start != world_visible_chunks_start ||
+	   world_previously_visible_chunks_end != world_visible_chunks_end {
+	    clear(&world_vertices)
+	    clear(&world_indices)
+		fmt.println("uh?")
+		world_draw_tiles()
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(world_vertices) * size_of(Vertex),
+			raw_data(world_vertices),
+			gl.STATIC_DRAW,
+		)
+	}
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	gl.BindVertexArray(vao)

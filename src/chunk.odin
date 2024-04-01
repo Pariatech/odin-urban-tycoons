@@ -16,7 +16,9 @@ Chunk :: struct {
 }
 
 Chunk_Iterator :: struct {
-	x, z, start_x, start_z, end_x, end_z: int,
+	pos:   glsl.ivec2,
+	start: glsl.ivec2,
+	end:   glsl.ivec2,
 }
 
 Chunk_Tile_Triangle_Iterator :: struct {
@@ -113,13 +115,13 @@ chunk_iterate_all_tile_triangle :: proc(
 		end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
 	}
 
-    ok : bool
-    it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
-    if !ok {
-        it.end = {0, 0, 0}
-    }
+	ok: bool
+	it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
+	if !ok {
+		it.end = {0, 0, 0}
+	}
 
-    return
+	return
 }
 
 chunk_iterate_all_ground_tile_triangle :: proc(
@@ -134,21 +136,21 @@ chunk_iterate_all_ground_tile_triangle :: proc(
 		end = {CHUNK_WIDTH, 1, CHUNK_DEPTH},
 	}
 
-    ok : bool
-    it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
-    if !ok {
-        it.end = {0, 0, 0}
-    }
+	ok: bool
+	it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
+	if !ok {
+		it.end = {0, 0, 0}
+	}
 
-    return
+	return
 }
 
 chunk_iterator_has_next :: proc(iterator: ^Chunk_Iterator) -> bool {
 	return(
-		iterator.x < iterator.end_x &&
-		iterator.z < iterator.end_z &&
-		iterator.x >= iterator.start_x &&
-		iterator.z >= iterator.start_z \
+		iterator.pos.x < iterator.end.x &&
+		iterator.pos.y < iterator.end.y &&
+		iterator.pos.x >= iterator.start.x &&
+		iterator.pos.y >= iterator.start.y \
 	)
 }
 
@@ -160,12 +162,12 @@ chunk_iterator_next :: proc(
 	has_next: bool = true,
 ) {
 	chunk_iterator_has_next(iterator) or_return
-	chunk = &world_chunks[iterator.x][iterator.z]
-	pos = {i32(iterator.x * CHUNK_WIDTH), 0, i32(iterator.z * CHUNK_DEPTH)}
-	iterator.x += 1
-	if iterator.x >= iterator.end_x {
-		iterator.x = iterator.start_x
-		iterator.z += 1
+	chunk = &world_chunks[iterator.pos.x][iterator.pos.y]
+	pos = {i32(iterator.pos.x * CHUNK_WIDTH), 0, i32(iterator.pos.y * CHUNK_DEPTH)}
+	iterator.pos.x += 1
+	if iterator.pos.x >= iterator.end.x {
+		iterator.pos.x = iterator.start.x
+		iterator.pos.y += 1
 	}
 	return
 }

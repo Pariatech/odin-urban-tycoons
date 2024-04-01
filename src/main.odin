@@ -90,6 +90,7 @@ start :: proc() -> (ok: bool = false) {
 
 		glfw.PollEvents()
 
+        world_update()
 		terrain_tool_update()
 
 		begin_draw()

@@ -490,8 +490,8 @@ get_camera_aabb :: proc() -> Rectangle {
 	aabb: Rectangle
 	switch camera_rotation {
 	case .South_West:
-		camera.x = math.min(camera.x, bottom_left.x)
-		camera.z = math.min(camera.z, bottom_right.y)
+		// camera.x = math.min(camera.x, bottom_left.x)
+		// camera.z = math.min(camera.z, bottom_right.y)
 		width := top_right.x - camera.x
 		height := top_left.y - camera.z
 
