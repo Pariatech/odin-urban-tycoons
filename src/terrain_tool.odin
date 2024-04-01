@@ -238,11 +238,6 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 
 		if x - i >= 0 {
 			for z in start_z ..= end_z {
-				fmt.println(
-					"ratio:",
-					f32(terrain_tool_brush_size - i32(i)) /
-					f32(terrain_tool_brush_size),
-				)
 				terrain_tool_move_point_height(
 					x - i,
 					z,
@@ -300,7 +295,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				tile_update_tile({x, 0, z}, nil, .Grid_Mask)
+                world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	} else {
@@ -316,7 +311,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				tile_update_tile({x, 0, z}, nil, .Grid_Mask)
+                world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	}
@@ -389,7 +384,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				tile_update_tile({x, 0, z}, nil, .Leveling_Brush)
+                world_set_tile_mask_texture({x, 0, z}, .Leveling_Brush)
 			}
 		}
 	} else {
@@ -405,7 +400,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				tile_update_tile({x, 0, z}, nil, .Dotted_Grid)
+                world_set_tile_mask_texture({x, 0, z}, .Dotted_Grid)
 			}
 		}
 	}

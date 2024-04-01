@@ -518,13 +518,6 @@ get_camera_aabb :: proc() -> Rectangle {
 		camera.z = math.max(camera.z, bottom_right.y)
 		width := camera.x - top_right.x
 		height := camera.z - top_left.y
-		fmt.println("camera.xz:", camera.xz)
-		fmt.println(
-			"bottom_left.x:",
-			bottom_left.x,
-			"bottom_right.y:",
-			bottom_right.y,
-		)
 
 		aabb = Rectangle {
 				x = i32(top_right.x),

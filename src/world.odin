@@ -1,449 +1,68 @@
 package main
 
 import "core:fmt"
-import m "core:math/linalg/glsl"
+import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 WORLD_WIDTH :: 1024
 WORLD_HEIGHT :: 4
 WORLD_DEPTH :: 1024
+WORLD_CHUNK_WIDTH :: WORLD_WIDTH / CHUNK_WIDTH
+WORLD_CHUNK_DEPTH :: WORLD_DEPTH / CHUNK_DEPTH
 
 SUN_POWER :: 1.5
 
-sun := m.vec3{1, -3, 1}
+sun := glsl.vec3{1, -3, 1}
 
 house_x: i32 = 12
 house_z: i32 = 12
 
+world_chunks: [WORLD_CHUNK_WIDTH][WORLD_CHUNK_DEPTH]Chunk
+
+world_get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
+	return &world_chunks[pos.x / CHUNK_WIDTH][pos.z / CHUNK_DEPTH]
+}
+
+world_set_tile :: proc(
+	pos: glsl.ivec3,
+	tile: [Tile_Triangle_Side]Maybe(Tile_Triangle),
+) {
+	chunk_set_tile(world_get_chunk(pos), pos, tile)
+}
+
+world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: Mask) {
+	chunk_set_tile_mask_texture(world_get_chunk(pos), pos, mask_texture)
+}
+
+world_set_tile_triangle :: proc(
+	pos: glsl.ivec3,
+	side: Tile_Triangle_Side,
+	tile_triangle: Maybe(Tile_Triangle),
+) {
+	chunk_set_tile_triangle(world_get_chunk(pos), pos, side, tile_triangle)
+}
+
+world_draw_tiles :: proc() {
+	aabb := get_camera_aabb()
+	x := max(int(aabb.x / CHUNK_WIDTH), 0)
+	z := max(int(aabb.y / CHUNK_DEPTH), 0)
+	endx := min(int((aabb.x + aabb.w) / CHUNK_WIDTH), WORLD_CHUNK_WIDTH - 1)
+	endz := min(int((aabb.y + aabb.h) / CHUNK_DEPTH), WORLD_CHUNK_DEPTH - 1)
+
+	for x in x ..= endx {
+		for z in z ..= endz {
+			pos := glsl.ivec3{i32(x) * CHUNK_WIDTH, 0, i32(z) * CHUNK_DEPTH}
+			chunk_draw_tiles(&world_chunks[x][z], pos)
+		}
+	}
+}
+
 init_world :: proc() {
-	//
-	// insert_north_south_wall(
-	// 	{1, 0, 1},
-	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_east_west_wall(
-	// 	{3, 0, 1},
-	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-
-	// insert_north_south_wall(
-	// 	{7, 0, 1},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{7, 0, 1},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{11, 0, 1},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{10, 0, 1},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{14, 0, 1},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{13, 0, 2},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{16, 0, 1},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{16, 0, 2},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{1, 0, 6},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_north_south_wall(
-	// 	{1, 0, 7},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_east_west_wall(
-	// 	{3, 0, 6},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{4, 0, 6},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{7, 0, 6},
-	// 	 {
-	// 		type = .Side_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_north_south_wall(
-	// 	{7, 0, 7},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{7, 0, 6},
-	// 	 {
-	// 		type = .Left_Corner_Side,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{8, 0, 6},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{12, 0, 6},
-	// 	 {
-	// 		type = .Side_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_north_south_wall(
-	// 	{12, 0, 7},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{10, 0, 6},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{11, 0, 6},
-	// 	 {
-	// 		type = .Side_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{15, 0, 6},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_north_south_wall(
-	// 	{15, 0, 7},
-	// 	 {
-	// 		type = .Left_Corner_Side,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{13, 0, 8},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{14, 0, 8},
-	// 	 {
-	// 		type = .Side_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{16, 0, 6},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_north_south_wall(
-	// 	{16, 0, 7},
-	// 	 {
-	// 		type = .Right_Corner_Side,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{16, 0, 8},
-	// 	 {
-	// 		type = .Right_Corner_Side,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{17, 0, 8},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{1, 0, 10},
-	// 	 {
-	// 		type = .Right_Corner_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_north_south_wall(
-	// 	{2, 0, 10},
-	// 	 {
-	// 		type = .Left_Corner_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{1, 0, 10},
-	// 	 {
-	// 		type = .Left_Corner_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	// insert_east_west_wall(
-	// 	{1, 0, 11},
-	// 	 {
-	// 		type = .Right_Corner_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{5, 0, 10},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_north_south_wall(
-	// 	{5, 0, 11},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{4, 0, 11},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_east_west_wall(
-	// 	{5, 0, 11},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_north_west_south_east_wall(
-	// 	{1, 0, 13},
-	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{1, 0, 15},
-	// 	{type = .End_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{1, 0, 17},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{2, 0, 17},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_west_south_east_wall(
-	// 	{6, 0, 17},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{6, 0, 18},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{9, 0, 17},
-	// 	 {
-	// 		type = .Left_Corner_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{9, 0, 18},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{10, 0, 17},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{13, 0, 17},
-	// 	 {
-	// 		type = .Right_Corner_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{12, 0, 17},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{14, 0, 17},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{17, 0, 17},
-	// 	 {
-	// 		type = .Right_Corner_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{16, 0, 17},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{17, 0, 16},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{20, 0, 17},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{19, 0, 17},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_west_south_east_wall(
-	// 	{22, 0, 17},
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{22, 0, 16},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_north_west_south_east_wall(
-	// 	{1, 0, 20},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_east_west_wall(
-	// 	{2, 0, 20},
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	//
-	// insert_north_south_wall(
-	// 	{1, 0, 23},
-	// 	 {
-	// 		type = .Right_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{1, 0, 24},
-	// 	{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_north_south_wall(
-	// 	{5, 0, 24},
-	// 	 {
-	// 		type = .End_Left_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Varg},
-	// 	},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{4, 0, 23},
-	// 	{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	//
-	// insert_south_west_north_east_wall(
-	// 	{6, 0, 23},
-	// 	{type = .End_Side, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-	// insert_south_west_north_east_wall(
-	// 	{7, 0, 24},
-	// 	{type = .Side_End, textures = {.Inside = .Brick, .Outside = .Varg}},
-	// )
-
+	for x in 0 ..< WORLD_CHUNK_WIDTH {
+		for z in 0 ..< WORLD_CHUNK_DEPTH {
+			chunk_init(&world_chunks[x][z])
+		}
+	}
 
 	// The house
 	add_house_floor_walls(0, .Varg, .Varg)
@@ -452,237 +71,71 @@ init_world :: proc() {
 
 	for x in 0 ..< WORLD_WIDTH {
 		for z in 1 ..= 3 {
-			insert_floor_tile(
+			world_set_tile(
 				{i32(x), 0, i32(z)},
-				{texture = .Asphalt, mask_texture = .Full_Mask},
+				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 
-		insert_floor_tile(
+		world_set_tile(
 			{i32(x), 0, 4},
-			{texture = .Asphalt_Horizontal_Line, mask_texture = .Full_Mask},
+			chunk_tile(
+				 {
+					texture = .Asphalt_Horizontal_Line,
+					mask_texture = .Full_Mask,
+				},
+			),
 		)
 		for z in 5 ..= 7 {
-			insert_floor_tile(
+			world_set_tile(
 				{i32(x), 0, i32(z)},
-				{texture = .Asphalt, mask_texture = .Full_Mask},
+				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 	}
 
 	for x in 1 ..= 7 {
-		insert_floor_tile(
+		world_set_tile(
 			{i32(x), 0, 4},
-			{texture = .Asphalt, mask_texture = .Full_Mask},
+			chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 		)
 	}
 
 	for z in 8 ..< WORLD_WIDTH {
 		for x in 1 ..= 3 {
-			insert_floor_tile(
+			world_set_tile(
 				{i32(x), 0, i32(z)},
-				{texture = .Asphalt, mask_texture = .Full_Mask},
+				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 
-		insert_floor_tile(
+		world_set_tile(
 			{4, 0, i32(z)},
-			{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
+			chunk_tile(
+				{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
+			),
 		)
 		for x in 5 ..= 7 {
-			insert_floor_tile(
+			world_set_tile(
 				{i32(x), 0, i32(z)},
-				{texture = .Asphalt, mask_texture = .Full_Mask},
+				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 	}
 
 	for x in 8 ..< WORLD_WIDTH {
-		insert_floor_tile(
+		world_set_tile(
 			{i32(x), 0, 8},
-			{texture = .Sidewalk, mask_texture = .Full_Mask},
+			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 
 	for z in 9 ..< WORLD_WIDTH {
-		insert_floor_tile(
+		world_set_tile(
 			{8, 0, i32(z)},
-			{texture = .Sidewalk, mask_texture = .Full_Mask},
+			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
-
-	// insert_wall_window(.East_West, {3, 0, 3}, {texture = .Medium_Window_Wood})
-	// insert_wall_door(.East_West, {2, 0, 2}, {model = .Wood})
-	// insert_wall_door(.North_South, {2, 0, 2}, {model = .Wood})
-	//
-	// insert_table(
-	// 	{4, 0, 4},
-	// 	{model = .Six_Places, texture = .Table_6Places_Wood},
-	// )
-	// insert_chair({4, 0, 6}, {model = .Wood, orientation = .South})
-	// insert_chair({4, 0, 3}, {model = .Wood, orientation = .North})
-	//
-	// insert_chair({3, 0, 5}, {model = .Wood, orientation = .East})
-	// insert_chair({3, 0, 4}, {model = .Wood, orientation = .East})
-	//
-	// insert_chair({5, 0, 5}, {model = .Wood, orientation = .West})
-	// insert_chair({5, 0, 4}, {model = .Wood, orientation = .West})
-
-	// append_billboard(
-	// 	 {
-	// 		position = {0, 0, 0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_North_Wood,
-	// 		depth_map = .Chair_North,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {0.1, 0.1, 0.2},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_North_Wood,
-	// 		depth_map = .Chair_North,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {1.0, -0.1, 0.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_South_Wood,
-	// 		depth_map = .Chair_South,
-	// 	},
-	// )
-
-	// for x in 0 ..< 20 {
-	// 	for z in 0 ..< 10 {
-	// 		append_billboard(
-	// 			 {
-	// 				position = {f32(x), 0.0, f32(z)},
-	// 				light = {1, 1, 1},
-	// 				texture = .Chair_Wood_SW,
-	// 				depth_map = .Chair_Wood_SW,
-	// 			},
-	// 		)
-	// 	}
-	// }
-	//    fmt.println("finished adding chairs", len(billboard_system.nodes))
-
-	// for x in 0 ..< 100 {
-	// 	for z in 0 ..< 100 {
-	// 		append_four_tiles_billboard(
-	// 			 {
-	// 				position = {f32(x * 2) + 0.5, 0.0, f32(z * 2) + 0.5},
-	// 				light = {1, 1, 1},
-	// 				texture = .Table_Wood_SW,
-	// 				depth_map = .Table_Wood_SW,
-	// 			},
-	// 		)
-	// 	}
-	// }
-
-
-	// append_billboard(
-	// 	 {
-	// 		position = {1.0, 0.0, 0.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_SW,
-	// 		depth_map = .Chair_Wood_SW,
-	//            rotation = 1,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {2.0, 0.0, 0.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_SW,
-	// 		depth_map = .Chair_Wood_SW,
-	//            rotation = 2,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {3.0, 0.0, 0.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_SW,
-	// 		depth_map = .Chair_Wood_SW,
-	//            rotation = 3,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {0.0, 0.0, 1.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_NE,
-	// 		depth_map = .Chair_Wood_NE,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {1.0, 0.0, 1.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_NE,
-	// 		depth_map = .Chair_Wood_NE,
-	//            rotation = 1,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {2.0, 0.0, 1.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_NE,
-	// 		depth_map = .Chair_Wood_NE,
-	//            rotation = 2,
-	// 	},
-	// )
-	//
-	// append_billboard(
-	// 	 {
-	// 		position = {3.0, 0.0, 1.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Chair_Wood_NE,
-	// 		depth_map = .Chair_Wood_NE,
-	//            rotation = 3,
-	// 	},
-	// )
-	//
-	//
-	// append_four_tiles_billboard(
-	// 	 {
-	// 		position = {0.5, 0.0, 3.5},
-	// 		light = {1, 1, 1},
-	// 		texture = .Table_Wood_SW,
-	// 		depth_map = .Table_Wood_SW,
-	//            rotation = 0,
-	// 	},
-	// )
-	//
-	// append_four_tiles_billboard(
-	// 	 {
-	// 		position = {3.5, 0.0, 3.5},
-	// 		light = {1, 1, 1},
-	// 		texture = .Table_8_Places_Wood_SW,
-	// 		depth_map = .Table_8_Places_Wood_SW,
-	//            rotation = 0,
-	// 	},
-	// )
-
-	// append_billboard(
-	// 	 {
-	// 		position = {0.0, 0.0, 3.0},
-	// 		light = {1, 1, 1},
-	// 		texture = .Table_North_Wood,
-	// 		depth_map = .Table_North_Wood,
-	//            rotation = 0,
-	// 	},
-	// )
-
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
@@ -691,44 +144,50 @@ add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
 		mask_texture = .Full_Mask,
 	}
 
-	insert_west_floor_tile_triangle({house_x + 4, floor, house_z}, tri)
-	insert_north_floor_tile_triangle({house_x + 4, floor, house_z}, tri)
+	world_set_tile_triangle({house_x + 4, floor, house_z}, .West, tri)
+	world_set_tile_triangle({house_x + 4, floor, house_z}, .North, tri)
 
-	insert_south_floor_tile_triangle({house_x, floor, house_z + 4}, tri)
-	insert_east_floor_tile_triangle({house_x, floor, house_z + 4}, tri)
+	world_set_tile_triangle({house_x, floor, house_z + 4}, .South, tri)
+	world_set_tile_triangle({house_x, floor, house_z + 4}, .East, tri)
 
-	insert_north_floor_tile_triangle({house_x, floor, house_z + 6}, tri)
-	insert_east_floor_tile_triangle({house_x, floor, house_z + 6}, tri)
+	world_set_tile_triangle({house_x, floor, house_z + 6}, .North, tri)
+	world_set_tile_triangle({house_x, floor, house_z + 6}, .East, tri)
 
-	insert_south_floor_tile_triangle({house_x + 4, floor, house_z + 10}, tri)
-	insert_west_floor_tile_triangle({house_x + 4, floor, house_z + 10}, tri)
+	world_set_tile_triangle({house_x + 4, floor, house_z + 10}, .South, tri)
+	world_set_tile_triangle({house_x + 4, floor, house_z + 10}, .West, tri)
 
 	for x in 0 ..< 4 {
 		for z in 0 ..< 4 {
-			insert_floor_tile({house_x + i32(x), floor, house_z + i32(z)}, tri)
+			world_set_tile(
+				{house_x + i32(x), floor, house_z + i32(z)},
+				chunk_tile(tri),
+			)
 		}
 	}
 
 	for x in 0 ..< 3 {
 		for z in 0 ..< 3 {
-			insert_floor_tile(
+			world_set_tile(
 				{house_x + i32(x) + 1, floor, house_z + i32(z) + 4},
-				tri,
+				chunk_tile(tri),
 			)
 		}
 	}
 
 	for x in 0 ..< 4 {
 		for z in 0 ..< 4 {
-			insert_floor_tile(
+			world_set_tile(
 				{house_x + i32(x), floor, house_z + i32(z) + 7},
-				tri,
+				chunk_tile(tri),
 			)
 		}
 	}
 
 	for z in 0 ..< 9 {
-		insert_floor_tile({house_x + 4, floor, house_z + i32(z) + 1}, tri)
+		world_set_tile(
+			{house_x + 4, floor, house_z + i32(z) + 1},
+			chunk_tile(tri),
+		)
 	}
 }
 
@@ -1033,8 +492,6 @@ add_house_floor_walls :: proc(
 }
 
 draw_world :: proc() {
-	draw_floor_tiles()
-
 	uniform_object.view = camera_view
 	uniform_object.proj = camera_proj
 
@@ -1054,7 +511,7 @@ draw_world :: proc() {
 	draw_diagonal_walls()
 	finish_wall_rendering()
 
-
+	world_draw_tiles()
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
