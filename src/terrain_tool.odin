@@ -160,11 +160,25 @@ terrain_tool_smooth_brush :: proc() {
 			}
 		}
 
+		terrain_tool_calculate_lights()
+
 		if terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 			terrain_tool_tick_timer = math.max(
 				0,
 				terrain_tool_tick_timer - TERRAIN_TOOL_TICK_SPEED,
 			)
+		}
+	}
+}
+
+terrain_tool_calculate_lights :: proc() {
+	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
+	end_x := max(terrain_tool_position.x + terrain_tool_brush_size, 0)
+	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
+	end_z := max(terrain_tool_position.y + terrain_tool_brush_size, 0)
+	for x in start_x ..= end_x {
+		for z in start_z ..= end_z {
+			calculate_terrain_light(int(x), int(z))
 		}
 	}
 }
@@ -195,6 +209,7 @@ terrain_tool_move_point :: proc() {
 			0,
 			movement,
 		)
+		terrain_tool_calculate_lights()
 
 		if terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 			terrain_tool_tick_timer = math.max(
@@ -345,7 +360,7 @@ terrain_tool_update :: proc() {
 	if cursor_pos != terrain_tool_cursor_pos {
 		tile_on_visible(0, terrain_tool_tile_cursor)
 		terrain_tool_cursor_pos = cursor_pos
-	} 
+	}
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
