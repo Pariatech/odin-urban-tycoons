@@ -19,6 +19,7 @@ house_z: i32 = 12
 
 world_chunks: [WORLD_CHUNK_WIDTH][WORLD_CHUNK_DEPTH]Chunk
 
+world_tiles_dirty: bool
 world_previously_visible_chunks_start: glsl.ivec2
 world_previously_visible_chunks_end: glsl.ivec2
 world_visible_chunks_start: glsl.ivec2
@@ -107,6 +108,7 @@ world_update :: proc() {
 		(aabb.y + aabb.h) / CHUNK_DEPTH + 1,
 		WORLD_CHUNK_DEPTH,
 	)
+    world_tiles_dirty = false
 }
 
 init_world :: proc() {
@@ -563,21 +565,21 @@ draw_world :: proc() {
 	draw_diagonal_walls()
 	finish_wall_rendering()
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	if world_previously_visible_chunks_start != world_visible_chunks_start ||
-	   world_previously_visible_chunks_end != world_visible_chunks_end {
-	    clear(&world_vertices)
-	    clear(&world_indices)
-		fmt.println("uh?")
+	   world_previously_visible_chunks_end != world_visible_chunks_end ||
+       world_tiles_dirty {
+		clear(&world_vertices)
+		clear(&world_indices)
 		world_draw_tiles()
+		gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(world_vertices) * size_of(Vertex),
 			raw_data(world_vertices),
 			gl.STATIC_DRAW,
 		)
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	}
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	gl.BindVertexArray(vao)
 	gl.ActiveTexture(gl.TEXTURE0)

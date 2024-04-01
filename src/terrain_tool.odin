@@ -92,6 +92,8 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 			}
 			terrain_tool_drag_start = nil
 			remove_billboard(terrain_tool_drag_start_billboard)
+
+			world_tiles_dirty = true
 		} else if terrain_tool_drag_end != terrain_tool_position {
 			terrain_tool_drag_end = terrain_tool_position
 		}
@@ -165,6 +167,8 @@ terrain_tool_smooth_brush :: proc() {
 				terrain_tool_tick_timer - TERRAIN_TOOL_TICK_SPEED,
 			)
 		}
+
+		world_tiles_dirty = true
 	}
 }
 
@@ -214,6 +218,8 @@ terrain_tool_move_point :: proc() {
 				terrain_tool_tick_timer - TERRAIN_TOOL_TICK_SPEED,
 			)
 		}
+
+		world_tiles_dirty = true
 	}
 }
 
@@ -330,6 +336,7 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size += 1
 			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
 		}
+		world_tiles_dirty = true
 	} else if is_key_press(.Key_Minus) {
 		if is_key_down(.Key_Left_Shift) {
 			terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
@@ -347,6 +354,7 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size -= 1
 			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
 		}
+		world_tiles_dirty = true
 	}
 
 	if cursor_pos != terrain_tool_cursor_pos {
@@ -365,9 +373,9 @@ terrain_tool_update :: proc() {
 				heights[i] += f32(index.pos.y * WALL_HEIGHT)
 			}
 
-            if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
-                break
-            }
+			if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
+				break
+			}
 		}
 		terrain_tool_cursor_pos = cursor_pos
 	}
@@ -378,6 +386,11 @@ terrain_tool_update :: proc() {
 	previous_tool_position := terrain_tool_position
 	terrain_tool_position.x = i32(position.x + 0.5)
 	terrain_tool_position.y = i32(position.z + 0.5)
+
+	if terrain_tool_position != previous_tool_position {
+		world_tiles_dirty = true
+	}
+
 	position.y =
 		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 	move_billboard(terrain_tool_billboard, position)
