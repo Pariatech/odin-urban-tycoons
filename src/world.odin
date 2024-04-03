@@ -62,35 +62,26 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 	)
 }
 
-world_iterate_visible_ground_tile_triangles :: proc(
-) -> Chunk_Tile_Triangle_Iterator {
-	return chunk_iterate_all_ground_tile_triangle(
-		world_iterate_visible_chunks(),
-	)
-}
-
-world_iterate_visible_tile_triangles :: proc(
-) -> Chunk_Tile_Triangle_Iterator {
-	return chunk_iterate_all_tile_triangle(world_iterate_visible_chunks())
-}
-
 world_draw_tiles :: proc() {
-	it := world_iterate_visible_tile_triangles()
-	for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-		side := index.side
-		pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+	chunks_it := world_iterate_visible_chunks()
+	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
+		it := chunk_iterate_all_tile_triangle(chunk, chunk_pos)
+		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+			side := index.side
+			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
 
-		x := int(index.pos.x)
-		z := int(index.pos.z)
-		lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+			x := int(index.pos.x)
+			z := int(index.pos.z)
+			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
 
-		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
-		for i in 0 ..< 3 {
-			heights[i] += f32(index.pos.y * WALL_HEIGHT)
+			for i in 0 ..< 3 {
+				heights[i] += f32(index.pos.y * WALL_HEIGHT)
+			}
+
+			draw_tile_triangle(tile_triangle^, side, lights, heights, pos, 1)
 		}
-
-		draw_tile_triangle(tile_triangle^, side, lights, heights, pos, 1)
 	}
 }
 
@@ -108,7 +99,7 @@ world_update :: proc() {
 		(aabb.y + aabb.h) / CHUNK_DEPTH + 1,
 		WORLD_CHUNK_DEPTH,
 	)
-    world_tiles_dirty = false
+	world_tiles_dirty = false
 }
 
 init_world :: proc() {
@@ -567,7 +558,7 @@ draw_world :: proc() {
 
 	if world_previously_visible_chunks_start != world_visible_chunks_start ||
 	   world_previously_visible_chunks_end != world_visible_chunks_end ||
-       world_tiles_dirty {
+	   world_tiles_dirty {
 		clear(&world_vertices)
 		clear(&world_indices)
 		world_draw_tiles()

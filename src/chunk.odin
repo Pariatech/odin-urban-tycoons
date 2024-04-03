@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:math/linalg/glsl"
+import gl "vendor:OpenGL"
 
 CHUNK_WIDTH :: 8
 CHUNK_DEPTH :: 8
@@ -12,7 +13,12 @@ Chunk_Items :: struct($T: typeid) {
 }
 
 Chunk :: struct {
-	tiles: Chunk_Items([Tile_Triangle_Side]Maybe(Tile_Triangle)),
+	tiles:             Chunk_Items([Tile_Triangle_Side]Maybe(Tile_Triangle)),
+	tiles_vertices:    [dynamic]Vertex,
+	tiles_indices:     [dynamic]u32,
+	tiles_dirty:       bool,
+	tiles_initialized: bool,
+	tiles_vbo:         u32,
 }
 
 Chunk_Iterator :: struct {
@@ -22,7 +28,6 @@ Chunk_Iterator :: struct {
 }
 
 Chunk_Tile_Triangle_Iterator :: struct {
-	chunk_iterator: Chunk_Iterator,
 	chunk:          ^Chunk,
 	chunk_pos:      glsl.ivec3,
 	pos:            glsl.ivec3,
@@ -36,6 +41,21 @@ Chunk_Tile_Triangle_Iterator_Value :: ^Tile_Triangle
 Chunk_Tile_Triangle_Iterator_Index :: struct {
 	pos:  glsl.ivec3,
 	side: Tile_Triangle_Side,
+}
+
+chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	if !chunk.tiles_initialized {
+		chunk.tiles_initialized = true
+		chunk.tiles_dirty = true
+
+		gl.GenBuffers(1, &chunk.tiles_vbo)
+	}
+
+	if chunk.tiles_dirty {
+		it := chunk_iterate_all_tile_triangle(chunk, pos)
+		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+		}
+	}
 }
 
 chunk_tile_triangle_iterator_has_next :: proc(
@@ -89,60 +109,39 @@ chunk_tile_triangle_iterator_next :: proc(
 			iterator.pos.z = iterator.start.z
 			iterator.pos.y += 1
 		}
-
-		if iterator.pos.y >= iterator.end.y {
-			iterator.pos.x = iterator.start.x
-			iterator.pos.y = iterator.start.y
-			iterator.pos.z = iterator.start.z
-			iterator.chunk, iterator.chunk_pos = chunk_iterator_next(
-				&iterator.chunk_iterator,
-			) or_return
-		}
 	}
 
 	return
 }
 
 chunk_iterate_all_tile_triangle :: proc(
-	chunk_iterator: Chunk_Iterator,
+	chunk: ^Chunk,
+    chunk_pos: glsl.ivec3,
 ) -> (
 	it: Chunk_Tile_Triangle_Iterator,
 ) {
-	it = {
-		chunk_iterator = chunk_iterator,
+	return {
+		chunk = chunk,
+        chunk_pos = chunk_pos,
 		pos = {0, 0, 0},
 		start = {0, 0, 0},
 		end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
 	}
-
-	ok: bool
-	it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
-	if !ok {
-		it.end = {0, 0, 0}
-	}
-
-	return
 }
 
 chunk_iterate_all_ground_tile_triangle :: proc(
-	chunk_iterator: Chunk_Iterator,
+	chunk: ^Chunk,
+    chunk_pos: glsl.ivec3,
 ) -> (
 	it: Chunk_Tile_Triangle_Iterator,
 ) {
-	it = {
-		chunk_iterator = chunk_iterator,
+	return {
+		chunk = chunk,
+        chunk_pos = chunk_pos,
 		pos = {0, 0, 0},
 		start = {0, 0, 0},
 		end = {CHUNK_WIDTH, 1, CHUNK_DEPTH},
 	}
-
-	ok: bool
-	it.chunk, it.chunk_pos, ok = chunk_iterator_next(&it.chunk_iterator)
-	if !ok {
-		it.end = {0, 0, 0}
-	}
-
-	return
 }
 
 chunk_iterator_has_next :: proc(iterator: ^Chunk_Iterator) -> bool {
@@ -163,7 +162,11 @@ chunk_iterator_next :: proc(
 ) {
 	chunk_iterator_has_next(iterator) or_return
 	chunk = &world_chunks[iterator.pos.x][iterator.pos.y]
-	pos = {i32(iterator.pos.x * CHUNK_WIDTH), 0, i32(iterator.pos.y * CHUNK_DEPTH)}
+	pos =  {
+		i32(iterator.pos.x * CHUNK_WIDTH),
+		0,
+		i32(iterator.pos.y * CHUNK_DEPTH),
+	}
 	iterator.pos.x += 1
 	if iterator.pos.x >= iterator.end.x {
 		iterator.pos.x = iterator.start.x

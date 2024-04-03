@@ -358,23 +358,33 @@ terrain_tool_update :: proc() {
 	}
 
 	if cursor_pos != terrain_tool_cursor_pos {
-		it := world_iterate_visible_ground_tile_triangles()
-		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-			side := index.side
-			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+		chunks_it := world_iterate_visible_chunks()
+		for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
+			it := chunk_iterate_all_ground_tile_triangle(chunk, chunk_pos)
+			for tile_triangle, index in chunk_tile_triangle_iterator_next(
+				&it,
+			) {
+				side := index.side
+				pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
 
-			x := int(index.pos.x)
-			z := int(index.pos.z)
-			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+				x := int(index.pos.x)
+				z := int(index.pos.z)
+				lights := get_terrain_tile_triangle_lights(side, x, z, 1)
 
-			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+				heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
-			for i in 0 ..< 3 {
-				heights[i] += f32(index.pos.y * WALL_HEIGHT)
-			}
+				for i in 0 ..< 3 {
+					heights[i] += f32(index.pos.y * WALL_HEIGHT)
+				}
 
-			if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
-				break
+				if terrain_tool_tile_cursor(
+					   tile_triangle^,
+					   side,
+					   heights,
+					   pos,
+				   ) {
+					break
+				}
 			}
 		}
 		terrain_tool_cursor_pos = cursor_pos
