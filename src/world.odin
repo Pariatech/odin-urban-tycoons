@@ -63,34 +63,40 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 }
 
 world_draw_tiles :: proc() {
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
+
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		it := chunk_iterate_all_tile_triangle(chunk, chunk_pos)
-		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-			side := index.side
-			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
-
-			x := int(index.pos.x)
-			z := int(index.pos.z)
-			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
-
-			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
-
-			for i in 0 ..< 3 {
-				heights[i] += f32(index.pos.y * WALL_HEIGHT)
-			}
-
-			draw_tile_triangle(
-				tile_triangle^,
-				side,
-				lights,
-				heights,
-				pos,
-				1,
-				&world_vertices,
-				&world_indices,
-			)
-		}
+        chunk_draw(chunk, chunk_pos)
+		// it := chunk_iterate_all_tile_triangle(chunk, chunk_pos)
+		// for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+		// 	side := index.side
+		// 	pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+		//
+		// 	x := int(index.pos.x)
+		// 	z := int(index.pos.z)
+		// 	lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+		//
+		// 	heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+		//
+		// 	for i in 0 ..< 3 {
+		// 		heights[i] += f32(index.pos.y * WALL_HEIGHT)
+		// 	}
+		//
+		// 	draw_tile_triangle(
+		// 		tile_triangle^,
+		// 		side,
+		// 		lights,
+		// 		heights,
+		// 		pos,
+		// 		1,
+		// 		&world_vertices,
+		// 		&world_indices,
+		// 	)
+		// }
 	}
 }
 
@@ -565,34 +571,30 @@ draw_world :: proc() {
 	draw_diagonal_walls()
 	finish_wall_rendering()
 
-	if world_previously_visible_chunks_start != world_visible_chunks_start ||
-	   world_previously_visible_chunks_end != world_visible_chunks_end ||
-	   world_tiles_dirty {
-		clear(&world_vertices)
-		clear(&world_indices)
-		world_draw_tiles()
-		gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			len(world_vertices) * size_of(Vertex),
-			raw_data(world_vertices),
-			gl.STATIC_DRAW,
-		)
-		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	}
+	// if world_previously_visible_chunks_start != world_visible_chunks_start ||
+	//    world_previously_visible_chunks_end != world_visible_chunks_end ||
+	//    world_tiles_dirty {
+	// 	clear(&world_vertices)
+	// 	clear(&world_indices)
+	// 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	// 	gl.BufferData(
+	// 		gl.ARRAY_BUFFER,
+	// 		len(world_vertices) * size_of(Vertex),
+	// 		raw_data(world_vertices),
+	// 		gl.STATIC_DRAW,
+	// 	)
+	// 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	// }
 
-	gl.BindVertexArray(vao)
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
+	world_draw_tiles()
+	// gl.BindVertexArray(vao)
 
-	gl.DrawElements(
-		gl.TRIANGLES,
-		i32(len(world_indices)),
-		gl.UNSIGNED_INT,
-		raw_data(world_indices),
-	)
-	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	// gl.DrawElements(
+	// 	gl.TRIANGLES,
+	// 	i32(len(world_indices)),
+	// 	gl.UNSIGNED_INT,
+	// 	raw_data(world_indices),
+	// )
+	// gl.BindVertexArray(0)
+	// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 }

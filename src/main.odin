@@ -54,6 +54,7 @@ start :: proc() -> (ok: bool = false) {
 	if (!init_renderer()) do return
 	defer deinit_renderer()
 
+    chunk_renderer_init()
 	init_wall_renderer() or_return
 
 	init_keyboard()
@@ -90,11 +91,11 @@ start :: proc() -> (ok: bool = false) {
 
 		glfw.PollEvents()
 
-        world_update()
-		terrain_tool_update()
 
 		begin_draw()
 		update_camera(delta_time)
+        world_update()
+		terrain_tool_update()
 
 		draw_world()
 

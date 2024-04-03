@@ -14,11 +14,12 @@ Chunk_Items :: struct($T: typeid) {
 
 Chunk :: struct {
 	tiles:             Chunk_Items([Tile_Triangle_Side]Maybe(Tile_Triangle)),
-	tiles_vertices:    [dynamic]Vertex,
-	tiles_indices:     [dynamic]u32,
 	tiles_dirty:       bool,
 	tiles_initialized: bool,
+	tiles_vao:         u32,
 	tiles_vbo:         u32,
+	tiles_ebo:         u32,
+	tiles_num_indices: i32,
 }
 
 Chunk_Iterator :: struct {
@@ -43,21 +44,85 @@ Chunk_Tile_Triangle_Iterator_Index :: struct {
 	side: Tile_Triangle_Side,
 }
 
+chunk_tiles_vao: u32
+
+chunk_renderer_init :: proc() {
+	gl.GenVertexArrays(1, &chunk_tiles_vao)
+}
+
 chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+
+	// gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	// gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+
 	if !chunk.tiles_initialized {
 		chunk.tiles_initialized = true
 		chunk.tiles_dirty = true
-
+		fmt.println("pos:", pos)
+        gl.GenVertexArrays(1, &chunk.tiles_vao)
+	    gl.BindVertexArray(chunk.tiles_vao)
 		gl.GenBuffers(1, &chunk.tiles_vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles_vbo)
+
+		gl.GenBuffers(1, &chunk.tiles_ebo)
+
+		gl.VertexAttribPointer(
+			0,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Vertex),
+			offset_of(Vertex, pos),
+		)
+		gl.EnableVertexAttribArray(0)
+
+		gl.VertexAttribPointer(
+			1,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Vertex),
+			offset_of(Vertex, light),
+		)
+		gl.EnableVertexAttribArray(1)
+
+		gl.VertexAttribPointer(
+			2,
+			4,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Vertex),
+			offset_of(Vertex, texcoords),
+		)
+		gl.EnableVertexAttribArray(2)
+
+		gl.VertexAttribPointer(
+			3,
+			1,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Vertex),
+			offset_of(Vertex, depth_map),
+		)
+		gl.EnableVertexAttribArray(3)
 	}
 
+	// fmt.println("buffer:", chunk.tiles_vbo)
+	gl.BindVertexArray(chunk.tiles_vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles_vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.tiles_ebo)
+
 	if chunk.tiles_dirty {
+		chunk.tiles_dirty = false
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
+
 		vertices: [dynamic]Vertex
 		indices: [dynamic]u32
 		defer delete(vertices)
 		defer delete(indices)
+
 		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+			// fmt.println("index:", index)
 			side := index.side
 			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
 
@@ -82,7 +147,35 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 				&indices,
 			)
 		}
+
+		// fmt.println("vertex:", vertices[0], "\n\n")
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(vertices) * size_of(Vertex),
+			raw_data(vertices),
+			gl.STATIC_DRAW,
+		)
+
+		gl.BufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			len(indices) * size_of(u32),
+			raw_data(indices),
+			gl.STATIC_DRAW,
+		)
+		chunk.tiles_num_indices = i32(len(indices))
+		// fmt.println("indices:", chunk.tiles_num_indices)
 	}
+
+	gl.DrawElements(
+		gl.TRIANGLES,
+		chunk.tiles_num_indices,
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
 }
 
 chunk_tile_triangle_iterator_has_next :: proc(

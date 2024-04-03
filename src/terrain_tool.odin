@@ -63,6 +63,26 @@ terrain_tool_tile_cursor :: proc(
 	return ok
 }
 
+terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
+	start := start
+	end := end
+	start.x /= CHUNK_WIDTH
+	end.x /= CHUNK_WIDTH
+	start.y /= CHUNK_DEPTH
+	end.y /= CHUNK_DEPTH
+
+	start.x = max(start.x, 0)
+	start.y = max(start.y, 0)
+	end.x = min(end.x, WORLD_CHUNK_WIDTH - 1)
+	end.y = min(end.y, WORLD_CHUNK_DEPTH - 1)
+
+	for i in start.x ..= end.x {
+		for j in start.y ..= end.y {
+			world_chunks[i][j].tiles_dirty = true
+		}
+	}
+}
+
 terrain_tool_move_points :: proc(position: glsl.vec3) {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
@@ -93,10 +113,11 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 			terrain_tool_drag_start = nil
 			remove_billboard(terrain_tool_drag_start_billboard)
 
-			world_tiles_dirty = true
 		} else if terrain_tool_drag_end != terrain_tool_position {
 			terrain_tool_drag_end = terrain_tool_position
 		}
+
+		terrain_tool_mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	} else if mouse_is_button_down(.Left) || mouse_is_button_down(.Right) {
 		terrain_tool_drag_clip = mouse_is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
@@ -168,7 +189,7 @@ terrain_tool_smooth_brush :: proc() {
 			)
 		}
 
-		world_tiles_dirty = true
+		terrain_tool_mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	}
 }
 
@@ -219,7 +240,16 @@ terrain_tool_move_point :: proc() {
 			)
 		}
 
-		world_tiles_dirty = true
+		terrain_tool_mark_array_dirty(
+			 {
+				terrain_tool_position.x - terrain_tool_brush_size,
+				terrain_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				terrain_tool_position.x + terrain_tool_brush_size,
+				terrain_tool_position.y + terrain_tool_brush_size,
+			},
+		)
 	}
 }
 
@@ -336,7 +366,16 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size += 1
 			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
 		}
-		world_tiles_dirty = true
+		terrain_tool_mark_array_dirty(
+			 {
+				terrain_tool_position.x - terrain_tool_brush_size,
+				terrain_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				terrain_tool_position.x + terrain_tool_brush_size,
+				terrain_tool_position.y + terrain_tool_brush_size,
+			},
+		)
 	} else if is_key_press(.Key_Minus) {
 		if is_key_down(.Key_Left_Shift) {
 			terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
@@ -354,7 +393,16 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size -= 1
 			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
 		}
-		world_tiles_dirty = true
+		terrain_tool_mark_array_dirty(
+			 {
+				terrain_tool_position.x - terrain_tool_brush_size,
+				terrain_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				terrain_tool_position.x + terrain_tool_brush_size,
+				terrain_tool_position.y + terrain_tool_brush_size,
+			},
+		)
 	}
 
 	if cursor_pos != terrain_tool_cursor_pos {
@@ -398,7 +446,26 @@ terrain_tool_update :: proc() {
 	terrain_tool_position.y = i32(position.z + 0.5)
 
 	if terrain_tool_position != previous_tool_position {
-		world_tiles_dirty = true
+		terrain_tool_mark_array_dirty(
+			 {
+				terrain_tool_position.x - terrain_tool_brush_size,
+				terrain_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				terrain_tool_position.x + terrain_tool_brush_size,
+				terrain_tool_position.y + terrain_tool_brush_size,
+			},
+		)
+		terrain_tool_mark_array_dirty(
+			 {
+				previous_tool_position.x - terrain_tool_brush_size,
+				previous_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				previous_tool_position.x + terrain_tool_brush_size,
+				previous_tool_position.y + terrain_tool_brush_size,
+			},
+		)
 	}
 
 	position.y =
