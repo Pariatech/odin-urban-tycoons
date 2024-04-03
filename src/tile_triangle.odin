@@ -98,8 +98,10 @@ draw_tile_triangle :: proc(
 	heights: [3]f32,
 	pos: glsl.vec2,
 	size: f32,
+    vertices_buffer: ^[dynamic]Vertex,
+    indices: ^[dynamic]u32,
 ) {
-	index_offset := u32(len(world_vertices))
+	index_offset := u32(len(vertices_buffer))
 
 	vertices := tile_triangle_side_vertices_map[side]
 	for vertex, i in vertices {
@@ -112,11 +114,11 @@ draw_tile_triangle :: proc(
 		vertex.texcoords.z = f32(tri.texture)
 		vertex.texcoords.w = f32(tri.mask_texture)
 		vertex.texcoords.xy *= size
-		append(&world_vertices, vertex)
+		append(vertices_buffer, vertex)
 	}
 
 	append(
-		&world_indices,
+		indices,
 		index_offset + 0,
 		index_offset + 1,
 		index_offset + 2,

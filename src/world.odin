@@ -80,7 +80,16 @@ world_draw_tiles :: proc() {
 				heights[i] += f32(index.pos.y * WALL_HEIGHT)
 			}
 
-			draw_tile_triangle(tile_triangle^, side, lights, heights, pos, 1)
+			draw_tile_triangle(
+				tile_triangle^,
+				side,
+				lights,
+				heights,
+				pos,
+				1,
+				&world_vertices,
+				&world_indices,
+			)
 		}
 	}
 }

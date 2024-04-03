@@ -28,12 +28,12 @@ Chunk_Iterator :: struct {
 }
 
 Chunk_Tile_Triangle_Iterator :: struct {
-	chunk:          ^Chunk,
-	chunk_pos:      glsl.ivec3,
-	pos:            glsl.ivec3,
-	start:          glsl.ivec3,
-	end:            glsl.ivec3,
-	side:           Tile_Triangle_Side,
+	chunk:     ^Chunk,
+	chunk_pos: glsl.ivec3,
+	pos:       glsl.ivec3,
+	start:     glsl.ivec3,
+	end:       glsl.ivec3,
+	side:      Tile_Triangle_Side,
 }
 
 Chunk_Tile_Triangle_Iterator_Value :: ^Tile_Triangle
@@ -53,7 +53,34 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 	if chunk.tiles_dirty {
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
+		vertices: [dynamic]Vertex
+		indices: [dynamic]u32
+		defer delete(vertices)
+		defer delete(indices)
 		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+			side := index.side
+			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+
+			x := int(index.pos.x)
+			z := int(index.pos.z)
+			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+
+			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+
+			for i in 0 ..< 3 {
+				heights[i] += f32(index.pos.y * WALL_HEIGHT)
+			}
+
+			draw_tile_triangle(
+				tile_triangle^,
+				side,
+				lights,
+				heights,
+				pos,
+				1,
+				&vertices,
+				&indices,
+			)
 		}
 	}
 }
@@ -116,32 +143,36 @@ chunk_tile_triangle_iterator_next :: proc(
 
 chunk_iterate_all_tile_triangle :: proc(
 	chunk: ^Chunk,
-    chunk_pos: glsl.ivec3,
+	chunk_pos: glsl.ivec3,
 ) -> (
 	it: Chunk_Tile_Triangle_Iterator,
 ) {
-	return {
-		chunk = chunk,
-        chunk_pos = chunk_pos,
-		pos = {0, 0, 0},
-		start = {0, 0, 0},
-		end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
-	}
+	return(
+		 {
+			chunk = chunk,
+			chunk_pos = chunk_pos,
+			pos = {0, 0, 0},
+			start = {0, 0, 0},
+			end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
+		} \
+	)
 }
 
 chunk_iterate_all_ground_tile_triangle :: proc(
 	chunk: ^Chunk,
-    chunk_pos: glsl.ivec3,
+	chunk_pos: glsl.ivec3,
 ) -> (
 	it: Chunk_Tile_Triangle_Iterator,
 ) {
-	return {
-		chunk = chunk,
-        chunk_pos = chunk_pos,
-		pos = {0, 0, 0},
-		start = {0, 0, 0},
-		end = {CHUNK_WIDTH, 1, CHUNK_DEPTH},
-	}
+	return(
+		 {
+			chunk = chunk,
+			chunk_pos = chunk_pos,
+			pos = {0, 0, 0},
+			start = {0, 0, 0},
+			end = {CHUNK_WIDTH, 1, CHUNK_DEPTH},
+		} \
+	)
 }
 
 chunk_iterator_has_next :: proc(iterator: ^Chunk_Iterator) -> bool {
