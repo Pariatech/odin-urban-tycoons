@@ -15,12 +15,18 @@ Tile_Triangle :: struct {
 	mask_texture: Mask,
 }
 
+Tile_Triangle_Vertex :: struct {
+	pos:       glsl.vec3,
+	light:     glsl.vec3,
+	texcoords: glsl.vec4,
+}
+
 north_tile_triangles := map[glsl.ivec3]Tile_Triangle{}
 east_tile_triangles := map[glsl.ivec3]Tile_Triangle{}
 south_tile_triangles := map[glsl.ivec3]Tile_Triangle{}
 west_tile_triangles := map[glsl.ivec3]Tile_Triangle{}
 
-tile_triangle_side_vertices_map := [Tile_Triangle_Side][3]Vertex {
+tile_triangle_side_vertices_map := [Tile_Triangle_Side][3]Tile_Triangle_Vertex {
 	.South =  {
 		 {
 			pos = {-0.5, 0.0, -0.5},
@@ -98,8 +104,8 @@ draw_tile_triangle :: proc(
 	heights: [3]f32,
 	pos: glsl.vec2,
 	size: f32,
-    vertices_buffer: ^[dynamic]Vertex,
-    indices: ^[dynamic]u32,
+	vertices_buffer: ^[dynamic]Tile_Triangle_Vertex,
+	indices: ^[dynamic]u32,
 ) {
 	index_offset := u32(len(vertices_buffer))
 
@@ -117,10 +123,5 @@ draw_tile_triangle :: proc(
 		append(vertices_buffer, vertex)
 	}
 
-	append(
-		indices,
-		index_offset + 0,
-		index_offset + 1,
-		index_offset + 2,
-	)
+	append(indices, index_offset + 0, index_offset + 1, index_offset + 2)
 }

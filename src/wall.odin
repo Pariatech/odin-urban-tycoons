@@ -58,12 +58,21 @@ Wall :: struct {
 	mask:     Wall_Mask_Texture,
 }
 
+
+Wall_Vertex :: struct {
+	pos:       m.vec3,
+	light:     m.vec3,
+	texcoords: m.vec4,
+}
+
+Wall_Index :: u32
+
 WALL_HEIGHT :: 3
 WALL_TOP_OFFSET :: 0.0001
 WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
-wall_full_vertices := []Vertex {
+wall_full_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.615, 0.0, -0.5},
@@ -89,7 +98,7 @@ wall_full_vertices := []Vertex {
 }
 wall_full_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
-wall_extended_side_vertices := []Vertex {
+wall_extended_side_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.615, 0.0, -0.5},
@@ -109,7 +118,7 @@ wall_extended_side_vertices := []Vertex {
 }
 wall_extended_side_indices := []u32{0, 1, 2, 0, 2, 3}
 
-wall_side_vertices := []Vertex {
+wall_side_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
@@ -125,7 +134,7 @@ wall_side_vertices := []Vertex {
 }
 wall_side_indices := []u32{0, 1, 2, 0, 2, 3}
 
-wall_end_vertices := []Vertex {
+wall_end_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
@@ -148,7 +157,7 @@ wall_end_vertices := []Vertex {
 wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
 
-wall_full_top_vertices := []Vertex {
+wall_full_top_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -170,7 +179,7 @@ wall_full_top_vertices := []Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
-wall_top_vertices := []Vertex {
+wall_top_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -679,21 +688,8 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-north_south_walls := [dynamic]Wall{}
-east_west_walls := [dynamic]Wall{}
-north_south_walls_quadtree := Quadtree(int) {
-	size = WORLD_WIDTH,
-}
-east_west_walls_quadtree := Quadtree(int) {
-	size = WORLD_WIDTH,
-}
-
 wall_texture_array: u32
 wall_mask_array: u32
-wall_vbo, wall_vao: u32
-wall_vertices: [dynamic]Vertex
-wall_indices: [dynamic]u32
-
 
 load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -706,7 +702,11 @@ load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(wall_mask_paths, WALL_TEXTURE_WIDTH, WALL_TEXTURE_HEIGHT)
+	return load_texture_2D_array(
+		wall_mask_paths,
+		WALL_TEXTURE_WIDTH,
+		WALL_TEXTURE_HEIGHT,
+	)
 }
 
 load_wall_texture_array :: proc() -> (ok: bool = true) {
@@ -723,123 +723,58 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 		gl.LINEAR_MIPMAP_LINEAR,
 	)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    max_anisotropy: f32
-    gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
-    gl.TexParameterf(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_ANISOTROPY, max_anisotropy)
+	max_anisotropy: f32
+	gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+	gl.TexParameterf(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MAX_ANISOTROPY,
+		max_anisotropy,
+	)
 
-	return load_texture_2D_array(wall_texture_paths, WALL_TEXTURE_WIDTH, WALL_TEXTURE_HEIGHT)
+	return load_texture_2D_array(
+		wall_texture_paths,
+		WALL_TEXTURE_WIDTH,
+		WALL_TEXTURE_HEIGHT,
+	)
 }
 
 init_wall_renderer :: proc() -> (ok: bool) {
-	gl.GenVertexArrays(1, &wall_vao)
-	gl.BindVertexArray(wall_vao)
-
-	gl.GenBuffers(1, &wall_vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, wall_vbo)
-
-	gl.VertexAttribPointer(
-		0,
-		3,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, pos),
-	)
-	gl.EnableVertexAttribArray(0)
-
-	gl.VertexAttribPointer(
-		1,
-		3,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, light),
-	)
-	gl.EnableVertexAttribArray(1)
-
-	gl.VertexAttribPointer(
-		2,
-		4,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, texcoords),
-	)
-	gl.EnableVertexAttribArray(2)
-
-	gl.VertexAttribPointer(
-		3,
-		1,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, depth_map),
-	)
-	gl.EnableVertexAttribArray(3)
-
 	load_wall_texture_array() or_return
 	load_wall_mask_array() or_return
 
-	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-
-    return true
-}
-
-start_wall_rendering :: proc() {
-	clear(&wall_vertices)
-	clear(&wall_indices)
-}
-
-finish_wall_rendering :: proc() {
-	gl.BindVertexArray(wall_vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, wall_vbo)
-
-	gl.BufferData(
-		gl.ARRAY_BUFFER,
-		len(wall_vertices) * size_of(Vertex),
-		raw_data(wall_vertices),
-		gl.STATIC_DRAW,
-	)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
-
-	gl.DrawElements(
-		gl.TRIANGLES,
-		i32(len(wall_indices)),
-		gl.UNSIGNED_INT,
-		raw_data(wall_indices),
-	)
-	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	return true
 }
 
 draw_wall_mesh :: proc(
-	vertices: []Vertex,
-	indices: []u32,
+	vertices: []Wall_Vertex,
+	indices: []Wall_Index,
 	model: m.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
+	vertex_buffer: ^[dynamic]Wall_Vertex,
+	index_buffer: ^[dynamic]Wall_Index,
 ) {
-	index_offset := u32(len(wall_vertices))
+	index_offset := u32(len(vertex_buffer))
 	for i in 0 ..< len(vertices) {
 		vertex := vertices[i]
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, vec4(vertex.pos, 1)).xyz
 
-		append(&wall_vertices, vertex)
+		append(vertex_buffer, vertex)
 	}
 
 	for idx in indices {
-		append(&wall_indices, idx + index_offset)
+		append(index_buffer, idx + index_offset)
 	}
 }
 
-draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
+draw_wall :: proc(
+	wall: Wall,
+	axis: Wall_Axis,
+	vertex_buffer: ^[dynamic]Wall_Vertex,
+	index_buffer: ^[dynamic]Wall_Index,
+) {
 	mask_map := WALL_MASK_MAP
 	side_map := WALL_SIDE_MAP
 	transform_map := WALL_TRANSFORM_MAP
@@ -854,8 +789,8 @@ draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 	transform := m.mat4Translate(position)
 	transform *= transform_map[axis][camera_rotation]
 
-	vertices: []Vertex
-	indices: []u32
+	vertices: []Wall_Vertex
+	indices: []Wall_Index
 
 	switch mask {
 	case .Full:
@@ -871,7 +806,15 @@ draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 		vertices = wall_end_vertices
 		indices = wall_end_indices
 	}
-	draw_wall_mesh(vertices, indices, transform, texture, wall.mask)
+	draw_wall_mesh(
+		vertices,
+		indices,
+		transform,
+		texture,
+		wall.mask,
+		vertex_buffer,
+		index_buffer,
+	)
 
 	top_vertices := wall_full_top_vertices
 	if top_mesh == .Side do top_vertices = wall_top_vertices
@@ -883,46 +826,7 @@ draw_wall :: proc(wall: Wall, axis: Wall_Axis) {
 		transform,
 		.Wall_Top,
 		.Full_Mask,
-	)
-}
-
-draw_walls :: proc() {
-	aabb := get_camera_aabb()
-	north_south_walls_indices := quadtree_search(
-		&north_south_walls_quadtree,
-		aabb,
-	)
-	defer delete(north_south_walls_indices)
-	for index in north_south_walls_indices {
-		draw_wall(north_south_walls[index], .North_South)
-	}
-
-	east_west_walls_indices := quadtree_search(
-		&east_west_walls_quadtree,
-		aabb,
-	)
-	defer delete(east_west_walls_indices)
-	for index in east_west_walls_indices {
-		draw_wall(east_west_walls[index], .East_West)
-	}
-}
-
-insert_north_south_wall :: proc(wall: Wall) {
-	index := len(north_south_walls)
-	append(&north_south_walls, wall)
-	quadtree_append(
-		&north_south_walls_quadtree,
-		{i32(wall.pos.x), i32(wall.pos.z)},
-		index,
-	)
-}
-
-insert_east_west_wall :: proc(wall: Wall) {
-	index := len(east_west_walls)
-	append(&east_west_walls, wall)
-	quadtree_append(
-		&east_west_walls_quadtree,
-		{i32(wall.pos.x), i32(wall.pos.z)},
-		index,
+		vertex_buffer,
+		index_buffer,
 	)
 }

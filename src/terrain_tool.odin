@@ -327,7 +327,6 @@ terrain_tool_check_intersect_tile :: proc(x, z: f32) -> bool {
 
 		x := int(pos.x)
 		z := int(pos.y)
-		lights := get_terrain_tile_triangle_lights(side, x, z, 1)
 
 		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
@@ -341,15 +340,17 @@ terrain_tool_check_intersect_tile :: proc(x, z: f32) -> bool {
 terrain_tool_check_intersect :: proc() {
 	x, z: f32
 	if cursor_ray.origin.z < cursor_ray.origin.x {
-		z = max(
+		z = clamp(
 			math.ceil(cursor_ray.origin.z),
+            0,
 			f32(world_visible_chunks_start.y * CHUNK_DEPTH),
 		)
 		t := (z - cursor_ray.origin.z) / cursor_ray.direction.z
 		x = cursor_ray.origin.x + t * cursor_ray.direction.x
 	} else {
-		x = max(
+		x = clamp(
 			math.ceil(cursor_ray.origin.x),
+            0,
 			f32(world_visible_chunks_start.x * CHUNK_WIDTH),
 		)
 		t := (x - cursor_ray.origin.x) / cursor_ray.direction.x
@@ -471,7 +472,6 @@ terrain_tool_update :: proc() {
 
     cursor_moved := cursor_ray.origin != terrain_tool_cursor_pos
 	if cursor_moved {
-        fmt.println(cursor_ray.origin)
 		terrain_tool_check_intersect()
 	    terrain_tool_cursor_pos = cursor_ray.origin
 	}

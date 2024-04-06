@@ -20,7 +20,7 @@ Diagonal_Wall_Mask :: enum {
 DIAGONAL_WALL_TOP_CROSS_OFFSET :: 0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
-diagonal_wall_full_vertices := []Vertex {
+diagonal_wall_full_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
@@ -43,7 +43,7 @@ diagonal_wall_full_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_right_extension_vertices := []Vertex {
+diagonal_wall_right_extension_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, 0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {0.5575, 0.0, -0.5575},
@@ -62,7 +62,7 @@ diagonal_wall_right_extension_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_left_extension_vertices := []Vertex {
+diagonal_wall_left_extension_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5575, 0.0, 0.5575},
 		light = {1, 1, 1},
@@ -81,7 +81,7 @@ diagonal_wall_left_extension_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_side_vertices := []Vertex {
+diagonal_wall_side_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, 0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
@@ -96,7 +96,7 @@ diagonal_wall_side_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_cross_vertices := []Vertex {
+diagonal_wall_cross_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.385}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	 {
 		pos = {-0.385, 0.0, -0.5},
@@ -116,7 +116,7 @@ diagonal_wall_cross_vertices := []Vertex {
 }
 
 
-diagonal_wall_top_cross_vertices := []Vertex {
+diagonal_wall_top_cross_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
 		light = {1, 1, 1},
@@ -139,7 +139,7 @@ diagonal_wall_top_cross_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_top_full_vertices := []Vertex {
+diagonal_wall_top_full_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
@@ -162,7 +162,7 @@ diagonal_wall_top_full_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_top_left_extension_vertices := []Vertex {
+diagonal_wall_top_left_extension_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
@@ -185,7 +185,7 @@ diagonal_wall_top_left_extension_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_top_right_extension_vertices := []Vertex {
+diagonal_wall_top_right_extension_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
@@ -208,7 +208,7 @@ diagonal_wall_top_right_extension_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_top_side_vertices := []Vertex {
+diagonal_wall_top_side_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
@@ -231,7 +231,7 @@ diagonal_wall_top_side_vertices := []Vertex {
 	},
 }
 
-diagonal_wall_indices := []u32{0, 1, 2, 0, 2, 3}
+diagonal_wall_indices := []Wall_Index{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
 	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
@@ -806,7 +806,7 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 	transform *= transform_map[camera_rotation]
 
 	if draw {
-		wall_vertices: []Vertex
+		wall_vertices: []Wall_Vertex
 		switch mask {
 		case .Full:
 			wall_vertices = diagonal_wall_full_vertices
@@ -820,16 +820,16 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 			wall_vertices = diagonal_wall_cross_vertices
 		}
 
-		draw_wall_mesh(
-			wall_vertices,
-			diagonal_wall_indices,
-			transform,
-			texture,
-			wall.mask,
-		)
+		// draw_wall_mesh(
+		// 	wall_vertices,
+		// 	diagonal_wall_indices,
+		// 	transform,
+		// 	texture,
+		// 	wall.mask,
+		// )
 	}
 
-	top_vertices: []Vertex
+	top_vertices: []Wall_Vertex
 	switch top_mask {
 	case .Full:
 		top_vertices = diagonal_wall_top_full_vertices
@@ -843,13 +843,13 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 		top_vertices = diagonal_wall_top_cross_vertices
 	}
 
-	draw_wall_mesh(
-		top_vertices,
-		diagonal_wall_indices,
-		transform,
-		.Wall_Top,
-		wall.mask,
-	)
+	// draw_wall_mesh(
+	// 	top_vertices,
+	// 	diagonal_wall_indices,
+	// 	transform,
+	// 	.Wall_Top,
+	// 	wall.mask,
+	// )
 }
 
 draw_diagonal_walls :: proc() {

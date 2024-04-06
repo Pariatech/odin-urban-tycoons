@@ -9,24 +9,27 @@ CHUNK_DEPTH :: 8
 CHUNK_HEIGHT :: 8
 
 Chunk_Tiles :: struct {
-	triangles: [CHUNK_HEIGHT][CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
+	triangles:     [CHUNK_HEIGHT][CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
 		Tile_Triangle,
 	),
-	dirty:          bool,
-	initialized:    bool,
-	vao:            u32,
-	vbo:            u32,
-	ebo:            u32,
-	num_indices:    i32,
+	dirty:         bool,
+	initialized:   bool,
+	vao, vbo, ebo: u32,
+	num_indices:   i32,
 }
 
 Chunk_Walls :: struct {
-	north_south_walls: [dynamic]Wall,
-	east_west_walls:   [dynamic]Wall,
+	north_south: [dynamic]Wall,
+	east_west:   [dynamic]Wall,
+	vao, vbo, ebo: u32,
+	dirty:         bool,
+	initialized:   bool,
+	num_indices:   i32,
 }
 
 Chunk :: struct {
 	tiles: Chunk_Tiles,
+    walls: Chunk_Walls,
 }
 
 Chunk_Iterator :: struct {
@@ -51,21 +54,10 @@ Chunk_Tile_Triangle_Iterator_Index :: struct {
 	side: Tile_Triangle_Side,
 }
 
-chunk_tiles_vao: u32
-
-chunk_renderer_init :: proc() {
-	gl.GenVertexArrays(1, &chunk_tiles_vao)
-}
-
-chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-
-	// gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	// gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
-
+chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	if !chunk.tiles.initialized {
 		chunk.tiles.initialized = true
 		chunk.tiles.dirty = true
-		fmt.println("pos:", pos)
 		gl.GenVertexArrays(1, &chunk.tiles.vao)
 		gl.BindVertexArray(chunk.tiles.vao)
 		gl.GenBuffers(1, &chunk.tiles.vbo)
@@ -78,8 +70,8 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Vertex),
-			offset_of(Vertex, pos),
+			size_of(Tile_Triangle_Vertex),
+			offset_of(Tile_Triangle_Vertex, pos),
 		)
 		gl.EnableVertexAttribArray(0)
 
@@ -88,8 +80,8 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Vertex),
-			offset_of(Vertex, light),
+			size_of(Tile_Triangle_Vertex),
+			offset_of(Tile_Triangle_Vertex, light),
 		)
 		gl.EnableVertexAttribArray(1)
 
@@ -98,23 +90,12 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			4,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Vertex),
-			offset_of(Vertex, texcoords),
+			size_of(Tile_Triangle_Vertex),
+			offset_of(Tile_Triangle_Vertex, texcoords),
 		)
 		gl.EnableVertexAttribArray(2)
-
-		gl.VertexAttribPointer(
-			3,
-			1,
-			gl.FLOAT,
-			gl.FALSE,
-			size_of(Vertex),
-			offset_of(Vertex, depth_map),
-		)
-		gl.EnableVertexAttribArray(3)
 	}
 
-	// fmt.println("buffer:", chunk.tiles_vbo)
 	gl.BindVertexArray(chunk.tiles.vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles.vbo)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.tiles.ebo)
@@ -123,13 +104,12 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		chunk.tiles.dirty = false
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
 
-		vertices: [dynamic]Vertex
+		vertices: [dynamic]Tile_Triangle_Vertex
 		indices: [dynamic]u32
 		defer delete(vertices)
 		defer delete(indices)
 
 		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-			// fmt.println("index:", index)
 			side := index.side
 			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
 
@@ -155,7 +135,6 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			)
 		}
 
-		// fmt.println("vertex:", vertices[0], "\n\n")
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(vertices) * size_of(Vertex),
@@ -170,12 +149,101 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			gl.STATIC_DRAW,
 		)
 		chunk.tiles.num_indices = i32(len(indices))
-		// fmt.println("indices:", chunk.tiles_num_indices)
 	}
 
 	gl.DrawElements(
 		gl.TRIANGLES,
 		chunk.tiles.num_indices,
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+}
+
+chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	if !chunk.walls.initialized {
+		chunk.walls.initialized = true
+		chunk.walls.dirty = true
+		gl.GenVertexArrays(1, &chunk.walls.vao)
+		gl.BindVertexArray(chunk.walls.vao)
+		gl.GenBuffers(1, &chunk.walls.vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.walls.vbo)
+
+		gl.GenBuffers(1, &chunk.walls.ebo)
+
+		gl.VertexAttribPointer(
+			0,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, pos),
+		)
+		gl.EnableVertexAttribArray(0)
+
+		gl.VertexAttribPointer(
+			1,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, light),
+		)
+		gl.EnableVertexAttribArray(1)
+
+		gl.VertexAttribPointer(
+			2,
+			4,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, texcoords),
+		)
+		gl.EnableVertexAttribArray(2)
+	}
+
+	gl.BindVertexArray(chunk.walls.vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.walls.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.walls.ebo)
+
+	if chunk.walls.dirty {
+		chunk.walls.dirty = false
+
+		vertices: [dynamic]Wall_Vertex
+		indices: [dynamic]Wall_Index
+		defer delete(vertices)
+		defer delete(indices)
+
+		for wall in chunk.walls.east_west {
+			draw_wall(wall, .East_West, &vertices, &indices)
+		}
+
+		for wall in chunk.walls.north_south {
+			draw_wall(wall, .North_South, &vertices, &indices)
+		}
+
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(vertices) * size_of(Wall_Vertex),
+			raw_data(vertices),
+			gl.STATIC_DRAW,
+		)
+
+		gl.BufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			len(indices) * size_of(Wall_Index),
+			raw_data(indices),
+			gl.STATIC_DRAW,
+		)
+		chunk.walls.num_indices = i32(len(indices))
+	}
+
+	gl.DrawElements(
+		gl.TRIANGLES,
+		chunk.walls.num_indices,
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -336,7 +404,9 @@ chunk_get_tile :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
-	return &chunk.tiles.triangles[pos.y][pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH]
+	return(
+		&chunk.tiles.triangles[pos.y][pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH] \
+	)
 }
 
 chunk_set_tile :: proc(
@@ -367,4 +437,25 @@ chunk_set_tile_mask_texture :: proc(
 			tile_triangle.mask_texture = mask_texture
 		}
 	}
+}
+
+
+chunk_set_north_south_wall :: proc(chunk: ^Chunk, wall: Wall) {
+	for existing_wall, i in &chunk.walls.north_south {
+        if existing_wall.pos == wall.pos {
+            existing_wall = wall
+            return
+        }
+    }
+	append(&chunk.walls.north_south, wall)
+}
+
+chunk_set_east_west_wall :: proc(chunk: ^Chunk, wall: Wall) {
+	for existing_wall, i in &chunk.walls.east_west {
+        if existing_wall.pos == wall.pos {
+            existing_wall = wall
+            return
+        }
+    }
+	append(&chunk.walls.east_west, wall)
 }

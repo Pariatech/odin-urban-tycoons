@@ -25,25 +25,25 @@ world_previously_visible_chunks_end: glsl.ivec2
 world_visible_chunks_start: glsl.ivec2
 world_visible_chunks_end: glsl.ivec2
 
-world_get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
-	return &world_chunks[pos.x / CHUNK_WIDTH][pos.z / CHUNK_DEPTH]
+world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
+	return &world_chunks[pos.x / CHUNK_WIDTH][pos.y / CHUNK_DEPTH]
 }
 
 world_set_tile :: proc(
 	pos: glsl.ivec3,
 	tile: [Tile_Triangle_Side]Maybe(Tile_Triangle),
 ) {
-	chunk_set_tile(world_get_chunk(pos), pos, tile)
+	chunk_set_tile(world_get_chunk(pos.xz), pos, tile)
 }
 
 world_get_tile :: proc(
 	pos: glsl.ivec3,
 ) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
-	return chunk_get_tile(world_get_chunk(pos), pos)
+	return chunk_get_tile(world_get_chunk(pos.xz), pos)
 }
 
 world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: Mask) {
-	chunk_set_tile_mask_texture(world_get_chunk(pos), pos, mask_texture)
+	chunk_set_tile_mask_texture(world_get_chunk(pos.xz), pos, mask_texture)
 }
 
 world_set_tile_triangle :: proc(
@@ -51,7 +51,21 @@ world_set_tile_triangle :: proc(
 	side: Tile_Triangle_Side,
 	tile_triangle: Maybe(Tile_Triangle),
 ) {
-	chunk_set_tile_triangle(world_get_chunk(pos), pos, side, tile_triangle)
+	chunk_set_tile_triangle(world_get_chunk(pos.xz), pos, side, tile_triangle)
+}
+
+world_set_north_south_wall :: proc(wall: Wall) {
+	chunk_set_north_south_wall(
+		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
+		wall,
+	)
+}
+
+world_set_east_west_wall :: proc(wall: Wall) {
+	chunk_set_east_west_wall(
+		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
+		wall,
+	)
 }
 
 world_iterate_all_chunks :: proc() -> Chunk_Iterator {
@@ -68,6 +82,19 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 	)
 }
 
+world_draw_walls :: proc() {
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
+
+	chunks_it := world_iterate_visible_chunks()
+	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
+		chunk_draw_walls(chunk, chunk_pos)
+	}
+}
+
+
 world_draw_tiles :: proc() {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
@@ -76,33 +103,7 @@ world_draw_tiles :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		chunk_draw(chunk, chunk_pos)
-		// it := chunk_iterate_all_tile_triangle(chunk, chunk_pos)
-		// for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-		// 	side := index.side
-		// 	pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
-		//
-		// 	x := int(index.pos.x)
-		// 	z := int(index.pos.z)
-		// 	lights := get_terrain_tile_triangle_lights(side, x, z, 1)
-		//
-		// 	heights := get_terrain_tile_triangle_heights(side, x, z, 1)
-		//
-		// 	for i in 0 ..< 3 {
-		// 		heights[i] += f32(index.pos.y * WALL_HEIGHT)
-		// 	}
-		//
-		// 	draw_tile_triangle(
-		// 		tile_triangle^,
-		// 		side,
-		// 		lights,
-		// 		heights,
-		// 		pos,
-		// 		1,
-		// 		&world_vertices,
-		// 		&world_indices,
-		// 	)
-		// }
+		chunk_draw_tiles(chunk, chunk_pos)
 	}
 }
 
@@ -263,7 +264,7 @@ add_house_floor_walls :: proc(
 	outside_texture: Wall_Texture,
 ) {
 	// The house's front wall
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Right_Corner,
@@ -271,7 +272,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 	for i in 0 ..< 2 {
-		insert_north_south_wall(
+		world_set_north_south_wall(
 			 {
 				pos =  {
 					f32(house_x),
@@ -286,7 +287,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	}
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 3)},
 			type = .Right_Corner_Side,
@@ -305,7 +306,7 @@ add_house_floor_walls :: proc(
 	// door?
 	mask := Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos =  {
 				f32(house_x + 1),
@@ -349,7 +350,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 7)},
 			type = .Side_Right_Corner,
@@ -358,7 +359,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		insert_north_south_wall(
+		world_set_north_south_wall(
 			 {
 				pos =  {
 					f32(house_x),
@@ -387,7 +388,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 10)},
 			type = .Right_Corner_Side,
@@ -396,7 +397,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's right side wall
-	insert_east_west_wall(
+	world_set_east_west_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Left_Corner_Side,
@@ -405,7 +406,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		insert_east_west_wall(
+		world_set_east_west_wall(
 			 {
 				pos =  {
 					f32(house_x + i32(i) + 1),
@@ -435,7 +436,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	insert_east_west_wall(
+	world_set_east_west_wall(
 		 {
 			pos = {f32(house_x + 3), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Left_Corner,
@@ -444,7 +445,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's left side wall
-	insert_east_west_wall(
+	world_set_east_west_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
 			type = .Right_Corner_Side,
@@ -453,7 +454,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		insert_east_west_wall(
+		world_set_east_west_wall(
 			 {
 				pos =  {
 					f32(house_x + i32(i) + 1),
@@ -482,7 +483,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	}
-	insert_east_west_wall(
+	world_set_east_west_wall(
 		 {
 			pos =  {
 				f32(house_x + 3),
@@ -503,7 +504,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos =  {
 				f32(house_x + 5),
@@ -516,7 +517,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 7 {
-		insert_north_south_wall(
+		world_set_north_south_wall(
 			 {
 				pos =  {
 					f32(house_x + 5),
@@ -532,7 +533,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	insert_north_south_wall(
+	world_set_north_south_wall(
 		 {
 			pos =  {
 				f32(house_x + 5),
@@ -572,35 +573,8 @@ draw_world :: proc() {
 
 	gl.UseProgram(shader_program)
 
-	start_wall_rendering()
-	draw_walls()
-	draw_diagonal_walls()
-	finish_wall_rendering()
-
-	// if world_previously_visible_chunks_start != world_visible_chunks_start ||
-	//    world_previously_visible_chunks_end != world_visible_chunks_end ||
-	//    world_tiles_dirty {
-	// 	clear(&world_vertices)
-	// 	clear(&world_indices)
-	// 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	// 	gl.BufferData(
-	// 		gl.ARRAY_BUFFER,
-	// 		len(world_vertices) * size_of(Vertex),
-	// 		raw_data(world_vertices),
-	// 		gl.STATIC_DRAW,
-	// 	)
-	// 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	// }
+	world_draw_walls()
+	// draw_diagonal_walls()
 
 	world_draw_tiles()
-	// gl.BindVertexArray(vao)
-
-	// gl.DrawElements(
-	// 	gl.TRIANGLES,
-	// 	i32(len(world_indices)),
-	// 	gl.UNSIGNED_INT,
-	// 	raw_data(world_indices),
-	// )
-	// gl.BindVertexArray(0)
-	// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 }
