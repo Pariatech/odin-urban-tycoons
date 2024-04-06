@@ -1,8 +1,8 @@
 package main
 
+import "core:fmt"
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
-import "core:fmt"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
@@ -777,17 +777,12 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
 	}
 
 
-south_west_north_east_walls := [dynamic]Wall{}
-north_west_south_east_walls := [dynamic]Wall{}
-
-south_west_north_east_walls_quadtree := Quadtree(int) {
-		size = WORLD_WIDTH,
-	}
-north_west_south_east_walls_quadtree := Quadtree(int) {
-		size = WORLD_WIDTH,
-	}
-
-draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
+draw_diagonal_wall :: proc(
+	wall: Wall,
+	axis: Diagonal_Wall_Axis,
+	vertex_buffer: ^[dynamic]Wall_Vertex,
+	index_buffer: ^[dynamic]Wall_Index,
+) {
 	mask_map := DIAGONAL_WALL_MASK_MAP
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
@@ -820,13 +815,15 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 			wall_vertices = diagonal_wall_cross_vertices
 		}
 
-		// draw_wall_mesh(
-		// 	wall_vertices,
-		// 	diagonal_wall_indices,
-		// 	transform,
-		// 	texture,
-		// 	wall.mask,
-		// )
+		draw_wall_mesh(
+			wall_vertices,
+			diagonal_wall_indices,
+			transform,
+			texture,
+			wall.mask,
+			vertex_buffer,
+			index_buffer,
+		)
 	}
 
 	top_vertices: []Wall_Vertex
@@ -843,59 +840,13 @@ draw_diagonal_wall :: proc(wall: Wall, axis: Diagonal_Wall_Axis) {
 		top_vertices = diagonal_wall_top_cross_vertices
 	}
 
-	// draw_wall_mesh(
-	// 	top_vertices,
-	// 	diagonal_wall_indices,
-	// 	transform,
-	// 	.Wall_Top,
-	// 	wall.mask,
-	// )
-}
-
-draw_diagonal_walls :: proc() {
-	aabb := get_camera_aabb()
-
-	north_west_south_east_walls_indices := quadtree_search(
-		&north_west_south_east_walls_quadtree,
-		aabb,
-	)
-	defer delete(north_west_south_east_walls_indices)
-	for index in north_west_south_east_walls_indices {
-		draw_diagonal_wall(
-			north_west_south_east_walls[index],
-			.North_West_South_East,
-		)
-	}
-
-	south_west_north_east_walls_indices := quadtree_search(
-		&south_west_north_east_walls_quadtree,
-		aabb,
-	)
-	defer delete(south_west_north_east_walls_indices)
-	for index in south_west_north_east_walls_indices {
-		draw_diagonal_wall(
-			south_west_north_east_walls[index],
-			.South_West_North_East,
-		)
-	}
-}
-
-insert_north_west_south_east_wall :: proc(wall: Wall) {
-	index := len(north_west_south_east_walls)
-	append(&north_west_south_east_walls, wall)
-	quadtree_append(
-		&north_west_south_east_walls_quadtree,
-		{i32(wall.pos.x), i32(wall.pos.z)},
-		index,
-	)
-}
-
-insert_south_west_north_east_wall :: proc(wall: Wall) {
-	index := len(south_west_north_east_walls)
-	append(&south_west_north_east_walls, wall)
-	quadtree_append(
-		&south_west_north_east_walls_quadtree,
-		{i32(wall.pos.x), i32(wall.pos.z)},
-		index,
+	draw_wall_mesh(
+		top_vertices,
+		diagonal_wall_indices,
+		transform,
+		.Wall_Top,
+		wall.mask,
+		vertex_buffer,
+		index_buffer,
 	)
 }

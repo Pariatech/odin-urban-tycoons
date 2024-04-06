@@ -68,6 +68,20 @@ world_set_east_west_wall :: proc(wall: Wall) {
 	)
 }
 
+world_set_north_west_south_east_wall :: proc(wall: Wall) {
+	chunk_set_north_west_south_east_wall(
+		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
+		wall,
+	)
+}
+
+world_set_south_west_north_east_wall :: proc(wall: Wall) {
+	chunk_set_south_west_north_east_wall(
+		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
+		wall,
+	)
+}
+
 world_iterate_all_chunks :: proc() -> Chunk_Iterator {
 	return {{0, 0}, {0, 0}, {WORLD_CHUNK_WIDTH, WORLD_CHUNK_DEPTH}}
 }
@@ -295,7 +309,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	insert_south_west_north_east_wall(
+	world_set_south_west_north_east_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 4)},
 			type = .Side_Side,
@@ -342,7 +356,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	insert_north_west_south_east_wall(
+	world_set_north_west_south_east_wall(
 		 {
 			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 6)},
 			type = .End_Side,
@@ -496,7 +510,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's back wall
-	insert_south_west_north_east_wall(
+	world_set_south_west_north_east_wall(
 		 {
 			pos = {f32(house_x + 4), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Side,
@@ -545,7 +559,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	insert_north_west_south_east_wall(
+	world_set_north_west_south_east_wall(
 		 {
 			pos =  {
 				f32(house_x + 4),

@@ -19,17 +19,19 @@ Chunk_Tiles :: struct {
 }
 
 Chunk_Walls :: struct {
-	north_south: [dynamic]Wall,
-	east_west:   [dynamic]Wall,
-	vao, vbo, ebo: u32,
-	dirty:         bool,
-	initialized:   bool,
-	num_indices:   i32,
+	north_south:           [dynamic]Wall,
+	east_west:             [dynamic]Wall,
+	south_west_north_east: [dynamic]Wall,
+	north_west_south_east: [dynamic]Wall,
+	vao, vbo, ebo:         u32,
+	dirty:                 bool,
+	initialized:           bool,
+	num_indices:           i32,
 }
 
 Chunk :: struct {
 	tiles: Chunk_Tiles,
-    walls: Chunk_Walls,
+	walls: Chunk_Walls,
 }
 
 Chunk_Iterator :: struct {
@@ -224,6 +226,14 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		for wall in chunk.walls.north_south {
 			draw_wall(wall, .North_South, &vertices, &indices)
 		}
+
+        for wall in chunk.walls.south_west_north_east {
+            draw_diagonal_wall(wall, .South_West_North_East, &vertices, &indices)
+        }
+
+        for wall in chunk.walls.north_west_south_east {
+            draw_diagonal_wall(wall, .North_West_South_East, &vertices, &indices)
+        }
 
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
@@ -442,20 +452,41 @@ chunk_set_tile_mask_texture :: proc(
 
 chunk_set_north_south_wall :: proc(chunk: ^Chunk, wall: Wall) {
 	for existing_wall, i in &chunk.walls.north_south {
-        if existing_wall.pos == wall.pos {
-            existing_wall = wall
-            return
-        }
-    }
+		if existing_wall.pos == wall.pos {
+			existing_wall = wall
+			return
+		}
+	}
 	append(&chunk.walls.north_south, wall)
 }
 
 chunk_set_east_west_wall :: proc(chunk: ^Chunk, wall: Wall) {
 	for existing_wall, i in &chunk.walls.east_west {
-        if existing_wall.pos == wall.pos {
-            existing_wall = wall
-            return
-        }
-    }
+		if existing_wall.pos == wall.pos {
+			existing_wall = wall
+			return
+		}
+	}
 	append(&chunk.walls.east_west, wall)
+}
+
+
+chunk_set_north_west_south_east_wall :: proc(chunk: ^Chunk, wall: Wall) {
+	for existing_wall, i in &chunk.walls.north_west_south_east {
+		if existing_wall.pos == wall.pos {
+			existing_wall = wall
+			return
+		}
+	}
+	append(&chunk.walls.north_west_south_east, wall)
+}
+
+chunk_set_south_west_north_east_wall :: proc(chunk: ^Chunk, wall: Wall) {
+	for existing_wall, i in &chunk.walls.south_west_north_east {
+		if existing_wall.pos == wall.pos {
+			existing_wall = wall
+			return
+		}
+	}
+	append(&chunk.walls.south_west_north_east, wall)
 }
