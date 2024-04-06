@@ -20,7 +20,10 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, xpos, ypos: f64) {
 	cursor_pos.x = f32(xpos)
 	cursor_pos.y = f32(ypos)
 
-	// fmt.println(window_size)
+    cursor_update_ray()
+}
+
+cursor_update_ray :: proc() {
 	screen_pos: glsl.vec4
 	screen_pos.x = cursor_pos.x / window_size.x
 	screen_pos.y = cursor_pos.y / window_size.y
@@ -36,12 +39,6 @@ cursor_pos_callback :: proc "c" (window: glfw.WindowHandle, xpos, ypos: f64) {
 	cursor_ray.origin = (icamera_vp * screen_pos).xyz
 	cursor_ray.direction = (icamera_vp * end_pos).xyz - cursor_ray.origin
 	cursor_ray.direction = glsl.normalize(cursor_ray.direction)
-
-	// fmt.println(cursor_pos)
-	// fmt.println(screen_pos)
-	// fmt.println(cursor_ray)
-	// p1 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, -1, 1}
-	// p2 := inverse(camera_vp) * glsl.vec4{screen_point.x, screen_point.y, 1, 1}
 }
 
 scroll_callback :: proc "c" (
@@ -60,6 +57,7 @@ init_cursor :: proc() {
 
 update_cursor :: proc() {
 	cursor_scroll = {0, 0}
+    cursor_update_ray()
 }
 
 cursor_ray_intersect_plane :: proc(pos: glsl.vec3, normal: glsl.vec3) -> Maybe(glsl.vec3) {

@@ -6,7 +6,7 @@ import "core:math/linalg/glsl"
 import "core:math/rand"
 import "vendor:glfw"
 
-terrain_tool_cursor_pos: glsl.vec2
+terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: int
 terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
@@ -78,7 +78,7 @@ terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 
 	for i in start.x ..= end.x {
 		for j in start.y ..= end.y {
-			world_chunks[i][j].tiles_dirty = true
+			world_chunks[i][j].tiles.dirty = true
 		}
 	}
 }
@@ -356,7 +356,6 @@ terrain_tool_check_intersect :: proc() {
 		z = cursor_ray.origin.z + t * cursor_ray.direction.z
 	}
 
-	terrain_tool_cursor_pos = cursor_pos
 	for x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) ||
 	    z <= f32(world_visible_chunks_end.y * CHUNK_DEPTH) {
 
@@ -470,8 +469,11 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-	if cursor_pos != terrain_tool_cursor_pos {
+    cursor_moved := cursor_ray.origin != terrain_tool_cursor_pos
+	if cursor_moved {
+        fmt.println(cursor_ray.origin)
 		terrain_tool_check_intersect()
+	    terrain_tool_cursor_pos = cursor_ray.origin
 	}
 
 	position := terrain_tool_intersect

@@ -8,18 +8,25 @@ CHUNK_WIDTH :: 8
 CHUNK_DEPTH :: 8
 CHUNK_HEIGHT :: 8
 
-Chunk_Items :: struct($T: typeid) {
-	items: [CHUNK_HEIGHT][CHUNK_WIDTH][CHUNK_DEPTH]T,
+Chunk_Tiles :: struct {
+	triangles: [CHUNK_HEIGHT][CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
+		Tile_Triangle,
+	),
+	dirty:          bool,
+	initialized:    bool,
+	vao:            u32,
+	vbo:            u32,
+	ebo:            u32,
+	num_indices:    i32,
+}
+
+Chunk_Walls :: struct {
+	north_south_walls: [dynamic]Wall,
+	east_west_walls:   [dynamic]Wall,
 }
 
 Chunk :: struct {
-	tiles:             Chunk_Items([Tile_Triangle_Side]Maybe(Tile_Triangle)),
-	tiles_dirty:       bool,
-	tiles_initialized: bool,
-	tiles_vao:         u32,
-	tiles_vbo:         u32,
-	tiles_ebo:         u32,
-	tiles_num_indices: i32,
+	tiles: Chunk_Tiles,
 }
 
 Chunk_Iterator :: struct {
@@ -55,16 +62,16 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	// gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	// gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
-	if !chunk.tiles_initialized {
-		chunk.tiles_initialized = true
-		chunk.tiles_dirty = true
+	if !chunk.tiles.initialized {
+		chunk.tiles.initialized = true
+		chunk.tiles.dirty = true
 		fmt.println("pos:", pos)
-        gl.GenVertexArrays(1, &chunk.tiles_vao)
-	    gl.BindVertexArray(chunk.tiles_vao)
-		gl.GenBuffers(1, &chunk.tiles_vbo)
-		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles_vbo)
+		gl.GenVertexArrays(1, &chunk.tiles.vao)
+		gl.BindVertexArray(chunk.tiles.vao)
+		gl.GenBuffers(1, &chunk.tiles.vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles.vbo)
 
-		gl.GenBuffers(1, &chunk.tiles_ebo)
+		gl.GenBuffers(1, &chunk.tiles.ebo)
 
 		gl.VertexAttribPointer(
 			0,
@@ -108,12 +115,12 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	}
 
 	// fmt.println("buffer:", chunk.tiles_vbo)
-	gl.BindVertexArray(chunk.tiles_vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles_vbo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.tiles_ebo)
+	gl.BindVertexArray(chunk.tiles.vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.tiles.ebo)
 
-	if chunk.tiles_dirty {
-		chunk.tiles_dirty = false
+	if chunk.tiles.dirty {
+		chunk.tiles.dirty = false
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
 
 		vertices: [dynamic]Vertex
@@ -162,13 +169,13 @@ chunk_draw :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			raw_data(indices),
 			gl.STATIC_DRAW,
 		)
-		chunk.tiles_num_indices = i32(len(indices))
+		chunk.tiles.num_indices = i32(len(indices))
 		// fmt.println("indices:", chunk.tiles_num_indices)
 	}
 
 	gl.DrawElements(
 		gl.TRIANGLES,
-		chunk.tiles_num_indices,
+		chunk.tiles.num_indices,
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -204,7 +211,7 @@ chunk_tile_triangle_iterator_next :: proc(
 		index.side = iterator.side
 
 		value, ok =
-		&iterator.chunk.tiles.items[iterator.pos.y][iterator.pos.x][iterator.pos.z][iterator.side].?
+		&iterator.chunk.tiles.triangles[iterator.pos.y][iterator.pos.x][iterator.pos.z][iterator.side].?
 
 		index.pos = iterator.chunk_pos + iterator.pos
 		switch iterator.side {
@@ -316,7 +323,7 @@ chunk_init :: proc(chunk: ^Chunk) {
 	for x in 0 ..< CHUNK_WIDTH {
 		for z in 0 ..< CHUNK_DEPTH {
 			for side in Tile_Triangle_Side {
-				chunk.tiles.items[0][x][z][side] = Tile_Triangle {
+				chunk.tiles.triangles[0][x][z][side] = Tile_Triangle {
 					texture      = .Grass,
 					mask_texture = .Grid_Mask,
 				}
@@ -329,7 +336,7 @@ chunk_get_tile :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
-	return &chunk.tiles.items[pos.y][pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH]
+	return &chunk.tiles.triangles[pos.y][pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH]
 }
 
 chunk_set_tile :: proc(
