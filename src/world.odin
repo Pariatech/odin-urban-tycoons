@@ -36,6 +36,12 @@ world_set_tile :: proc(
 	chunk_set_tile(world_get_chunk(pos), pos, tile)
 }
 
+world_get_tile :: proc(
+	pos: glsl.ivec3,
+) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
+	return chunk_get_tile(world_get_chunk(pos), pos)
+}
+
 world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: Mask) {
 	chunk_set_tile_mask_texture(world_get_chunk(pos), pos, mask_texture)
 }
@@ -70,7 +76,7 @@ world_draw_tiles :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-        chunk_draw(chunk, chunk_pos)
+		chunk_draw(chunk, chunk_pos)
 		// it := chunk_iterate_all_tile_triangle(chunk, chunk_pos)
 		// for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
 		// 	side := index.side
