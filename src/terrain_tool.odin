@@ -319,6 +319,135 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	}
 }
 
+terrain_tool_check_intersect_chunk :: proc(chunk_x, chunk_z: i32) -> bool {
+	chunk := &world_chunks[chunk_x][chunk_z]
+	chunk_pos := glsl.ivec3{chunk_x * CHUNK_WIDTH, 0, chunk_z * CHUNK_DEPTH}
+	it := chunk_iterate_all_ground_tile_triangle(chunk, chunk_pos)
+	for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+		side := index.side
+		pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+
+		x := int(index.pos.x)
+		z := int(index.pos.z)
+		lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+
+		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+
+		for i in 0 ..< 3 {
+			heights[i] += f32(index.pos.y * WALL_HEIGHT)
+		}
+
+		if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
+			return true
+		}
+	}
+	return false
+}
+
+terrain_tool_check_intersect :: proc() {
+	x, z: f32
+	if cursor_ray.origin.z < cursor_ray.origin.x {
+		z =
+			max(
+				math.ceil(cursor_ray.origin.z / CHUNK_DEPTH),
+				f32(world_visible_chunks_start.y),
+			) *
+			CHUNK_DEPTH
+		t := (z - cursor_ray.origin.z) / cursor_ray.direction.z
+		x = cursor_ray.origin.x + t * cursor_ray.direction.x
+	} else {
+		x =
+			max(
+				math.ceil(cursor_ray.origin.x / CHUNK_WIDTH),
+				f32(world_visible_chunks_start.x),
+			) *
+			CHUNK_WIDTH
+		t := (x - cursor_ray.origin.x) / cursor_ray.direction.x
+		z = cursor_ray.origin.z + t * cursor_ray.direction.z
+	}
+
+	// chunk_start := glsl.ivec2 {
+	// 	i32(math.ceil(max(x / CHUNK_WIDTH, 0))),
+	// 	i32(math.ceil(max(z / CHUNK_DEPTH, 0))),
+	// }
+
+	// fmt.println("x:", x, "z:", z)
+
+	for x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) ||
+	    z <= f32(world_visible_chunks_end.y * CHUNK_DEPTH) {
+
+		chunk_x := i32(x / CHUNK_WIDTH)
+		chunk_z := i32(z / CHUNK_DEPTH)
+
+		z += CHUNK_DEPTH
+		x += CHUNK_WIDTH
+
+		next_chunk_x := i32(x / CHUNK_WIDTH)
+		next_chunk_z := i32(z / CHUNK_DEPTH)
+
+		// fmt.println("x:", x, "z:", z, "chunk_x:", chunk_x, "chunk_z:", chunk_z)
+
+		if terrain_tool_check_intersect_chunk(chunk_x, chunk_z) {
+			break
+		}
+
+		if next_chunk_x > chunk_x &&
+		   terrain_tool_check_intersect_chunk(chunk_x + 1, chunk_z) {
+			break
+		}
+	}
+	terrain_tool_cursor_pos = cursor_pos
+
+	// fmt.println(
+	// 	"start:",
+	// 	world_visible_chunks_start,
+	// 	"\nend:",
+	// 	world_visible_chunks_end,
+	// 	"\norigin:",
+	// 	cursor_ray.origin,
+	// 	"\ndirection",
+	// 	cursor_ray.direction,
+	// 	"\nchunk_start:",
+	// 	chunk_start,
+	// 	"\nx",
+	// 	x,
+	// 	"\nz",
+	// 	z,
+	// 	"\nnext_x",
+	// 	next_x,
+	// 	"\nnext_z",
+	// 	next_z,
+	// )
+	//       world_visible_chunks_start,
+	// world_visible_chunks_end,
+
+	// chunks_it := world_iterate_visible_chunks()
+	//
+	// // cursor_ray
+	// for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
+	// 	it := chunk_iterate_all_ground_tile_triangle(chunk, chunk_pos)
+	// 	for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
+	// 		side := index.side
+	// 		pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
+	//
+	// 		x := int(index.pos.x)
+	// 		z := int(index.pos.z)
+	// 		lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+	//
+	// 		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+	//
+	// 		for i in 0 ..< 3 {
+	// 			heights[i] += f32(index.pos.y * WALL_HEIGHT)
+	// 		}
+	//
+	// 		if terrain_tool_tile_cursor(tile_triangle^, side, heights, pos) {
+	// 			break
+	// 		}
+	// 	}
+	// }
+	// terrain_tool_cursor_pos = cursor_pos
+}
+
 terrain_tool_update :: proc() {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
@@ -406,36 +535,7 @@ terrain_tool_update :: proc() {
 	}
 
 	if cursor_pos != terrain_tool_cursor_pos {
-		chunks_it := world_iterate_visible_chunks()
-		for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-			it := chunk_iterate_all_ground_tile_triangle(chunk, chunk_pos)
-			for tile_triangle, index in chunk_tile_triangle_iterator_next(
-				&it,
-			) {
-				side := index.side
-				pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
-
-				x := int(index.pos.x)
-				z := int(index.pos.z)
-				lights := get_terrain_tile_triangle_lights(side, x, z, 1)
-
-				heights := get_terrain_tile_triangle_heights(side, x, z, 1)
-
-				for i in 0 ..< 3 {
-					heights[i] += f32(index.pos.y * WALL_HEIGHT)
-				}
-
-				if terrain_tool_tile_cursor(
-					   tile_triangle^,
-					   side,
-					   heights,
-					   pos,
-				   ) {
-					break
-				}
-			}
-		}
-		terrain_tool_cursor_pos = cursor_pos
+		terrain_tool_check_intersect()
 	}
 
 	position := terrain_tool_intersect
