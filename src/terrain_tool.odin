@@ -388,20 +388,22 @@ terrain_tool_check_intersect :: proc() {
 		next_chunk_z := i32(z / CHUNK_DEPTH)
 
 		if terrain_tool_check_intersect_chunk(chunk_x, chunk_z) {
-            fmt.println("found")
+			fmt.println("found")
 			break
 		}
 
-		if next_chunk_x > chunk_x &&
-		   terrain_tool_check_intersect_chunk(chunk_x + 1, chunk_z) {
-            fmt.println("found")
-			break
-		}
-
-		if next_chunk_z > chunk_z &&
-		   terrain_tool_check_intersect_chunk(chunk_x, chunk_z + 1) {
-            fmt.println("found")
-			break
+		if z < x {
+			if next_chunk_x > chunk_x &&
+			   terrain_tool_check_intersect_chunk(chunk_x + 1, chunk_z) {
+				fmt.println("found")
+				break
+			}
+		} else {
+			if next_chunk_z > chunk_z &&
+			   terrain_tool_check_intersect_chunk(chunk_x, chunk_z + 1) {
+				fmt.println("found")
+				break
+			}
 		}
 	}
 	terrain_tool_cursor_pos = cursor_pos
