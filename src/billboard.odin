@@ -790,9 +790,6 @@ chunk_billboards_draw :: proc(
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	}
 
-	// TODO move it to the world_draw_billboards()
-	// So that we draw all the billboards_1x1 and then draw all the billboards_2x2
-
 	gl.BindVertexArray(billboards.vao)
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,
@@ -802,9 +799,4 @@ chunk_billboards_draw :: proc(
 		i32(len(billboards.instances)),
 	)
 	gl.BindVertexArray(0)
-}
-
-chunk_draw_billboards :: proc(chunk: ^Chunk) {
-	chunk_billboards_draw(&chunk.billboards_1x1, billboard_1x1_draw_context)
-	chunk_billboards_draw(&chunk.billboards_2x2, billboard_2x2_draw_context)
 }
