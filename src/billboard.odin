@@ -18,20 +18,19 @@ BILLBOARD_TEXTURE_HEIGHT :: 256
 FOUR_TILES_BILLBOARD_TEXTURE_WIDTH :: 512
 FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT :: 1024
 
-Billboard_System :: struct {
+Billboard_Draw_Context :: struct {
 	indices:                 [6]u8,
 	vertices:                [4]Billboard_Vertex,
-	instances:               [dynamic]Billboard_Instance,
-	quadtree:                Quadtree(int),
-	uniform_object:          Billboard_Uniform_Object,
-	vbo, ebo, vao, ibo, ubo: u32,
-	shader_program:          u32,
+	vbo, ebo:                u32,
 	texture_array:           u32,
 	depth_map_texture_array: u32,
 }
 
-billboard_system: Billboard_System
-four_tiles_billboard_system: Billboard_System
+billboard_shader_program: u32
+billboard_uniform_object: Billboard_Uniform_Object
+billboard_ubo: u32
+billboard_1x1_draw_context: Billboard_Draw_Context
+billboard_2x2_draw_context: Billboard_Draw_Context
 
 Billboard_Instance :: struct {
 	position:  glsl.vec3,
@@ -41,19 +40,17 @@ Billboard_Instance :: struct {
 	rotation:  u8,
 }
 
-One_Tile_Billboard :: struct {
-	position:  glsl.vec3,
+Billboard_1x1 :: struct {
 	light:     glsl.vec3,
-	texture:   Billboard_Texture,
-	depth_map: Billboard_Texture,
+	texture:   Billboard_Texture_1x1,
+	depth_map: Billboard_Texture_1x1,
 	rotation:  u8,
 }
 
-Four_Tiles_Billboard :: struct {
-	position:  glsl.vec3,
+Billboard_2x2 :: struct {
 	light:     glsl.vec3,
-	texture:   Four_Tiles_Billboard_Texture,
-	depth_map: Four_Tiles_Billboard_Texture,
+	texture:   Billboard_Texture_2x2,
+	depth_map: Billboard_Texture_2x2,
 	rotation:  u8,
 }
 
@@ -67,7 +64,7 @@ Billboard_Uniform_Object :: struct {
 	camera_rotation:      u32,
 }
 
-Billboard_Texture :: enum u8 {
+Billboard_Texture_1x1 :: enum u8 {
 	// Chair_Wood_SW,
 	// Chair_Wood_SE,
 	// Chair_Wood_NE,
@@ -122,7 +119,7 @@ Billboard_Texture :: enum u8 {
 	Shovel_10_NW,
 }
 
-Four_Tiles_Billboard_Texture :: enum u8 {
+Billboard_Texture_2x2 :: enum u8 {
 	Table_Wood_SW,
 	Table_Wood_SE,
 	Table_Wood_NE,
@@ -133,7 +130,7 @@ Four_Tiles_Billboard_Texture :: enum u8 {
 	Table_8_Places_Wood_NW,
 }
 
-BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
+BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
 	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
 	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
@@ -188,7 +185,7 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 	.Shovel_10_NW   = "resources/textures/billboards/shovel/10-diffuse.png",
 }
 
-FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
+FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_2x2]cstring {
 	.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
 	.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
 	.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
@@ -199,7 +196,7 @@ FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Four_Tiles_Billboard_Texture]cstring {
 	.Table_8_Places_Wood_NW = "resources/textures/billboards/table-8places-wood/nw-diffuse.png",
 }
 
-BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
+BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
 	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
 	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
@@ -255,7 +252,7 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture]cstring {
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
-	[Four_Tiles_Billboard_Texture]cstring {
+	[Billboard_Texture_2x2]cstring {
 		.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
 		.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
 		.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
@@ -266,29 +263,8 @@ FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
 		.Table_8_Places_Wood_NW = "resources/textures/billboards/table-8places-wood/nw-depth-map.png",
 	}
 
-init_billboard_systems :: proc() -> (ok: bool = false) {
-	init_billboard_system(
-		&billboard_system,
-		BILLBOARD_MODEL_PATH,
-		BILLBOARD_TEXTURE_PATHS,
-		BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
-		BILLBOARD_TEXTURE_WIDTH,
-		BILLBOARD_TEXTURE_HEIGHT,
-	) or_return
-
-	init_billboard_system(
-		&four_tiles_billboard_system,
-		FOUR_TILES_BILLBOARD_MODEL_PATH,
-		FOUR_TILES_BILLBOARD_TEXTURE_PATHS,
-		FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
-		FOUR_TILES_BILLBOARD_TEXTURE_WIDTH,
-		FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT,
-	) or_return
-	return true
-}
-
-init_billboard_system :: proc(
-	billboard_system: ^Billboard_System,
+billboard_init_draw_context :: proc(
+	draw_context: ^Billboard_Draw_Context,
 	model_path: cstring,
 	texture_paths: [$T]cstring,
 	depth_map_texture_paths: [$D]cstring,
@@ -297,164 +273,70 @@ init_billboard_system :: proc(
 ) -> (
 	ok: bool = false,
 ) {
-	billboard_system.quadtree.size = WORLD_WIDTH
 	load_billboard_model(
 		model_path,
-		&billboard_system.vertices,
-		&billboard_system.indices,
+		&draw_context.vertices,
+		&draw_context.indices,
 	) or_return
-	fmt.println("billboard vertices:", billboard_system.vertices)
-	fmt.println("billboard indices:", billboard_system.indices)
+	fmt.println("billboard vertices:", draw_context.vertices)
+	fmt.println("billboard indices:", draw_context.indices)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
 
-	gl.GenBuffers(1, &billboard_system.ibo)
-
-	gl.GenVertexArrays(1, &billboard_system.vao)
-	gl.BindVertexArray(billboard_system.vao)
-
-	gl.GenBuffers(1, &billboard_system.vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.vbo)
+	gl.GenBuffers(1, &draw_context.vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, draw_context.vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
-		len(billboard_system.vertices) * size_of(Billboard_Vertex),
-		&billboard_system.vertices,
+		len(draw_context.vertices) * size_of(Billboard_Vertex),
+		&draw_context.vertices,
 		gl.STATIC_DRAW,
 	)
 
-	gl.GenBuffers(1, &billboard_system.ebo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, billboard_system.ebo)
+	gl.GenBuffers(1, &draw_context.ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, draw_context.ebo)
 	gl.BufferData(
 		gl.ELEMENT_ARRAY_BUFFER,
-		len(billboard_system.indices) * size_of(u8),
-		&billboard_system.indices,
+		len(draw_context.indices) * size_of(u8),
+		&draw_context.indices,
 		gl.STATIC_DRAW,
 	)
 
 
-	gl.GenBuffers(1, &billboard_system.ubo)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_system.ubo)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_system.ubo)
-
-	gl.GenTextures(1, &billboard_system.texture_array)
+	gl.GenTextures(1, &draw_context.texture_array)
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_system.texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, draw_context.texture_array)
 	load_billboard_texture_array(
 		texture_paths,
 		expected_texture_width,
 		expected_texture_height,
 	) or_return
 
-	gl.GenTextures(1, &billboard_system.depth_map_texture_array)
+	gl.GenTextures(1, &draw_context.depth_map_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_system.depth_map_texture_array,
-	)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, draw_context.depth_map_texture_array)
 	load_billboard_depth_map_texture_array(
 		depth_map_texture_paths,
 		expected_texture_width,
 		expected_texture_height,
 	) or_return
 
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointer(
-		0,
-		3,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Vertex),
-		offset_of(Billboard_Vertex, pos),
-	)
-
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointer(
-		1,
-		2,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Vertex),
-		offset_of(Billboard_Vertex, texcoords),
-	)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
-
-	gl.EnableVertexAttribArray(2)
-	gl.VertexAttribPointer(
-		2,
-		3,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Instance),
-		offset_of(Billboard_Instance, position),
-	)
-
-	gl.EnableVertexAttribArray(3)
-	gl.VertexAttribPointer(
-		3,
-		3,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Instance),
-		offset_of(Billboard_Instance, light),
-	)
-
-	gl.EnableVertexAttribArray(4)
-	gl.VertexAttribPointer(
-		4,
-		1,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Instance),
-		offset_of(Billboard_Instance, texture),
-	)
-
-	gl.EnableVertexAttribArray(5)
-	gl.VertexAttribPointer(
-		5,
-		1,
-		gl.FLOAT,
-		gl.FALSE,
-		size_of(Billboard_Instance),
-		offset_of(Billboard_Instance, depth_map),
-	)
-
-	gl.EnableVertexAttribArray(6)
-	gl.VertexAttribPointer(
-		6,
-		1,
-		gl.UNSIGNED_BYTE,
-		gl.FALSE,
-		size_of(Billboard_Instance),
-		offset_of(Billboard_Instance, rotation),
-	)
-
-	gl.VertexAttribDivisor(2, 1)
-	gl.VertexAttribDivisor(3, 1)
-	gl.VertexAttribDivisor(4, 1)
-	gl.VertexAttribDivisor(5, 1)
-	gl.VertexAttribDivisor(6, 1)
-
 	load_shader_program(
-		&billboard_system.shader_program,
+		&billboard_shader_program,
 		BILLBOARD_VERTEX_SHADER_PATH,
 		BILLBOARD_FRAGMENT_SHADER_PATH,
 	) or_return
 
 
 	gl.Uniform1i(
-		gl.GetUniformLocation(
-			billboard_system.shader_program,
-			"texture_sampler",
-		),
+		gl.GetUniformLocation(billboard_shader_program, "texture_sampler"),
 		0,
 	)
 	gl.Uniform1i(
 		gl.GetUniformLocation(
-			billboard_system.shader_program,
+			billboard_shader_program,
 			"depth_map_texture_sampler",
 		),
 		1,
@@ -467,211 +349,6 @@ init_billboard_system :: proc(
 	gl.UseProgram(0)
 
 	return true
-}
-
-get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
-	p1 :=
-		linalg.inverse(camera_vp) *
-		glsl.vec4{screen_point.x, screen_point.y, -1, 1}
-	p2 :=
-		linalg.inverse(camera_vp) *
-		glsl.vec4{screen_point.x, screen_point.y, 1, 1}
-	t := -p1.y / (p2.y - p1.y)
-	return glsl.vec2{p1.x + t * (p2.x - p1.x), p1.z + t * (p2.z - p1.z)}
-}
-
-get_camera_aabb :: proc() -> Rectangle {
-	bottom_left := get_view_corner({-1, -1})
-	top_left := get_view_corner({-1, 1})
-	bottom_right := get_view_corner({1, -1})
-	top_right := get_view_corner({1, 1})
-	camera := camera_position + camera_translate
-
-	aabb: Rectangle
-	switch camera_rotation {
-	case .South_West:
-		// camera.x = math.min(camera.x, bottom_left.x)
-		// camera.z = math.min(camera.z, bottom_right.y)
-		camera.x = bottom_left.x
-		camera.z = bottom_right.y
-		width := top_right.x - camera.x
-		height := top_left.y - camera.z
-
-		aabb = Rectangle {
-				x = i32(camera.x),
-				y = i32(camera.z),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
-	case .South_East:
-		camera.x = math.max(camera.x, bottom_right.x)
-		camera.z = math.min(camera.z, bottom_left.y)
-		width := camera.x - top_left.x
-		height := top_right.y - camera.z
-
-		aabb = Rectangle {
-				x = i32(top_left.x),
-				y = i32(camera.z),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
-	case .North_East:
-		camera.x = math.max(camera.x, bottom_left.x)
-		camera.z = math.max(camera.z, bottom_right.y)
-		width := camera.x - top_right.x
-		height := camera.z - top_left.y
-
-		aabb = Rectangle {
-				x = i32(top_right.x),
-				y = i32(top_left.y),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
-	case .North_West:
-		camera.x = math.min(camera.x, bottom_right.x)
-		camera.z = math.max(camera.z, bottom_left.y)
-		width := top_left.x - camera.x
-		height := camera.z - top_right.y
-
-		aabb = Rectangle {
-				x = i32(camera.x),
-				y = i32(top_right.y),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
-	}
-
-	return aabb
-}
-
-draw_billboard_system_instances :: proc(billboard_system: ^Billboard_System) {
-	if len(billboard_system.instances) == 0 do return
-
-	visible_instances := [dynamic]Billboard_Instance{}
-	defer delete(visible_instances)
-
-	aabb := get_camera_aabb()
-	indices := quadtree_search(&billboard_system.quadtree, aabb)
-	defer delete(indices)
-	for index in indices {
-		append(&visible_instances, billboard_system.instances[index])
-	}
-
-	// fmt.println("visible billboards:", len(visible_instances))
-	if len(visible_instances) == 0 do return
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, billboard_system.ibo)
-	gl.BufferData(
-		gl.ARRAY_BUFFER,
-		len(visible_instances) * size_of(Billboard_Instance),
-		raw_data(visible_instances),
-		gl.STATIC_DRAW,
-	)
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_system.texture_array)
-
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_system.depth_map_texture_array,
-	)
-
-	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_system.ubo)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_system.ubo)
-	billboard_system.uniform_object.view = camera_view
-	billboard_system.uniform_object.proj = camera_proj
-	billboard_system.uniform_object.rotation = glsl.mat4Rotate(
-		{0, 1, 0},
-		glsl.radians_f32(f32(camera_rotation) * -90.0),
-	)
-	billboard_system.uniform_object.camera_rotation = u32(camera_rotation)
-	gl.BufferData(
-		gl.UNIFORM_BUFFER,
-		size_of(Billboard_Uniform_Object),
-		&billboard_system.uniform_object,
-		gl.STATIC_DRAW,
-	)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-
-	gl.BindVertexArray(billboard_system.vao)
-	gl.DrawElementsInstanced(
-		gl.TRIANGLES,
-		i32(len(billboard_system.indices)),
-		gl.UNSIGNED_BYTE,
-		nil,
-		i32(len(visible_instances)),
-	)
-	gl.BindVertexArray(0)
-
-}
-
-draw_billboards :: proc() {
-	gl.UseProgram(billboard_system.shader_program)
-	draw_billboard_system_instances(&billboard_system)
-	draw_billboard_system_instances(&four_tiles_billboard_system)
-}
-
-append_billboard :: proc(using billboard: One_Tile_Billboard) -> int {
-	instance := Billboard_Instance {
-		position  = position,
-		light     = light,
-		texture   = f32(texture),
-		depth_map = f32(depth_map),
-		rotation  = rotation,
-	}
-
-	index := len(billboard_system.instances)
-	append(&billboard_system.instances, instance)
-	quadtree_append(
-		&billboard_system.quadtree,
-		{i32(position.x + 0.5), i32(position.z + 0.5)},
-		index,
-	)
-
-	return index
-}
-
-billboard_set_texture :: proc(index: int, texture: Billboard_Texture) {
-	billboard_system.instances[index].texture = f32(texture)
-}
-
-remove_billboard :: proc(index: int) {
-	position := billboard_system.instances[index].position
-	old := glsl.ivec2{i32(position.x + 0.5), i32(position.z + 0.5)}
-	quadtree_remove(&billboard_system.quadtree, old, index)
-}
-
-move_billboard :: proc(index: int, to: glsl.vec3) {
-	position := billboard_system.instances[index].position
-	billboard_system.instances[index].position = to
-
-	old := glsl.ivec2{i32(position.x + 0.5), i32(position.z + 0.5)}
-	new := glsl.ivec2{i32(to.x + 0.5), i32(to.z + 0.5)}
-
-	if old != new {
-		quadtree_remove(&billboard_system.quadtree, old, index)
-		quadtree_append(&billboard_system.quadtree, new, index)
-	}
-}
-
-append_four_tiles_billboard :: proc(using billboard: Four_Tiles_Billboard) {
-	instance := Billboard_Instance {
-		position  = position,
-		light     = light,
-		texture   = f32(texture),
-		depth_map = f32(depth_map),
-		rotation  = rotation,
-	}
-	index := len(four_tiles_billboard_system.instances)
-	append(&four_tiles_billboard_system.instances, instance)
-	quadtree_append(
-		&four_tiles_billboard_system.quadtree,
-		{i32(position.x + 0.5), i32(position.z + 0.5)},
-		index,
-	)
 }
 
 load_billboard_model :: proc(
@@ -916,4 +593,218 @@ load_billboard_texture_array :: proc(
 	}
 
 	return
+}
+
+billboard_init_draw_contexts :: proc() -> bool {
+	gl.GenBuffers(1, &billboard_ubo)
+
+	billboard_init_draw_context(
+		&billboard_1x1_draw_context,
+		BILLBOARD_MODEL_PATH,
+		BILLBOARD_TEXTURE_PATHS,
+		BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
+		BILLBOARD_TEXTURE_WIDTH,
+		BILLBOARD_TEXTURE_HEIGHT,
+	) or_return
+
+	billboard_init_draw_context(
+		&billboard_2x2_draw_context,
+		FOUR_TILES_BILLBOARD_MODEL_PATH,
+		FOUR_TILES_BILLBOARD_TEXTURE_PATHS,
+		FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS,
+		FOUR_TILES_BILLBOARD_TEXTURE_WIDTH,
+		FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT,
+	) or_return
+
+	return true
+}
+
+billboard_1x1_set_texture :: proc(
+	pos: glsl.vec3,
+	texture: Billboard_Texture_1x1,
+) {
+	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
+	billboard, ok := &chunk.billboards_1x1.instances[pos]
+	if ok {
+		billboard.texture = texture
+	    chunk.billboards_1x1.dirty = true
+	}
+}
+
+billboard_1x1_remove :: proc(pos: glsl.vec3) {
+	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
+	delete_key(&chunk.billboards_1x1.instances, pos)
+	chunk.billboards_1x1.dirty = true
+}
+
+billboard_1x1_move :: proc(from: glsl.vec3, to: glsl.vec3) {
+	if from == to {
+		return
+	}
+	from_chunk := world_get_chunk({i32(from.x), i32(from.z)})
+	to_chunk := world_get_chunk({i32(to.x), i32(to.z)})
+	billboard, ok := from_chunk.billboards_1x1.instances[from]
+	if ok {
+		to_chunk.billboards_1x1.instances[to] = billboard
+		delete_key(&from_chunk.billboards_1x1.instances, from)
+		to_chunk.billboards_1x1.dirty = true
+		from_chunk.billboards_1x1.dirty = true
+	}
+}
+
+billboard_1x1_set :: proc(pos: glsl.vec3, billboard: Billboard_1x1) {
+	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
+	chunk.billboards_1x1.instances[pos] = billboard
+	chunk.billboards_1x1.dirty = true
+}
+
+chunk_billboards_draw :: proc(
+	billboards: ^Chunk_Billboards($T),
+	billboard_draw_context: Billboard_Draw_Context,
+) {
+	if !billboards.initialized {
+		billboards.initialized = true
+		billboards.dirty = true
+
+		gl.GenVertexArrays(1, &billboards.vao)
+		gl.BindVertexArray(billboards.vao)
+
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, billboard_draw_context.ebo)
+
+		gl.GenBuffers(1, &billboards.ibo)
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, billboard_draw_context.vbo)
+
+		gl.EnableVertexAttribArray(0)
+		gl.VertexAttribPointer(
+			0,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Vertex),
+			offset_of(Billboard_Vertex, pos),
+		)
+
+		gl.EnableVertexAttribArray(1)
+		gl.VertexAttribPointer(
+			1,
+			2,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Vertex),
+			offset_of(Billboard_Vertex, texcoords),
+		)
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, billboards.ibo)
+
+		gl.EnableVertexAttribArray(2)
+		gl.VertexAttribPointer(
+			2,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Instance),
+			offset_of(Billboard_Instance, position),
+		)
+
+		gl.EnableVertexAttribArray(3)
+		gl.VertexAttribPointer(
+			3,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Instance),
+			offset_of(Billboard_Instance, light),
+		)
+
+		gl.EnableVertexAttribArray(4)
+		gl.VertexAttribPointer(
+			4,
+			1,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Instance),
+			offset_of(Billboard_Instance, texture),
+		)
+
+		gl.EnableVertexAttribArray(5)
+		gl.VertexAttribPointer(
+			5,
+			1,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Billboard_Instance),
+			offset_of(Billboard_Instance, depth_map),
+		)
+
+		gl.EnableVertexAttribArray(6)
+		gl.VertexAttribPointer(
+			6,
+			1,
+			gl.UNSIGNED_BYTE,
+			gl.FALSE,
+			size_of(Billboard_Instance),
+			offset_of(Billboard_Instance, rotation),
+		)
+
+		gl.VertexAttribDivisor(2, 1)
+		gl.VertexAttribDivisor(3, 1)
+		gl.VertexAttribDivisor(4, 1)
+		gl.VertexAttribDivisor(5, 1)
+		gl.VertexAttribDivisor(6, 1)
+
+		gl.BindVertexArray(0)
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	}
+
+	if billboards.dirty {
+		billboards.dirty = false
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, billboards.ibo)
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(billboards.instances) * size_of(Billboard_Instance),
+			nil,
+			gl.STATIC_DRAW,
+		)
+
+		i := 0
+		for k, v in billboards.instances {
+			instance: Billboard_Instance = {
+				position  = k,
+				light     = v.light,
+				texture   = f32(v.texture),
+				depth_map = f32(v.depth_map),
+				rotation  = v.rotation,
+			}
+			gl.BufferSubData(
+				gl.ARRAY_BUFFER,
+				i * size_of(Billboard_Instance),
+				size_of(Billboard_Instance),
+				&instance,
+			)
+			i += 1
+		}
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	}
+
+	// TODO move it to the world_draw_billboards()
+	// So that we draw all the billboards_1x1 and then draw all the billboards_2x2
+
+	gl.BindVertexArray(billboards.vao)
+	gl.DrawElementsInstanced(
+		gl.TRIANGLES,
+		i32(len(billboard_draw_context.indices)),
+		gl.UNSIGNED_BYTE,
+		nil,
+		i32(len(billboards.instances)),
+	)
+	gl.BindVertexArray(0)
+}
+
+chunk_draw_billboards :: proc(chunk: ^Chunk) {
+	chunk_billboards_draw(&chunk.billboards_1x1, billboard_1x1_draw_context)
+	chunk_billboards_draw(&chunk.billboards_2x2, billboard_2x2_draw_context)
 }

@@ -60,7 +60,7 @@ start :: proc() -> (ok: bool = false) {
     mouse_init()
 	init_cursor()
 
-	init_billboard_systems() or_return
+	billboard_init_draw_contexts() or_return
 	init_terrain()
 	init_world()
 
@@ -98,7 +98,6 @@ start :: proc() -> (ok: bool = false) {
 
 		draw_world()
 
-		draw_billboards()
         gui_draw()
 
 		end_draw()

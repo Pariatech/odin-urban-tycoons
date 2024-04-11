@@ -7,13 +7,13 @@ import "core:math/rand"
 import "vendor:glfw"
 
 terrain_tool_cursor_pos: glsl.vec3
-terrain_tool_billboard: int
+terrain_tool_billboard: glsl.vec3
+terrain_tool_drag_start_billboard: glsl.vec3
 terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
 terrain_tool_drag_end: Maybe(glsl.ivec2)
-terrain_tool_drag_start_billboard: int
 terrain_tool_drag_clip: bool
 terrain_tool_brush_size: i32 = 1
 terrain_tool_brush_strength: f32 = 0.1
@@ -28,9 +28,9 @@ TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 terrain_tool_init :: proc() {
-	terrain_tool_billboard = append_billboard(
+	billboard_1x1_set(
+		{0.0, 0.0, 0.0},
 		 {
-			position = {0.0, 0.0, 0.0},
 			light = {1, 1, 1},
 			texture = .Shovel_1_SW,
 			depth_map = .Shovel_1_SW,
@@ -111,7 +111,7 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 				}
 			}
 			terrain_tool_drag_start = nil
-			remove_billboard(terrain_tool_drag_start_billboard)
+			billboard_1x1_remove(terrain_tool_drag_start_billboard)
 
 		} else if terrain_tool_drag_end != terrain_tool_position {
 			terrain_tool_drag_end = terrain_tool_position
@@ -121,9 +121,10 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 	} else if mouse_is_button_down(.Left) || mouse_is_button_down(.Right) {
 		terrain_tool_drag_clip = mouse_is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
-		terrain_tool_drag_start_billboard = append_billboard(
+		terrain_tool_drag_start_billboard = position
+		billboard_1x1_set(
+			terrain_tool_drag_start_billboard,
 			 {
-				position = position,
 				light = {1, 1, 1},
 				texture = .Shovel_1_SW,
 				depth_map = .Shovel_1_SW,
@@ -342,7 +343,7 @@ terrain_tool_check_intersect :: proc() {
 	if cursor_ray.origin.z < cursor_ray.origin.x {
 		z = clamp(
 			math.ceil(cursor_ray.origin.z),
-            0,
+			0,
 			f32(world_visible_chunks_start.y * CHUNK_DEPTH),
 		)
 		t := (z - cursor_ray.origin.z) / cursor_ray.direction.z
@@ -350,7 +351,7 @@ terrain_tool_check_intersect :: proc() {
 	} else {
 		x = clamp(
 			math.ceil(cursor_ray.origin.x),
-            0,
+			0,
 			f32(world_visible_chunks_start.x * CHUNK_WIDTH),
 		)
 		t := (x - cursor_ray.origin.x) / cursor_ray.direction.x
@@ -368,13 +369,11 @@ terrain_tool_check_intersect :: proc() {
 		}
 
 		if z < x {
-			if next_x > x &&
-			   terrain_tool_check_intersect_tile(x + 1, z) {
+			if next_x > x && terrain_tool_check_intersect_tile(x + 1, z) {
 				break
 			}
 		} else {
-			if next_z > z &&
-			   terrain_tool_check_intersect_tile(x, z + 1) {
+			if next_z > z && terrain_tool_check_intersect_tile(x, z + 1) {
 				break
 			}
 		}
@@ -423,9 +422,11 @@ terrain_tool_update :: proc() {
 			)
 
 			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard_set_texture(
+			billboard_1x1_set_texture(
 				terrain_tool_billboard,
-				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
+				Billboard_Texture_1x1(
+					int(Billboard_Texture_1x1.Shovel_1_SW) + t * 4,
+				),
 			)
 		} else {
 			terrain_tool_brush_size += 1
@@ -450,9 +451,11 @@ terrain_tool_update :: proc() {
 			)
 
 			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard_set_texture(
+			billboard_1x1_set_texture(
 				terrain_tool_billboard,
-				Billboard_Texture(int(Billboard_Texture.Shovel_1_SW) + t * 4),
+				Billboard_Texture_1x1(
+					int(Billboard_Texture_1x1.Shovel_1_SW) + t * 4,
+				),
 			)
 		} else {
 			terrain_tool_brush_size -= 1
@@ -470,10 +473,10 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-    cursor_moved := cursor_ray.origin != terrain_tool_cursor_pos
+	cursor_moved := cursor_ray.origin != terrain_tool_cursor_pos
 	if cursor_moved {
 		terrain_tool_check_intersect()
-	    terrain_tool_cursor_pos = cursor_ray.origin
+		terrain_tool_cursor_pos = cursor_ray.origin
 	}
 
 	position := terrain_tool_intersect
@@ -508,7 +511,8 @@ terrain_tool_update :: proc() {
 
 	position.y =
 		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-	move_billboard(terrain_tool_billboard, position)
+	billboard_1x1_move(terrain_tool_billboard, position)
+	terrain_tool_billboard = position
 	shift_down := is_key_down(.Key_Left_Shift)
 
 	if shift_down || terrain_tool_drag_start != nil {

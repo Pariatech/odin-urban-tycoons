@@ -29,9 +29,18 @@ Chunk_Walls :: struct {
 	num_indices:           i32,
 }
 
+Chunk_Billboards :: struct($T: typeid) {
+	instances:   map[glsl.vec3]T,
+	vao, ibo:    u32,
+	dirty:       bool,
+	initialized: bool,
+}
+
 Chunk :: struct {
-	tiles: Chunk_Tiles,
-	walls: Chunk_Walls,
+	tiles:          Chunk_Tiles,
+	walls:          Chunk_Walls,
+	billboards_1x1: Chunk_Billboards(Billboard_1x1),
+	billboards_2x2: Chunk_Billboards(Billboard_2x2),
 }
 
 Chunk_Iterator :: struct {
@@ -227,13 +236,23 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			draw_wall(wall, .North_South, &vertices, &indices)
 		}
 
-        for wall in chunk.walls.south_west_north_east {
-            draw_diagonal_wall(wall, .South_West_North_East, &vertices, &indices)
-        }
+		for wall in chunk.walls.south_west_north_east {
+			draw_diagonal_wall(
+				wall,
+				.South_West_North_East,
+				&vertices,
+				&indices,
+			)
+		}
 
-        for wall in chunk.walls.north_west_south_east {
-            draw_diagonal_wall(wall, .North_West_South_East, &vertices, &indices)
-        }
+		for wall in chunk.walls.north_west_south_east {
+			draw_diagonal_wall(
+				wall,
+				.North_West_South_East,
+				&vertices,
+				&indices,
+			)
+		}
 
 		gl.BufferData(
 			gl.ARRAY_BUFFER,

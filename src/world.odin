@@ -121,6 +121,58 @@ world_draw_tiles :: proc() {
 	}
 }
 
+world_draw_billboards :: proc() {
+	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
+
+	billboard_uniform_object.view = camera_view
+	billboard_uniform_object.proj = camera_proj
+	billboard_uniform_object.rotation = glsl.mat4Rotate(
+		{0, 1, 0},
+		glsl.radians_f32(f32(camera_rotation) * -90.0),
+	)
+	billboard_uniform_object.camera_rotation = u32(camera_rotation)
+
+	gl.BufferData(
+		gl.UNIFORM_BUFFER,
+		size_of(Billboard_Uniform_Object),
+		&billboard_uniform_object,
+		gl.STATIC_DRAW,
+	)
+
+	gl.UseProgram(billboard_shader_program)
+    
+	chunks_it := world_iterate_visible_chunks()
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_1x1_draw_context.texture_array)
+
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_1x1_draw_context.depth_map_texture_array,
+	)
+
+    billboards_1x1_it := chunks_it
+	for chunk in chunk_iterator_next(&billboards_1x1_it) {
+	    chunk_billboards_draw(&chunk.billboards_1x1, billboard_1x1_draw_context)
+	}
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, billboard_2x2_draw_context.texture_array)
+
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_2x2_draw_context.depth_map_texture_array,
+	)
+
+    billboards_2x2_it := chunks_it
+	for chunk in chunk_iterator_next(&billboards_2x2_it) {
+	    chunk_billboards_draw(&chunk.billboards_2x2, billboard_1x1_draw_context)
+	}
+}
+
 world_update :: proc() {
 	aabb := get_camera_aabb()
 	world_previously_visible_chunks_start = world_visible_chunks_start
@@ -333,22 +385,18 @@ add_house_floor_walls :: proc(
 		},
 	)
 	if floor > 0 {
-		append_billboard(
+		billboard_1x1_set(
+			{f32(house_x + 1), f32(floor * WALL_HEIGHT), f32(house_z + 5)},
 			 {
-				position =  {
-					f32(house_x + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 5),
-				},
 				light = {1, 1, 1},
 				texture = .Window_Wood_SE,
 				depth_map = .Window_Wood_SE,
 			},
 		)
 	} else {
-		append_billboard(
+		billboard_1x1_set(
+			{f32(house_x + 1), f32(floor), f32(house_z + 5)},
 			 {
-				position = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
 				light = {1, 1, 1},
 				texture = .Door_Wood_SE,
 				depth_map = .Door_Wood_SE,
@@ -388,13 +436,13 @@ add_house_floor_walls :: proc(
 				mask = .Window_Opening,
 			},
 		)
-		append_billboard(
+		billboard_1x1_set(
 			 {
-				position =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
-				},
+				f32(house_x),
+				f32(floor * WALL_HEIGHT),
+				f32(house_z + i32(i) + 8),
+			},
+			 {
 				light = {1, 1, 1},
 				texture = .Window_Wood_SE,
 				depth_map = .Window_Wood_SE,
@@ -436,13 +484,13 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		append_billboard(
+		billboard_1x1_set(
 			 {
-				position =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z),
-				},
+				f32(house_x + i32(i) + 1),
+				f32(floor * WALL_HEIGHT),
+				f32(house_z),
+			},
+			 {
 				light = {1, 1, 1},
 				texture = .Window_Wood_SW,
 				depth_map = .Window_Wood_SW,
@@ -484,13 +532,13 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		append_billboard(
+		billboard_1x1_set(
 			 {
-				position =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 11),
-				},
+				f32(house_x + i32(i) + 1),
+				f32(floor * WALL_HEIGHT),
+				f32(house_z + 11),
+			},
+			 {
 				light = {1, 1, 1},
 				texture = .Window_Wood_SW,
 				depth_map = .Window_Wood_SW,
@@ -591,4 +639,5 @@ draw_world :: proc() {
 	// draw_diagonal_walls()
 
 	world_draw_tiles()
+    world_draw_billboards()
 }
