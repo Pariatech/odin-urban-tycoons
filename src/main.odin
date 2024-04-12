@@ -94,7 +94,8 @@ start :: proc() -> (ok: bool = false) {
 		begin_draw()
 		update_camera(delta_time)
         world_update()
-		terrain_tool_update()
+
+        tools_controller_update()
 
 		draw_world()
 

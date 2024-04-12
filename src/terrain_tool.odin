@@ -37,6 +37,9 @@ terrain_tool_init :: proc() {
 			rotation = 0,
 		},
 	)
+
+	terrain_tool_drag_start = nil
+	terrain_tool_drag_end = nil
 }
 
 terrain_tool_tile_cursor :: proc(
@@ -113,6 +116,16 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 			terrain_tool_drag_start = nil
 			billboard_1x1_remove(terrain_tool_drag_start_billboard)
 
+			terrain_tool_mark_array_dirty(
+				 {
+					start_x - terrain_tool_brush_size,
+					start_z - terrain_tool_brush_size,
+				},
+				 {
+					end_x + terrain_tool_brush_size,
+					end_z + terrain_tool_brush_size,
+				},
+			)
 		} else if terrain_tool_drag_end != terrain_tool_position {
 			terrain_tool_drag_end = terrain_tool_position
 		}
@@ -340,7 +353,15 @@ terrain_tool_check_intersect_tile :: proc(x, z: f32) -> bool {
 
 terrain_tool_check_intersect :: proc() {
 	x, z: f32
-	if cursor_ray.origin.z < cursor_ray.origin.x {
+	fmt.println("x:", cursor_ray.origin.x, "z:", cursor_ray.origin.z)
+	if cursor_ray.origin.z == cursor_ray.origin.x {
+		z = clamp(
+			math.ceil(cursor_ray.origin.z),
+			0,
+			f32(world_visible_chunks_start.y * CHUNK_DEPTH),
+		)
+		x = z
+	} else if cursor_ray.origin.z < cursor_ray.origin.x {
 		z = clamp(
 			math.ceil(cursor_ray.origin.z),
 			0,
@@ -381,6 +402,23 @@ terrain_tool_check_intersect :: proc() {
 		z += 1
 		x += 1
 	}
+}
+
+terrain_tool_deinit :: proc() {
+	if drag_start, ok := terrain_tool_drag_start.?; ok {
+		start_x := min(drag_start.x, terrain_tool_position.x)
+		start_z := min(drag_start.y, terrain_tool_position.y)
+		end_x := max(drag_start.x, terrain_tool_position.x)
+		end_z := max(drag_start.y, terrain_tool_position.y)
+
+		for x in start_x ..< end_x {
+			for z in start_z ..< end_z {
+				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+			}
+		}
+		billboard_1x1_remove(terrain_tool_drag_start_billboard)
+	}
+	billboard_1x1_remove(terrain_tool_billboard)
 }
 
 terrain_tool_update :: proc() {
@@ -463,12 +501,12 @@ terrain_tool_update :: proc() {
 		}
 		terrain_tool_mark_array_dirty(
 			 {
-				terrain_tool_position.x - terrain_tool_brush_size,
-				terrain_tool_position.y - terrain_tool_brush_size,
+				terrain_tool_position.x - terrain_tool_brush_size - 1,
+				terrain_tool_position.y - terrain_tool_brush_size - 1,
 			},
 			 {
-				terrain_tool_position.x + terrain_tool_brush_size,
-				terrain_tool_position.y + terrain_tool_brush_size,
+				terrain_tool_position.x + terrain_tool_brush_size + 1,
+				terrain_tool_position.y + terrain_tool_brush_size + 1,
 			},
 		)
 	}
