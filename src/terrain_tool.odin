@@ -28,8 +28,17 @@ TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 terrain_tool_init :: proc() {
+	terrain_tool_check_intersect()
+	terrain_tool_cursor_pos = cursor_ray.origin
+
+	position := terrain_tool_intersect
+	position.x = math.ceil(position.x) - 0.5
+	position.z = math.ceil(position.z) - 0.5
+	position.y =
+		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+
 	billboard_1x1_set(
-		{0.0, 0.0, 0.0},
+		position,
 		 {
 			light = {1, 1, 1},
 			texture = .Shovel_1_SW,
@@ -38,6 +47,7 @@ terrain_tool_init :: proc() {
 		},
 	)
 
+	terrain_tool_billboard = position
 	terrain_tool_drag_start = nil
 	terrain_tool_drag_end = nil
 }
@@ -417,8 +427,43 @@ terrain_tool_deinit :: proc() {
 			}
 		}
 		billboard_1x1_remove(terrain_tool_drag_start_billboard)
+
+		terrain_tool_mark_array_dirty(
+			 {
+				start_x - terrain_tool_brush_size,
+				start_z - terrain_tool_brush_size,
+			},
+			{end_x + terrain_tool_brush_size, end_z + terrain_tool_brush_size},
+		)
+	} else {
+		start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
+		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
+		end_x := min(
+			terrain_tool_position.x + terrain_tool_brush_size,
+			WORLD_WIDTH,
+		)
+		end_z := min(
+			terrain_tool_position.y + terrain_tool_brush_size,
+			WORLD_DEPTH,
+		)
+		for x in start_x ..< end_x {
+			for z in start_z ..< end_z {
+				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+			}
+		}
+		terrain_tool_mark_array_dirty(
+			 {
+				terrain_tool_position.x - terrain_tool_brush_size,
+				terrain_tool_position.y - terrain_tool_brush_size,
+			},
+			 {
+				terrain_tool_position.x + terrain_tool_brush_size,
+				terrain_tool_position.y + terrain_tool_brush_size,
+			},
+		)
 	}
 	billboard_1x1_remove(terrain_tool_billboard)
+
 }
 
 terrain_tool_update :: proc() {
