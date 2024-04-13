@@ -85,6 +85,48 @@ Billboard_Texture_1x1 :: enum u8 {
 	Shovel_10_SW,
 }
 
+BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 :: [Billboard_Texture_1x1]Billboard_Texture_1x1 {
+	.Door_Wood_SW   = .Door_Wood_SE,
+	.Door_Wood_SE   = .Door_Wood_NE,
+	.Door_Wood_NE   = .Door_Wood_NW,
+	.Door_Wood_NW   = .Door_Wood_SW,
+	.Window_Wood_SW = .Window_Wood_SE,
+	.Window_Wood_SE = .Window_Wood_NE,
+	.Window_Wood_NE = .Window_Wood_NW,
+	.Window_Wood_NW = .Window_Wood_SW,
+	.Shovel_1_SW    = .Shovel_1_SW,
+	.Shovel_2_SW    = .Shovel_2_SW,
+	.Shovel_3_SW    = .Shovel_3_SW,
+	.Shovel_4_SW    = .Shovel_4_SW,
+	.Shovel_5_SW    = .Shovel_5_SW,
+	.Shovel_6_SW    = .Shovel_6_SW,
+	.Shovel_7_SW    = .Shovel_7_SW,
+	.Shovel_8_SW    = .Shovel_8_SW,
+	.Shovel_9_SW    = .Shovel_9_SW,
+	.Shovel_10_SW   = .Shovel_10_SW,
+}
+
+BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 :: [Billboard_Texture_1x1]Billboard_Texture_1x1 {
+	.Door_Wood_SW   = .Door_Wood_NW,
+	.Door_Wood_SE   = .Door_Wood_SW,
+	.Door_Wood_NE   = .Door_Wood_SE,
+	.Door_Wood_NW   = .Door_Wood_NE,
+	.Window_Wood_SW = .Window_Wood_NW,
+	.Window_Wood_SE = .Window_Wood_SW,
+	.Window_Wood_NE = .Window_Wood_SE,
+	.Window_Wood_NW = .Window_Wood_NE,
+	.Shovel_1_SW    = .Shovel_1_SW,
+	.Shovel_2_SW    = .Shovel_2_SW,
+	.Shovel_3_SW    = .Shovel_3_SW,
+	.Shovel_4_SW    = .Shovel_4_SW,
+	.Shovel_5_SW    = .Shovel_5_SW,
+	.Shovel_6_SW    = .Shovel_6_SW,
+	.Shovel_7_SW    = .Shovel_7_SW,
+	.Shovel_8_SW    = .Shovel_8_SW,
+	.Shovel_9_SW    = .Shovel_9_SW,
+	.Shovel_10_SW   = .Shovel_10_SW,
+}
+
 Billboard_Texture_2x2 :: enum u8 {
 	Table_Wood_SW,
 	Table_Wood_SE,
@@ -94,6 +136,28 @@ Billboard_Texture_2x2 :: enum u8 {
 	Table_8_Places_Wood_SE,
 	Table_8_Places_Wood_NE,
 	Table_8_Places_Wood_NW,
+}
+
+BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2 :: [Billboard_Texture_2x2]Billboard_Texture_2x2 {
+	.Table_Wood_SW          = .Table_Wood_SE,
+	.Table_Wood_SE          = .Table_Wood_NE,
+	.Table_Wood_NE          = .Table_Wood_NW,
+	.Table_Wood_NW          = .Table_Wood_SW,
+	.Table_8_Places_Wood_SW = .Table_8_Places_Wood_SE,
+	.Table_8_Places_Wood_SE = .Table_8_Places_Wood_NE,
+	.Table_8_Places_Wood_NE = .Table_8_Places_Wood_NW,
+	.Table_8_Places_Wood_NW = .Table_8_Places_Wood_SW,
+}
+
+BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2 :: [Billboard_Texture_2x2]Billboard_Texture_2x2 {
+	.Table_Wood_SW          = .Table_Wood_NW,
+	.Table_Wood_SE          = .Table_Wood_SW,
+	.Table_Wood_NE          = .Table_Wood_SE,
+	.Table_Wood_NW          = .Table_Wood_NE,
+	.Table_8_Places_Wood_SW = .Table_8_Places_Wood_NW,
+	.Table_8_Places_Wood_SE = .Table_8_Places_Wood_SW,
+	.Table_8_Places_Wood_NE = .Table_8_Places_Wood_SE,
+	.Table_8_Places_Wood_NW = .Table_8_Places_Wood_NE,
 }
 
 BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
@@ -699,7 +763,10 @@ billboard_update_draw_context_after_rotation :: proc(draw_context: $T) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, draw_context.vbo)
 	for v, i in draw_context.vertices {
 		v := v
-		rotation := glsl.mat4Rotate({0, 1, 0}, (math.PI / 2) * f32(camera_rotation))
+		rotation := glsl.mat4Rotate(
+			{0, 1, 0},
+			(math.PI / 2) * f32(camera_rotation),
+		)
 		v.pos = (glsl.vec4{v.pos.x, v.pos.y, v.pos.z, 1} * rotation).xyz
 		gl.BufferSubData(
 			gl.ARRAY_BUFFER,

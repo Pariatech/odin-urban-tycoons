@@ -636,3 +636,57 @@ draw_world :: proc() {
 	world_draw_tiles()
     world_draw_billboards()
 }
+
+world_update_after_clockwise_rotation :: proc() {
+    for row in &world_chunks {
+        for chunk in &row {
+            chunk_billboards_update_after_clockwise_rotation_1x1(&chunk.billboards_1x1)
+            chunk_billboards_update_after_clockwise_rotation_2x2(&chunk.billboards_2x2)
+        }
+    }
+}
+
+chunk_billboards_update_after_clockwise_rotation_1x1 :: proc(billboards: ^Chunk_Billboards(Billboard_1x1)) {
+    rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1
+    for _, billboard in &billboards.instances {
+        billboard.texture = rotation_table[billboard.texture];
+        billboard.depth_map = rotation_table[billboard.depth_map];
+    }
+    billboards.dirty = true
+}
+
+chunk_billboards_update_after_clockwise_rotation_2x2 :: proc(billboards: ^Chunk_Billboards(Billboard_2x2)) {
+    rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2
+    for _, billboard in &billboards.instances {
+        billboard.texture = rotation_table[billboard.texture];
+        billboard.depth_map = rotation_table[billboard.depth_map];
+    }
+    billboards.dirty = true
+}
+
+world_update_after_counter_clockwise_rotation :: proc() {
+    for row in &world_chunks {
+        for chunk in &row {
+            chunk_billboards_update_after_counter_clockwise_rotation_1x1(&chunk.billboards_1x1)
+            chunk_billboards_update_after_counter_clockwise_rotation_2x2(&chunk.billboards_2x2)
+        }
+    }
+}
+
+chunk_billboards_update_after_counter_clockwise_rotation_1x1 :: proc(billboards: ^Chunk_Billboards(Billboard_1x1)) {
+    rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1
+    for _, billboard in &billboards.instances {
+        billboard.texture = rotation_table[billboard.texture];
+        billboard.depth_map = rotation_table[billboard.depth_map];
+    }
+    billboards.dirty = true
+}
+
+chunk_billboards_update_after_counter_clockwise_rotation_2x2 :: proc(billboards: ^Chunk_Billboards(Billboard_2x2)) {
+    rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2
+    for _, billboard in &billboards.instances {
+        billboard.texture = rotation_table[billboard.texture];
+        billboard.depth_map = rotation_table[billboard.depth_map];
+    }
+    billboards.dirty = true
+}
