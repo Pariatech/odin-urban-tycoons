@@ -22,7 +22,7 @@ TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_LOW :: 0
 TERRAIN_TOOL_HIGH :: 6
 TERRAIN_TOOL_BRUSH_MIN_STRENGTH :: 0.1
-TERRAIN_TOOL_BRUSH_MAX_STRENGTH :: 1.0
+TERRAIN_TOOL_BRUSH_MAX_STRENGTH :: 1.1
 TERRAIN_TOOL_MIN_SLOPE :: 0.1
 TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
@@ -43,7 +43,6 @@ terrain_tool_init :: proc() {
 			light = {1, 1, 1},
 			texture = .Shovel_1_SW,
 			depth_map = .Shovel_1_SW,
-			rotation = 0,
 		},
 	)
 
@@ -151,7 +150,6 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 				light = {1, 1, 1},
 				texture = .Shovel_1_SW,
 				depth_map = .Shovel_1_SW,
-				rotation = 0,
 			},
 		)
 	}
@@ -508,7 +506,7 @@ terrain_tool_update :: proc() {
 			billboard_1x1_set_texture(
 				terrain_tool_billboard,
 				Billboard_Texture_1x1(
-					int(Billboard_Texture_1x1.Shovel_1_SW) + t * 4,
+					int(Billboard_Texture_1x1.Shovel_1_SW) + t,
 				),
 			)
 		} else {
@@ -537,7 +535,7 @@ terrain_tool_update :: proc() {
 			billboard_1x1_set_texture(
 				terrain_tool_billboard,
 				Billboard_Texture_1x1(
-					int(Billboard_Texture_1x1.Shovel_1_SW) + t * 4,
+					int(Billboard_Texture_1x1.Shovel_1_SW) + t,
 				),
 			)
 		} else {

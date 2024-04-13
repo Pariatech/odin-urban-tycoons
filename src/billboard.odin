@@ -37,21 +37,18 @@ Billboard_Instance :: struct {
 	light:     glsl.vec3,
 	texture:   f32,
 	depth_map: f32,
-	rotation:  u8,
 }
 
 Billboard_1x1 :: struct {
 	light:     glsl.vec3,
 	texture:   Billboard_Texture_1x1,
 	depth_map: Billboard_Texture_1x1,
-	rotation:  u8,
 }
 
 Billboard_2x2 :: struct {
 	light:     glsl.vec3,
 	texture:   Billboard_Texture_2x2,
 	depth_map: Billboard_Texture_2x2,
-	rotation:  u8,
 }
 
 Billboard_Vertex :: struct {
@@ -60,8 +57,7 @@ Billboard_Vertex :: struct {
 }
 
 Billboard_Uniform_Object :: struct {
-	proj, view, rotation: glsl.mat4,
-	camera_rotation:      u32,
+	proj, view: glsl.mat4,
 }
 
 Billboard_Texture_1x1 :: enum u8 {
@@ -78,45 +74,15 @@ Billboard_Texture_1x1 :: enum u8 {
 	Window_Wood_NE,
 	Window_Wood_NW,
 	Shovel_1_SW,
-	Shovel_1_SE,
-	Shovel_1_NE,
-	Shovel_1_NW,
 	Shovel_2_SW,
-	Shovel_2_SE,
-	Shovel_2_NE,
-	Shovel_2_NW,
 	Shovel_3_SW,
-	Shovel_3_SE,
-	Shovel_3_NE,
-	Shovel_3_NW,
 	Shovel_4_SW,
-	Shovel_4_SE,
-	Shovel_4_NE,
-	Shovel_4_NW,
 	Shovel_5_SW,
-	Shovel_5_SE,
-	Shovel_5_NE,
-	Shovel_5_NW,
 	Shovel_6_SW,
-	Shovel_6_SE,
-	Shovel_6_NE,
-	Shovel_6_NW,
 	Shovel_7_SW,
-	Shovel_7_SE,
-	Shovel_7_NE,
-	Shovel_7_NW,
 	Shovel_8_SW,
-	Shovel_8_SE,
-	Shovel_8_NE,
-	Shovel_8_NW,
 	Shovel_9_SW,
-	Shovel_9_SE,
-	Shovel_9_NE,
-	Shovel_9_NW,
 	Shovel_10_SW,
-	Shovel_10_SE,
-	Shovel_10_NE,
-	Shovel_10_NW,
 }
 
 Billboard_Texture_2x2 :: enum u8 {
@@ -144,45 +110,15 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-diffuse.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-diffuse.png",
 	.Shovel_1_SW    = "resources/textures/billboards/shovel/1-diffuse.png",
-	.Shovel_1_SE    = "resources/textures/billboards/shovel/1-diffuse.png",
-	.Shovel_1_NE    = "resources/textures/billboards/shovel/1-diffuse.png",
-	.Shovel_1_NW    = "resources/textures/billboards/shovel/1-diffuse.png",
 	.Shovel_2_SW    = "resources/textures/billboards/shovel/2-diffuse.png",
-	.Shovel_2_SE    = "resources/textures/billboards/shovel/2-diffuse.png",
-	.Shovel_2_NE    = "resources/textures/billboards/shovel/2-diffuse.png",
-	.Shovel_2_NW    = "resources/textures/billboards/shovel/2-diffuse.png",
 	.Shovel_3_SW    = "resources/textures/billboards/shovel/3-diffuse.png",
-	.Shovel_3_SE    = "resources/textures/billboards/shovel/3-diffuse.png",
-	.Shovel_3_NE    = "resources/textures/billboards/shovel/3-diffuse.png",
-	.Shovel_3_NW    = "resources/textures/billboards/shovel/3-diffuse.png",
 	.Shovel_4_SW    = "resources/textures/billboards/shovel/4-diffuse.png",
-	.Shovel_4_SE    = "resources/textures/billboards/shovel/4-diffuse.png",
-	.Shovel_4_NE    = "resources/textures/billboards/shovel/4-diffuse.png",
-	.Shovel_4_NW    = "resources/textures/billboards/shovel/4-diffuse.png",
 	.Shovel_5_SW    = "resources/textures/billboards/shovel/5-diffuse.png",
-	.Shovel_5_SE    = "resources/textures/billboards/shovel/5-diffuse.png",
-	.Shovel_5_NE    = "resources/textures/billboards/shovel/5-diffuse.png",
-	.Shovel_5_NW    = "resources/textures/billboards/shovel/5-diffuse.png",
 	.Shovel_6_SW    = "resources/textures/billboards/shovel/6-diffuse.png",
-	.Shovel_6_SE    = "resources/textures/billboards/shovel/6-diffuse.png",
-	.Shovel_6_NE    = "resources/textures/billboards/shovel/6-diffuse.png",
-	.Shovel_6_NW    = "resources/textures/billboards/shovel/6-diffuse.png",
 	.Shovel_7_SW    = "resources/textures/billboards/shovel/7-diffuse.png",
-	.Shovel_7_SE    = "resources/textures/billboards/shovel/7-diffuse.png",
-	.Shovel_7_NE    = "resources/textures/billboards/shovel/7-diffuse.png",
-	.Shovel_7_NW    = "resources/textures/billboards/shovel/7-diffuse.png",
 	.Shovel_8_SW    = "resources/textures/billboards/shovel/8-diffuse.png",
-	.Shovel_8_SE    = "resources/textures/billboards/shovel/8-diffuse.png",
-	.Shovel_8_NE    = "resources/textures/billboards/shovel/8-diffuse.png",
-	.Shovel_8_NW    = "resources/textures/billboards/shovel/8-diffuse.png",
 	.Shovel_9_SW    = "resources/textures/billboards/shovel/9-diffuse.png",
-	.Shovel_9_SE    = "resources/textures/billboards/shovel/9-diffuse.png",
-	.Shovel_9_NE    = "resources/textures/billboards/shovel/9-diffuse.png",
-	.Shovel_9_NW    = "resources/textures/billboards/shovel/9-diffuse.png",
 	.Shovel_10_SW   = "resources/textures/billboards/shovel/10-diffuse.png",
-	.Shovel_10_SE   = "resources/textures/billboards/shovel/10-diffuse.png",
-	.Shovel_10_NE   = "resources/textures/billboards/shovel/10-diffuse.png",
-	.Shovel_10_NW   = "resources/textures/billboards/shovel/10-diffuse.png",
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_2x2]cstring {
@@ -210,45 +146,15 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 	.Window_Wood_NE = "resources/textures/billboards/window-wood/ne-depth-map.png",
 	.Window_Wood_NW = "resources/textures/billboards/window-wood/nw-depth-map.png",
 	.Shovel_1_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_1_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_1_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_1_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_2_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_2_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_2_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_2_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_3_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_3_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_3_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_3_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_4_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_4_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_4_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_4_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_5_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_5_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_5_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_5_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_6_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_6_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_6_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_6_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_7_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_7_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_7_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_7_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_8_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_8_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_8_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_8_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_9_SW    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_9_SE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_9_NE    = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_9_NW    = "resources/textures/billboards/shovel/depth-map.png",
 	.Shovel_10_SW   = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_10_SE   = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_10_NE   = "resources/textures/billboards/shovel/depth-map.png",
-	.Shovel_10_NW   = "resources/textures/billboards/shovel/depth-map.png",
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
@@ -627,7 +533,7 @@ billboard_1x1_set_texture :: proc(
 	billboard, ok := &chunk.billboards_1x1.instances[pos]
 	if ok {
 		billboard.texture = texture
-	    chunk.billboards_1x1.dirty = true
+		chunk.billboards_1x1.dirty = true
 	}
 }
 
@@ -737,21 +643,10 @@ chunk_billboards_draw :: proc(
 			offset_of(Billboard_Instance, depth_map),
 		)
 
-		gl.EnableVertexAttribArray(6)
-		gl.VertexAttribPointer(
-			6,
-			1,
-			gl.UNSIGNED_BYTE,
-			gl.FALSE,
-			size_of(Billboard_Instance),
-			offset_of(Billboard_Instance, rotation),
-		)
-
 		gl.VertexAttribDivisor(2, 1)
 		gl.VertexAttribDivisor(3, 1)
 		gl.VertexAttribDivisor(4, 1)
 		gl.VertexAttribDivisor(5, 1)
-		gl.VertexAttribDivisor(6, 1)
 
 		gl.BindVertexArray(0)
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -776,7 +671,6 @@ chunk_billboards_draw :: proc(
 				light     = v.light,
 				texture   = f32(v.texture),
 				depth_map = f32(v.depth_map),
-				rotation  = v.rotation,
 			}
 			gl.BufferSubData(
 				gl.ARRAY_BUFFER,
@@ -799,4 +693,25 @@ chunk_billboards_draw :: proc(
 		i32(len(billboards.instances)),
 	)
 	gl.BindVertexArray(0)
+}
+
+billboard_update_draw_context_after_rotation :: proc(draw_context: $T) {
+	gl.BindBuffer(gl.ARRAY_BUFFER, draw_context.vbo)
+	for v, i in draw_context.vertices {
+		v := v
+		rotation := glsl.mat4Rotate({0, 1, 0}, (math.PI / 2) * f32(camera_rotation))
+		v.pos = (glsl.vec4{v.pos.x, v.pos.y, v.pos.z, 1} * rotation).xyz
+		gl.BufferSubData(
+			gl.ARRAY_BUFFER,
+			i * size_of(Billboard_Vertex),
+			size_of(Billboard_Vertex),
+			&v,
+		)
+	}
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+}
+
+billboard_update_after_rotation :: proc() {
+	billboard_update_draw_context_after_rotation(billboard_1x1_draw_context)
+	billboard_update_draw_context_after_rotation(billboard_2x2_draw_context)
 }
