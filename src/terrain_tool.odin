@@ -39,11 +39,7 @@ terrain_tool_init :: proc() {
 
 	billboard_1x1_set(
 		position,
-		 {
-			light = {1, 1, 1},
-			texture = .Shovel_1_SW,
-			depth_map = .Shovel_1_SW,
-		},
+		{light = {1, 1, 1}, texture = .Shovel_1_SW, depth_map = .Shovel_1_SW},
 	)
 
 	terrain_tool_billboard = position
@@ -359,56 +355,103 @@ terrain_tool_check_intersect_tile :: proc(x, z: f32) -> bool {
 	return false
 }
 
-terrain_tool_check_intersect :: proc() {
-	x, z: f32
-	fmt.println("x:", cursor_ray.origin.x, "z:", cursor_ray.origin.z)
-	if cursor_ray.origin.z == cursor_ray.origin.x {
-		z = clamp(
-			math.ceil(cursor_ray.origin.z),
-			0,
-			f32(world_visible_chunks_start.y * CHUNK_DEPTH),
-		)
-		x = z
-	} else if cursor_ray.origin.z < cursor_ray.origin.x {
-		z = clamp(
-			math.ceil(cursor_ray.origin.z),
-			0,
-			f32(world_visible_chunks_start.y * CHUNK_DEPTH),
-		)
-		t := (z - cursor_ray.origin.z) / cursor_ray.direction.z
-		x = cursor_ray.origin.x + t * cursor_ray.direction.x
+terrain_tool_check_intersect_south_west :: proc() {
+	x := cursor_ray.origin.x
+	z := cursor_ray.origin.z
+	dx := cursor_ray.direction.x
+	dz := cursor_ray.direction.z
+
+
+	left_x := f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5
+	left_z := z + ((left_x - x) / dx) * dz
+
+	right_z := f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5
+	right_x := x + ((right_z - z) / dz) * dx
+
+	if (right_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
+	   (right_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) {
+		x = right_x
+		z = right_z
 	} else {
-		x = clamp(
-			math.ceil(cursor_ray.origin.x),
-			0,
-			f32(world_visible_chunks_start.x * CHUNK_WIDTH),
-		)
-		t := (x - cursor_ray.origin.x) / cursor_ray.direction.x
-		z = cursor_ray.origin.z + t * cursor_ray.direction.z
+		x = left_x
+		z = left_z
 	}
 
-	for x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) ||
-	    z <= f32(world_visible_chunks_end.y * CHUNK_DEPTH) {
+	for x <= (f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) &&
+	    z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) {
 
-		next_z := x + 1
-		next_x := z + 1
+		next_x := x + 1
+		next_z := z + 1
 
-		if terrain_tool_check_intersect_tile(x, z) {
+		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
 			break
 		}
 
-		if z < x {
-			if next_x > x && terrain_tool_check_intersect_tile(x + 1, z) {
-				break
-			}
-		} else {
-			if next_z > z && terrain_tool_check_intersect_tile(x, z + 1) {
-				break
-			}
+		if (next_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 &&
+			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
+		   (next_z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) &&
+				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
+			break
 		}
 
-		z += 1
 		x += 1
+		z += 1
+	}
+}
+
+terrain_tool_check_intersect_south_east :: proc() {
+	x := cursor_ray.origin.x
+	z := cursor_ray.origin.z
+	dx := cursor_ray.direction.x
+	dz := cursor_ray.direction.z
+
+	left_z := f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5
+	left_x := x + ((left_z - z) / dz) * dx
+
+	right_x := f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5
+	right_z := z + ((x - right_x) / dx) * dz
+
+	if left_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
+	   left_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 {
+		x = left_x
+		z = left_z
+	} else {
+		x = right_x
+		z = right_z
+	}
+
+	for x >= (f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
+	    z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) {
+
+		next_x := x - 1
+		next_z := z + 1
+
+		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
+			break
+		}
+
+		if (next_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
+			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
+		   (next_z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) &&
+				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
+			break
+		}
+
+		x -= 1
+		z += 1
+	}
+}
+
+terrain_tool_check_intersect :: proc() {
+	switch camera_rotation {
+	case .South_West:
+		terrain_tool_check_intersect_south_west()
+	case .South_East:
+		terrain_tool_check_intersect_south_east()
+	case .North_West:
+		terrain_tool_check_intersect_south_west()
+	case .North_East:
+		terrain_tool_check_intersect_south_east()
 	}
 }
 
