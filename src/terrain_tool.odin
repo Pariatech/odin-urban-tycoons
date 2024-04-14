@@ -27,7 +27,7 @@ TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 terrain_tool_init :: proc() {
-	terrain_tool_check_intersect()
+	cursor_intersect_with_tiles(terrain_tool_on_intersect)
 	terrain_tool_cursor_pos = cursor_ray.origin
 
 	position := terrain_tool_intersect
@@ -46,28 +46,8 @@ terrain_tool_init :: proc() {
 	terrain_tool_drag_end = nil
 }
 
-terrain_tool_tile_cursor :: proc(
-	tri: Tile_Triangle,
-	side: Tile_Triangle_Side,
-	heights: [3]f32,
-	pos: glsl.vec2,
-) -> bool {
-	triangle: [3]glsl.vec3
-
-	vertices := tile_triangle_side_vertices_map[side]
-	for vertex, i in vertices {
-		triangle[i] = vertex.pos
-		triangle[i].x += pos.x
-		triangle[i].z += pos.y
-		triangle[i].y += heights[i]
-	}
-
-	intersect, ok := cursor_ray_intersect_triangle(triangle).?
-	if ok {
-		terrain_tool_intersect = intersect
-	}
-
-	return ok
+terrain_tool_on_intersect :: proc(intersect: glsl.vec3) {
+	terrain_tool_intersect = intersect
 }
 
 terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
@@ -326,210 +306,6 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	}
 }
 
-terrain_tool_check_intersect_tile :: proc(x, z: f32) -> bool {
-	tile := world_get_tile({i32(x), 0, i32(z)})
-
-	for tile_triangle, side in tile {
-		pos := glsl.vec2{math.floor(x), math.floor(z)}
-
-		x := int(pos.x)
-		z := int(pos.y)
-
-		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
-
-		if terrain_tool_tile_cursor(tile_triangle.?, side, heights, pos) {
-			return true
-		}
-	}
-	return false
-}
-
-terrain_tool_check_intersect_south_west :: proc() {
-	x := cursor_ray.origin.x
-	z := cursor_ray.origin.z
-	dx := cursor_ray.direction.x
-	dz := cursor_ray.direction.z
-
-
-	left_x := f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5
-	left_z := z + ((left_x - x) / dx) * dz
-
-	right_z := f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5
-	right_x := x + ((right_z - z) / dz) * dx
-
-	if (right_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
-	   (right_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) {
-		x = right_x
-		z = right_z
-	} else {
-		x = left_x
-		z = left_z
-	}
-
-	for x <= (f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) &&
-	    z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) {
-
-		next_x := x + 1
-		next_z := z + 1
-
-		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
-			break
-		}
-
-		if (next_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 &&
-			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
-		   (next_z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) &&
-				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
-			break
-		}
-
-		x += 1
-		z += 1
-	}
-}
-
-terrain_tool_check_intersect_south_east :: proc() {
-	x := cursor_ray.origin.x
-	z := cursor_ray.origin.z
-	dx := cursor_ray.direction.x
-	dz := cursor_ray.direction.z
-
-	left_z := f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5
-	left_x := x + ((left_z - z) / dz) * dx
-
-	right_x := f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5
-	right_z := z + ((x - right_x) / dx) * dz
-
-	if left_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
-	   left_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 {
-		x = left_x
-		z = left_z
-	} else {
-		x = right_x
-		z = right_z
-	}
-
-	for x >= (f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
-	    z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) {
-
-		next_x := x - 1
-		next_z := z + 1
-
-		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
-			break
-		}
-
-		if (next_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
-			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
-		   (next_z <= (f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5) &&
-				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
-			break
-		}
-
-		x -= 1
-		z += 1
-	}
-}
-
-terrain_tool_check_intersect_north_west :: proc() {
-	x := cursor_ray.origin.x
-	z := cursor_ray.origin.z
-	dx := cursor_ray.direction.x
-	dz := cursor_ray.direction.z
-
-	left_z := f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5
-	left_x := x + ((z - left_z) / dz) * dx
-
-	right_x := f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5
-	right_z := z + ((right_x - x) / dx) * dz
-
-	if (left_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
-	   (left_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) {
-		x = left_x
-		z = left_z
-	} else {
-		x = right_x
-		z = right_z
-	}
-
-	for x <= (f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) &&
-	    z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) {
-
-		next_x := x + 1
-		next_z := z - 1
-
-		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
-			break
-		}
-
-		if (next_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 &&
-			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
-		   (next_z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) &&
-				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
-			break
-		}
-
-		x += 1
-		z -= 1
-	}
-}
-
-terrain_tool_check_intersect_north_east :: proc() {
-	x := cursor_ray.origin.x
-	z := cursor_ray.origin.z
-	dx := cursor_ray.direction.x
-	dz := cursor_ray.direction.z
-
-	right_z := f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5
-	right_x := x + ((right_z - z) / dz) * dx
-
-	left_x := f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5
-	left_z := z + ((left_x - x) / dx) * dz
-
-	if left_z >= f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5 &&
-	   left_z <= f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5 {
-		x = left_x
-		z = left_z
-	} else {
-		x = right_x
-		z = right_z
-	}
-
-	for x >= (f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
-	    z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) {
-
-		next_x := x - 1
-		next_z := z - 1
-
-		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
-			break
-		}
-
-		if (next_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
-			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
-		   (next_z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) &&
-				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
-			break
-		}
-
-		x -= 1
-		z -= 1
-	}
-}
-
-terrain_tool_check_intersect :: proc() {
-	switch camera_rotation {
-	case .South_West:
-		terrain_tool_check_intersect_south_west()
-	case .South_East:
-		terrain_tool_check_intersect_south_east()
-	case .North_West:
-		terrain_tool_check_intersect_north_west()
-	case .North_East:
-		terrain_tool_check_intersect_north_east()
-	}
-}
-
 terrain_tool_deinit :: proc() {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
@@ -671,11 +447,7 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-	cursor_moved := cursor_ray.origin != terrain_tool_cursor_pos
-	if cursor_moved {
-		terrain_tool_check_intersect()
-		terrain_tool_cursor_pos = cursor_ray.origin
-	}
+    cursor_on_tile_intersect(terrain_tool_on_intersect)
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
