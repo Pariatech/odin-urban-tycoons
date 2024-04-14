@@ -4,9 +4,9 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-WORLD_WIDTH :: 1024
+WORLD_WIDTH :: 64
 WORLD_HEIGHT :: 4
-WORLD_DEPTH :: 1024
+WORLD_DEPTH :: 64
 WORLD_CHUNK_WIDTH :: WORLD_WIDTH / CHUNK_WIDTH
 WORLD_CHUNK_DEPTH :: WORLD_DEPTH / CHUNK_DEPTH
 

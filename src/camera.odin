@@ -146,8 +146,10 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .South_East:
-		camera.x = math.max(camera.x, bottom_right.x)
-		camera.z = math.min(camera.z, bottom_left.y)
+		// camera.x = math.max(camera.x, bottom_right.x)
+		// camera.z = math.min(camera.z, bottom_left.y)
+		camera.x = bottom_right.x
+		camera.z = bottom_left.y
 		width := camera.x - top_left.x
 		height := top_right.y - camera.z
 
@@ -158,8 +160,10 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_East:
-		camera.x = math.max(camera.x, bottom_left.x)
-		camera.z = math.max(camera.z, bottom_right.y)
+		// camera.x = math.max(camera.x, bottom_left.x)
+		// camera.z = math.max(camera.z, bottom_right.y)
+		camera.x = bottom_left.x
+		camera.z = bottom_right.y
 		width := camera.x - top_right.x
 		height := camera.z - top_left.y
 
@@ -170,8 +174,10 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_West:
-		camera.x = math.min(camera.x, bottom_right.x)
-		camera.z = math.max(camera.z, bottom_left.y)
+		// camera.x = math.min(camera.x, bottom_right.x)
+		// camera.z = math.max(camera.z, bottom_left.y)
+		camera.x = bottom_right.x
+		camera.z = bottom_left.y
 		width := top_left.x - camera.x
 		height := camera.z - top_right.y
 

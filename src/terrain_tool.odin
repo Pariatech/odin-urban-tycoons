@@ -182,9 +182,9 @@ terrain_tool_smooth_brush :: proc() {
 
 terrain_tool_calculate_lights :: proc() {
 	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
-	end_x := max(terrain_tool_position.x + terrain_tool_brush_size, 0)
+	end_x := min(terrain_tool_position.x + terrain_tool_brush_size, WORLD_WIDTH)
 	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
-	end_z := max(terrain_tool_position.y + terrain_tool_brush_size, 0)
+	end_z := min(terrain_tool_position.y + terrain_tool_brush_size, WORLD_DEPTH)
 	for x in start_x ..= end_x {
 		for z in start_z ..= end_z {
 			calculate_terrain_light(int(x), int(z))
