@@ -11,6 +11,7 @@ wall_tool_init :: proc() {
 		wall_tool_billboard,
 		{light = {1, 1, 1}, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
 	)
+	cursor_intersect_with_tiles(wall_tool_on_tile_intersect)
 }
 
 wall_tool_deinit :: proc() {

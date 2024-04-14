@@ -512,6 +512,16 @@ load_billboard_texture_array :: proc(
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	max_anisotropy: f32
+	gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+	fmt.println("max_anisotropy:", max_anisotropy)
+	gl.TexParameterf(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MAX_ANISOTROPY,
+		max_anisotropy,
+	)
+
 	gl.TexStorage3D(
 		gl.TEXTURE_2D_ARRAY,
 		1,
