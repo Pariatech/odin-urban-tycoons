@@ -18,6 +18,24 @@ BILLBOARD_TEXTURE_HEIGHT :: 256
 FOUR_TILES_BILLBOARD_TEXTURE_WIDTH :: 512
 FOUR_TILES_BILLBOARD_TEXTURE_HEIGHT :: 1024
 
+billboard_shader_program: u32
+billboard_uniform_object: Billboard_Uniform_Object
+billboard_ubo: u32
+billboard_1x1_draw_context: Billboard_Draw_Context
+billboard_2x2_draw_context: Billboard_Draw_Context
+
+Billboard_Type :: enum {
+	Door,
+	Window,
+	Shovel_Cursor,
+	Wall_Cursor,
+}
+
+Billboard_Key :: struct {
+	pos:  glsl.vec3,
+	type: Billboard_Type,
+}
+
 Billboard_Draw_Context :: struct {
 	indices:                 [6]u8,
 	vertices:                [4]Billboard_Vertex,
@@ -25,12 +43,6 @@ Billboard_Draw_Context :: struct {
 	texture_array:           u32,
 	depth_map_texture_array: u32,
 }
-
-billboard_shader_program: u32
-billboard_uniform_object: Billboard_Uniform_Object
-billboard_ubo: u32
-billboard_1x1_draw_context: Billboard_Draw_Context
-billboard_2x2_draw_context: Billboard_Draw_Context
 
 Billboard_Instance :: struct {
 	position:  glsl.vec3,
@@ -603,41 +615,42 @@ billboard_init_draw_contexts :: proc() -> bool {
 }
 
 billboard_1x1_set_texture :: proc(
-	pos: glsl.vec3,
+	key: Billboard_Key,
 	texture: Billboard_Texture_1x1,
 ) {
-	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
-	billboard, ok := &chunk.billboards_1x1.instances[pos]
+	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
+	billboard, ok := &chunk.billboards_1x1.instances[key]
 	if ok {
 		billboard.texture = texture
 		chunk.billboards_1x1.dirty = true
 	}
 }
 
-billboard_1x1_remove :: proc(pos: glsl.vec3) {
-	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
-	delete_key(&chunk.billboards_1x1.instances, pos)
+billboard_1x1_remove :: proc(key: Billboard_Key) {
+	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
+	delete_key(&chunk.billboards_1x1.instances, key)
 	chunk.billboards_1x1.dirty = true
 }
 
-billboard_1x1_move :: proc(from: glsl.vec3, to: glsl.vec3) {
-	if from == to {
+billboard_1x1_move :: proc(of: ^Billboard_Key, to: glsl.vec3) {
+	if of.pos == to {
 		return
 	}
-	from_chunk := world_get_chunk({i32(from.x), i32(from.z)})
+	from_chunk := world_get_chunk({i32(of.pos.x), i32(of.pos.z)})
 	to_chunk := world_get_chunk({i32(to.x), i32(to.z)})
-	billboard, ok := from_chunk.billboards_1x1.instances[from]
+	billboard, ok := from_chunk.billboards_1x1.instances[of^]
 	if ok {
-		to_chunk.billboards_1x1.instances[to] = billboard
-		delete_key(&from_chunk.billboards_1x1.instances, from)
+		delete_key(&from_chunk.billboards_1x1.instances, of^)
+		of.pos = to
+		to_chunk.billboards_1x1.instances[of^] = billboard
 		to_chunk.billboards_1x1.dirty = true
 		from_chunk.billboards_1x1.dirty = true
 	}
 }
 
-billboard_1x1_set :: proc(pos: glsl.vec3, billboard: Billboard_1x1) {
-	chunk := world_get_chunk({i32(pos.x), i32(pos.z)})
-	chunk.billboards_1x1.instances[pos] = billboard
+billboard_1x1_set :: proc(key: Billboard_Key, billboard: Billboard_1x1) {
+	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
+	chunk.billboards_1x1.instances[key] = billboard
 	chunk.billboards_1x1.dirty = true
 }
 
@@ -744,7 +757,7 @@ chunk_billboards_draw :: proc(
 		i := 0
 		for k, v in billboards.instances {
 			instance: Billboard_Instance = {
-				position  = k,
+				position  = k.pos,
 				light     = v.light,
 				texture   = f32(v.texture),
 				depth_map = f32(v.depth_map),

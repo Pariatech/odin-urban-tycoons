@@ -7,7 +7,7 @@ import "core:math/rand"
 import "vendor:glfw"
 
 terrain_tool_cursor_pos: glsl.vec3
-terrain_tool_billboard: glsl.vec3
+terrain_tool_billboard: Billboard_Key
 terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
@@ -36,12 +36,15 @@ terrain_tool_init :: proc() {
 	position.y =
 		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 
+	terrain_tool_billboard = {
+		type = .Shovel_Cursor,
+		pos  = position,
+	}
 	billboard_1x1_set(
-		position,
+		terrain_tool_billboard,
 		{light = {1, 1, 1}, texture = .Shovel_1_SW, depth_map = .Shovel_1_SW},
 	)
 
-	terrain_tool_billboard = position
 	terrain_tool_drag_start = nil
 	terrain_tool_drag_end = nil
 }
@@ -182,9 +185,15 @@ terrain_tool_smooth_brush :: proc() {
 
 terrain_tool_calculate_lights :: proc() {
 	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
-	end_x := min(terrain_tool_position.x + terrain_tool_brush_size, WORLD_WIDTH)
+	end_x := min(
+		terrain_tool_position.x + terrain_tool_brush_size,
+		WORLD_WIDTH,
+	)
 	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
-	end_z := min(terrain_tool_position.y + terrain_tool_brush_size, WORLD_DEPTH)
+	end_z := min(
+		terrain_tool_position.y + terrain_tool_brush_size,
+		WORLD_DEPTH,
+	)
 	for x in start_x ..= end_x {
 		for z in start_z ..= end_z {
 			calculate_terrain_light(int(x), int(z))
@@ -447,7 +456,7 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-    cursor_on_tile_intersect(terrain_tool_on_intersect)
+	cursor_on_tile_intersect(terrain_tool_on_intersect)
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
@@ -481,8 +490,7 @@ terrain_tool_update :: proc() {
 
 	position.y =
 		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-	billboard_1x1_move(terrain_tool_billboard, position)
-	terrain_tool_billboard = position
+	billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := is_key_down(.Key_Left_Shift)
 
 	if shift_down || terrain_tool_drag_start != nil {

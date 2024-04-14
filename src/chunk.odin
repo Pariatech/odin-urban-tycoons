@@ -30,7 +30,7 @@ Chunk_Walls :: struct {
 }
 
 Chunk_Billboards :: struct($T: typeid) {
-	instances:   map[glsl.vec3]T,
+	instances:   map[Billboard_Key]T,
 	vao, ibo:    u32,
 	dirty:       bool,
 	initialized: bool,

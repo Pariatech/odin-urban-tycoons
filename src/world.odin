@@ -393,7 +393,14 @@ add_house_floor_walls :: proc(
 	)
 	if floor > 0 {
 		billboard_1x1_set(
-			{f32(house_x + 1), f32(floor * WALL_HEIGHT), f32(house_z + 5)},
+			 {
+				type = .Window,
+				pos =  {
+					f32(house_x + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + 5),
+				},
+			},
 			 {
 				light = {1, 1, 1},
 				texture = .Window_Wood_SE,
@@ -402,7 +409,10 @@ add_house_floor_walls :: proc(
 		)
 	} else {
 		billboard_1x1_set(
-			{f32(house_x + 1), f32(floor), f32(house_z + 5)},
+			 {
+				type = .Door,
+				pos = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
+			},
 			 {
 				light = {1, 1, 1},
 				texture = .Door_Wood_SE,
@@ -445,9 +455,12 @@ add_house_floor_walls :: proc(
 		)
 		billboard_1x1_set(
 			 {
-				f32(house_x),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + i32(i) + 8),
+				type = .Window,
+				pos =  {
+					f32(house_x),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + i32(i) + 8),
+				},
 			},
 			 {
 				light = {1, 1, 1},
@@ -493,9 +506,12 @@ add_house_floor_walls :: proc(
 
 		billboard_1x1_set(
 			 {
-				f32(house_x + i32(i) + 1),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z),
+				type = .Window,
+				pos =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z),
+				},
 			},
 			 {
 				light = {1, 1, 1},
@@ -541,9 +557,12 @@ add_house_floor_walls :: proc(
 
 		billboard_1x1_set(
 			 {
-				f32(house_x + i32(i) + 1),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 11),
+				type = .Window,
+				pos =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * WALL_HEIGHT),
+					f32(house_z + 11),
+				},
 			},
 			 {
 				light = {1, 1, 1},
