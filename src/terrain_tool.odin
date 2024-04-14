@@ -8,7 +8,6 @@ import "vendor:glfw"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: glsl.vec3
-terrain_tool_drag_start_billboard: glsl.vec3
 terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
@@ -119,7 +118,6 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 				}
 			}
 			terrain_tool_drag_start = nil
-			billboard_1x1_remove(terrain_tool_drag_start_billboard)
 
 			terrain_tool_mark_array_dirty(
 				 {
@@ -139,15 +137,6 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 	} else if mouse_is_button_down(.Left) || mouse_is_button_down(.Right) {
 		terrain_tool_drag_clip = mouse_is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
-		terrain_tool_drag_start_billboard = position
-		billboard_1x1_set(
-			terrain_tool_drag_start_billboard,
-			 {
-				light = {1, 1, 1},
-				texture = .Shovel_1_SW,
-				depth_map = .Shovel_1_SW,
-			},
-		)
 	}
 }
 
@@ -442,6 +431,92 @@ terrain_tool_check_intersect_south_east :: proc() {
 	}
 }
 
+terrain_tool_check_intersect_north_west :: proc() {
+	x := cursor_ray.origin.x
+	z := cursor_ray.origin.z
+	dx := cursor_ray.direction.x
+	dz := cursor_ray.direction.z
+
+	left_z := f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5
+	left_x := x + ((z - left_z) / dz) * dx
+
+	right_x := f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5
+	right_z := z + ((right_x - x) / dx) * dz
+
+	if (left_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
+	   (left_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) {
+		x = left_x
+		z = left_z
+	} else {
+		x = right_x
+		z = right_z
+	}
+
+	for x <= (f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5) &&
+	    z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) {
+
+		next_x := x + 1
+		next_z := z - 1
+
+		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
+			break
+		}
+
+		if (next_x <= f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5 &&
+			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
+		   (next_z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) &&
+				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
+			break
+		}
+
+		x += 1
+		z -= 1
+	}
+}
+
+terrain_tool_check_intersect_north_east :: proc() {
+	x := cursor_ray.origin.x
+	z := cursor_ray.origin.z
+	dx := cursor_ray.direction.x
+	dz := cursor_ray.direction.z
+
+	right_z := f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5
+	right_x := x + ((right_z - z) / dz) * dx
+
+	left_x := f32(world_visible_chunks_end.x * CHUNK_WIDTH) + 0.5
+	left_z := z + ((left_x - x) / dx) * dz
+
+	if left_z >= f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5 &&
+	   left_z <= f32(world_visible_chunks_end.y * CHUNK_DEPTH) + 0.5 {
+		x = left_x
+		z = left_z
+	} else {
+		x = right_x
+		z = right_z
+	}
+
+	for x >= (f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5) &&
+	    z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) {
+
+		next_x := x - 1
+		next_z := z - 1
+
+		if terrain_tool_check_intersect_tile(x + 0.5, z + 0.5) {
+			break
+		}
+
+		if (next_x >= f32(world_visible_chunks_start.x * CHUNK_WIDTH) - 0.5 &&
+			   terrain_tool_check_intersect_tile(next_x + 0.5, z + 0.5)) ||
+		   (next_z >= (f32(world_visible_chunks_start.y * CHUNK_DEPTH) - 0.5) &&
+				   terrain_tool_check_intersect_tile(x + 0.5, next_z + 0.5)) {
+			break
+		}
+
+		x -= 1
+		z -= 1
+	}
+}
+
 terrain_tool_check_intersect :: proc() {
 	switch camera_rotation {
 	case .South_West:
@@ -449,9 +524,9 @@ terrain_tool_check_intersect :: proc() {
 	case .South_East:
 		terrain_tool_check_intersect_south_east()
 	case .North_West:
-		terrain_tool_check_intersect_south_west()
+		terrain_tool_check_intersect_north_west()
 	case .North_East:
-		terrain_tool_check_intersect_south_east()
+		terrain_tool_check_intersect_north_east()
 	}
 }
 
@@ -467,7 +542,6 @@ terrain_tool_deinit :: proc() {
 				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
-		billboard_1x1_remove(terrain_tool_drag_start_billboard)
 
 		terrain_tool_mark_array_dirty(
 			 {
