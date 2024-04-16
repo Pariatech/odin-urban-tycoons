@@ -5,6 +5,7 @@ import "core:math/linalg/glsl"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_position: glsl.ivec2
+wall_tool_drag_start: glsl.ivec2
 
 wall_tool_init :: proc() {
 	wall_tool_billboard = { type = .Wall_Cursor }

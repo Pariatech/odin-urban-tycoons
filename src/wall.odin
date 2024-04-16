@@ -2,7 +2,7 @@ package main
 
 import "core:fmt"
 import "core:math/linalg"
-import m "core:math/linalg/glsl"
+import glsl "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 Wall_Axis :: enum {
@@ -52,7 +52,6 @@ Wall_Side :: enum {
 }
 
 Wall :: struct {
-	pos:      m.vec3,
 	type:     Wall_Type,
 	textures: [Wall_Side]Wall_Texture,
 	mask:     Wall_Mask_Texture,
@@ -60,9 +59,9 @@ Wall :: struct {
 
 
 Wall_Vertex :: struct {
-	pos:       m.vec3,
-	light:     m.vec3,
-	texcoords: m.vec4,
+	pos:       glsl.vec3,
+	light:     glsl.vec3,
+	texcoords: glsl.vec4,
 }
 
 Wall_Index :: u32
@@ -218,7 +217,7 @@ WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	},
 }
 
-WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]m.mat4 {
+WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]glsl.mat4 {
 	.North_South =  {
 		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
@@ -748,7 +747,7 @@ init_wall_renderer :: proc() -> (ok: bool) {
 draw_wall_mesh :: proc(
 	vertices: []Wall_Vertex,
 	indices: []Wall_Index,
-	model: m.mat4,
+	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
@@ -770,6 +769,7 @@ draw_wall_mesh :: proc(
 }
 
 draw_wall :: proc(
+	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
@@ -785,8 +785,12 @@ draw_wall :: proc(
 	mask := mask_map[wall.type][axis][camera_rotation]
 	top_mesh := top_mesh_map[wall.type][axis][camera_rotation]
 
-	position := wall.pos
-	transform := m.mat4Translate(position)
+	position := glsl.vec3 {
+		f32(pos.x),
+		f32(pos.y) * WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.z),
+	}
+	transform := glsl.mat4Translate(position)
 	transform *= transform_map[axis][camera_rotation]
 
 	vertices: []Wall_Vertex
@@ -818,7 +822,7 @@ draw_wall :: proc(
 
 	top_vertices := wall_full_top_vertices
 	if top_mesh == .Side do top_vertices = wall_top_vertices
-	transform *= m.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
+	transform *= glsl.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
 	draw_wall_mesh(
 		top_vertices,

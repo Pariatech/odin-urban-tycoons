@@ -2,7 +2,7 @@ package main
 
 import "core:fmt"
 import "core:math/linalg"
-import m "core:math/linalg/glsl"
+import glsl "core:math/linalg/glsl"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
@@ -769,7 +769,7 @@ DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
 	}
 
 
-DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
+DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]glsl.mat4 {
 		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
@@ -778,6 +778,7 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]m.mat4 {
 
 
 draw_diagonal_wall :: proc(
+	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Diagonal_Wall_Axis,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
@@ -796,8 +797,12 @@ draw_diagonal_wall :: proc(
 	mask := mask_map[axis][camera_rotation][wall.type]
 	top_mask := top_mask_map[axis][camera_rotation][wall.type]
 	draw := draw_map[axis][wall.type][camera_rotation]
-	position := wall.pos
-	transform := m.mat4Translate(position)
+	position := glsl.vec3 {
+		f32(pos.x),
+		f32(pos.y) * WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.z),
+	}
+	transform := glsl.mat4Translate(position)
 	transform *= transform_map[camera_rotation]
 
 	if draw {

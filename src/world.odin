@@ -54,32 +54,20 @@ world_set_tile_triangle :: proc(
 	chunk_set_tile_triangle(world_get_chunk(pos.xz), pos, side, tile_triangle)
 }
 
-world_set_north_south_wall :: proc(wall: Wall) {
-	chunk_set_north_south_wall(
-		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
-		wall,
-	)
+world_set_north_south_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_north_south_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
-world_set_east_west_wall :: proc(wall: Wall) {
-	chunk_set_east_west_wall(
-		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
-		wall,
-	)
+world_set_east_west_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_east_west_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
-world_set_north_west_south_east_wall :: proc(wall: Wall) {
-	chunk_set_north_west_south_east_wall(
-		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
-		wall,
-	)
+world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_north_west_south_east_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
-world_set_south_west_north_east_wall :: proc(wall: Wall) {
-	chunk_set_south_west_north_east_wall(
-		world_get_chunk({i32(wall.pos.x), i32(wall.pos.z)}),
-		wall,
-	)
+world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_south_west_north_east_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
 world_iterate_all_chunks :: proc() -> Chunk_Iterator {
@@ -338,20 +326,16 @@ add_house_floor_walls :: proc(
 ) {
 	// The house's front wall
 	world_set_north_south_wall(
+		{house_x, floor, house_z},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Right_Corner,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 	for i in 0 ..< 2 {
 		world_set_north_south_wall(
+			{house_x, floor, house_z + i32(i) + 1},
 			 {
-				pos =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 1),
-				},
 				type = .Side_Side,
 				textures =  {
 					.Inside = inside_texture,
@@ -361,16 +345,16 @@ add_house_floor_walls :: proc(
 		)
 	}
 	world_set_north_south_wall(
+		{house_x, floor, house_z + 3},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 3)},
 			type = .Right_Corner_Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
 	world_set_south_west_north_east_wall(
+		{house_x, floor, house_z + 4},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 4)},
 			type = .Side_Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
@@ -380,12 +364,8 @@ add_house_floor_walls :: proc(
 	mask := Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
 	world_set_north_south_wall(
+		{house_x + 1, floor, house_z + 5},
 		 {
-			pos =  {
-				f32(house_x + 1),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 5),
-			},
 			type = .Left_Corner_Left_Corner,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 			mask = mask,
@@ -422,16 +402,16 @@ add_house_floor_walls :: proc(
 	}
 
 	world_set_north_west_south_east_wall(
+		{house_x, floor, house_z + 6},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 6)},
 			type = .End_Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
 	world_set_north_south_wall(
+		{house_x, floor, house_z + 7},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 7)},
 			type = .Side_Right_Corner,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
@@ -439,12 +419,8 @@ add_house_floor_walls :: proc(
 
 	for i in 0 ..< 2 {
 		world_set_north_south_wall(
+			{house_x, floor, house_z + i32(i) + 8},
 			 {
-				pos =  {
-					f32(house_x),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
-				},
 				type = .Side_Side,
 				textures =  {
 					.Inside = inside_texture,
@@ -471,8 +447,8 @@ add_house_floor_walls :: proc(
 	}
 
 	world_set_north_south_wall(
+		{house_x, floor, house_z + 10},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 10)},
 			type = .Right_Corner_Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
@@ -480,8 +456,8 @@ add_house_floor_walls :: proc(
 
 	// The house's right side wall
 	world_set_east_west_wall(
+		{house_x, floor, house_z},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Left_Corner_Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
@@ -489,12 +465,8 @@ add_house_floor_walls :: proc(
 
 	for i in 0 ..< 2 {
 		world_set_east_west_wall(
+			{house_x + i32(i) + 1, floor, house_z},
 			 {
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z),
-				},
 				type = .Side_Side,
 				textures =  {
 					.Inside = inside_texture,
@@ -522,8 +494,8 @@ add_house_floor_walls :: proc(
 	}
 
 	world_set_east_west_wall(
+		{house_x + 3, floor, house_z},
 		 {
-			pos = {f32(house_x + 3), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Left_Corner,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
@@ -531,8 +503,8 @@ add_house_floor_walls :: proc(
 
 	// The house's left side wall
 	world_set_east_west_wall(
+		{house_x, floor, house_z + 11},
 		 {
-			pos = {f32(house_x), f32(floor * WALL_HEIGHT), f32(house_z + 11)},
 			type = .Right_Corner_Side,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
@@ -540,12 +512,8 @@ add_house_floor_walls :: proc(
 
 	for i in 0 ..< 2 {
 		world_set_east_west_wall(
+			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + 11),
-				},
 				type = .Side_Side,
 				textures =  {
 					.Inside = outside_texture,
@@ -572,12 +540,8 @@ add_house_floor_walls :: proc(
 		)
 	}
 	world_set_east_west_wall(
+		{house_x + 3, floor, house_z + 11},
 		 {
-			pos =  {
-				f32(house_x + 3),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 11),
-			},
 			type = .Side_Right_Corner,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
@@ -585,20 +549,16 @@ add_house_floor_walls :: proc(
 
 	// The house's back wall
 	world_set_south_west_north_east_wall(
+		{house_x + 4, floor, house_z},
 		 {
-			pos = {f32(house_x + 4), f32(floor * WALL_HEIGHT), f32(house_z)},
 			type = .Side_Side,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
 	world_set_north_south_wall(
+		{house_x + 5, floor, house_z + 1},
 		 {
-			pos =  {
-				f32(house_x + 5),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 1),
-			},
 			type = .Side_Left_Corner,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
@@ -606,12 +566,8 @@ add_house_floor_walls :: proc(
 
 	for i in 0 ..< 7 {
 		world_set_north_south_wall(
+			{house_x + 5, floor, house_z + i32(i) + 2},
 			 {
-				pos =  {
-					f32(house_x + 5),
-					f32(floor * WALL_HEIGHT),
-					f32(house_z + i32(i) + 2),
-				},
 				type = .Side_Side,
 				textures =  {
 					.Inside = outside_texture,
@@ -622,24 +578,16 @@ add_house_floor_walls :: proc(
 	}
 
 	world_set_north_south_wall(
+		{house_x + 5, floor, house_z + 9},
 		 {
-			pos =  {
-				f32(house_x + 5),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 9),
-			},
 			type = .Left_Corner_Side,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
 	world_set_north_west_south_east_wall(
+		{house_x + 4, floor, house_z + 10},
 		 {
-			pos =  {
-				f32(house_x + 4),
-				f32(floor * WALL_HEIGHT),
-				f32(house_z + 10),
-			},
 			type = .End_Side,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
