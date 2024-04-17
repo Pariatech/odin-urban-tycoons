@@ -233,7 +233,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		}
 
 		for pos, wall in chunk.walls.north_south {
-			draw_wall(pos,wall, .North_South, &vertices, &indices)
+			draw_wall(pos, wall, .North_South, &vertices, &indices)
 		}
 
 		for pos, wall in chunk.walls.south_west_north_east {
@@ -477,10 +477,22 @@ chunk_set_north_south_wall :: proc(
 	wall: Wall,
 ) {
 	chunk.walls.north_south[pos] = wall
+	chunk.walls.dirty = true
+}
+
+chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	delete_key(&chunk.walls.north_south, pos)
+	chunk.walls.dirty = true
 }
 
 chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: Wall) {
 	chunk.walls.east_west[pos] = wall
+	chunk.walls.dirty = true
+}
+
+chunk_remove_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	delete_key(&chunk.walls.east_west, pos)
+	chunk.walls.dirty = true
 }
 
 
@@ -490,6 +502,15 @@ chunk_set_north_west_south_east_wall :: proc(
 	wall: Wall,
 ) {
 	chunk.walls.north_west_south_east[pos] = wall
+	chunk.walls.dirty = true
+}
+
+chunk_remove_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) {
+	delete_key(&chunk.walls.north_west_south_east, pos)
+	chunk.walls.dirty = true
 }
 
 chunk_set_south_west_north_east_wall :: proc(
@@ -498,4 +519,13 @@ chunk_set_south_west_north_east_wall :: proc(
 	wall: Wall,
 ) {
 	chunk.walls.south_west_north_east[pos] = wall
+	chunk.walls.dirty = true
+}
+
+chunk_remove_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) {
+	delete_key(&chunk.walls.south_west_north_east, pos)
+	chunk.walls.dirty = true
 }

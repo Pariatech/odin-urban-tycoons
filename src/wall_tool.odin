@@ -1,14 +1,21 @@
 package main
 
+import "core:fmt"
 import "core:math"
 import "core:math/linalg/glsl"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_position: glsl.ivec2
 wall_tool_drag_start: glsl.ivec2
+wall_tool_north_south_walls: map[glsl.ivec3]Wall
+wall_tool_east_west_walls: map[glsl.ivec3]Wall
+wall_tool_south_west_north_east_walls: map[glsl.ivec3]Wall
+wall_tool_north_west_south_east_walls: map[glsl.ivec3]Wall
 
 wall_tool_init :: proc() {
-	wall_tool_billboard = { type = .Wall_Cursor }
+	wall_tool_billboard = {
+		type = .Wall_Cursor,
+	}
 	billboard_1x1_set(
 		wall_tool_billboard,
 		{light = {1, 1, 1}, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
@@ -31,5 +38,147 @@ wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 }
 
 wall_tool_update :: proc() {
+	if mouse_is_button_down(.Left) {
+		if abs(
+			   wall_tool_drag_start.y +
+			   (wall_tool_position.x - wall_tool_drag_start.x) -
+			   wall_tool_position.y,
+		   ) <
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			floor: i32 = 0
+			z := wall_tool_drag_start.y
+			dz: i32 = 0
+			if wall_tool_position.x < wall_tool_drag_start.x {
+				dz = start_x - end_x
+			}
+			for x, i in start_x ..< end_x {
+				world_remove_south_west_north_east_wall(
+					{x, floor, z + i32(i) + dz},
+				)
+			}
+		} else if abs(
+			   wall_tool_drag_start.y -
+			   (wall_tool_position.x - wall_tool_drag_start.x) -
+			   wall_tool_position.y,
+		   ) <
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			floor: i32 = 0
+			z := wall_tool_drag_start.y
+			dz: i32 = -1
+			if wall_tool_position.x < wall_tool_drag_start.x {
+				dz = end_x - start_x - 1
+			}
+			for x, i in start_x ..< end_x {
+				world_remove_north_west_south_east_wall(
+					{x, floor, z - i32(i) + dz},
+				)
+			}
+		} else if abs(wall_tool_position.x - wall_tool_drag_start.x) >
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			z := wall_tool_drag_start.y
+			floor: i32 = 0
+			for x in start_x ..< end_x {
+				world_remove_east_west_wall({x, floor, z})
+			}
+		} else {
+			start_z := min(wall_tool_position.y, wall_tool_drag_start.y)
+			end_z := max(wall_tool_position.y, wall_tool_drag_start.y)
+			x := wall_tool_drag_start.x
+			floor: i32 = 0
+			for z in start_z ..< end_z {
+				world_remove_north_south_wall({x, floor, z})
+			}
+		}
+	}
+
 	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+
+	if mouse_is_button_press(.Left) {
+		wall_tool_drag_start = wall_tool_position
+	} else if mouse_is_button_down(.Left) {
+		if abs(
+			   wall_tool_drag_start.y +
+			   (wall_tool_position.x - wall_tool_drag_start.x) -
+			   wall_tool_position.y,
+		   ) <
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			floor: i32 = 0
+			z := wall_tool_drag_start.y
+			dz: i32 = 0
+			if wall_tool_position.x < wall_tool_drag_start.x {
+				dz = start_x - end_x
+			}
+			for x, i in start_x ..< end_x {
+				world_set_south_west_north_east_wall(
+					{x, floor, z + i32(i) + dz},
+					 {
+						type = .Side_Side,
+						textures = {.Inside = .Brick, .Outside = .Brick},
+					},
+				)
+			}
+		} else if abs(
+			   wall_tool_drag_start.y -
+			   (wall_tool_position.x - wall_tool_drag_start.x) -
+			   wall_tool_position.y,
+		   ) <
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			floor: i32 = 0
+			z := wall_tool_drag_start.y
+			dz: i32 = -1
+			if wall_tool_position.x < wall_tool_drag_start.x {
+				dz = end_x - start_x - 1
+			}
+			for x, i in start_x ..< end_x {
+				world_set_north_west_south_east_wall(
+					{x, floor, z - i32(i) + dz},
+					 {
+						type = .Side_Side,
+						textures = {.Inside = .Brick, .Outside = .Brick},
+					},
+				)
+			}
+
+		} else if abs(wall_tool_position.x - wall_tool_drag_start.x) >
+		   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+			start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+			end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+			z := wall_tool_drag_start.y
+			floor: i32 = 0
+			for x in start_x ..< end_x {
+				world_set_east_west_wall(
+					{x, floor, z},
+					 {
+						type = .Side_Side,
+						textures = {.Inside = .Brick, .Outside = .Brick},
+					},
+				)
+			}
+		} else {
+			start_z := min(wall_tool_position.y, wall_tool_drag_start.y)
+			end_z := max(wall_tool_position.y, wall_tool_drag_start.y)
+			x := wall_tool_drag_start.x
+			floor: i32 = 0
+			for z in start_z ..< end_z {
+				world_set_north_south_wall(
+					{x, floor, z},
+					 {
+						type = .Side_Side,
+						textures = {.Inside = .Brick, .Outside = .Brick},
+					},
+				)
+			}
+		}
+	} else {
+	}
 }
