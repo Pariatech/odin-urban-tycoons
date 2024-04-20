@@ -40,12 +40,21 @@ wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 wall_tool_south_west_north_east_update :: proc(
 	fn: proc(_: glsl.ivec3),
 ) -> bool {
-	if abs(
-		   wall_tool_drag_start.y +
-		   (wall_tool_position.x - wall_tool_drag_start.x) -
-		   wall_tool_position.y,
-	   ) >=
-	   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+	l := max(
+		abs(wall_tool_position.x - wall_tool_drag_start.x),
+		abs(wall_tool_position.y - wall_tool_drag_start.y),
+	)
+	fmt.println("l:", l)
+	fmt.println(
+		"abs(wall_tool_drag_start.y + l / 2):",
+		abs(wall_tool_drag_start.y + l / 2 - wall_tool_position.y),
+	)
+	fmt.println(
+		"abs(wall_tool_position.y - wall_tool_drag_start.y):",
+		abs(wall_tool_position.y - wall_tool_drag_start.y),
+	)
+	if abs(wall_tool_position.y - wall_tool_drag_start.y) <= l / 2 ||
+	   abs(wall_tool_position.x - wall_tool_drag_start.x) <= l / 2 {
 		return false
 	}
 
@@ -61,7 +70,7 @@ wall_tool_south_west_north_east_update :: proc(
 		fn({x, floor, z + i32(i) + dz})
 	}
 
-    fmt.println("south west north east")
+	fmt.println("south west north east")
 
 	return true
 }
@@ -71,7 +80,7 @@ wall_tool_north_west_south_east_update :: proc(
 ) -> bool {
 	if abs(
 		   wall_tool_drag_start.y -
-		   (wall_tool_position.x - wall_tool_drag_start.x) -
+		   (wall_tool_position.x - wall_tool_drag_start.x) / 2 -
 		   wall_tool_position.y,
 	   ) >=
 	   abs(wall_tool_position.y - wall_tool_drag_start.y) {
@@ -90,7 +99,7 @@ wall_tool_north_west_south_east_update :: proc(
 		fn({x, floor, z - i32(i) + dz})
 	}
 
-    fmt.println("north west south east")
+	fmt.println("north west south east")
 
 	return true
 }
@@ -98,7 +107,6 @@ wall_tool_north_west_south_east_update :: proc(
 wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 	if abs(wall_tool_position.x - wall_tool_drag_start.x) <
 	   abs(wall_tool_position.y - wall_tool_drag_start.y) {
-    fmt.println("uh???")
 		return false
 	}
 
@@ -110,7 +118,7 @@ wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 		fn({x, floor, z})
 	}
 
-    fmt.println("east west")
+	fmt.println("east west")
 
 	return true
 }
@@ -124,7 +132,7 @@ wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 		fn({x, floor, z})
 	}
 
-    fmt.println("north south")
+	fmt.println("north south")
 
 	return true
 }
