@@ -37,20 +37,12 @@ wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 	billboard_1x1_move(&wall_tool_billboard, position)
 }
 
-wall_tool_south_west_north_east_update :: proc(
-	fn: proc(_: glsl.ivec3),
+wall_tool_diagonal_update :: proc(
+	south_west_north_east_fn: proc(_: glsl.ivec3),
+	north_west_south_east_fn: proc(_: glsl.ivec3),
 ) -> bool {
 	l := max(
 		abs(wall_tool_position.x - wall_tool_drag_start.x),
-		abs(wall_tool_position.y - wall_tool_drag_start.y),
-	)
-	fmt.println("l:", l)
-	fmt.println(
-		"abs(wall_tool_drag_start.y + l / 2):",
-		abs(wall_tool_drag_start.y + l / 2 - wall_tool_position.y),
-	)
-	fmt.println(
-		"abs(wall_tool_position.y - wall_tool_drag_start.y):",
 		abs(wall_tool_position.y - wall_tool_drag_start.y),
 	)
 	if abs(wall_tool_position.y - wall_tool_drag_start.y) <= l / 2 ||
@@ -62,12 +54,28 @@ wall_tool_south_west_north_east_update :: proc(
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
 	floor: i32 = 0
 	z := wall_tool_drag_start.y
-	dz: i32 = 0
-	if wall_tool_position.x < wall_tool_drag_start.x {
-		dz = start_x - end_x
-	}
-	for x, i in start_x ..< end_x {
-		fn({x, floor, z + i32(i) + dz})
+
+	if (wall_tool_position.x >= wall_tool_drag_start.x &&
+		   wall_tool_position.y >= wall_tool_drag_start.y) ||
+	   (wall_tool_position.x < wall_tool_drag_start.x &&
+			   wall_tool_position.y < wall_tool_drag_start.y) {
+
+		dz: i32 = 0
+		if wall_tool_position.x < wall_tool_drag_start.x {
+			dz = start_x - end_x
+		}
+		for x, i in start_x ..< end_x {
+			south_west_north_east_fn({x, floor, z + i32(i) + dz})
+		}
+	} else {
+		dz: i32 = -1
+		if wall_tool_position.x < wall_tool_drag_start.x {
+			dz = end_x - start_x - 1
+		}
+
+		for x, i in start_x ..< end_x {
+			north_west_south_east_fn({x, floor, z - i32(i) + dz})
+		}
 	}
 
 	fmt.println("south west north east")
@@ -78,14 +86,24 @@ wall_tool_south_west_north_east_update :: proc(
 wall_tool_north_west_south_east_update :: proc(
 	fn: proc(_: glsl.ivec3),
 ) -> bool {
-	if abs(
-		   wall_tool_drag_start.y -
-		   (wall_tool_position.x - wall_tool_drag_start.x) / 2 -
-		   wall_tool_position.y,
-	   ) >=
-	   abs(wall_tool_position.y - wall_tool_drag_start.y) {
+
+	l := max(
+		abs(wall_tool_position.x - wall_tool_drag_start.x),
+		abs(wall_tool_position.y - wall_tool_drag_start.y),
+	)
+	if abs(wall_tool_position.y - wall_tool_drag_start.y) <= l / 2 ||
+	   abs(wall_tool_position.x - wall_tool_drag_start.x) <= l / 2 {
 		return false
 	}
+
+	// if abs(
+	// 	   wall_tool_drag_start.y -
+	// 	   (wall_tool_position.x - wall_tool_drag_start.x) / 2 -
+	// 	   wall_tool_position.y,
+	//    ) >=
+	//    abs(wall_tool_position.y - wall_tool_drag_start.y) {
+	// 	return false
+	// }
 
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
@@ -140,10 +158,8 @@ wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 wall_tool_update :: proc() {
 	if mouse_is_button_down(.Left) {
 		_ =
-			wall_tool_south_west_north_east_update(
+			wall_tool_diagonal_update(
 				world_remove_south_west_north_east_wall,
-			) ||
-			wall_tool_north_west_south_east_update(
 				world_remove_north_west_south_east_wall,
 			) ||
 			wall_tool_east_west_update(world_remove_east_west_wall) ||
@@ -155,7 +171,7 @@ wall_tool_update :: proc() {
 	if mouse_is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 	} else if mouse_is_button_down(.Left) {
-		_ = wall_tool_south_west_north_east_update(proc(pos: glsl.ivec3) {
+		_ = wall_tool_diagonal_update(proc(pos: glsl.ivec3) {
 				world_set_south_west_north_east_wall(
 					pos,
 					 {
@@ -163,17 +179,15 @@ wall_tool_update :: proc() {
 						textures = {.Inside = .Brick, .Outside = .Brick},
 					},
 				)
-			}) || wall_tool_north_west_south_east_update(
-				proc(pos: glsl.ivec3) {
-					world_set_north_west_south_east_wall(
-						pos,
-						 {
-							type = .Side_Side,
-							textures = {.Inside = .Brick, .Outside = .Brick},
-						},
-					)
-				},
-			) || wall_tool_east_west_update(proc(pos: glsl.ivec3) {
+			}, proc(pos: glsl.ivec3) {
+				world_set_north_west_south_east_wall(
+					pos,
+					 {
+						type = .Side_Side,
+						textures = {.Inside = .Brick, .Outside = .Brick},
+					},
+				)
+			}) || wall_tool_east_west_update(proc(pos: glsl.ivec3) {
 					world_set_east_west_wall(
 						pos,
 						 {
