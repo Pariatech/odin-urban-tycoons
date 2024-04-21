@@ -37,97 +37,91 @@ wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 	billboard_1x1_move(&wall_tool_billboard, position)
 }
 
-wall_tool_diagonal_update :: proc(
+wall_tool_update_walls :: proc(
 	south_west_north_east_fn: proc(_: glsl.ivec3),
 	north_west_south_east_fn: proc(_: glsl.ivec3),
-) -> bool {
+	east_west: proc(_: glsl.ivec3),
+	north_south: proc(_: glsl.ivec3),
+) {
+	if wall_tool_is_diagonal() {
+		wall_tool_diagonal_update(
+			south_west_north_east_fn,
+			north_west_south_east_fn,
+		)
+	} else {
+		wall_tool_cardinal_update(east_west, north_south)
+	}
+}
+
+wall_tool_is_diagonal :: proc() -> bool {
 	l := max(
 		abs(wall_tool_position.x - wall_tool_drag_start.x),
 		abs(wall_tool_position.y - wall_tool_drag_start.y),
 	)
-	if abs(wall_tool_position.y - wall_tool_drag_start.y) <= l / 2 ||
-	   abs(wall_tool_position.x - wall_tool_drag_start.x) <= l / 2 {
-		return false
-	}
+	return(
+		abs(wall_tool_position.y - wall_tool_drag_start.y) > l / 2 &&
+		abs(wall_tool_position.x - wall_tool_drag_start.x) > l / 2 \
+	)
+}
 
-	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
-	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
-	floor: i32 = 0
-	z := wall_tool_drag_start.y
-
+wall_tool_diagonal_update :: proc(
+	south_west_north_east_fn: proc(_: glsl.ivec3),
+	north_west_south_east_fn: proc(_: glsl.ivec3),
+) {
 	if (wall_tool_position.x >= wall_tool_drag_start.x &&
 		   wall_tool_position.y >= wall_tool_drag_start.y) ||
 	   (wall_tool_position.x < wall_tool_drag_start.x &&
 			   wall_tool_position.y < wall_tool_drag_start.y) {
-
-		dz: i32 = 0
-		if wall_tool_position.x < wall_tool_drag_start.x {
-			dz = start_x - end_x
-		}
-		for x, i in start_x ..< end_x {
-			south_west_north_east_fn({x, floor, z + i32(i) + dz})
-		}
+		wall_tool_south_west_north_east_update(south_west_north_east_fn)
 	} else {
-		dz: i32 = -1
-		if wall_tool_position.x < wall_tool_drag_start.x {
-			dz = end_x - start_x - 1
-		}
-
-		for x, i in start_x ..< end_x {
-			north_west_south_east_fn({x, floor, z - i32(i) + dz})
-		}
+		wall_tool_north_west_south_east_update(north_west_south_east_fn)
 	}
-
-	fmt.println("south west north east")
-
-	return true
 }
 
-wall_tool_north_west_south_east_update :: proc(
-	fn: proc(_: glsl.ivec3),
-) -> bool {
-
-	l := max(
-		abs(wall_tool_position.x - wall_tool_drag_start.x),
-		abs(wall_tool_position.y - wall_tool_drag_start.y),
-	)
-	if abs(wall_tool_position.y - wall_tool_drag_start.y) <= l / 2 ||
-	   abs(wall_tool_position.x - wall_tool_drag_start.x) <= l / 2 {
-		return false
-	}
-
-	// if abs(
-	// 	   wall_tool_drag_start.y -
-	// 	   (wall_tool_position.x - wall_tool_drag_start.x) / 2 -
-	// 	   wall_tool_position.y,
-	//    ) >=
-	//    abs(wall_tool_position.y - wall_tool_drag_start.y) {
-	// 	return false
-	// }
-
+wall_tool_south_west_north_east_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
 	floor: i32 = 0
 	z := wall_tool_drag_start.y
+
+	dz: i32 = 0
+	if wall_tool_position.x < wall_tool_drag_start.x {
+		dz = start_x - end_x
+	}
+	for x, i in start_x ..< end_x {
+		fn({x, floor, z + i32(i) + dz})
+	}
+}
+
+wall_tool_north_west_south_east_update :: proc(fn: proc(_: glsl.ivec3)) {
+	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
+	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
+	floor: i32 = 0
+	z := wall_tool_drag_start.y
+
 	dz: i32 = -1
 	if wall_tool_position.x < wall_tool_drag_start.x {
 		dz = end_x - start_x - 1
 	}
+
 	for x, i in start_x ..< end_x {
 		fn({x, floor, z - i32(i) + dz})
 	}
-
-	fmt.println("north west south east")
-
-	return true
 }
 
-wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
+wall_tool_cardinal_update :: proc(
+	east_west: proc(_: glsl.ivec3),
+	north_south: proc(_: glsl.ivec3),
+) {
 	if abs(wall_tool_position.x - wall_tool_drag_start.x) <
 	   abs(wall_tool_position.y - wall_tool_drag_start.y) {
-		return false
+		wall_tool_north_south_update(north_south)
+	} else {
+		wall_tool_east_west_update(east_west)
 	}
+}
 
+wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
 	z := wall_tool_drag_start.y
@@ -135,13 +129,9 @@ wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 	for x in start_x ..< end_x {
 		fn({x, floor, z})
 	}
-
-	fmt.println("east west")
-
-	return true
 }
 
-wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
+wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_z := min(wall_tool_position.y, wall_tool_drag_start.y)
 	end_z := max(wall_tool_position.y, wall_tool_drag_start.y)
 	x := wall_tool_drag_start.x
@@ -149,21 +139,44 @@ wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) -> bool {
 	for z in start_z ..< end_z {
 		fn({x, floor, z})
 	}
+}
 
-	fmt.println("north south")
+wall_tool_set_default_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
+	world_set_south_west_north_east_wall(
+		pos,
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+	)
+}
 
-	return true
+wall_tool_set_default_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
+	world_set_north_west_south_east_wall(
+		pos,
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+	)
+}
+
+wall_tool_set_default_east_west_wall :: proc(pos: glsl.ivec3) {
+	world_set_east_west_wall(
+		pos,
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+	)
+}
+
+wall_tool_set_default_north_south_wall :: proc(pos: glsl.ivec3) {
+	world_set_north_south_wall(
+		pos,
+		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+	)
 }
 
 wall_tool_update :: proc() {
 	if mouse_is_button_down(.Left) {
-		_ =
-			wall_tool_diagonal_update(
-				world_remove_south_west_north_east_wall,
-				world_remove_north_west_south_east_wall,
-			) ||
-			wall_tool_east_west_update(world_remove_east_west_wall) ||
-			wall_tool_north_south_update(world_remove_north_south_wall)
+		wall_tool_update_walls(
+			world_remove_south_west_north_east_wall,
+			world_remove_north_west_south_east_wall,
+			world_remove_east_west_wall,
+			world_remove_north_south_wall,
+		)
 	}
 
 	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
@@ -171,39 +184,12 @@ wall_tool_update :: proc() {
 	if mouse_is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 	} else if mouse_is_button_down(.Left) {
-		_ = wall_tool_diagonal_update(proc(pos: glsl.ivec3) {
-				world_set_south_west_north_east_wall(
-					pos,
-					 {
-						type = .Side_Side,
-						textures = {.Inside = .Brick, .Outside = .Brick},
-					},
-				)
-			}, proc(pos: glsl.ivec3) {
-				world_set_north_west_south_east_wall(
-					pos,
-					 {
-						type = .Side_Side,
-						textures = {.Inside = .Brick, .Outside = .Brick},
-					},
-				)
-			}) || wall_tool_east_west_update(proc(pos: glsl.ivec3) {
-					world_set_east_west_wall(
-						pos,
-						 {
-							type = .Side_Side,
-							textures = {.Inside = .Brick, .Outside = .Brick},
-						},
-					)
-				}) || wall_tool_north_south_update(proc(pos: glsl.ivec3) {
-					world_set_north_south_wall(
-						pos,
-						 {
-							type = .Side_Side,
-							textures = {.Inside = .Brick, .Outside = .Brick},
-						},
-					)
-				})
+		wall_tool_update_walls(
+			wall_tool_set_default_south_west_north_east_wall,
+			wall_tool_set_default_north_west_south_east_wall,
+			wall_tool_set_default_east_west_wall,
+			wall_tool_set_default_north_south_wall,
+		)
 	} else {
 	}
 }
