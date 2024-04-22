@@ -279,9 +279,5 @@ wall_tool_update :: proc() {
 		)
 	} else {
 		wall_tool_drag_start = wall_tool_position
-        clear(&wall_tool_south_west_north_east_walls)
-        clear(&wall_tool_north_west_south_east_walls)
-        clear(&wall_tool_east_west_walls)
-        clear(&wall_tool_north_south_walls)
 	}
 }
