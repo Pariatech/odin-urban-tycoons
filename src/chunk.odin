@@ -480,6 +480,20 @@ chunk_set_north_south_wall :: proc(
 	chunk.walls.dirty = true
 }
 
+chunk_has_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
+	return pos in chunk.walls.north_south
+}
+
+chunk_get_north_south_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.walls.north_south[pos]
+}
+
 chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	delete_key(&chunk.walls.north_south, pos)
 	chunk.walls.dirty = true
@@ -488,6 +502,20 @@ chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: Wall) {
 	chunk.walls.east_west[pos] = wall
 	chunk.walls.dirty = true
+}
+
+chunk_has_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
+	return pos in chunk.walls.east_west
+}
+
+chunk_get_east_west_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.walls.east_west[pos]
 }
 
 chunk_remove_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
@@ -505,6 +533,23 @@ chunk_set_north_west_south_east_wall :: proc(
 	chunk.walls.dirty = true
 }
 
+chunk_has_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> bool {
+	return pos in chunk.walls.north_west_south_east
+}
+
+chunk_get_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.walls.north_west_south_east[pos]
+}
+
 chunk_remove_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
@@ -520,6 +565,23 @@ chunk_set_south_west_north_east_wall :: proc(
 ) {
 	chunk.walls.south_west_north_east[pos] = wall
 	chunk.walls.dirty = true
+}
+
+chunk_has_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> bool {
+	return pos in chunk.walls.south_west_north_east
+}
+
+chunk_get_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.walls.south_west_north_east[pos]
 }
 
 chunk_remove_south_west_north_east_wall :: proc(

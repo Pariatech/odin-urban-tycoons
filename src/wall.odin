@@ -10,19 +10,26 @@ Wall_Axis :: enum {
 	East_West,
 }
 
+Wall_Type_Part :: enum {
+	End,
+	Side,
+	Left_Corner,
+	Right_Corner,
+}
+
 Wall_Type :: enum {
 	End_End,
-	Side_Side,
 	End_Side,
+	End_Left_Corner,
+	End_Right_Corner,
 	Side_End,
 	Left_Corner_End,
-	End_Left_Corner,
 	Right_Corner_End,
-	End_Right_Corner,
-	Left_Corner_Side,
+	Side_Side,
 	Side_Left_Corner,
-	Right_Corner_Side,
 	Side_Right_Corner,
+	Left_Corner_Side,
+	Right_Corner_Side,
 	Left_Corner_Left_Corner,
 	Right_Corner_Right_Corner,
 	Left_Corner_Right_Corner,
@@ -201,6 +208,33 @@ wall_top_vertices := []Wall_Vertex {
 	},
 }
 wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
+
+WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
+	.End =  {
+		.End = .End_End,
+		.Side = .End_Side,
+		.Left_Corner = .End_Left_Corner,
+		.Right_Corner = .End_Right_Corner,
+	},
+	.Side =  {
+		.End = .Side_End,
+		.Side = .Side_Side,
+		.Left_Corner = .Side_Left_Corner,
+		.Right_Corner = .Side_Right_Corner,
+	},
+	.Left_Corner =  {
+		.End = .Left_Corner_End,
+		.Side = .Left_Corner_Side,
+		.Left_Corner = .Left_Corner_Left_Corner,
+		.Right_Corner = .Left_Corner_Right_Corner,
+	},
+	.Right_Corner =  {
+		.End = .Right_Corner_End,
+		.Side = .Right_Corner_Side,
+		.Left_Corner = .Right_Corner_Left_Corner,
+		.Right_Corner = .Right_Corner_Right_Corner,
+	},
+}
 
 WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	.North_South =  {
