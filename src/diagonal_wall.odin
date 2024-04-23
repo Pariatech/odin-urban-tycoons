@@ -477,7 +477,7 @@ DIAGONAL_WALL_TOP_MASK_MAP ::
 				.Side_Right_Corner = .Right_Extension,
 				.Left_Corner_Left_Corner = .Full,
 				.Right_Corner_Right_Corner = .Full,
-				.Left_Corner_Right_Corner = .Left_Extension,
+				.Left_Corner_Right_Corner = .Full,
 				.Right_Corner_Left_Corner = .Full,
 			},
 			.South_East =  {
