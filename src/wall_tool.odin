@@ -312,8 +312,10 @@ wall_tool_set_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
     wall_tool_update_north_west_south_east_wall(pos)
     wall_tool_update_north_west_south_east_wall(pos + {-1, 0, 1})
     wall_tool_update_north_west_south_east_wall(pos + {1, 0, -1})
-	wall_tool_update_south_west_north_east_wall(pos - {1, 0, 1})
-	wall_tool_update_south_west_north_east_wall(pos + {1, 0, 1})
+	wall_tool_update_south_west_north_east_wall(pos + {0, 0, 1})
+	wall_tool_update_south_west_north_east_wall(pos + {0, 0, -1})
+	wall_tool_update_south_west_north_east_wall(pos + {-1, 0, 0})
+	wall_tool_update_south_west_north_east_wall(pos + {1, 0, 0})
 }
 
 wall_tool_set_east_west_wall :: proc(pos: glsl.ivec3) {
