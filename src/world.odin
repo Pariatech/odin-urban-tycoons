@@ -685,6 +685,7 @@ draw_world :: proc() {
 }
 
 world_update_after_rotation :: proc(rotated: Camera_Rotated) {
+	wall_tool_move_cursor()
 	billboard_update_after_rotation()
 	switch rotated {
 	case .Counter_Clockwise:

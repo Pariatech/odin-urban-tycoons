@@ -21,6 +21,7 @@ wall_tool_init :: proc() {
 		{light = {1, 1, 1}, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
 	)
 	cursor_intersect_with_tiles(wall_tool_on_tile_intersect)
+	wall_tool_move_cursor()
 }
 
 wall_tool_deinit :: proc() {
@@ -31,10 +32,6 @@ wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 	wall_tool_position.x = i32(math.ceil(intersect.x))
 	wall_tool_position.y = i32(math.ceil(intersect.z))
 	position := intersect
-	position.x = math.ceil(position.x)
-	position.z = math.ceil(position.z)
-	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
-	billboard_1x1_move(&wall_tool_billboard, position)
 }
 
 wall_tool_update_walls :: proc(
@@ -210,10 +207,7 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 
 	type_map := WALL_SIDE_TYPE_MAP
 	type := type_map[left_type_part][right_type_part]
-	world_set_east_west_wall(
-		pos,
-		{type = type, textures = wall.textures},
-	)
+	world_set_east_west_wall(pos, {type = type, textures = wall.textures})
 }
 
 wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
@@ -257,10 +251,7 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 
 	type_map := WALL_SIDE_TYPE_MAP
 	type := type_map[left_type_part][right_type_part]
-	world_set_north_south_wall(
-		pos,
-		{type = type, textures = wall.textures},
-	)
+	world_set_north_south_wall(pos, {type = type, textures = wall.textures})
 }
 
 wall_tool_update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
@@ -444,7 +435,12 @@ wall_tool_update :: proc() {
 		)
 	}
 
+	previous_tool_position := wall_tool_position
 	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+
+	if previous_tool_position != wall_tool_position {
+		wall_tool_move_cursor()
+	}
 
 	if mouse_is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
@@ -462,4 +458,26 @@ wall_tool_update :: proc() {
 	} else {
 		wall_tool_drag_start = wall_tool_position
 	}
+}
+
+wall_tool_move_cursor :: proc() {
+	position: glsl.vec3
+	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
+
+	switch camera_rotation {
+	case .South_West:
+		position.x = f32(wall_tool_position.x)
+		position.z = f32(wall_tool_position.y)
+	case .South_East:
+		position.x = f32(wall_tool_position.x - 1)
+		position.z = f32(wall_tool_position.y)
+	case .North_East:
+		position.x = f32(wall_tool_position.x - 1)
+		position.z = f32(wall_tool_position.y - 1)
+	case .North_West:
+		position.x = f32(wall_tool_position.x)
+		position.z = f32(wall_tool_position.y - 1)
+	}
+
+	billboard_1x1_move(&wall_tool_billboard, position)
 }
