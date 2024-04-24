@@ -144,6 +144,13 @@ wall_tool_remove_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 		return
 	}
 	world_remove_south_west_north_east_wall(pos)
+
+	wall_tool_update_south_west_north_east_wall(pos - {1, 0, 1})
+	wall_tool_update_south_west_north_east_wall(pos + {1, 0, 1})
+	wall_tool_update_north_west_south_east_wall(pos + {0, 0, 1})
+	wall_tool_update_north_west_south_east_wall(pos + {0, 0, -1})
+	wall_tool_update_north_west_south_east_wall(pos + {-1, 0, 0})
+	wall_tool_update_north_west_south_east_wall(pos + {1, 0, 0})
 }
 
 wall_tool_remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
@@ -151,6 +158,13 @@ wall_tool_remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 		return
 	}
 	world_remove_north_west_south_east_wall(pos)
+
+	wall_tool_update_north_west_south_east_wall(pos + {-1, 0, 1})
+	wall_tool_update_north_west_south_east_wall(pos + {1, 0, -1})
+	wall_tool_update_south_west_north_east_wall(pos + {0, 0, 1})
+	wall_tool_update_south_west_north_east_wall(pos + {0, 0, -1})
+	wall_tool_update_south_west_north_east_wall(pos + {-1, 0, 0})
+	wall_tool_update_south_west_north_east_wall(pos + {1, 0, 0})
 }
 
 wall_tool_remove_east_west_wall :: proc(pos: glsl.ivec3) {
@@ -158,6 +172,13 @@ wall_tool_remove_east_west_wall :: proc(pos: glsl.ivec3) {
 		return
 	}
 	world_remove_east_west_wall(pos)
+
+	wall_tool_update_east_west_wall(pos + {-1, 0, 0})
+	wall_tool_update_east_west_wall(pos + {1, 0, 0})
+	wall_tool_update_north_south_wall(pos + {0, 0, -1})
+	wall_tool_update_north_south_wall(pos + {0, 0, 1})
+	wall_tool_update_north_south_wall(pos + {1, 0, -1})
+	wall_tool_update_north_south_wall(pos + {1, 0, 1})
 }
 
 wall_tool_remove_north_south_wall :: proc(pos: glsl.ivec3) {
@@ -165,6 +186,13 @@ wall_tool_remove_north_south_wall :: proc(pos: glsl.ivec3) {
 		return
 	}
 	world_remove_north_south_wall(pos)
+
+	wall_tool_update_north_south_wall(pos + {0, 0, -1})
+	wall_tool_update_north_south_wall(pos + {0, 0, 1})
+	wall_tool_update_east_west_wall(pos + {-1, 0, 0})
+	wall_tool_update_east_west_wall(pos + {1, 0, 0})
+	wall_tool_update_east_west_wall(pos + {-1, 0, 1})
+	wall_tool_update_east_west_wall(pos + {1, 0, 1})
 }
 
 wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
@@ -181,8 +209,12 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 	if world_has_east_west_wall(pos + {-1, 0, 0}) {
 		left_type_part = .Side
 	} else {
-		has_left := world_has_north_south_wall(pos + {0, 0, 0})
-		has_right := world_has_north_south_wall(pos + {0, 0, -1})
+		has_left :=
+			world_has_north_south_wall(pos + {0, 0, 0}) ||
+			world_has_north_west_south_east_wall(pos + {-1, 0, 0})
+		has_right :=
+			world_has_north_south_wall(pos + {0, 0, -1}) ||
+			world_has_south_west_north_east_wall(pos + {-1, 0, -1})
 		if has_left && has_right {
 			left_type_part = .Side
 		} else if has_left {
@@ -195,8 +227,13 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 	if world_has_east_west_wall(pos + {1, 0, 0}) {
 		right_type_part = .Side
 	} else {
-		has_left := world_has_north_south_wall(pos + {1, 0, 0})
-		has_right := world_has_north_south_wall(pos + {1, 0, -1})
+		has_left :=
+			world_has_north_south_wall(pos + {1, 0, 0}) ||
+			world_has_south_west_north_east_wall(pos + {1, 0, 0})
+		has_right :=
+			world_has_north_south_wall(pos + {1, 0, -1}) ||
+			world_has_north_west_south_east_wall(pos + {1, 0, -1})
+
 		if has_left && has_right {
 			right_type_part = .Side
 		} else if has_left {
@@ -225,8 +262,12 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 	if world_has_north_south_wall(pos + {0, 0, 1}) {
 		left_type_part = .Side
 	} else {
-		has_left := world_has_east_west_wall(pos + {-1, 0, 1})
-		has_right := world_has_east_west_wall(pos + {0, 0, 1})
+		has_left :=
+			world_has_east_west_wall(pos + {-1, 0, 1}) ||
+			world_has_north_west_south_east_wall(pos + {-1, 0, 1})
+		has_right :=
+			world_has_east_west_wall(pos + {0, 0, 1}) ||
+			world_has_south_west_north_east_wall(pos + {0, 0, 1})
 		if has_left && has_right {
 			left_type_part = .Side
 		} else if has_left {
@@ -239,8 +280,13 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 	if world_has_north_south_wall(pos + {0, 0, -1}) {
 		right_type_part = .Side
 	} else {
-		has_left := world_has_east_west_wall(pos + {-1, 0, 0})
-		has_right := world_has_east_west_wall(pos + {0, 0, 0})
+		has_left :=
+			world_has_east_west_wall(pos + {-1, 0, 0}) ||
+			world_has_south_west_north_east_wall(pos + {-1, 0, -1})
+		has_right :=
+			world_has_east_west_wall(pos + {0, 0, 0}) ||
+			world_has_north_west_south_east_wall(pos + {0, 0, -1})
+
 		if has_left && has_right {
 			right_type_part = .Side
 		} else if has_left {
