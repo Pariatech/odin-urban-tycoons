@@ -62,6 +62,15 @@ world_get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 	return chunk_get_north_south_wall(world_get_chunk(pos.xz), pos)
 }
 
+world_has_north_south_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		chunk_has_north_south_wall(world_get_chunk(pos.xz), pos) \
+	)
+}
+
 world_remove_north_south_wall :: proc(pos: glsl.ivec3) {
 	chunk_remove_north_south_wall(world_get_chunk(pos.xz), pos)
 }
@@ -74,6 +83,15 @@ world_get_east_west_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 	return chunk_get_east_west_wall(world_get_chunk(pos.xz), pos)
 }
 
+world_has_east_west_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		chunk_has_east_west_wall(world_get_chunk(pos.xz), pos) \
+	)
+}
+
 world_remove_east_west_wall :: proc(pos: glsl.ivec3) {
 	chunk_remove_east_west_wall(world_get_chunk(pos.xz), pos)
 }
@@ -83,7 +101,12 @@ world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
 }
 
 world_has_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> bool {
-	return chunk_has_north_west_south_east_wall(world_get_chunk(pos.xz), pos)
+	return(
+		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		chunk_has_north_west_south_east_wall(world_get_chunk(pos.xz), pos) \
+	)
 }
 
 world_get_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
@@ -99,7 +122,12 @@ world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
 }
 
 world_has_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> bool {
-	return chunk_has_south_west_north_east_wall(world_get_chunk(pos.xz), pos)
+	return(
+		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		chunk_has_south_west_north_east_wall(world_get_chunk(pos.xz), pos) \
+	)
 }
 
 world_get_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
