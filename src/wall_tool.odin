@@ -5,6 +5,7 @@ import "core:math"
 import "core:math/linalg/glsl"
 
 wall_tool_billboard: Billboard_Key
+wall_tool_start_billboard: Maybe(Billboard_Key)
 wall_tool_position: glsl.ivec2
 wall_tool_drag_start: glsl.ivec2
 wall_tool_north_south_walls: map[glsl.ivec3]Wall
@@ -449,6 +450,7 @@ wall_tool_update :: proc() {
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
 	} else if mouse_is_button_down(.Left) {
+		wall_tool_update_drag_start_billboard()
 		wall_tool_update_walls(
 			wall_tool_set_south_west_north_east_wall,
 			wall_tool_set_north_west_south_east_wall,
@@ -456,7 +458,41 @@ wall_tool_update :: proc() {
 			wall_tool_set_north_south_wall,
 		)
 	} else {
+		wall_tool_remove_drag_start_billboard()
 		wall_tool_drag_start = wall_tool_position
+	}
+}
+
+wall_tool_update_drag_start_billboard :: proc() {
+	if wall_tool_start_billboard == nil &&
+	   wall_tool_drag_start != wall_tool_position {
+		wall_tool_start_billboard = Billboard_Key {
+			pos =  {
+				f32(wall_tool_drag_start.x),
+				terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y],
+				f32(wall_tool_drag_start.y),
+			},
+			type = .Wall_Cursor,
+		}
+		billboard_1x1_set(
+			wall_tool_start_billboard.?,
+			 {
+				light = {1, 1, 1},
+				texture = .Wall_Cursor,
+				depth_map = .Wall_Cursor,
+			},
+		)
+	} else if wall_tool_start_billboard != nil &&
+	   wall_tool_drag_start == wall_tool_position {
+		wall_tool_start_billboard = nil
+	}
+}
+
+wall_tool_remove_drag_start_billboard :: proc() {
+	if wall_tool_start_billboard != nil &&
+	   wall_tool_drag_start != wall_tool_position {
+		billboard_1x1_remove(wall_tool_start_billboard.?)
+		wall_tool_start_billboard = nil
 	}
 }
 
