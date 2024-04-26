@@ -753,7 +753,7 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(
 		gl.TEXTURE_2D_ARRAY,
 		gl.TEXTURE_MIN_FILTER,
-		gl.LINEAR_MIPMAP_LINEAR,
+		gl.NEAREST_MIPMAP_LINEAR,
 	)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	max_anisotropy: f32

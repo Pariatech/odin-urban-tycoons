@@ -32,6 +32,7 @@ Wall_Texture :: enum (u16) {
 	Brick,
 	Varg,
 	Nyana,
+    Frame,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -73,6 +74,7 @@ wall_texture_paths :: [Wall_Texture]cstring {
 	.Brick    = "resources/textures/walls/brick-wall.png",
 	.Varg     = "resources/textures/walls/varg-wall.png",
 	.Nyana    = "resources/textures/walls/nyana-wall.png",
+	.Frame    = "resources/textures/walls/frame.png",
 }
 
 wall_mask_paths :: [Wall_Mask_Texture]cstring {

@@ -677,10 +677,8 @@ draw_world :: proc() {
 
 	gl.UseProgram(shader_program)
 
-	world_draw_walls()
-	// draw_diagonal_walls()
-
 	world_draw_tiles()
+	world_draw_walls()
 	world_draw_billboards()
 }
 

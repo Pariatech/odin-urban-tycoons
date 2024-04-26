@@ -209,12 +209,10 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 	if world_has_east_west_wall(pos + {-1, 0, 0}) {
 		left_type_part = .Side
 	} else {
-		has_left :=
-			world_has_north_south_wall(pos + {0, 0, 0}) 
-            // || world_has_north_west_south_east_wall(pos + {-1, 0, 0})
-		has_right :=
-			world_has_north_south_wall(pos + {0, 0, -1}) 
-            // || world_has_south_west_north_east_wall(pos + {-1, 0, -1})
+		has_left := world_has_north_south_wall(pos + {0, 0, 0})
+		// || world_has_north_west_south_east_wall(pos + {-1, 0, 0})
+		has_right := world_has_north_south_wall(pos + {0, 0, -1})
+		// || world_has_south_west_north_east_wall(pos + {-1, 0, -1})
 		if has_left && has_right {
 			left_type_part = .Side
 		} else if has_left {
@@ -227,12 +225,8 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 	if world_has_east_west_wall(pos + {1, 0, 0}) {
 		right_type_part = .Side
 	} else {
-		has_left :=
-			world_has_north_south_wall(pos + {1, 0, 0}) 
-            // || world_has_south_west_north_east_wall(pos + {1, 0, 0})
-		has_right :=
-			world_has_north_south_wall(pos + {1, 0, -1}) 
-            // || world_has_north_west_south_east_wall(pos + {1, 0, -1})
+		has_left := world_has_north_south_wall(pos + {1, 0, 0})
+		has_right := world_has_north_south_wall(pos + {1, 0, -1})
 
 		if has_left && has_right {
 			right_type_part = .Side
@@ -262,12 +256,8 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 	if world_has_north_south_wall(pos + {0, 0, 1}) {
 		left_type_part = .Side
 	} else {
-		has_left :=
-			world_has_east_west_wall(pos + {-1, 0, 1}) 
-            // || world_has_north_west_south_east_wall(pos + {-1, 0, 1})
-		has_right :=
-			world_has_east_west_wall(pos + {0, 0, 1}) 
-            // || world_has_south_west_north_east_wall(pos + {0, 0, 1})
+		has_left := world_has_east_west_wall(pos + {-1, 0, 1})
+		has_right := world_has_east_west_wall(pos + {0, 0, 1})
 		if has_left && has_right {
 			left_type_part = .Side
 		} else if has_left {
@@ -280,12 +270,8 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 	if world_has_north_south_wall(pos + {0, 0, -1}) {
 		right_type_part = .Side
 	} else {
-		has_left :=
-			world_has_east_west_wall(pos + {-1, 0, 0}) 
-            // || world_has_south_west_north_east_wall(pos + {-1, 0, -1})
-		has_right :=
-			world_has_east_west_wall(pos + {0, 0, 0}) 
-            // || world_has_north_west_south_east_wall(pos + {0, 0, -1})
+		has_left := world_has_east_west_wall(pos + {-1, 0, 0})
+		has_right := world_has_east_west_wall(pos + {0, 0, 0})
 
 		if has_left && has_right {
 			right_type_part = .Side
@@ -395,7 +381,18 @@ wall_tool_update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 	)
 }
 
-wall_tool_set_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
+wall_tool_set_south_west_north_east_wall_frame :: proc(pos: glsl.ivec3) {
+	wall_tool_set_south_west_north_east_wall(pos, .Frame)
+}
+
+wall_tool_set_south_west_north_east_wall_drywall :: proc(pos: glsl.ivec3) {
+	wall_tool_set_south_west_north_east_wall(pos, .Brick)
+}
+
+wall_tool_set_south_west_north_east_wall :: proc(
+	pos: glsl.ivec3,
+	texture: Wall_Texture,
+) {
 	if wall, ok := world_get_south_west_north_east_wall(pos); ok {
 		wall_tool_south_west_north_east_walls[pos] = wall
 		return
@@ -403,7 +400,10 @@ wall_tool_set_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 
 	world_set_south_west_north_east_wall(
 		pos,
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+		 {
+			type = .Side_Side,
+			textures = {.Inside = texture, .Outside = texture},
+		},
 	)
 
 	wall_tool_update_south_west_north_east_wall(pos)
@@ -415,14 +415,28 @@ wall_tool_set_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 	wall_tool_update_north_west_south_east_wall(pos + {1, 0, 0})
 }
 
-wall_tool_set_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
+wall_tool_set_north_west_south_east_wall_frame :: proc(pos: glsl.ivec3) {
+	wall_tool_set_north_west_south_east_wall(pos, .Frame)
+}
+
+wall_tool_set_north_west_south_east_wall_drywall :: proc(pos: glsl.ivec3) {
+	wall_tool_set_north_west_south_east_wall(pos, .Brick)
+}
+
+wall_tool_set_north_west_south_east_wall :: proc(
+	pos: glsl.ivec3,
+	texture: Wall_Texture,
+) {
 	if wall, ok := world_get_north_west_south_east_wall(pos); ok {
 		wall_tool_north_west_south_east_walls[pos] = wall
 		return
 	}
 	world_set_north_west_south_east_wall(
 		pos,
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+		 {
+			type = .Side_Side,
+			textures = {.Inside = texture, .Outside = texture},
+		},
 	)
 
 	wall_tool_update_north_west_south_east_wall(pos)
@@ -434,14 +448,25 @@ wall_tool_set_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 	wall_tool_update_south_west_north_east_wall(pos + {1, 0, 0})
 }
 
-wall_tool_set_east_west_wall :: proc(pos: glsl.ivec3) {
+wall_tool_set_east_west_wall_frame :: proc(pos: glsl.ivec3) {
+	wall_tool_set_east_west_wall(pos, .Frame)
+}
+
+wall_tool_set_east_west_wall_drywall :: proc(pos: glsl.ivec3) {
+	wall_tool_set_east_west_wall(pos, .Brick)
+}
+
+wall_tool_set_east_west_wall :: proc(pos: glsl.ivec3, texture: Wall_Texture) {
 	if wall, ok := world_get_east_west_wall(pos); ok {
 		wall_tool_east_west_walls[pos] = wall
 		return
 	}
 	world_set_east_west_wall(
 		pos,
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+		 {
+			type = .Side_Side,
+			textures = {.Inside = texture, .Outside = texture},
+		},
 	)
 
 	wall_tool_update_east_west_wall(pos)
@@ -453,14 +478,28 @@ wall_tool_set_east_west_wall :: proc(pos: glsl.ivec3) {
 	wall_tool_update_north_south_wall(pos + {1, 0, 1})
 }
 
-wall_tool_set_north_south_wall :: proc(pos: glsl.ivec3) {
+wall_tool_set_north_south_wall_frame :: proc(pos: glsl.ivec3) {
+	wall_tool_set_north_south_wall(pos, .Frame)
+}
+
+wall_tool_set_north_south_wall_drywall :: proc(pos: glsl.ivec3) {
+	wall_tool_set_north_south_wall(pos, .Brick)
+}
+
+wall_tool_set_north_south_wall :: proc(
+	pos: glsl.ivec3,
+	texture: Wall_Texture,
+) {
 	if wall, ok := world_get_north_south_wall(pos); ok {
 		wall_tool_north_south_walls[pos] = wall
 		return
 	}
 	world_set_north_south_wall(
 		pos,
-		{type = .Side_Side, textures = {.Inside = .Brick, .Outside = .Brick}},
+		 {
+			type = .Side_Side,
+			textures = {.Inside = texture, .Outside = texture},
+		},
 	)
 
 	wall_tool_update_north_south_wall(pos)
@@ -473,7 +512,7 @@ wall_tool_set_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_update :: proc() {
-	if mouse_is_button_down(.Left) {
+	if mouse_is_button_down(.Left) || mouse_is_button_release(.Left) {
 		wall_tool_update_walls(
 			wall_tool_remove_south_west_north_east_wall,
 			wall_tool_remove_north_west_south_east_wall,
@@ -498,10 +537,17 @@ wall_tool_update :: proc() {
 	} else if mouse_is_button_down(.Left) {
 		wall_tool_update_drag_start_billboard()
 		wall_tool_update_walls(
-			wall_tool_set_south_west_north_east_wall,
-			wall_tool_set_north_west_south_east_wall,
-			wall_tool_set_east_west_wall,
-			wall_tool_set_north_south_wall,
+			wall_tool_set_south_west_north_east_wall_frame,
+			wall_tool_set_north_west_south_east_wall_frame,
+			wall_tool_set_east_west_wall_frame,
+			wall_tool_set_north_south_wall_frame,
+		)
+	} else if mouse_is_button_release(.Left) {
+		wall_tool_update_walls(
+			wall_tool_set_south_west_north_east_wall_drywall,
+			wall_tool_set_north_west_south_east_wall_drywall,
+			wall_tool_set_east_west_wall_drywall,
+			wall_tool_set_north_south_wall_drywall,
 		)
 	} else {
 		wall_tool_remove_drag_start_billboard()
