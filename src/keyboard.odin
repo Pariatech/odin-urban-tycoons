@@ -168,6 +168,11 @@ is_key_press :: proc(key: Key_Value) -> bool {
 	return ok && state == .Press
 }
 
+is_key_release :: proc(key: Key_Value) -> bool {
+	state, ok := key_map[key]
+	return ok && state == .Release
+}
+
 on_key :: proc "c" (
 	window: glfw.WindowHandle,
 	key: c.int,

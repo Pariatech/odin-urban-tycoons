@@ -397,10 +397,23 @@ chunk_iterator_next :: proc(
 		0,
 		i32(iterator.pos.y * CHUNK_DEPTH),
 	}
-	iterator.pos.x += 1
-	if iterator.pos.x >= iterator.end.x {
-		iterator.pos.x = iterator.start.x
-		iterator.pos.y += 1
+	if camera_rotation == .South_West || camera_rotation == .South_East {
+		iterator.pos.x -= 1
+	} else {
+		iterator.pos.x += 1
+	}
+	if iterator.pos.x >= iterator.end.x || iterator.pos.x < iterator.start.x {
+		if iterator.pos.x < iterator.start.x {
+			iterator.pos.x = iterator.end.x - 1
+		} else {
+			iterator.pos.x = iterator.start.x
+		}
+
+		if camera_rotation == .South_West || camera_rotation == .North_West {
+			iterator.pos.y -= 1
+		} else {
+			iterator.pos.y += 1
+		}
 	}
 	return
 }

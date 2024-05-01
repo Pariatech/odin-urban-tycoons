@@ -143,13 +143,25 @@ world_iterate_all_chunks :: proc() -> Chunk_Iterator {
 }
 
 world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
-	return(
-		 {
-			world_visible_chunks_start,
-			world_visible_chunks_start,
-			world_visible_chunks_end,
-		} \
-	)
+	it := Chunk_Iterator{}
+
+	switch camera_rotation {
+	case .South_West:
+		it.pos = world_visible_chunks_end - {1, 1}
+	case .South_East:
+		it.pos.x = world_visible_chunks_end.x - 1
+		it.pos.y = world_visible_chunks_start.y
+	case .North_East:
+		it.pos = world_visible_chunks_start
+	case .North_West:
+		it.pos.x = world_visible_chunks_start.x
+		it.pos.y = world_visible_chunks_end.y - 1
+	}
+
+	it.start = world_visible_chunks_start
+	it.end = world_visible_chunks_end
+
+	return it
 }
 
 world_draw_walls :: proc() {
@@ -170,11 +182,13 @@ world_draw_tiles :: proc() {
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
+	// gl.Disable(gl.BLEND)
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
 		chunk_draw_tiles(chunk, chunk_pos)
 	}
+	// gl.Enable(gl.BLEND)
 }
 
 world_draw_billboards :: proc() {
