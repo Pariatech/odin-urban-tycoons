@@ -135,7 +135,6 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
-            if index.pos.y > 0 do fmt.println(index.pos.y)
 			for i in 0 ..< 3 {
 				heights[i] += f32(index.pos.y * WALL_HEIGHT)
 			}

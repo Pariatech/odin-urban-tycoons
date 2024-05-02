@@ -164,7 +164,7 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 	return it
 }
 
-world_draw_walls :: proc() {
+world_draw_walls :: proc(floor: int) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -172,14 +172,12 @@ world_draw_walls :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		for floor in 0 ..< CHUNK_HEIGHT {
-			chunk_draw_walls(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
-		}
+		chunk_draw_walls(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
 	}
 }
 
 
-world_draw_tiles :: proc() {
+world_draw_tiles :: proc(floor: int) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -188,14 +186,12 @@ world_draw_tiles :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		for floor in 0 ..< CHUNK_HEIGHT {
-			chunk_draw_tiles(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
-		}
+		chunk_draw_tiles(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
 	}
 	// gl.Enable(gl.BLEND)
 }
 
-world_draw_billboards :: proc() {
+world_draw_billboards :: proc(floor: int) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
 
@@ -227,12 +223,10 @@ world_draw_billboards :: proc() {
 
 	billboards_1x1_it := chunks_it
 	for chunk in chunk_iterator_next(&billboards_1x1_it) {
-		for floor in 0 ..< CHUNK_HEIGHT {
-			chunk_billboards_draw(
-				&chunk.floors[floor].billboards_1x1,
-				billboard_1x1_draw_context,
-			)
-		}
+		chunk_billboards_draw(
+			&chunk.floors[floor].billboards_1x1,
+			billboard_1x1_draw_context,
+		)
 	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -249,12 +243,10 @@ world_draw_billboards :: proc() {
 
 	billboards_2x2_it := chunks_it
 	for chunk in chunk_iterator_next(&billboards_2x2_it) {
-		for floor in 0 ..< CHUNK_HEIGHT {
-			chunk_billboards_draw(
-				&chunk.floors[floor].billboards_2x2,
-				billboard_1x1_draw_context,
-			)
-		}
+		chunk_billboards_draw(
+			&chunk.floors[floor].billboards_2x2,
+			billboard_1x1_draw_context,
+		)
 	}
 }
 
@@ -697,11 +689,13 @@ draw_world :: proc() {
 		&uniform_object,
 	)
 
-	gl.UseProgram(shader_program)
 
-	world_draw_tiles()
-	world_draw_walls()
-	world_draw_billboards()
+	for floor in 0 ..< CHUNK_HEIGHT {
+	    gl.UseProgram(shader_program)
+		world_draw_tiles(floor)
+		world_draw_walls(floor)
+		world_draw_billboards(floor)
+	}
 }
 
 world_update_after_rotation :: proc(rotated: Camera_Rotated) {
