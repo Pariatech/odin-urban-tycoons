@@ -68,7 +68,9 @@ terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 
 	for i in start.x ..= end.x {
 		for j in start.y ..= end.y {
-			world_chunks[i][j].tiles.dirty = true
+			for floor in 0 ..< CHUNK_HEIGHT {
+				world_chunks[i][j].floors[floor].tiles.dirty = true
+			}
 		}
 	}
 }

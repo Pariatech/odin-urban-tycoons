@@ -172,7 +172,9 @@ world_draw_walls :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		chunk_draw_walls(chunk, chunk_pos)
+		for floor in 0 ..< CHUNK_HEIGHT {
+			chunk_draw_walls(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
+		}
 	}
 }
 
@@ -186,7 +188,9 @@ world_draw_tiles :: proc() {
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		chunk_draw_tiles(chunk, chunk_pos)
+		for floor in 0 ..< CHUNK_HEIGHT {
+			chunk_draw_tiles(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
+		}
 	}
 	// gl.Enable(gl.BLEND)
 }
@@ -223,10 +227,12 @@ world_draw_billboards :: proc() {
 
 	billboards_1x1_it := chunks_it
 	for chunk in chunk_iterator_next(&billboards_1x1_it) {
-		chunk_billboards_draw(
-			&chunk.billboards_1x1,
-			billboard_1x1_draw_context,
-		)
+		for floor in 0 ..< CHUNK_HEIGHT {
+			chunk_billboards_draw(
+				&chunk.floors[floor].billboards_1x1,
+				billboard_1x1_draw_context,
+			)
+		}
 	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -243,10 +249,12 @@ world_draw_billboards :: proc() {
 
 	billboards_2x2_it := chunks_it
 	for chunk in chunk_iterator_next(&billboards_2x2_it) {
-		chunk_billboards_draw(
-			&chunk.billboards_2x2,
-			billboard_1x1_draw_context,
-		)
+		for floor in 0 ..< CHUNK_HEIGHT {
+			chunk_billboards_draw(
+				&chunk.floors[floor].billboards_2x2,
+				billboard_1x1_draw_context,
+			)
+		}
 	}
 }
 
@@ -707,7 +715,9 @@ world_update_after_rotation :: proc(rotated: Camera_Rotated) {
 	}
 	for row in &world_chunks {
 		for chunk in &row {
-			chunk.walls.dirty = true
+			for floor in 0 ..< CHUNK_HEIGHT {
+				chunk.floors[floor].walls.dirty = true
+			}
 		}
 	}
 }
@@ -715,12 +725,14 @@ world_update_after_rotation :: proc(rotated: Camera_Rotated) {
 world_update_after_clockwise_rotation :: proc() {
 	for row in &world_chunks {
 		for chunk in &row {
-			chunk_billboards_update_after_clockwise_rotation_1x1(
-				&chunk.billboards_1x1,
-			)
-			chunk_billboards_update_after_clockwise_rotation_2x2(
-				&chunk.billboards_2x2,
-			)
+			for floor in 0 ..< CHUNK_HEIGHT {
+				chunk_billboards_update_after_clockwise_rotation_1x1(
+					&chunk.floors[floor].billboards_1x1,
+				)
+				chunk_billboards_update_after_clockwise_rotation_2x2(
+					&chunk.floors[floor].billboards_2x2,
+				)
+			}
 		}
 	}
 }
@@ -750,12 +762,14 @@ chunk_billboards_update_after_clockwise_rotation_2x2 :: proc(
 world_update_after_counter_clockwise_rotation :: proc() {
 	for row in &world_chunks {
 		for chunk in &row {
-			chunk_billboards_update_after_counter_clockwise_rotation_1x1(
-				&chunk.billboards_1x1,
-			)
-			chunk_billboards_update_after_counter_clockwise_rotation_2x2(
-				&chunk.billboards_2x2,
-			)
+			for floor in 0 ..< CHUNK_HEIGHT {
+				chunk_billboards_update_after_counter_clockwise_rotation_1x1(
+					&chunk.floors[floor].billboards_1x1,
+				)
+				chunk_billboards_update_after_counter_clockwise_rotation_2x2(
+					&chunk.floors[floor].billboards_2x2,
+				)
+			}
 		}
 	}
 }

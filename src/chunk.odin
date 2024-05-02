@@ -9,7 +9,7 @@ CHUNK_DEPTH :: 8
 CHUNK_HEIGHT :: 8
 
 Chunk_Tiles :: struct {
-	triangles:     [CHUNK_HEIGHT][CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
+	triangles:     [CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
 		Tile_Triangle,
 	),
 	dirty:         bool,
@@ -19,10 +19,10 @@ Chunk_Tiles :: struct {
 }
 
 Chunk_Walls :: struct {
-	north_south:           map[glsl.ivec3]Wall,
-	east_west:             map[glsl.ivec3]Wall,
-	south_west_north_east: map[glsl.ivec3]Wall,
-	north_west_south_east: map[glsl.ivec3]Wall,
+	north_south:           map[glsl.ivec2]Wall,
+	east_west:             map[glsl.ivec2]Wall,
+	south_west_north_east: map[glsl.ivec2]Wall,
+	north_west_south_east: map[glsl.ivec2]Wall,
 	vao, vbo, ebo:         u32,
 	dirty:                 bool,
 	initialized:           bool,
@@ -36,11 +36,15 @@ Chunk_Billboards :: struct($T: typeid) {
 	initialized: bool,
 }
 
-Chunk :: struct {
+Chunk_Floor :: struct {
 	tiles:          Chunk_Tiles,
 	walls:          Chunk_Walls,
 	billboards_1x1: Chunk_Billboards(Billboard_1x1),
 	billboards_2x2: Chunk_Billboards(Billboard_2x2),
+}
+
+Chunk :: struct {
+	floors: [CHUNK_HEIGHT]Chunk_Floor,
 }
 
 Chunk_Iterator :: struct {
@@ -66,15 +70,16 @@ Chunk_Tile_Triangle_Iterator_Index :: struct {
 }
 
 chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-	if !chunk.tiles.initialized {
-		chunk.tiles.initialized = true
-		chunk.tiles.dirty = true
-		gl.GenVertexArrays(1, &chunk.tiles.vao)
-		gl.BindVertexArray(chunk.tiles.vao)
-		gl.GenBuffers(1, &chunk.tiles.vbo)
-		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles.vbo)
+	floor := &chunk.floors[pos.y]
+	if !floor.tiles.initialized {
+		floor.tiles.initialized = true
+		floor.tiles.dirty = true
+		gl.GenVertexArrays(1, &floor.tiles.vao)
+		gl.BindVertexArray(floor.tiles.vao)
+		gl.GenBuffers(1, &floor.tiles.vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, floor.tiles.vbo)
 
-		gl.GenBuffers(1, &chunk.tiles.ebo)
+		gl.GenBuffers(1, &floor.tiles.ebo)
 
 		gl.VertexAttribPointer(
 			0,
@@ -107,12 +112,12 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		gl.EnableVertexAttribArray(2)
 	}
 
-	gl.BindVertexArray(chunk.tiles.vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.tiles.vbo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.tiles.ebo)
+	gl.BindVertexArray(floor.tiles.vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, floor.tiles.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, floor.tiles.ebo)
 
-	if chunk.tiles.dirty {
-		chunk.tiles.dirty = false
+	if floor.tiles.dirty {
+		floor.tiles.dirty = false
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
 
 		vertices: [dynamic]Tile_Triangle_Vertex
@@ -130,6 +135,7 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
+            if index.pos.y > 0 do fmt.println(index.pos.y)
 			for i in 0 ..< 3 {
 				heights[i] += f32(index.pos.y * WALL_HEIGHT)
 			}
@@ -159,12 +165,12 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			raw_data(indices),
 			gl.STATIC_DRAW,
 		)
-		chunk.tiles.num_indices = i32(len(indices))
+		floor.tiles.num_indices = i32(len(indices))
 	}
 
 	gl.DrawElements(
 		gl.TRIANGLES,
-		chunk.tiles.num_indices,
+		floor.tiles.num_indices,
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -175,15 +181,16 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 }
 
 chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-	if !chunk.walls.initialized {
-		chunk.walls.initialized = true
-		chunk.walls.dirty = true
-		gl.GenVertexArrays(1, &chunk.walls.vao)
-		gl.BindVertexArray(chunk.walls.vao)
-		gl.GenBuffers(1, &chunk.walls.vbo)
-		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.walls.vbo)
+	floor := &chunk.floors[pos.y]
+	if !floor.walls.initialized {
+		floor.walls.initialized = true
+		floor.walls.dirty = true
+		gl.GenVertexArrays(1, &floor.walls.vao)
+		gl.BindVertexArray(floor.walls.vao)
+		gl.GenBuffers(1, &floor.walls.vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, floor.walls.vbo)
 
-		gl.GenBuffers(1, &chunk.walls.ebo)
+		gl.GenBuffers(1, &floor.walls.ebo)
 
 		gl.VertexAttribPointer(
 			0,
@@ -216,29 +223,41 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		gl.EnableVertexAttribArray(2)
 	}
 
-	gl.BindVertexArray(chunk.walls.vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.walls.vbo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.walls.ebo)
+	gl.BindVertexArray(floor.walls.vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, floor.walls.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, floor.walls.ebo)
 
-	if chunk.walls.dirty {
-		chunk.walls.dirty = false
+	if floor.walls.dirty {
+		floor.walls.dirty = false
 
 		vertices: [dynamic]Wall_Vertex
 		indices: [dynamic]Wall_Index
 		defer delete(vertices)
 		defer delete(indices)
 
-		for pos, wall in chunk.walls.east_west {
-			draw_wall(pos, wall, .East_West, &vertices, &indices)
+		for wall_pos, wall in floor.walls.east_west {
+			draw_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				wall,
+				.East_West,
+				&vertices,
+				&indices,
+			)
 		}
 
-		for pos, wall in chunk.walls.north_south {
-			draw_wall(pos, wall, .North_South, &vertices, &indices)
+		for wall_pos, wall in floor.walls.north_south {
+			draw_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				wall,
+				.North_South,
+				&vertices,
+				&indices,
+			)
 		}
 
-		for pos, wall in chunk.walls.south_west_north_east {
+		for wall_pos, wall in floor.walls.south_west_north_east {
 			draw_diagonal_wall(
-				pos,
+				{wall_pos.x, pos.y, wall_pos.y},
 				wall,
 				.South_West_North_East,
 				&vertices,
@@ -246,9 +265,9 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			)
 		}
 
-		for pos, wall in chunk.walls.north_west_south_east {
+		for wall_pos, wall in floor.walls.north_west_south_east {
 			draw_diagonal_wall(
-				pos,
+				{wall_pos.x, pos.y, wall_pos.y},
 				wall,
 				.North_West_South_East,
 				&vertices,
@@ -269,12 +288,12 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			raw_data(indices),
 			gl.STATIC_DRAW,
 		)
-		chunk.walls.num_indices = i32(len(indices))
+		floor.walls.num_indices = i32(len(indices))
 	}
 
 	gl.DrawElements(
 		gl.TRIANGLES,
-		chunk.walls.num_indices,
+		floor.walls.num_indices,
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -289,10 +308,10 @@ chunk_tile_triangle_iterator_has_next :: proc(
 ) -> bool {
 	return(
 		iterator.pos.x < iterator.end.x &&
-		iterator.pos.y < iterator.end.y &&
+		// iterator.pos.y < iterator.end.y &&
 		iterator.pos.z < iterator.end.z &&
 		iterator.pos.x >= iterator.start.x &&
-		iterator.pos.y >= iterator.start.y &&
+		// iterator.pos.y >= iterator.start.y &&
 		iterator.pos.z >= iterator.start.z \
 	)
 }
@@ -310,7 +329,7 @@ chunk_tile_triangle_iterator_next :: proc(
 		index.side = iterator.side
 
 		value, ok =
-		&iterator.chunk.tiles.triangles[iterator.pos.y][iterator.pos.x][iterator.pos.z][iterator.side].?
+		&iterator.chunk.floors[iterator.pos.y].tiles.triangles[iterator.pos.x][iterator.pos.z][iterator.side].?
 
 		index.pos = iterator.chunk_pos + iterator.pos
 		switch iterator.side {
@@ -330,11 +349,11 @@ chunk_tile_triangle_iterator_next :: proc(
 			iterator.pos.z += 1
 		}
 
-		if iterator.pos.z >= iterator.end.z {
-			iterator.pos.x = iterator.start.x
-			iterator.pos.z = iterator.start.z
-			iterator.pos.y += 1
-		}
+		// if iterator.pos.z >= iterator.end.z {
+		// 	iterator.pos.x = iterator.start.x
+		// 	iterator.pos.z = iterator.start.z
+		// 	iterator.pos.y += 1
+		// }
 	}
 
 	return
@@ -349,9 +368,9 @@ chunk_iterate_all_tile_triangle :: proc(
 	return(
 		 {
 			chunk = chunk,
-			chunk_pos = chunk_pos,
-			pos = {0, 0, 0},
-			start = {0, 0, 0},
+			chunk_pos = {chunk_pos.x, 0, chunk_pos.z},
+			pos = {0, chunk_pos.y, 0},
+			start = {0, chunk_pos.y, 0},
 			end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
 		} \
 	)
@@ -435,7 +454,7 @@ chunk_init :: proc(chunk: ^Chunk) {
 	for x in 0 ..< CHUNK_WIDTH {
 		for z in 0 ..< CHUNK_DEPTH {
 			for side in Tile_Triangle_Side {
-				chunk.tiles.triangles[0][x][z][side] = Tile_Triangle {
+				chunk.floors[0].tiles.triangles[x][z][side] = Tile_Triangle {
 					texture      = .Grass,
 					mask_texture = .Grid_Mask,
 				}
@@ -449,7 +468,7 @@ chunk_get_tile :: proc(
 	pos: glsl.ivec3,
 ) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
 	return(
-		&chunk.tiles.triangles[pos.y][pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH] \
+		&chunk.floors[pos.y].tiles.triangles[pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH] \
 	)
 }
 
@@ -489,12 +508,12 @@ chunk_set_north_south_wall :: proc(
 	pos: glsl.ivec3,
 	wall: Wall,
 ) {
-	chunk.walls.north_south[pos] = wall
-	chunk.walls.dirty = true
+	chunk.floors[pos.y].walls.north_south[pos.xz] = wall
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_has_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
-	return pos in chunk.walls.north_south
+	return pos.xz in chunk.floors[pos.y].walls.north_south
 }
 
 chunk_get_north_south_wall :: proc(
@@ -504,21 +523,21 @@ chunk_get_north_south_wall :: proc(
 	Wall,
 	bool,
 ) {
-	return chunk.walls.north_south[pos]
+	return chunk.floors[pos.y].walls.north_south[pos.xz]
 }
 
 chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-	delete_key(&chunk.walls.north_south, pos)
-	chunk.walls.dirty = true
+	delete_key(&chunk.floors[pos.y].walls.north_south, glsl.ivec2(pos.xz))
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: Wall) {
-	chunk.walls.east_west[pos] = wall
-	chunk.walls.dirty = true
+	chunk.floors[pos.y].walls.east_west[pos.xz] = wall
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_has_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
-	return pos in chunk.walls.east_west
+	return pos.xz in chunk.floors[pos.y].walls.east_west
 }
 
 chunk_get_east_west_wall :: proc(
@@ -528,12 +547,12 @@ chunk_get_east_west_wall :: proc(
 	Wall,
 	bool,
 ) {
-	return chunk.walls.east_west[pos]
+	return chunk.floors[pos.y].walls.east_west[pos.xz]
 }
 
 chunk_remove_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-	delete_key(&chunk.walls.east_west, pos)
-	chunk.walls.dirty = true
+	delete_key(&chunk.floors[pos.y].walls.east_west, glsl.ivec2(pos.xz))
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 
@@ -542,15 +561,15 @@ chunk_set_north_west_south_east_wall :: proc(
 	pos: glsl.ivec3,
 	wall: Wall,
 ) {
-	chunk.walls.north_west_south_east[pos] = wall
-	chunk.walls.dirty = true
+	chunk.floors[pos.y].walls.north_west_south_east[pos.xz] = wall
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_has_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> bool {
-	return pos in chunk.walls.north_west_south_east
+	return pos.xz in chunk.floors[pos.y].walls.north_west_south_east
 }
 
 chunk_get_north_west_south_east_wall :: proc(
@@ -560,15 +579,15 @@ chunk_get_north_west_south_east_wall :: proc(
 	Wall,
 	bool,
 ) {
-	return chunk.walls.north_west_south_east[pos]
+	return chunk.floors[pos.y].walls.north_west_south_east[pos.xz]
 }
 
 chunk_remove_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
-	delete_key(&chunk.walls.north_west_south_east, pos)
-	chunk.walls.dirty = true
+	delete_key(&chunk.floors[pos.y].walls.north_west_south_east, glsl.ivec2(pos.xz))
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_set_south_west_north_east_wall :: proc(
@@ -576,15 +595,15 @@ chunk_set_south_west_north_east_wall :: proc(
 	pos: glsl.ivec3,
 	wall: Wall,
 ) {
-	chunk.walls.south_west_north_east[pos] = wall
-	chunk.walls.dirty = true
+	chunk.floors[pos.y].walls.south_west_north_east[pos.xz] = wall
+	chunk.floors[pos.y].walls.dirty = true
 }
 
 chunk_has_south_west_north_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> bool {
-	return pos in chunk.walls.south_west_north_east
+	return pos.xz in chunk.floors[pos.y].walls.south_west_north_east
 }
 
 chunk_get_south_west_north_east_wall :: proc(
@@ -594,13 +613,13 @@ chunk_get_south_west_north_east_wall :: proc(
 	Wall,
 	bool,
 ) {
-	return chunk.walls.south_west_north_east[pos]
+	return chunk.floors[pos.y].walls.south_west_north_east[pos.xz]
 }
 
 chunk_remove_south_west_north_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
-	delete_key(&chunk.walls.south_west_north_east, pos)
-	chunk.walls.dirty = true
+	delete_key(&chunk.floors[pos.y].walls.south_west_north_east, glsl.ivec2(pos.xz))
+	chunk.floors[pos.y].walls.dirty = true
 }

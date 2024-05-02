@@ -21,10 +21,10 @@ floor_update :: proc() {
 			for x in 0 ..< WORLD_CHUNK_WIDTH {
 				for z in 0 ..< WORLD_CHUNK_DEPTH {
 					chunk := &world_chunks[x][z]
-                    chunk.tiles.dirty = true
+                    chunk.floors[previous_floor].tiles.dirty = true
 					for x in 0 ..< CHUNK_WIDTH {
 						for z in 0 ..< CHUNK_DEPTH {
-							tile := &chunk.tiles.triangles[previous_floor][x][z]
+							tile := &chunk.floors[previous_floor].tiles.triangles[x][z]
 							for tri, side in tile {
 								if triangle, ok := tri.?; ok {
 									if triangle.texture == .Floor_Marker {
@@ -42,10 +42,10 @@ floor_update :: proc() {
 			for x in 0 ..< WORLD_CHUNK_WIDTH {
 				for z in 0 ..< WORLD_CHUNK_DEPTH {
 					chunk := &world_chunks[x][z]
-                    chunk.tiles.dirty = true
+                    chunk.floors[floor].tiles.dirty = true
 					for x in 0 ..< CHUNK_WIDTH {
 						for z in 0 ..< CHUNK_DEPTH {
-							tile := &chunk.tiles.triangles[floor][x][z]
+							tile := &chunk.floors[floor].tiles.triangles[x][z]
 							for tri, side in tile {
 								if tri == nil {
 									tile[side] = Tile_Triangle {

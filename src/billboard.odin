@@ -618,40 +618,50 @@ billboard_1x1_set_texture :: proc(
 	key: Billboard_Key,
 	texture: Billboard_Texture_1x1,
 ) {
+    floor := get_floor_from_vec3(key.pos)
 	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	billboard, ok := &chunk.billboards_1x1.instances[key]
+	billboard, ok := &chunk.floors[floor].billboards_1x1.instances[key]
 	if ok {
 		billboard.texture = texture
-		chunk.billboards_1x1.dirty = true
+		chunk.floors[floor].billboards_1x1.dirty = true
 	}
 }
 
 billboard_1x1_remove :: proc(key: Billboard_Key) {
+    floor := get_floor_from_vec3(key.pos)
 	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	delete_key(&chunk.billboards_1x1.instances, key)
-	chunk.billboards_1x1.dirty = true
+	delete_key(&chunk.floors[floor].billboards_1x1.instances, key)
+	chunk.floors[floor].billboards_1x1.dirty = true
+}
+
+get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
+    terrain_height := get_terrain_height({i32(pos.x), i32(pos.z)})
+    return clamp(int((pos.y - terrain_height) / WALL_HEIGHT), 0, CHUNK_HEIGHT - 1)
 }
 
 billboard_1x1_move :: proc(of: ^Billboard_Key, to: glsl.vec3) {
+    of_floor := get_floor_from_vec3(of.pos)
+    to_floor := get_floor_from_vec3(to)
 	if of.pos == to {
 		return
 	}
 	from_chunk := world_get_chunk({i32(of.pos.x), i32(of.pos.z)})
 	to_chunk := world_get_chunk({i32(to.x), i32(to.z)})
-	billboard, ok := from_chunk.billboards_1x1.instances[of^]
+	billboard, ok := from_chunk.floors[of_floor].billboards_1x1.instances[of^]
 	if ok {
-		delete_key(&from_chunk.billboards_1x1.instances, of^)
+		delete_key(&from_chunk.floors[of_floor].billboards_1x1.instances, of^)
 		of.pos = to
-		to_chunk.billboards_1x1.instances[of^] = billboard
-		to_chunk.billboards_1x1.dirty = true
-		from_chunk.billboards_1x1.dirty = true
+		to_chunk.floors[to_floor].billboards_1x1.instances[of^] = billboard
+		to_chunk.floors[to_floor].billboards_1x1.dirty = true
+		from_chunk.floors[of_floor].billboards_1x1.dirty = true
 	}
 }
 
 billboard_1x1_set :: proc(key: Billboard_Key, billboard: Billboard_1x1) {
+    floor := get_floor_from_vec3(key.pos)
 	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	chunk.billboards_1x1.instances[key] = billboard
-	chunk.billboards_1x1.dirty = true
+	chunk.floors[floor].billboards_1x1.instances[key] = billboard
+	chunk.floors[floor].billboards_1x1.dirty = true
 }
 
 chunk_billboards_draw :: proc(

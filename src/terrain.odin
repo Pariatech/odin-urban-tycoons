@@ -1,11 +1,11 @@
 package main
 
 import "core:fmt"
-import m "core:math/linalg/glsl"
+import "core:math/linalg/glsl"
 import "core:math/noise"
 
 terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
-terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]m.vec3
+terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]glsl.vec3
 
 init_terrain :: proc() {
 	set_terrain_height(3, 3, .5)
@@ -18,9 +18,9 @@ init_terrain :: proc() {
 }
 
 calculate_terrain_light :: proc(x, z: int) {
-	normal: m.vec3
+	normal: glsl.vec3
 	if x == 0 && z == 0 {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{-0.5, terrain_heights[x][z], -0.5},
 				{0.5, terrain_heights[x + 1][z], -0.5},
@@ -31,7 +31,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == WORLD_WIDTH && z == WORLD_DEPTH {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{-1.0, terrain_heights[x - 1][z], 0.0},
@@ -42,7 +42,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == 0 && z == WORLD_DEPTH {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z - 1], -1.0},
@@ -53,7 +53,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == 0 && x == WORLD_WIDTH {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z + 1], 1.0},
@@ -64,7 +64,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == 0 {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -80,7 +80,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == 0 {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -96,7 +96,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if x == WORLD_WIDTH {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{0.0, terrain_heights[x][z + 1], 1.0},
@@ -112,7 +112,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else if z == WORLD_DEPTH {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{-1.0, terrain_heights[x - 1][z], 0.0},
@@ -128,7 +128,7 @@ calculate_terrain_light :: proc(x, z: int) {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
 	} else {
-		triangles := [?][3]m.vec3 {
+		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
 				{1.0, terrain_heights[x + 1][z], 0.0},
@@ -155,8 +155,8 @@ calculate_terrain_light :: proc(x, z: int) {
 		}
 	}
 
-	normal = m.normalize(normal)
-	light := clamp(m.dot(m.normalize(sun), normal), 0.2, 1)
+	normal = glsl.normalize(normal)
+	light := clamp(glsl.dot(glsl.normalize(sun), normal), 0.2, 1)
 	// light :f32 = 1.0
 	terrain_lights[x][z] = {light, light, light}
 }
@@ -165,11 +165,11 @@ get_terrain_tile_triangle_lights :: proc(
 	side: Tile_Triangle_Side,
 	x, z, w: int,
 ) -> (
-	lights: [3]m.vec3,
+	lights: [3]glsl.vec3,
 ) {
 	lights = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}
 
-	tile_lights := [4]m.vec3 {
+	tile_lights := [4]glsl.vec3 {
 		terrain_lights[x][z],
 		terrain_lights[x + w][z],
 		terrain_lights[x + w][z + w],
@@ -259,4 +259,8 @@ get_tile_height :: proc(x, z: int) -> f32 {
 set_terrain_height :: proc(x, z: int, height: f32) {
 	if terrain_heights[x][z] == height {return}
 	terrain_heights[x][z] = height
+}
+
+get_terrain_height :: proc(pos: glsl.ivec2) -> f32 {
+    return terrain_heights[pos.x][pos.y]
 }
