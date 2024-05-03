@@ -32,7 +32,6 @@ wall_tool_deinit :: proc() {
 wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
 	wall_tool_position.x = i32(math.ceil(intersect.x))
 	wall_tool_position.y = i32(math.ceil(intersect.z))
-	position := intersect
 }
 
 wall_tool_update_walls_line :: proc(
@@ -60,24 +59,23 @@ wall_tool_update_walls_rectangle :: proc(
 	start_z := min(wall_tool_position.y, wall_tool_drag_start.y)
 	end_z := max(wall_tool_position.y, wall_tool_drag_start.y)
 
-	floor: i32 = 0
 	for z in start_z ..< end_z {
-		north_south({start_x, floor, z})
+		north_south({start_x, i32(floor), z})
 	}
 
 	if start_x != end_x {
 		for z in start_z ..< end_z {
-			north_south({end_x, floor, z})
+			north_south({end_x, i32(floor), z})
 		}
 	}
 
 	for x in start_x ..< end_x {
-		east_west({x, floor, start_z})
+		east_west({x, i32(floor), start_z})
 	}
 
 	if start_z != end_z {
 		for x in start_x ..< end_x {
-			east_west({x, floor, end_z})
+			east_west({x, i32(floor), end_z})
 		}
 	}
 }
@@ -110,7 +108,6 @@ wall_tool_diagonal_update :: proc(
 wall_tool_south_west_north_east_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
-	floor: i32 = 0
 	z := wall_tool_drag_start.y
 
 	dz: i32 = 0
@@ -118,14 +115,13 @@ wall_tool_south_west_north_east_update :: proc(fn: proc(_: glsl.ivec3)) {
 		dz = start_x - end_x
 	}
 	for x, i in start_x ..< end_x {
-		fn({x, floor, z + i32(i) + dz})
+		fn({x, i32(floor), z + i32(i) + dz})
 	}
 }
 
 wall_tool_north_west_south_east_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
-	floor: i32 = 0
 	z := wall_tool_drag_start.y
 
 	dz: i32 = -1
@@ -134,7 +130,7 @@ wall_tool_north_west_south_east_update :: proc(fn: proc(_: glsl.ivec3)) {
 	}
 
 	for x, i in start_x ..< end_x {
-		fn({x, floor, z - i32(i) + dz})
+		fn({x, i32(floor), z - i32(i) + dz})
 	}
 }
 
@@ -154,9 +150,8 @@ wall_tool_east_west_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_x := min(wall_tool_position.x, wall_tool_drag_start.x)
 	end_x := max(wall_tool_position.x, wall_tool_drag_start.x)
 	z := wall_tool_drag_start.y
-	floor: i32 = 0
 	for x in start_x ..< end_x {
-		fn({x, floor, z})
+		fn({x, i32(floor), z})
 	}
 }
 
@@ -164,9 +159,8 @@ wall_tool_north_south_update :: proc(fn: proc(_: glsl.ivec3)) {
 	start_z := min(wall_tool_position.y, wall_tool_drag_start.y)
 	end_z := max(wall_tool_position.y, wall_tool_drag_start.y)
 	x := wall_tool_drag_start.x
-	floor: i32 = 0
 	for z in start_z ..< end_z {
-		fn({x, floor, z})
+		fn({x, i32(floor), z})
 	}
 }
 
@@ -624,7 +618,8 @@ wall_tool_removing_line :: proc() {
 	previous_tool_position := wall_tool_position
 	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
 
-	if previous_tool_position != wall_tool_position {
+	if previous_tool_position != wall_tool_position ||
+	   previous_floor != floor {
 		wall_tool_move_cursor()
 	}
 
@@ -826,7 +821,8 @@ wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 		wall_tool_start_billboard = Billboard_Key {
 			pos =  {
 				f32(wall_tool_drag_start.x),
-				terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y],
+				terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
+				f32(floor) * WALL_HEIGHT,
 				f32(wall_tool_drag_start.y),
 			},
 			type = .Wall_Cursor,
@@ -852,6 +848,7 @@ wall_tool_remove_drag_start_billboard :: proc() {
 wall_tool_move_cursor :: proc() {
 	position: glsl.vec3
 	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
+	position.y += f32(floor) * WALL_HEIGHT
 
 	switch camera_rotation {
 	case .South_West:

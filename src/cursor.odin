@@ -164,7 +164,7 @@ cursor_intersect_with_tile :: proc(
 	x, z: f32,
 	on_intersect: proc(_: glsl.vec3),
 ) -> bool {
-	tile := world_get_tile({i32(x), 0, i32(z)})
+	tile := world_get_tile({i32(x), i32(floor), i32(z)})
 
 	for tile_triangle, side in tile {
 		pos := glsl.vec2{math.floor(x), math.floor(z)}
@@ -173,6 +173,9 @@ cursor_intersect_with_tile :: proc(
 		z := int(pos.y)
 
 		heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+		for h in &heights {
+			h += f32(floor) * WALL_HEIGHT
+		}
 
 		if cursor_intersect_with_tile_triangle(
 			   tile_triangle.?,
@@ -395,7 +398,7 @@ cursor_intersect_with_tiles :: proc(on_intersect: proc(_: glsl.vec3)) {
 
 
 cursor_on_tile_intersect :: proc(on_intersect: proc(_: glsl.vec3)) {
-	if cursor_moved {
+	if cursor_moved || previous_floor != floor {
 		cursor_intersect_with_tiles(on_intersect)
 	}
 }

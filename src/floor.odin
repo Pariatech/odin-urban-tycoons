@@ -6,10 +6,11 @@ import "core:testing"
 
 FLOOR_OFFSET :: 0.0004
 
+previous_floor: int
 floor: int
 
 floor_update :: proc() {
-	previous_floor := floor
+	previous_floor = floor
 	if is_key_press(.Key_Equal) {
 		floor = min(floor + 1, WORLD_HEIGHT - 1)
 	} else if is_key_press(.Key_Minus) {
