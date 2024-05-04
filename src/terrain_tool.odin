@@ -8,6 +8,7 @@ import "vendor:glfw"
 
 import "constants"
 import "keyboard"
+import "mouse"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: Billboard_Key
@@ -85,7 +86,7 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 		end_x := max(drag_start.x, terrain_tool_position.x)
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
-		if mouse_is_button_up(.Left) && mouse_is_button_up(.Right) {
+		if mouse.is_button_up(.Left) && mouse.is_button_up(.Right) {
 			height := terrain_heights[drag_start.x][drag_start.y]
 			for x in start_x ..= end_x {
 				for z in start_z ..= end_z {
@@ -122,16 +123,16 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 		}
 
 		terrain_tool_mark_array_dirty({start_x, start_z}, {end_x, end_z})
-	} else if mouse_is_button_down(.Left) || mouse_is_button_down(.Right) {
-		terrain_tool_drag_clip = mouse_is_button_down(.Right)
+	} else if mouse.is_button_down(.Left) || mouse.is_button_down(.Right) {
+		terrain_tool_drag_clip = mouse.is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
 	}
 }
 
 terrain_tool_smooth_brush :: proc() {
-	if mouse_is_button_down(.Left) {
+	if mouse.is_button_down(.Left) {
 		terrain_tool_tick_timer += delta_time
-	} else if mouse_is_button_release(.Left) && terrain_tool_tick_timer > 0 {
+	} else if mouse.is_button_release(.Left) && terrain_tool_tick_timer > 0 {
 		terrain_tool_tick_timer = 0
 	}
 
@@ -208,13 +209,13 @@ terrain_tool_calculate_lights :: proc() {
 
 terrain_tool_move_point :: proc() {
 	movement: f32 = 0
-	if mouse_is_button_down(.Left) {
+	if mouse.is_button_down(.Left) {
 		movement = terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
-	} else if mouse_is_button_down(.Right) {
+	} else if mouse.is_button_down(.Right) {
 		movement = -terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
-	} else if mouse_is_button_release(.Left) && terrain_tool_tick_timer > 0 {
+	} else if mouse.is_button_release(.Left) && terrain_tool_tick_timer > 0 {
 		terrain_tool_tick_timer = 0
 	}
 

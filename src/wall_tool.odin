@@ -7,6 +7,7 @@ import "core:math/linalg/glsl"
 import "constants"
 import "keyboard"
 import "camera"
+import "mouse"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_start_billboard: Maybe(Billboard_Key)
@@ -610,7 +611,7 @@ wall_tool_removing_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_removing_line :: proc() {
-	if mouse_is_button_down(.Left) || mouse_is_button_release(.Left) {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		wall_tool_update_walls_line(
 			wall_tool_undo_removing_south_west_north_east_wall,
 			wall_tool_undo_removing_north_west_south_east_wall,
@@ -627,13 +628,13 @@ wall_tool_removing_line :: proc() {
 		wall_tool_move_cursor()
 	}
 
-	if mouse_is_button_press(.Left) {
+	if mouse.is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 		clear(&wall_tool_south_west_north_east_walls)
 		clear(&wall_tool_north_west_south_east_walls)
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
-	} else if mouse_is_button_down(.Left) {
+	} else if mouse.is_button_down(.Left) {
 		wall_tool_update_drag_start_billboard({1, 0, 0})
 		wall_tool_update_walls_line(
 			wall_tool_removing_south_west_north_east_wall,
@@ -641,7 +642,7 @@ wall_tool_removing_line :: proc() {
 			wall_tool_removing_east_west_wall,
 			wall_tool_removing_north_south_wall,
 		)
-	} else if mouse_is_button_release(.Left) {
+	} else if mouse.is_button_release(.Left) {
 		wall_tool_update_walls_line(
 			wall_tool_removing_south_west_north_east_wall,
 			wall_tool_removing_north_west_south_east_wall,
@@ -656,7 +657,7 @@ wall_tool_removing_line :: proc() {
 }
 
 wall_tool_adding_line :: proc() {
-	if mouse_is_button_down(.Left) || mouse_is_button_release(.Left) {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		wall_tool_update_walls_line(
 			wall_tool_remove_south_west_north_east_wall,
 			wall_tool_remove_north_west_south_east_wall,
@@ -672,13 +673,13 @@ wall_tool_adding_line :: proc() {
 		wall_tool_move_cursor()
 	}
 
-	if mouse_is_button_press(.Left) {
+	if mouse.is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 		clear(&wall_tool_south_west_north_east_walls)
 		clear(&wall_tool_north_west_south_east_walls)
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
-	} else if mouse_is_button_down(.Left) {
+	} else if mouse.is_button_down(.Left) {
 		wall_tool_update_drag_start_billboard({1, 1, 1})
 		wall_tool_update_walls_line(
 			wall_tool_set_south_west_north_east_wall_frame,
@@ -686,7 +687,7 @@ wall_tool_adding_line :: proc() {
 			wall_tool_set_east_west_wall_frame,
 			wall_tool_set_north_south_wall_frame,
 		)
-	} else if mouse_is_button_release(.Left) {
+	} else if mouse.is_button_release(.Left) {
 		wall_tool_update_walls_line(
 			wall_tool_set_south_west_north_east_wall_drywall,
 			wall_tool_set_north_west_south_east_wall_drywall,
@@ -708,7 +709,7 @@ wall_tool_update_line :: proc() {
 }
 
 wall_tool_adding_rectangle :: proc() {
-	if mouse_is_button_down(.Left) || mouse_is_button_release(.Left) {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		wall_tool_update_walls_rectangle(
 			wall_tool_remove_east_west_wall,
 			wall_tool_remove_north_south_wall,
@@ -722,19 +723,19 @@ wall_tool_adding_rectangle :: proc() {
 		wall_tool_move_cursor()
 	}
 
-	if mouse_is_button_press(.Left) {
+	if mouse.is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 		clear(&wall_tool_south_west_north_east_walls)
 		clear(&wall_tool_north_west_south_east_walls)
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
-	} else if mouse_is_button_down(.Left) {
+	} else if mouse.is_button_down(.Left) {
 		wall_tool_update_drag_start_billboard({1, 1, 1})
 		wall_tool_update_walls_rectangle(
 			wall_tool_set_east_west_wall_frame,
 			wall_tool_set_north_south_wall_frame,
 		)
-	} else if mouse_is_button_release(.Left) {
+	} else if mouse.is_button_release(.Left) {
 		wall_tool_update_walls_rectangle(
 			wall_tool_set_east_west_wall_drywall,
 			wall_tool_set_north_south_wall_drywall,
@@ -746,7 +747,7 @@ wall_tool_adding_rectangle :: proc() {
 }
 
 wall_tool_removing_rectangle :: proc() {
-	if mouse_is_button_down(.Left) || mouse_is_button_release(.Left) {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		wall_tool_update_walls_rectangle(
 			wall_tool_undo_removing_east_west_wall,
 			wall_tool_undo_removing_north_south_wall,
@@ -760,19 +761,19 @@ wall_tool_removing_rectangle :: proc() {
 		wall_tool_move_cursor()
 	}
 
-	if mouse_is_button_press(.Left) {
+	if mouse.is_button_press(.Left) {
 		wall_tool_drag_start = wall_tool_position
 		clear(&wall_tool_south_west_north_east_walls)
 		clear(&wall_tool_north_west_south_east_walls)
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
-	} else if mouse_is_button_down(.Left) {
+	} else if mouse.is_button_down(.Left) {
 		wall_tool_update_drag_start_billboard({1, 0, 0})
 		wall_tool_update_walls_rectangle(
 			wall_tool_removing_east_west_wall,
 			wall_tool_removing_north_south_wall,
 		)
-	} else if mouse_is_button_release(.Left) {
+	} else if mouse.is_button_release(.Left) {
 		wall_tool_update_walls_rectangle(
 			wall_tool_removing_east_west_wall,
 			wall_tool_removing_north_south_wall,

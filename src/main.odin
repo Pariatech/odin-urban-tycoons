@@ -8,6 +8,7 @@ import "vendor:glfw"
 
 import "window"
 import "keyboard"
+import "mouse"
 import "camera"
 
 WIDTH :: 1920
@@ -57,7 +58,7 @@ start :: proc() -> (ok: bool = false) {
 	init_wall_renderer() or_return
 
 	keyboard.init()
-    mouse_init()
+    mouse.init()
 	init_cursor()
 
 	billboard_init_draw_contexts() or_return
@@ -110,7 +111,7 @@ start :: proc() -> (ok: bool = false) {
 			keyboard.is_key_down(.Key_Escape)
 
 		keyboard.update()
-        mouse_update()
+        mouse.update()
 		update_cursor()
 
 		frames += 1
