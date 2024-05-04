@@ -4,14 +4,16 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:math/noise"
 
-terrain_heights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]f32
-terrain_lights: [WORLD_WIDTH + 1][WORLD_DEPTH + 1]glsl.vec3
+import "constants"
+
+terrain_heights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]f32
+terrain_lights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]glsl.vec3
 
 init_terrain :: proc() {
 	set_terrain_height(3, 3, .5)
 
-	for x in 0 ..= WORLD_WIDTH {
-		for z in 0 ..= WORLD_DEPTH {
+	for x in 0 ..= constants.WORLD_WIDTH {
+		for z in 0 ..= constants.WORLD_DEPTH {
 			calculate_terrain_light(x, z)
 		}
 	}
@@ -30,7 +32,7 @@ calculate_terrain_light :: proc(x, z: int) {
 		for tri in triangles {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
-	} else if x == WORLD_WIDTH && z == WORLD_DEPTH {
+	} else if x == constants.WORLD_WIDTH && z == constants.WORLD_DEPTH {
 		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
@@ -41,7 +43,7 @@ calculate_terrain_light :: proc(x, z: int) {
 		for tri in triangles {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
-	} else if x == 0 && z == WORLD_DEPTH {
+	} else if x == 0 && z == constants.WORLD_DEPTH {
 		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
@@ -52,7 +54,7 @@ calculate_terrain_light :: proc(x, z: int) {
 		for tri in triangles {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
-	} else if z == 0 && x == WORLD_WIDTH {
+	} else if z == 0 && x == constants.WORLD_WIDTH {
 		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
@@ -95,7 +97,7 @@ calculate_terrain_light :: proc(x, z: int) {
 		for tri in triangles {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
-	} else if x == WORLD_WIDTH {
+	} else if x == constants.WORLD_WIDTH {
 		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},
@@ -111,7 +113,7 @@ calculate_terrain_light :: proc(x, z: int) {
 		for tri in triangles {
 			normal += triangle_normal(tri[0], tri[1], tri[2])
 		}
-	} else if z == WORLD_DEPTH {
+	} else if z == constants.WORLD_DEPTH {
 		triangles := [?][3]glsl.vec3 {
 			 {
 				{0.0, terrain_heights[x][z], 0.0},

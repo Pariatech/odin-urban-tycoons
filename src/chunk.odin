@@ -4,14 +4,10 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-CHUNK_WIDTH :: 8
-CHUNK_DEPTH :: 8
-CHUNK_HEIGHT :: 8
+import "constants"
 
 Chunk_Tiles :: struct {
-	triangles:     [CHUNK_WIDTH][CHUNK_DEPTH][Tile_Triangle_Side]Maybe(
-		Tile_Triangle,
-	),
+	triangles:     [constants.CHUNK_WIDTH][constants.CHUNK_DEPTH][Tile_Triangle_Side]Maybe(Tile_Triangle),
 	dirty:         bool,
 	initialized:   bool,
 	vao, vbo, ebo: u32,
@@ -44,7 +40,7 @@ Chunk_Floor :: struct {
 }
 
 Chunk :: struct {
-	floors: [CHUNK_HEIGHT]Chunk_Floor,
+	floors: [constants.CHUNK_HEIGHT]Chunk_Floor,
 }
 
 Chunk_Iterator :: struct {
@@ -136,7 +132,7 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
 			for i in 0 ..< 3 {
-				heights[i] += f32(index.pos.y * WALL_HEIGHT)
+				heights[i] += f32(index.pos.y * constants.WALL_HEIGHT)
 			}
 
 			draw_tile_triangle(
@@ -307,10 +303,8 @@ chunk_tile_triangle_iterator_has_next :: proc(
 ) -> bool {
 	return(
 		iterator.pos.x < iterator.end.x &&
-		// iterator.pos.y < iterator.end.y &&
 		iterator.pos.z < iterator.end.z &&
 		iterator.pos.x >= iterator.start.x &&
-		// iterator.pos.y >= iterator.start.y &&
 		iterator.pos.z >= iterator.start.z \
 	)
 }
@@ -370,7 +364,11 @@ chunk_iterate_all_tile_triangle :: proc(
 			chunk_pos = {chunk_pos.x, 0, chunk_pos.z},
 			pos = {0, chunk_pos.y, 0},
 			start = {0, chunk_pos.y, 0},
-			end = {CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_DEPTH},
+			end =  {
+				constants.CHUNK_WIDTH,
+				constants.CHUNK_HEIGHT,
+				constants.CHUNK_DEPTH,
+			},
 		} \
 	)
 }
@@ -387,7 +385,7 @@ chunk_iterate_all_ground_tile_triangle :: proc(
 			chunk_pos = chunk_pos,
 			pos = {0, 0, 0},
 			start = {0, 0, 0},
-			end = {CHUNK_WIDTH, 1, CHUNK_DEPTH},
+			end = {constants.CHUNK_WIDTH, 1, constants.CHUNK_DEPTH},
 		} \
 	)
 }
@@ -411,9 +409,9 @@ chunk_iterator_next :: proc(
 	chunk_iterator_has_next(iterator) or_return
 	chunk = &world_chunks[iterator.pos.x][iterator.pos.y]
 	pos =  {
-		i32(iterator.pos.x * CHUNK_WIDTH),
+		i32(iterator.pos.x * constants.CHUNK_WIDTH),
 		0,
-		i32(iterator.pos.y * CHUNK_DEPTH),
+		i32(iterator.pos.y * constants.CHUNK_DEPTH),
 	}
 	if camera_rotation == .South_West || camera_rotation == .South_East {
 		iterator.pos.x -= 1
@@ -450,8 +448,8 @@ chunk_tile :: proc(
 }
 
 chunk_init :: proc(chunk: ^Chunk) {
-	for x in 0 ..< CHUNK_WIDTH {
-		for z in 0 ..< CHUNK_DEPTH {
+	for x in 0 ..< constants.CHUNK_WIDTH {
+		for z in 0 ..< constants.CHUNK_DEPTH {
 			for side in Tile_Triangle_Side {
 				chunk.floors[0].tiles.triangles[x][z][side] = Tile_Triangle {
 					texture      = .Grass,
@@ -467,7 +465,7 @@ chunk_get_tile :: proc(
 	pos: glsl.ivec3,
 ) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
 	return(
-		&chunk.floors[pos.y].tiles.triangles[pos.x % CHUNK_WIDTH][pos.z % CHUNK_DEPTH] \
+		&chunk.floors[pos.y].tiles.triangles[pos.x % constants.CHUNK_WIDTH][pos.z % constants.CHUNK_DEPTH] \
 	)
 }
 
@@ -585,7 +583,10 @@ chunk_remove_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
-	delete_key(&chunk.floors[pos.y].walls.north_west_south_east, glsl.ivec2(pos.xz))
+	delete_key(
+		&chunk.floors[pos.y].walls.north_west_south_east,
+		glsl.ivec2(pos.xz),
+	)
 	chunk.floors[pos.y].walls.dirty = true
 }
 
@@ -619,6 +620,9 @@ chunk_remove_south_west_north_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
-	delete_key(&chunk.floors[pos.y].walls.south_west_north_east, glsl.ivec2(pos.xz))
+	delete_key(
+		&chunk.floors[pos.y].walls.south_west_north_east,
+		glsl.ivec2(pos.xz),
+	)
 	chunk.floors[pos.y].walls.dirty = true
 }

@@ -6,6 +6,8 @@ import "core:math/linalg/glsl"
 import "core:math/rand"
 import "vendor:glfw"
 
+import "constants"
+
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: Billboard_Key
 terrain_tool_intersect: glsl.vec3
@@ -56,19 +58,19 @@ terrain_tool_on_intersect :: proc(intersect: glsl.vec3) {
 terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 	start := start
 	end := end
-	start.x /= CHUNK_WIDTH
-	end.x /= CHUNK_WIDTH
-	start.y /= CHUNK_DEPTH
-	end.y /= CHUNK_DEPTH
+	start.x /= constants.CHUNK_WIDTH
+	end.x /= constants.CHUNK_WIDTH
+	start.y /= constants.CHUNK_DEPTH
+	end.y /= constants.CHUNK_DEPTH
 
 	start.x = max(start.x, 0)
 	start.y = max(start.y, 0)
-	end.x = min(end.x, WORLD_CHUNK_WIDTH - 1)
-	end.y = min(end.y, WORLD_CHUNK_DEPTH - 1)
+	end.x = min(end.x, constants.WORLD_CHUNK_WIDTH - 1)
+	end.y = min(end.y, constants.WORLD_CHUNK_DEPTH - 1)
 
 	for i in start.x ..= end.x {
 		for j in start.y ..= end.y {
-			for floor in 0 ..< CHUNK_HEIGHT {
+			for floor in 0 ..< constants.CHUNK_HEIGHT {
 				world_chunks[i][j].floors[floor].tiles.dirty = true
 			}
 		}
@@ -145,19 +147,19 @@ terrain_tool_smooth_brush :: proc() {
 		)
 		end_x := min(
 			terrain_tool_position.x + terrain_tool_brush_size - 1,
-			WORLD_WIDTH,
+			constants.WORLD_WIDTH,
 		)
 		end_z := min(
 			terrain_tool_position.y + terrain_tool_brush_size - 1,
-			WORLD_DEPTH,
+			constants.WORLD_DEPTH,
 		)
 
 		for x in start_x ..= end_x {
 			for z in start_z ..= end_z {
 				start_x := max(x - 1, 0)
 				start_z := max(z - 1, 0)
-				end_x := min(x + 1, WORLD_WIDTH)
-				end_z := min(z + 1, WORLD_DEPTH)
+				end_x := min(x + 1, constants.WORLD_WIDTH)
+				end_z := min(z + 1, constants.WORLD_DEPTH)
 				points := f32((end_x - start_x + 1) * (end_z - start_z + 1))
 				average: f32 = 0
 
@@ -189,12 +191,12 @@ terrain_tool_calculate_lights :: proc() {
 	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
 	end_x := min(
 		terrain_tool_position.x + terrain_tool_brush_size,
-		WORLD_WIDTH,
+		constants.WORLD_WIDTH,
 	)
 	start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
 	end_z := min(
 		terrain_tool_position.y + terrain_tool_brush_size,
-		WORLD_DEPTH,
+		constants.WORLD_DEPTH,
 	)
 	for x in start_x ..= end_x {
 		for z in start_z ..= end_z {
@@ -279,7 +281,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 			}
 		}
 
-		if x + w + i < WORLD_WIDTH {
+		if x + w + i < constants.WORLD_WIDTH {
 			for z in start_z ..= end_z {
 				terrain_tool_move_point_height(
 					x + w + i,
@@ -303,7 +305,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 			}
 		}
 
-		if z + h + i < WORLD_DEPTH {
+		if z + h + i < constants.WORLD_DEPTH {
 			for x in start_x ..< end_x {
 				terrain_tool_move_point_height(
 					x,
@@ -342,11 +344,11 @@ terrain_tool_deinit :: proc() {
 		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
 		end_x := min(
 			terrain_tool_position.x + terrain_tool_brush_size,
-			WORLD_WIDTH,
+			constants.WORLD_WIDTH,
 		)
 		end_z := min(
 			terrain_tool_position.y + terrain_tool_brush_size,
-			WORLD_DEPTH,
+			constants.WORLD_DEPTH,
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
@@ -384,12 +386,12 @@ terrain_tool_update :: proc() {
 		start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
 		end_x := min(
 			terrain_tool_position.x + terrain_tool_brush_size,
-			WORLD_WIDTH,
+			constants.WORLD_WIDTH,
 		)
 		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
 		end_z := min(
 			terrain_tool_position.y + terrain_tool_brush_size,
-			WORLD_DEPTH,
+			constants.WORLD_DEPTH,
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
@@ -518,12 +520,12 @@ terrain_tool_update :: proc() {
 		start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
 		end_x := min(
 			terrain_tool_position.x + terrain_tool_brush_size,
-			WORLD_WIDTH,
+			constants.WORLD_WIDTH,
 		)
 		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
 		end_z := min(
 			terrain_tool_position.y + terrain_tool_brush_size,
-			WORLD_DEPTH,
+			constants.WORLD_DEPTH,
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {

@@ -4,6 +4,8 @@ import "core:fmt"
 import "core:math"
 import "core:math/linalg/glsl"
 
+import "constants"
+
 wall_tool_billboard: Billboard_Key
 wall_tool_start_billboard: Maybe(Billboard_Key)
 wall_tool_position: glsl.ivec2
@@ -285,7 +287,7 @@ wall_tool_remove_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= WORLD_WIDTH || pos.z >= WORLD_DEPTH {
+	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -332,7 +334,7 @@ wall_tool_update_east_west_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= WORLD_WIDTH || pos.z >= WORLD_DEPTH {
+	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -377,7 +379,7 @@ wall_tool_update_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= WORLD_WIDTH || pos.z >= WORLD_DEPTH {
+	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -424,7 +426,7 @@ wall_tool_update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 }
 
 wall_tool_update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= WORLD_WIDTH || pos.z >= WORLD_DEPTH {
+	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -822,7 +824,7 @@ wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 			pos =  {
 				f32(wall_tool_drag_start.x),
 				terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
-				f32(floor) * WALL_HEIGHT,
+				f32(floor) * constants.WALL_HEIGHT,
 				f32(wall_tool_drag_start.y),
 			},
 			type = .Wall_Cursor,
@@ -848,7 +850,7 @@ wall_tool_remove_drag_start_billboard :: proc() {
 wall_tool_move_cursor :: proc() {
 	position: glsl.vec3
 	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
-	position.y += f32(floor) * WALL_HEIGHT
+	position.y += f32(floor) * constants.WALL_HEIGHT
 
 	switch camera_rotation {
 	case .South_West:

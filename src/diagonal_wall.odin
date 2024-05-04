@@ -4,6 +4,8 @@ import "core:fmt"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 
+import "constants"
+
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
 	North_West_South_East,
@@ -32,12 +34,12 @@ diagonal_wall_full_vertices := []Wall_Vertex {
 		texcoords = {1, 1, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -51,12 +53,12 @@ diagonal_wall_right_extension_vertices := []Wall_Vertex {
 		texcoords = {1, 1, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT, -0.5575},
+		pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, 0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -70,12 +72,12 @@ diagonal_wall_left_extension_vertices := []Wall_Vertex {
 	},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5575, WALL_HEIGHT, 0.5575},
+		pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -85,12 +87,12 @@ diagonal_wall_side_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, 0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, 0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -104,12 +106,12 @@ diagonal_wall_cross_vertices := []Wall_Vertex {
 		texcoords = {0.115, 1, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT, -0.5},
+		pos = {-0.385, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0.115, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -118,22 +120,22 @@ diagonal_wall_cross_vertices := []Wall_Vertex {
 
 diagonal_wall_top_cross_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.5},
+		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.5},
+		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.615},
+		pos = {0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
@@ -141,22 +143,22 @@ diagonal_wall_top_cross_vertices := []Wall_Vertex {
 
 diagonal_wall_top_full_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
+		pos = {-0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
+		pos = {0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
+		pos = {0.6725, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
+		pos = {-0.4425, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -164,22 +166,22 @@ diagonal_wall_top_full_vertices := []Wall_Vertex {
 
 diagonal_wall_top_left_extension_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
+		pos = {-0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
+		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
+		pos = {-0.4425, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -187,22 +189,22 @@ diagonal_wall_top_left_extension_vertices := []Wall_Vertex {
 
 diagonal_wall_top_right_extension_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
+		pos = {-0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
+		pos = {0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
+		pos = {0.6725, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
+		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -210,22 +212,22 @@ diagonal_wall_top_right_extension_vertices := []Wall_Vertex {
 
 diagonal_wall_top_side_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
+		pos = {-0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
+		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
+		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -799,7 +801,7 @@ draw_diagonal_wall :: proc(
 	draw := draw_map[axis][wall.type][camera_rotation]
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT + terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)

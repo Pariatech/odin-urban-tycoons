@@ -5,6 +5,8 @@ import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
+import "constants"
+
 Wall_Axis :: enum {
 	North_South,
 	East_West,
@@ -73,7 +75,6 @@ Wall_Vertex :: struct {
 
 Wall_Index :: u32
 
-WALL_HEIGHT :: 3
 WALL_TOP_OFFSET :: 0.0001
 WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
@@ -86,18 +87,18 @@ wall_full_vertices := []Wall_Vertex {
 		texcoords = {1.115, 1, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.5},
+		pos = {0.615, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1.115, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 	{pos = {-0.5, 0, -0.385}, light = {1, 1, 1}, texcoords = {0.115, 1, 0, 0}},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {0.115, 0, 0, 0},
 	},
@@ -112,12 +113,12 @@ wall_extended_side_vertices := []Wall_Vertex {
 		texcoords = {1.115, 1, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.5},
+		pos = {0.615, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1.115, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -128,12 +129,12 @@ wall_side_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -144,18 +145,18 @@ wall_end_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
 	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 	{pos = {-0.5, 0, -0.385}, light = {1, 1, 1}, texcoords = {0.115, 1, 0, 0}},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {0.115, 0, 0, 0},
 	},
@@ -165,44 +166,44 @@ wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
 wall_full_top_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.5},
+		pos = {0.615, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, WALL_HEIGHT, -0.385},
+		pos = {0.615, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 }
 wall_top_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.5},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.5},
+		pos = {0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5, WALL_HEIGHT, -0.385},
+		pos = {0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.5, WALL_HEIGHT, -0.385},
+		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -821,7 +822,7 @@ draw_wall :: proc(
 
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT + terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)

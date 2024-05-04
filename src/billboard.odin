@@ -8,6 +8,7 @@ import gl "vendor:OpenGL"
 import "vendor:cgltf"
 import stbi "vendor:stb/image"
 
+import "constants"
 
 BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
@@ -636,7 +637,7 @@ billboard_1x1_remove :: proc(key: Billboard_Key) {
 
 get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
     terrain_height := get_terrain_height({i32(pos.x), i32(pos.z)})
-    return clamp(int((pos.y - terrain_height) / WALL_HEIGHT), 0, CHUNK_HEIGHT - 1)
+    return clamp(int((pos.y - terrain_height) / constants.WALL_HEIGHT), 0, constants.CHUNK_HEIGHT - 1)
 }
 
 billboard_1x1_move :: proc(of: ^Billboard_Key, to: glsl.vec3) {

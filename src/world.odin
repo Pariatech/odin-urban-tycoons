@@ -4,20 +4,14 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-WORLD_WIDTH :: 64
-WORLD_HEIGHT :: 4
-WORLD_DEPTH :: 64
-WORLD_CHUNK_WIDTH :: WORLD_WIDTH / CHUNK_WIDTH
-WORLD_CHUNK_DEPTH :: WORLD_DEPTH / CHUNK_DEPTH
-
-SUN_POWER :: 1.5
+import "constants"
 
 sun := glsl.vec3{1, -3, 1}
 
 house_x: i32 = 12
 house_z: i32 = 12
 
-world_chunks: [WORLD_CHUNK_WIDTH][WORLD_CHUNK_DEPTH]Chunk
+world_chunks: [constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
 world_tiles_dirty: bool
 world_previously_visible_chunks_start: glsl.ivec2
@@ -26,7 +20,7 @@ world_visible_chunks_start: glsl.ivec2
 world_visible_chunks_end: glsl.ivec2
 
 world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
-	return &world_chunks[pos.x / CHUNK_WIDTH][pos.y / CHUNK_DEPTH]
+	return &world_chunks[pos.x / constants.CHUNK_WIDTH][pos.y / constants.CHUNK_DEPTH]
 }
 
 world_set_tile :: proc(
@@ -64,9 +58,9 @@ world_get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 
 world_has_north_south_wall :: proc(pos: glsl.ivec3) -> bool {
 	return(
-		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
 		chunk_has_north_south_wall(world_get_chunk(pos.xz), pos) \
 	)
 }
@@ -85,9 +79,9 @@ world_get_east_west_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 
 world_has_east_west_wall :: proc(pos: glsl.ivec3) -> bool {
 	return(
-		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
 		chunk_has_east_west_wall(world_get_chunk(pos.xz), pos) \
 	)
 }
@@ -102,9 +96,9 @@ world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
 
 world_has_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> bool {
 	return(
-		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
 		chunk_has_north_west_south_east_wall(world_get_chunk(pos.xz), pos) \
 	)
 }
@@ -123,9 +117,9 @@ world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
 
 world_has_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> bool {
 	return(
-		(pos.x >= 0 && pos.x < WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < WORLD_DEPTH) &&
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
 		chunk_has_south_west_north_east_wall(world_get_chunk(pos.xz), pos) \
 	)
 }
@@ -139,7 +133,7 @@ world_remove_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 }
 
 world_iterate_all_chunks :: proc() -> Chunk_Iterator {
-	return {{0, 0}, {0, 0}, {WORLD_CHUNK_WIDTH, WORLD_CHUNK_DEPTH}}
+	return {{0, 0}, {0, 0}, {constants.WORLD_CHUNK_WIDTH, constants.WORLD_CHUNK_DEPTH}}
 }
 
 world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
@@ -254,22 +248,22 @@ world_update :: proc() {
 	aabb := get_camera_aabb()
 	world_previously_visible_chunks_start = world_visible_chunks_start
 	world_previously_visible_chunks_end = world_visible_chunks_end
-	world_visible_chunks_start.x = max(aabb.x / CHUNK_WIDTH - 1, 0)
-	world_visible_chunks_start.y = max(aabb.y / CHUNK_DEPTH - 1, 0)
+	world_visible_chunks_start.x = max(aabb.x / constants.CHUNK_WIDTH - 1, 0)
+	world_visible_chunks_start.y = max(aabb.y / constants.CHUNK_DEPTH - 1, 0)
 	world_visible_chunks_end.x = min(
-		(aabb.x + aabb.w) / CHUNK_WIDTH + 1,
-		WORLD_CHUNK_WIDTH,
+		(aabb.x + aabb.w) / constants.CHUNK_WIDTH + 1,
+		constants.WORLD_CHUNK_WIDTH,
 	)
 	world_visible_chunks_end.y = min(
-		(aabb.y + aabb.h) / CHUNK_DEPTH + 1,
-		WORLD_CHUNK_DEPTH,
+		(aabb.y + aabb.h) / constants.CHUNK_DEPTH + 1,
+		constants.WORLD_CHUNK_DEPTH,
 	)
 	world_tiles_dirty = false
 }
 
 init_world :: proc() {
-	for x in 0 ..< WORLD_CHUNK_WIDTH {
-		for z in 0 ..< WORLD_CHUNK_DEPTH {
+	for x in 0 ..< constants.WORLD_CHUNK_WIDTH {
+		for z in 0 ..< constants.WORLD_CHUNK_DEPTH {
 			chunk_init(&world_chunks[x][z])
 		}
 	}
@@ -279,7 +273,7 @@ init_world :: proc() {
 	add_house_floor_walls(1, .Nyana, .Nyana)
 	add_house_floor_triangles(2, .Wood)
 
-	for x in 0 ..< WORLD_WIDTH {
+	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {
 			world_set_tile(
 				{i32(x), 0, i32(z)},
@@ -311,7 +305,7 @@ init_world :: proc() {
 		)
 	}
 
-	for z in 8 ..< WORLD_WIDTH {
+	for z in 8 ..< constants.WORLD_WIDTH {
 		for x in 1 ..= 3 {
 			world_set_tile(
 				{i32(x), 0, i32(z)},
@@ -333,14 +327,14 @@ init_world :: proc() {
 		}
 	}
 
-	for x in 8 ..< WORLD_WIDTH {
+	for x in 8 ..< constants.WORLD_WIDTH {
 		world_set_tile(
 			{i32(x), 0, 8},
 			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 
-	for z in 9 ..< WORLD_WIDTH {
+	for z in 9 ..< constants.WORLD_WIDTH {
 		world_set_tile(
 			{8, 0, i32(z)},
 			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
@@ -459,7 +453,7 @@ add_house_floor_walls :: proc(
 				type = .Window,
 				pos =  {
 					f32(house_x + 1),
-					f32(floor * WALL_HEIGHT),
+					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 5),
 				},
 			},
@@ -516,7 +510,7 @@ add_house_floor_walls :: proc(
 				type = .Window,
 				pos =  {
 					f32(house_x),
-					f32(floor * WALL_HEIGHT),
+					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + i32(i) + 8),
 				},
 			},
@@ -563,7 +557,7 @@ add_house_floor_walls :: proc(
 				type = .Window,
 				pos =  {
 					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
+					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z),
 				},
 			},
@@ -610,7 +604,7 @@ add_house_floor_walls :: proc(
 				type = .Window,
 				pos =  {
 					f32(house_x + i32(i) + 1),
-					f32(floor * WALL_HEIGHT),
+					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 11),
 				},
 			},
@@ -690,7 +684,7 @@ draw_world :: proc() {
 	)
 
 
-	for floor in 0 ..< CHUNK_HEIGHT {
+	for floor in 0 ..< constants.CHUNK_HEIGHT {
 	    gl.UseProgram(shader_program)
 		world_draw_tiles(floor)
 		world_draw_walls(floor)
@@ -709,7 +703,7 @@ world_update_after_rotation :: proc(rotated: Camera_Rotated) {
 	}
 	for row in &world_chunks {
 		for chunk in &row {
-			for floor in 0 ..< CHUNK_HEIGHT {
+			for floor in 0 ..< constants.CHUNK_HEIGHT {
 				chunk.floors[floor].walls.dirty = true
 			}
 		}
@@ -719,7 +713,7 @@ world_update_after_rotation :: proc(rotated: Camera_Rotated) {
 world_update_after_clockwise_rotation :: proc() {
 	for row in &world_chunks {
 		for chunk in &row {
-			for floor in 0 ..< CHUNK_HEIGHT {
+			for floor in 0 ..< constants.CHUNK_HEIGHT {
 				chunk_billboards_update_after_clockwise_rotation_1x1(
 					&chunk.floors[floor].billboards_1x1,
 				)
@@ -756,7 +750,7 @@ chunk_billboards_update_after_clockwise_rotation_2x2 :: proc(
 world_update_after_counter_clockwise_rotation :: proc() {
 	for row in &world_chunks {
 		for chunk in &row {
-			for floor in 0 ..< CHUNK_HEIGHT {
+			for floor in 0 ..< constants.CHUNK_HEIGHT {
 				chunk_billboards_update_after_counter_clockwise_rotation_1x1(
 					&chunk.floors[floor].billboards_1x1,
 				)
