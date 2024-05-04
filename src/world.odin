@@ -5,6 +5,7 @@ import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 import "constants"
+import "camera"
 
 sun := glsl.vec3{1, -3, 1}
 
@@ -139,7 +140,7 @@ world_iterate_all_chunks :: proc() -> Chunk_Iterator {
 world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 	it := Chunk_Iterator{}
 
-	switch camera_rotation {
+	switch camera.rotation {
 	case .South_West:
 		it.pos = world_visible_chunks_end - {1, 1}
 	case .South_East:
@@ -189,8 +190,8 @@ world_draw_billboards :: proc(floor: int) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
 
-	billboard_uniform_object.view = camera_view
-	billboard_uniform_object.proj = camera_proj
+	billboard_uniform_object.view = camera.view
+	billboard_uniform_object.proj = camera.proj
 
 	gl.BufferData(
 		gl.UNIFORM_BUFFER,
@@ -245,7 +246,7 @@ world_draw_billboards :: proc(floor: int) {
 }
 
 world_update :: proc() {
-	aabb := get_camera_aabb()
+	aabb := camera.get_aabb()
 	world_previously_visible_chunks_start = world_visible_chunks_start
 	world_previously_visible_chunks_end = world_visible_chunks_end
 	world_visible_chunks_start.x = max(aabb.x / constants.CHUNK_WIDTH - 1, 0)
@@ -671,8 +672,8 @@ add_house_floor_walls :: proc(
 }
 
 draw_world :: proc() {
-	uniform_object.view = camera_view
-	uniform_object.proj = camera_proj
+	uniform_object.view = camera.view
+	uniform_object.proj = camera.proj
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
@@ -692,7 +693,7 @@ draw_world :: proc() {
 	}
 }
 
-world_update_after_rotation :: proc(rotated: Camera_Rotated) {
+world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	wall_tool_move_cursor()
 	billboard_update_after_rotation()
 	switch rotated {

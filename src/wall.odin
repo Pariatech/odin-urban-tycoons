@@ -6,6 +6,8 @@ import glsl "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 import "constants"
+import "camera"
+import "utils"
 
 Wall_Axis :: enum {
 	North_South,
@@ -237,7 +239,7 @@ WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
 	},
 }
 
-WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
+WALL_SIDE_MAP :: [Wall_Axis][camera.Rotation]Wall_Side {
 	.North_South =  {
 		.South_West = .Outside,
 		.South_East = .Inside,
@@ -252,7 +254,7 @@ WALL_SIDE_MAP :: [Wall_Axis][Camera_Rotation]Wall_Side {
 	},
 }
 
-WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]glsl.mat4 {
+WALL_TRANSFORM_MAP :: [Wall_Axis][camera.Rotation]glsl.mat4 {
 	.North_South =  {
 		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
@@ -268,7 +270,7 @@ WALL_TRANSFORM_MAP :: [Wall_Axis][Camera_Rotation]glsl.mat4 {
 }
 
 
-WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
+WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	.End_End =  {
 		.North_South =  {
 			.South_West = .Full,
@@ -495,7 +497,7 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
 	},
 }
 
-WALL_MASK_MAP :: [Wall_Type][Wall_Axis][Camera_Rotation]Wall_Mask {
+WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	.End_End =  {
 		.North_South =  {
 			.South_West = .Full,
@@ -793,7 +795,7 @@ draw_wall_mesh :: proc(
 		vertex := vertices[i]
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
-		vertex.pos = linalg.mul(model, vec4(vertex.pos, 1)).xyz
+		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
 
 		append(vertex_buffer, vertex)
 	}
@@ -815,10 +817,10 @@ draw_wall :: proc(
 	transform_map := WALL_TRANSFORM_MAP
 	top_mesh_map := WALL_TOP_MESH_MAP
 
-	side := side_map[axis][camera_rotation]
+	side := side_map[axis][camera.rotation]
 	texture := wall.textures[side]
-	mask := mask_map[wall.type][axis][camera_rotation]
-	top_mesh := top_mesh_map[wall.type][axis][camera_rotation]
+	mask := mask_map[wall.type][axis][camera.rotation]
+	top_mesh := top_mesh_map[wall.type][axis][camera.rotation]
 
 	position := glsl.vec3 {
 		f32(pos.x),
@@ -826,7 +828,7 @@ draw_wall :: proc(
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
-	transform *= transform_map[axis][camera_rotation]
+	transform *= transform_map[axis][camera.rotation]
 
 	vertices: []Wall_Vertex
 	indices: []Wall_Index

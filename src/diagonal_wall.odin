@@ -5,6 +5,7 @@ import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 
 import "constants"
+import "camera"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
@@ -236,7 +237,7 @@ diagonal_wall_top_side_vertices := []Wall_Vertex {
 diagonal_wall_indices := []Wall_Index{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
-	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
+	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.South_West_North_East =  {
 			.South_West =  {
 				.End_End = .Cross,
@@ -388,7 +389,7 @@ DIAGONAL_WALL_MASK_MAP ::
 	}
 
 DIAGONAL_WALL_TOP_MASK_MAP ::
-	[Diagonal_Wall_Axis][Camera_Rotation][Wall_Type]Diagonal_Wall_Mask {
+	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.South_West_North_East =  {
 			.South_West =  {
 				.End_End = .Cross,
@@ -540,7 +541,7 @@ DIAGONAL_WALL_TOP_MASK_MAP ::
 	}
 
 DIAGONAL_WALL_ROTATION_MAP ::
-	[Diagonal_Wall_Axis][Camera_Rotation]Diagonal_Wall_Axis {
+	[Diagonal_Wall_Axis][camera.Rotation]Diagonal_Wall_Axis {
 		.South_West_North_East =  {
 			.South_West = .South_West_North_East,
 			.South_East = .North_West_South_East,
@@ -556,7 +557,7 @@ DIAGONAL_WALL_ROTATION_MAP ::
 	}
 
 DIAGONAL_WALL_DRAW_MAP ::
-	[Diagonal_Wall_Axis][Wall_Type][Camera_Rotation]bool {
+	[Diagonal_Wall_Axis][Wall_Type][camera.Rotation]bool {
 		.South_West_North_East =  {
 			.End_End =  {
 				.South_West = true,
@@ -755,7 +756,7 @@ DIAGONAL_WALL_DRAW_MAP ::
 		},
 	}
 
-DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
+DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][camera.Rotation]Wall_Side {
 		.South_West_North_East =  {
 			.South_West = .Outside,
 			.South_East = .Inside,
@@ -771,7 +772,7 @@ DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][Camera_Rotation]Wall_Side {
 	}
 
 
-DIAGONAL_WALL_TRANSFORM_MAP :: [Camera_Rotation]glsl.mat4 {
+DIAGONAL_WALL_TRANSFORM_MAP :: [camera.Rotation]glsl.mat4 {
 		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1},
@@ -793,19 +794,19 @@ draw_diagonal_wall :: proc(
 	side_map := DIAGONAL_WALL_SIDE_MAP
 	transform_map := DIAGONAL_WALL_TRANSFORM_MAP
 
-	side := side_map[axis][camera_rotation]
-	rotation := rotation_map[axis][camera_rotation]
+	side := side_map[axis][camera.rotation]
+	rotation := rotation_map[axis][camera.rotation]
 	texture := wall.textures[side]
-	mask := mask_map[axis][camera_rotation][wall.type]
-	top_mask := top_mask_map[axis][camera_rotation][wall.type]
-	draw := draw_map[axis][wall.type][camera_rotation]
+	mask := mask_map[axis][camera.rotation][wall.type]
+	top_mask := top_mask_map[axis][camera.rotation][wall.type]
+	draw := draw_map[axis][wall.type][camera.rotation]
 	position := glsl.vec3 {
 		f32(pos.x),
 		f32(pos.y) * constants.WALL_HEIGHT + terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
-	transform *= transform_map[camera_rotation]
+	transform *= transform_map[camera.rotation]
 
 	if draw {
 		wall_vertices: []Wall_Vertex

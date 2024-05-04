@@ -8,6 +8,7 @@ import "vendor:glfw"
 
 import "window"
 import "keyboard"
+import "camera"
 
 WIDTH :: 1920
 HEIGHT :: 1080
@@ -23,15 +24,12 @@ framebuffer_size_callback :: proc "c" (
 ) {
 	context = runtime.default_context()
 
-	fmt.println("Window resized")
 	framebuffer_resized = true
 	window_size.x = f32(width)
 	window_size.y = f32(height)
 }
 
 start :: proc() -> (ok: bool = false) {
-	fmt.println("Hellope!")
-
 	if !bool(glfw.Init()) {
 		fmt.eprintln("GLFW has failed to load.")
 		return
@@ -94,7 +92,7 @@ start :: proc() -> (ok: bool = false) {
 
 
 		begin_draw()
-		update_camera(delta_time)
+		camera.update(delta_time, world_update_after_rotation)
         world_update()
         floor_update()
 

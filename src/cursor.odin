@@ -8,8 +8,8 @@ import "vendor:glfw"
 
 import "constants"
 import "window"
+import "camera"
 
-cursor_scroll: glsl.vec2
 cursor_pos: glsl.vec2
 cursor_moved: bool
 cursor_ray: Cursor_Ray
@@ -42,9 +42,9 @@ cursor_update_ray :: proc() {
 	end_pos.z = 1
 
 	last_origin := cursor_ray.origin
-	cursor_ray.origin = (icamera_vp * screen_pos).xyz
+	cursor_ray.origin = (camera.inverse_view_proj * screen_pos).xyz
 	cursor_moved = last_origin != cursor_ray.origin
-	cursor_ray.direction = (icamera_vp * end_pos).xyz - cursor_ray.origin
+	cursor_ray.direction = (camera.inverse_view_proj * end_pos).xyz - cursor_ray.origin
 	cursor_ray.direction = glsl.normalize(cursor_ray.direction)
 }
 
@@ -53,8 +53,8 @@ scroll_callback :: proc "c" (
 	xoffset, yoffset: f64,
 ) {
 	context = runtime.default_context()
-	cursor_scroll.x = f32(xoffset)
-	cursor_scroll.y = f32(yoffset)
+	camera.scroll.x = f32(xoffset)
+	camera.scroll.y = f32(yoffset)
 }
 
 init_cursor :: proc() {
@@ -63,7 +63,7 @@ init_cursor :: proc() {
 }
 
 update_cursor :: proc() {
-	cursor_scroll = {0, 0}
+	camera.scroll = {0, 0}
 	cursor_update_ray()
 }
 
@@ -387,7 +387,7 @@ cursor_intersect_with_tiles_north_east :: proc(
 }
 
 cursor_intersect_with_tiles :: proc(on_intersect: proc(_: glsl.vec3)) {
-	switch camera_rotation {
+	switch camera.rotation {
 	case .South_West:
 		cursor_intersect_with_tiles_south_west(on_intersect)
 	case .South_East:

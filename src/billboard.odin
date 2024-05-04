@@ -9,6 +9,7 @@ import "vendor:cgltf"
 import stbi "vendor:stb/image"
 
 import "constants"
+import "camera"
 
 BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
@@ -802,7 +803,7 @@ billboard_update_draw_context_after_rotation :: proc(draw_context: $T) {
 		v := v
 		rotation := glsl.mat4Rotate(
 			{0, 1, 0},
-			(math.PI / 2) * f32(camera_rotation),
+			(math.PI / 2) * f32(camera.rotation),
 		)
 		v.pos = (glsl.vec4{v.pos.x, v.pos.y, v.pos.z, 1} * rotation).xyz
 		gl.BufferSubData(

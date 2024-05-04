@@ -1,4 +1,4 @@
-package main
+package utils
 
 import m "core:math/linalg/glsl"
 import "core:testing"

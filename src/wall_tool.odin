@@ -6,6 +6,7 @@ import "core:math/linalg/glsl"
 
 import "constants"
 import "keyboard"
+import "camera"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_start_billboard: Maybe(Billboard_Key)
@@ -853,7 +854,7 @@ wall_tool_move_cursor :: proc() {
 	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
 	position.y += f32(floor) * constants.WALL_HEIGHT
 
-	switch camera_rotation {
+	switch camera.rotation {
 	case .South_West:
 		position.x = f32(wall_tool_position.x)
 		position.z = f32(wall_tool_position.y)

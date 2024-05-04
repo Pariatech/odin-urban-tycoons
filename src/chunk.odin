@@ -5,6 +5,7 @@ import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 import "constants"
+import "camera"
 
 Chunk_Tiles :: struct {
 	triangles:     [constants.CHUNK_WIDTH][constants.CHUNK_DEPTH][Tile_Triangle_Side]Maybe(Tile_Triangle),
@@ -413,7 +414,7 @@ chunk_iterator_next :: proc(
 		0,
 		i32(iterator.pos.y * constants.CHUNK_DEPTH),
 	}
-	if camera_rotation == .South_West || camera_rotation == .South_East {
+	if camera.rotation == .South_West || camera.rotation == .South_East {
 		iterator.pos.x -= 1
 	} else {
 		iterator.pos.x += 1
@@ -425,7 +426,7 @@ chunk_iterator_next :: proc(
 			iterator.pos.x = iterator.start.x
 		}
 
-		if camera_rotation == .South_West || camera_rotation == .North_West {
+		if camera.rotation == .South_West || camera.rotation == .North_West {
 			iterator.pos.y -= 1
 		} else {
 			iterator.pos.y += 1
