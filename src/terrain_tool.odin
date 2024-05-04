@@ -7,6 +7,7 @@ import "core:math/rand"
 import "vendor:glfw"
 
 import "constants"
+import "keyboard"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: Billboard_Key
@@ -400,8 +401,8 @@ terrain_tool_update :: proc() {
 		}
 	}
 
-	if is_key_press(.Key_Equal) {
-		if is_key_down(.Key_Left_Shift) {
+	if keyboard.is_key_press(.Key_Equal) {
+		if keyboard.is_key_down(.Key_Left_Shift) {
 			terrain_tool_brush_strength += TERRAIN_TOOL_BRUSH_MIN_STRENGTH
 			terrain_tool_brush_strength = min(
 				terrain_tool_brush_strength,
@@ -429,8 +430,8 @@ terrain_tool_update :: proc() {
 				terrain_tool_position.y + terrain_tool_brush_size,
 			},
 		)
-	} else if is_key_press(.Key_Minus) {
-		if is_key_down(.Key_Left_Shift) {
+	} else if keyboard.is_key_press(.Key_Minus) {
+		if keyboard.is_key_down(.Key_Left_Shift) {
 			terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
 			terrain_tool_brush_strength = max(
 				terrain_tool_brush_strength,
@@ -495,11 +496,11 @@ terrain_tool_update :: proc() {
 	position.y =
 		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 	billboard_1x1_move(&terrain_tool_billboard, position)
-	shift_down := is_key_down(.Key_Left_Shift)
+	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
 	if shift_down || terrain_tool_drag_start != nil {
 		terrain_tool_move_points(position)
-	} else if is_key_down(.Key_Left_Control) {
+	} else if keyboard.is_key_down(.Key_Left_Control) {
 		terrain_tool_smooth_brush()
 	} else {
 		terrain_tool_move_point()

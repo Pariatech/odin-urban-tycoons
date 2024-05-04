@@ -1,7 +1,9 @@
 package main
 
-TOOLS_CONTROLLER_TERRAIN_TOOL_KEY :: Key_Value.Key_T
-TOOLS_CONTROLLER_WALL_TOOL_KEY :: Key_Value.Key_G
+import "keyboard"
+
+TOOLS_CONTROLLER_TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_T
+TOOLS_CONTROLLER_WALL_TOOL_KEY :: keyboard.Key_Value.Key_G
 
 tools_controller_active_tool: Tool = .Terrain
 
@@ -11,11 +13,11 @@ Tool :: enum{
 }
 
 tools_controller_update :: proc() {
-    if is_key_press(TOOLS_CONTROLLER_WALL_TOOL_KEY) {
+    if keyboard.is_key_press(TOOLS_CONTROLLER_WALL_TOOL_KEY) {
         terrain_tool_deinit()
         wall_tool_init()
         tools_controller_active_tool = .Wall
-    } else if is_key_press(TOOLS_CONTROLLER_TERRAIN_TOOL_KEY) {
+    } else if keyboard.is_key_press(TOOLS_CONTROLLER_TERRAIN_TOOL_KEY) {
         wall_tool_deinit()
         terrain_tool_init()
         tools_controller_active_tool = .Terrain

@@ -5,6 +5,7 @@ import m "core:math/linalg/glsl"
 import "core:testing"
 
 import "constants"
+import "keyboard"
 
 FLOOR_OFFSET :: 0.0004
 
@@ -13,9 +14,9 @@ floor: int
 
 floor_update :: proc() {
 	previous_floor = floor
-	if is_key_press(.Key_Equal) {
+	if keyboard.is_key_press(.Key_Equal) {
 		floor = min(floor + 1, constants.WORLD_HEIGHT - 1)
-	} else if is_key_press(.Key_Minus) {
+	} else if keyboard.is_key_press(.Key_Minus) {
 		floor = max(floor - 1, 0)
 	}
 

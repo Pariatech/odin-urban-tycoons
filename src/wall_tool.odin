@@ -5,6 +5,7 @@ import "core:math"
 import "core:math/linalg/glsl"
 
 import "constants"
+import "keyboard"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_start_billboard: Maybe(Billboard_Key)
@@ -698,7 +699,7 @@ wall_tool_adding_line :: proc() {
 }
 
 wall_tool_update_line :: proc() {
-	if is_key_down(.Key_Left_Control) {
+	if keyboard.is_key_down(.Key_Left_Control) {
 		wall_tool_removing_line()
 	} else {
 		wall_tool_adding_line()
@@ -782,7 +783,7 @@ wall_tool_removing_rectangle :: proc() {
 }
 
 wall_tool_update_rectangle :: proc() {
-	if is_key_down(.Key_Left_Control) {
+	if keyboard.is_key_down(.Key_Left_Control) {
 		wall_tool_removing_rectangle()
 	} else {
 		wall_tool_adding_rectangle()
@@ -790,7 +791,7 @@ wall_tool_update_rectangle :: proc() {
 }
 
 wall_tool_update :: proc() {
-	if is_key_release(.Key_Left_Control) {
+	if keyboard.is_key_release(.Key_Left_Control) {
 		billboard_1x1_set(
 			wall_tool_billboard,
 			 {
@@ -799,7 +800,7 @@ wall_tool_update :: proc() {
 				depth_map = .Wall_Cursor,
 			},
 		)
-	} else if is_key_press(.Key_Left_Control) {
+	} else if keyboard.is_key_press(.Key_Left_Control) {
 		billboard_1x1_set(
 			wall_tool_billboard,
 			 {
@@ -810,7 +811,7 @@ wall_tool_update :: proc() {
 		)
 	}
 
-	if is_key_down(.Key_Left_Shift) {
+	if keyboard.is_key_down(.Key_Left_Shift) {
 		wall_tool_update_rectangle()
 	} else {
 		wall_tool_update_line()

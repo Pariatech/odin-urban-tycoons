@@ -6,11 +6,13 @@ import "core:runtime"
 import "core:time"
 import "vendor:glfw"
 
+import "window"
+import "keyboard"
+
 WIDTH :: 1920
 HEIGHT :: 1080
 TITLE :: "My Window!"
 
-window_handle: glfw.WindowHandle
 framebuffer_resized: bool
 window_size := glsl.vec2{WIDTH, HEIGHT}
 delta_time: f64
@@ -36,19 +38,19 @@ start :: proc() -> (ok: bool = false) {
 	}
 
 	glfw.WindowHint(glfw.SAMPLES, 4)
-	window_handle = glfw.CreateWindow(WIDTH, HEIGHT, TITLE, nil, nil)
+	window.handle = glfw.CreateWindow(WIDTH, HEIGHT, TITLE, nil, nil)
 
-	defer glfw.DestroyWindow(window_handle)
+	defer glfw.DestroyWindow(window.handle)
 	defer glfw.Terminate()
 
-	if window_handle == nil {
+	if window.handle == nil {
 		fmt.eprintln("GLFW has failed to load the window.")
 		return
 	}
 
-	glfw.SetFramebufferSizeCallback(window_handle, framebuffer_size_callback)
+	glfw.SetFramebufferSizeCallback(window.handle, framebuffer_size_callback)
 
-	glfw.MakeContextCurrent(window_handle)
+	glfw.MakeContextCurrent(window.handle)
 	glfw.SwapInterval(0)
 
 	if (!init_renderer()) do return
@@ -56,7 +58,7 @@ start :: proc() -> (ok: bool = false) {
 
 	init_wall_renderer() or_return
 
-	init_keyboard()
+	keyboard.init()
     mouse_init()
 	init_cursor()
 
@@ -106,10 +108,10 @@ start :: proc() -> (ok: bool = false) {
 
 
 		should_close =
-			bool(glfw.WindowShouldClose(window_handle)) ||
-			is_key_down(.Key_Escape)
+			bool(glfw.WindowShouldClose(window.handle)) ||
+			keyboard.is_key_down(.Key_Escape)
 
-		update_keyboard()
+		keyboard.update()
         mouse_update()
 		update_cursor()
 

@@ -3,6 +3,8 @@ package main
 import "core:runtime"
 import "vendor:glfw"
 
+import "window"
+
 Mouse_Button_State :: enum {
 	Up,
 	Press,
@@ -42,8 +44,7 @@ mouse_on_button :: proc "c" (
 }
 
 mouse_init :: proc() {
-	glfw.SetMouseButtonCallback(window_handle, mouse_on_button)
-	key_map = make(map[Key_Value]Key_State)
+	glfw.SetMouseButtonCallback(window.handle, mouse_on_button)
 }
 
 mouse_update :: proc() {

@@ -7,6 +7,7 @@ import "core:runtime"
 import "vendor:glfw"
 
 import "constants"
+import "window"
 
 cursor_scroll: glsl.vec2
 cursor_pos: glsl.vec2
@@ -57,8 +58,8 @@ scroll_callback :: proc "c" (
 }
 
 init_cursor :: proc() {
-	glfw.SetCursorPosCallback(window_handle, cursor_pos_callback)
-	glfw.SetScrollCallback(window_handle, scroll_callback)
+	glfw.SetCursorPosCallback(window.handle, cursor_pos_callback)
+	glfw.SetScrollCallback(window.handle, scroll_callback)
 }
 
 update_cursor :: proc() {

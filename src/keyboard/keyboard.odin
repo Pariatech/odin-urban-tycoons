@@ -1,9 +1,11 @@
-package main
+package keyboard
 
 import "core:c"
 import "core:fmt"
 import "core:runtime"
 import "vendor:glfw"
+
+import "../window"
 
 key_map: map[Key_Value]Key_State
 
@@ -192,12 +194,12 @@ on_key :: proc "c" (
 	}
 }
 
-init_keyboard :: proc() {
-	glfw.SetKeyCallback(window_handle, on_key)
+init :: proc() {
+	glfw.SetKeyCallback(window.handle, on_key)
 	key_map = make(map[Key_Value]Key_State)
 }
 
-update_keyboard :: proc() {
+update :: proc() {
 	for key in key_map {
 		switch state := &key_map[key]; state^ {
 		case .Press, .Repeat, .Down:

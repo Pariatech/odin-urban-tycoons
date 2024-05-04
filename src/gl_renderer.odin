@@ -8,6 +8,8 @@ import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"
 
+import "window"
+
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
 TEXTURE_SIZE :: 128
@@ -355,7 +357,7 @@ deinit_renderer :: proc() {
 
 begin_draw :: proc() {
 	if (framebuffer_resized) {
-		width, height := glfw.GetWindowSize(window_handle)
+		width, height := glfw.GetWindowSize(window.handle)
 		gl.Viewport(0, 0, width, height)
 	}
 
@@ -366,7 +368,7 @@ begin_draw :: proc() {
 }
 
 end_draw :: proc() {
-	glfw.SwapBuffers(window_handle)
+	glfw.SwapBuffers(window.handle)
 
 	gl_error := gl.GetError()
 	if (gl_error != gl.NO_ERROR) {

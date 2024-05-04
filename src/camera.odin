@@ -5,6 +5,9 @@ import "core:math/linalg"
 import "core:math/linalg/glsl"
 import "vendor:glfw"
 
+import "window"
+import "keyboard"
+
 CAMERA_SPEED :: 8.0
 CAMERA_ZOOM_SPEED :: 0.05
 CAMERA_ZOOM_MAX :: 2
@@ -47,8 +50,7 @@ update_camera :: proc(delta_time: f64) {
 	camera_zoom -= cursor_scroll.y * CAMERA_ZOOM_SPEED
 	camera_zoom = math.clamp(camera_zoom, CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX)
 
-	width, height := glfw.GetWindowSize(window_handle)
-	// camera_distance = width 
+	width, height := glfw.GetWindowSize(window.handle)
 
 	camera_movement := glsl.vec3 {
 		f32(CAMERA_SPEED * delta_time) * (camera_zoom + 1),
@@ -56,12 +58,12 @@ update_camera :: proc(delta_time: f64) {
 		f32(CAMERA_SPEED * delta_time) * (camera_zoom + 1),
 	}
 
-	if is_key_press(.Key_Q) {
+	if keyboard.is_key_press(.Key_Q) {
 		camera_translate *= glsl.vec3{-1, 1, 1}
 		camera_translate.zx = camera_translate.xz
 		camera_rotation = Camera_Rotation((int(camera_rotation) + 3) % 4)
         world_update_after_rotation(.Counter_Clockwise)
-	} else if is_key_press(.Key_E) {
+	} else if keyboard.is_key_press(.Key_E) {
 		camera_translate *= glsl.vec3{1, 1, -1}
 		camera_translate.zx = camera_translate.xz
 		camera_rotation = Camera_Rotation((int(camera_rotation) + 1) % 4)
@@ -70,15 +72,15 @@ update_camera :: proc(delta_time: f64) {
 
 	camera_movement *= camera_translate / camera_distance
 
-	if is_key_down(.Key_W) {
+	if keyboard.is_key_down(.Key_W) {
 		camera_position += glsl.vec3{-camera_movement.x, 0, -camera_movement.z}
-	} else if is_key_down(.Key_S) {
+	} else if keyboard.is_key_down(.Key_S) {
 		camera_position += glsl.vec3{camera_movement.x, 0, camera_movement.z}
 	}
 
-	if is_key_down(.Key_A) {
+	if keyboard.is_key_down(.Key_A) {
 		camera_position += glsl.vec3{camera_movement.z, 0, -camera_movement.x}
-	} else if is_key_down(.Key_D) {
+	} else if keyboard.is_key_down(.Key_D) {
 		camera_position += glsl.vec3{-camera_movement.z, 0, camera_movement.x}
 	}
 
@@ -88,10 +90,7 @@ update_camera :: proc(delta_time: f64) {
 		{0, 1, 0},
 	)
 	aspect_ratio := f32(height) / f32(width)
-	// scale := f32(width) / (128 / camera_zoom) / 1.4142
-	// scale := f32(width) / (128 / camera_zoom)
 	scale := f32(width) / (176.775 / camera_zoom)
-	// scale := f32(width) / (128 / camera_zoom)
 
 	camera_left = scale
 	camera_right = -scale
@@ -132,8 +131,6 @@ get_camera_aabb :: proc() -> Rectangle {
 	aabb: Rectangle
 	switch camera_rotation {
 	case .South_West:
-		// camera.x = math.min(camera.x, bottom_left.x)
-		// camera.z = math.min(camera.z, bottom_right.y)
 		camera.x = bottom_left.x
 		camera.z = bottom_right.y
 		width := top_right.x - camera.x
@@ -146,8 +143,6 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .South_East:
-		// camera.x = math.max(camera.x, bottom_right.x)
-		// camera.z = math.min(camera.z, bottom_left.y)
 		camera.x = bottom_right.x
 		camera.z = bottom_left.y
 		width := camera.x - top_left.x
@@ -160,8 +155,6 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_East:
-		// camera.x = math.max(camera.x, bottom_left.x)
-		// camera.z = math.max(camera.z, bottom_right.y)
 		camera.x = bottom_left.x
 		camera.z = bottom_right.y
 		width := camera.x - top_right.x
@@ -174,8 +167,6 @@ get_camera_aabb :: proc() -> Rectangle {
 				h = i32(math.ceil(height)),
 			}
 	case .North_West:
-		// camera.x = math.min(camera.x, bottom_right.x)
-		// camera.z = math.max(camera.z, bottom_left.y)
 		camera.x = bottom_right.x
 		camera.z = bottom_left.y
 		width := top_left.x - camera.x
