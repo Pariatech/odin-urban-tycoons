@@ -951,8 +951,8 @@ draw_billboards :: proc(floor: int) {
 	)
 
 	for floor in &chunks_1x1 {
-		for x in camera.visible_chunks_start.x ..= camera.visible_chunks_end.x {
-			for z in camera.visible_chunks_start.y ..= camera.visible_chunks_end.y {
+		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
+			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk_billboards_draw(&floor[x][z], billboard_1x1_draw_context)
 			}
 		}
@@ -971,8 +971,8 @@ draw_billboards :: proc(floor: int) {
 	)
 
 	for floor in &chunks_2x2 {
-		for x in camera.visible_chunks_start.x ..= camera.visible_chunks_end.x {
-			for z in camera.visible_chunks_start.y ..= camera.visible_chunks_end.y {
+		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
+			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk_billboards_draw(&floor[x][z], billboard_2x2_draw_context)
 			}
 		}

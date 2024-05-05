@@ -1,12 +1,12 @@
-package main
+package wall
 
 import "core:fmt"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 
-import "constants"
-import "camera"
-import "terrain"
+import "../constants"
+import "../camera"
+import "../terrain"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,

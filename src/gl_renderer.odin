@@ -14,7 +14,6 @@ import "renderer"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
-TEXTURE_SIZE :: 128
 VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
@@ -41,85 +40,6 @@ gl_debug_callback :: proc "c" (
 	fmt.println("OpenGL Debug: ", message)
 }
 
-load_texture_2D_array :: proc(
-	paths: [$T]cstring,
-	width: i32 = TEXTURE_SIZE,
-	height: i32 = TEXTURE_SIZE,
-) -> (
-	ok: bool = true,
-) {
-	textures :: len(paths)
-
-	if (textures == 0) {
-		fmt.println("No textures to load.")
-		return true
-	}
-
-	stbi.set_flip_vertically_on_load(0)
-	stbi.set_flip_vertically_on_load_thread(false)
-
-	gl.TexStorage3D(
-		gl.TEXTURE_2D_ARRAY,
-		3,
-		gl.RGBA8,
-		width,
-		height,
-		textures,
-	)
-
-	for path, i in paths {
-		w, h: i32
-		pixels := stbi.load(path, &w, &h, nil, 4)
-		defer stbi.image_free(pixels)
-
-		if pixels == nil {
-			fmt.eprintln("Failed to load texture: ", path)
-			return false
-		}
-
-		if w != width {
-			fmt.eprintln(
-				"Texture: ",
-				path,
-				" is of a different width. expected: ",
-				width,
-				" got: ",
-				w,
-			)
-			return false
-		}
-
-		if h != height {
-			fmt.eprintln(
-				"Texture: ",
-				path,
-				" is of a different height. expected: ",
-				height,
-				" got: ",
-				h,
-			)
-			return false
-		}
-
-		gl.TexSubImage3D(
-			gl.TEXTURE_2D_ARRAY,
-			0,
-			0,
-			0,
-			i32(i),
-			width,
-			height,
-			1,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			pixels,
-		)
-	}
-
-	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
-
-	return
-}
 
 load_mask_array :: proc() -> (ok: bool) {
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -132,7 +52,7 @@ load_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(tile.MASK_PATHS)
+	return renderer.load_texture_2D_array(tile.MASK_PATHS)
 }
 
 load_texture_array :: proc() -> (ok: bool = true) {
@@ -161,7 +81,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(tile.TEXTURE_PATHS)
+	return renderer.load_texture_2D_array(tile.TEXTURE_PATHS)
 }
 
 init_renderer :: proc() -> (ok: bool = true) {

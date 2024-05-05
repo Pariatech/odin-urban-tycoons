@@ -9,11 +9,13 @@ import "camera"
 import "tile"
 import "terrain"
 
+import "wall"
+
 Chunk_Walls :: struct {
-	north_south:           map[glsl.ivec2]Wall,
-	east_west:             map[glsl.ivec2]Wall,
-	south_west_north_east: map[glsl.ivec2]Wall,
-	north_west_south_east: map[glsl.ivec2]Wall,
+	north_south:           map[glsl.ivec2]wall.Wall,
+	east_west:             map[glsl.ivec2]wall.Wall,
+	south_west_north_east: map[glsl.ivec2]wall.Wall,
+	north_west_south_east: map[glsl.ivec2]wall.Wall,
 	vao, vbo, ebo:         u32,
 	dirty:                 bool,
 	initialized:           bool,
@@ -69,8 +71,8 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Wall_Vertex),
-			offset_of(Wall_Vertex, pos),
+			size_of(wall.Wall_Vertex),
+			offset_of(wall.Wall_Vertex, pos),
 		)
 		gl.EnableVertexAttribArray(0)
 
@@ -79,8 +81,8 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Wall_Vertex),
-			offset_of(Wall_Vertex, light),
+			size_of(wall.Wall_Vertex),
+			offset_of(wall.Wall_Vertex, light),
 		)
 		gl.EnableVertexAttribArray(1)
 
@@ -89,8 +91,8 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			4,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Wall_Vertex),
-			offset_of(Wall_Vertex, texcoords),
+			size_of(wall.Wall_Vertex),
+			offset_of(wall.Wall_Vertex, texcoords),
 		)
 		gl.EnableVertexAttribArray(2)
 	}
@@ -102,45 +104,45 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	if floor.walls.dirty {
 		floor.walls.dirty = false
 
-		vertices: [dynamic]Wall_Vertex
-		indices: [dynamic]Wall_Index
+		vertices: [dynamic]wall.Wall_Vertex
+		indices: [dynamic]wall.Wall_Index
 		defer delete(vertices)
 		defer delete(indices)
 
-		for wall_pos, wall in floor.walls.east_west {
-			draw_wall(
+		for wall_pos, w in floor.walls.east_west {
+			wall.draw_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
-				wall,
+				w,
 				.East_West,
 				&vertices,
 				&indices,
 			)
 		}
 
-		for wall_pos, wall in floor.walls.north_south {
-			draw_wall(
+		for wall_pos, w in floor.walls.north_south {
+			wall.draw_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
-				wall,
+				w,
 				.North_South,
 				&vertices,
 				&indices,
 			)
 		}
 
-		for wall_pos, wall in floor.walls.south_west_north_east {
-			draw_diagonal_wall(
+		for wall_pos, w in floor.walls.south_west_north_east {
+			wall.draw_diagonal_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
-				wall,
+				w,
 				.South_West_North_East,
 				&vertices,
 				&indices,
 			)
 		}
 
-		for wall_pos, wall in floor.walls.north_west_south_east {
-			draw_diagonal_wall(
+		for wall_pos, w in floor.walls.north_west_south_east {
+			wall.draw_diagonal_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
-				wall,
+				w,
 				.North_West_South_East,
 				&vertices,
 				&indices,
@@ -149,14 +151,14 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
-			len(vertices) * size_of(Wall_Vertex),
+			len(vertices) * size_of(wall.Wall_Vertex),
 			raw_data(vertices),
 			gl.STATIC_DRAW,
 		)
 
 		gl.BufferData(
 			gl.ELEMENT_ARRAY_BUFFER,
-			len(indices) * size_of(Wall_Index),
+			len(indices) * size_of(wall.Wall_Index),
 			raw_data(indices),
 			gl.STATIC_DRAW,
 		)
@@ -315,7 +317,7 @@ chunk_iterator_next :: proc(
 chunk_set_north_south_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	wall: Wall,
+	wall: wall.Wall,
 ) {
 	chunk.floors[pos.y].walls.north_south[pos.xz] = wall
 	chunk.floors[pos.y].walls.dirty = true
@@ -329,7 +331,7 @@ chunk_get_north_south_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> (
-	Wall,
+	wall.Wall,
 	bool,
 ) {
 	return chunk.floors[pos.y].walls.north_south[pos.xz]
@@ -340,7 +342,7 @@ chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	chunk.floors[pos.y].walls.dirty = true
 }
 
-chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: Wall) {
+chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: wall.Wall) {
 	chunk.floors[pos.y].walls.east_west[pos.xz] = wall
 	chunk.floors[pos.y].walls.dirty = true
 }
@@ -353,7 +355,7 @@ chunk_get_east_west_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> (
-	Wall,
+	wall.Wall,
 	bool,
 ) {
 	return chunk.floors[pos.y].walls.east_west[pos.xz]
@@ -368,7 +370,7 @@ chunk_remove_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 chunk_set_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	wall: Wall,
+	wall: wall.Wall,
 ) {
 	chunk.floors[pos.y].walls.north_west_south_east[pos.xz] = wall
 	chunk.floors[pos.y].walls.dirty = true
@@ -385,7 +387,7 @@ chunk_get_north_west_south_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> (
-	Wall,
+	wall.Wall,
 	bool,
 ) {
 	return chunk.floors[pos.y].walls.north_west_south_east[pos.xz]
@@ -405,7 +407,7 @@ chunk_remove_north_west_south_east_wall :: proc(
 chunk_set_south_west_north_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	wall: Wall,
+	wall: wall.Wall,
 ) {
 	chunk.floors[pos.y].walls.south_west_north_east[pos.xz] = wall
 	chunk.floors[pos.y].walls.dirty = true
@@ -422,7 +424,7 @@ chunk_get_south_west_north_east_wall :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) -> (
-	Wall,
+	wall.Wall,
 	bool,
 ) {
 	return chunk.floors[pos.y].walls.south_west_north_east[pos.xz]

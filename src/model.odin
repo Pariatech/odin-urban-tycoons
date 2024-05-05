@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
 import "vendor:cgltf"
+
 import "tile"
 
 get_model_info :: proc(model_path: cstring) {

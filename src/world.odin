@@ -8,6 +8,7 @@ import "constants"
 import "camera"
 import "tile"
 import "billboard"
+import "wall"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -22,11 +23,11 @@ world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
 	return &world_chunks[pos.x / constants.CHUNK_WIDTH][pos.y / constants.CHUNK_DEPTH]
 }
 
-world_set_north_south_wall :: proc(pos: glsl.ivec3, wall: Wall) {
-	chunk_set_north_south_wall(world_get_chunk(pos.xz), pos, wall)
+world_set_north_south_wall :: proc(pos: glsl.ivec3, w: wall.Wall) {
+	chunk_set_north_south_wall(world_get_chunk(pos.xz), pos, w)
 }
 
-world_get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+world_get_north_south_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
 	return chunk_get_north_south_wall(world_get_chunk(pos.xz), pos)
 }
 
@@ -43,11 +44,11 @@ world_remove_north_south_wall :: proc(pos: glsl.ivec3) {
 	chunk_remove_north_south_wall(world_get_chunk(pos.xz), pos)
 }
 
-world_set_east_west_wall :: proc(pos: glsl.ivec3, wall: Wall) {
-	chunk_set_east_west_wall(world_get_chunk(pos.xz), pos, wall)
+world_set_east_west_wall :: proc(pos: glsl.ivec3, w: wall.Wall) {
+	chunk_set_east_west_wall(world_get_chunk(pos.xz), pos, w)
 }
 
-world_get_east_west_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+world_get_east_west_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
 	return chunk_get_east_west_wall(world_get_chunk(pos.xz), pos)
 }
 
@@ -64,7 +65,7 @@ world_remove_east_west_wall :: proc(pos: glsl.ivec3) {
 	chunk_remove_east_west_wall(world_get_chunk(pos.xz), pos)
 }
 
-world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: wall.Wall) {
 	chunk_set_north_west_south_east_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
@@ -77,7 +78,7 @@ world_has_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> bool {
 	)
 }
 
-world_get_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+world_get_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
 	return chunk_get_north_west_south_east_wall(world_get_chunk(pos.xz), pos)
 }
 
@@ -85,7 +86,7 @@ world_remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 	chunk_remove_north_west_south_east_wall(world_get_chunk(pos.xz), pos)
 }
 
-world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: wall.Wall) {
 	chunk_set_south_west_north_east_wall(world_get_chunk(pos.xz), pos, wall)
 }
 
@@ -98,7 +99,7 @@ world_has_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> bool {
 	)
 }
 
-world_get_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+world_get_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
 	return chunk_get_south_west_north_east_wall(world_get_chunk(pos.xz), pos)
 }
 
@@ -134,9 +135,9 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 
 world_draw_walls :: proc(floor: int) {
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall.wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall.wall_mask_array)
 
 	chunks_it := world_iterate_visible_chunks()
 	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
@@ -294,8 +295,8 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 
 add_house_floor_walls :: proc(
 	floor: i32,
-	inside_texture: Wall_Texture,
-	outside_texture: Wall_Texture,
+	inside_texture: wall.Wall_Texture,
+	outside_texture: wall.Wall_Texture,
 ) {
 	// The house's front wall
 	world_set_north_south_wall(
@@ -334,7 +335,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// door?
-	mask := Wall_Mask_Texture.Window_Opening
+	mask := wall.Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
 	world_set_north_south_wall(
 		{house_x + 1, floor, house_z + 5},

@@ -13,6 +13,7 @@ import "camera"
 import "cursor"
 import "terrain"
 import "billboard"
+import "wall"
 
 TITLE :: "My Window!"
 
@@ -55,7 +56,7 @@ start :: proc() -> (ok: bool = false) {
 	if (!init_renderer()) do return
 	defer deinit_renderer()
 
-	init_wall_renderer() or_return
+	wall.init_wall_renderer() or_return
 
 	keyboard.init()
     mouse.init()

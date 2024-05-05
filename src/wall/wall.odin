@@ -1,14 +1,30 @@
-package main
+package wall
 
 import "core:fmt"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-import "constants"
-import "camera"
-import "utils"
-import "terrain"
+import "../constants"
+import "../camera"
+import "../utils"
+import "../terrain"
+import "../renderer"
+
+
+Wall_Texture :: enum (u16) {
+	Wall_Top,
+	Brick,
+	Varg,
+	Nyana,
+    Frame,
+}
+
+Wall_Mask_Texture :: enum (u16) {
+	Full_Mask,
+	Door_Opening,
+	Window_Opening,
+}
 
 Wall_Axis :: enum {
 	North_South,
@@ -81,6 +97,20 @@ Wall_Index :: u32
 WALL_TOP_OFFSET :: 0.0001
 WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
+
+WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
+	.Wall_Top = "resources/textures/walls/wall-top.png",
+	.Brick    = "resources/textures/walls/brick-wall.png",
+	.Varg     = "resources/textures/walls/varg-wall.png",
+	.Nyana    = "resources/textures/walls/nyana-wall.png",
+	.Frame    = "resources/textures/walls/frame.png",
+}
+
+WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
+	.Full_Mask      = "resources/textures/wall-masks/full.png",
+	.Door_Opening   = "resources/textures/wall-masks/door-opening.png",
+	.Window_Opening = "resources/textures/wall-masks/window-opening.png",
+}
 
 wall_full_vertices := []Wall_Vertex {
 	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
@@ -739,8 +769,8 @@ load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(
-		wall_mask_paths,
+	return renderer.load_texture_2D_array(
+		WALL_MASK_PATHS,
 		WALL_TEXTURE_WIDTH,
 		WALL_TEXTURE_HEIGHT,
 	)
@@ -768,8 +798,8 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 		max_anisotropy,
 	)
 
-	return load_texture_2D_array(
-		wall_texture_paths,
+	return renderer.load_texture_2D_array(
+		WALL_TEXTURE_PATHS,
 		WALL_TEXTURE_WIDTH,
 		WALL_TEXTURE_HEIGHT,
 	)
