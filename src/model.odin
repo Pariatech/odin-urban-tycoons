@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:math/linalg"
 import m "core:math/linalg/glsl"
 import "vendor:cgltf"
+import "tile"
 
 get_model_info :: proc(model_path: cstring) {
 	fmt.println("Model:", model_path)
@@ -38,7 +39,7 @@ get_models_info :: proc(paths: [$T]cstring) {
 
 load_model :: proc(
 	model_path: cstring,
-	model_vertices: ^[$E]Vertex,
+	model_vertices: ^[$E]tile.Vertex,
 	model_indices: ^[$O]u32,
 ) -> (
 	ok: bool = false,
@@ -103,7 +104,7 @@ load_model :: proc(
 
 load_models :: proc(
 	paths: [$T]cstring,
-	vertices: ^[T][$E]Vertex,
+	vertices: ^[T][$E]tile.Vertex,
 	indices: ^[T][$O]u32,
 ) -> (
 	ok: bool = false,

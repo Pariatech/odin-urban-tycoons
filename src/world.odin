@@ -22,31 +22,6 @@ world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
 	return &world_chunks[pos.x / constants.CHUNK_WIDTH][pos.y / constants.CHUNK_DEPTH]
 }
 
-world_set_tile :: proc(
-	pos: glsl.ivec3,
-	tile: [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
-) {
-	chunk_set_tile(world_get_chunk(pos.xz), pos, tile)
-}
-
-world_get_tile :: proc(
-	pos: glsl.ivec3,
-) -> ^[tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
-	return chunk_get_tile(world_get_chunk(pos.xz), pos)
-}
-
-world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: tile.Mask) {
-	chunk_set_tile_mask_texture(world_get_chunk(pos.xz), pos, mask_texture)
-}
-
-world_set_tile_triangle :: proc(
-	pos: glsl.ivec3,
-	side: tile.Tile_Triangle_Side,
-	tile_triangle: Maybe(tile.Tile_Triangle),
-) {
-	chunk_set_tile_triangle(world_get_chunk(pos.xz), pos, side, tile_triangle)
-}
-
 world_set_north_south_wall :: proc(pos: glsl.ivec3, wall: Wall) {
 	chunk_set_north_south_wall(world_get_chunk(pos.xz), pos, wall)
 }
@@ -170,20 +145,6 @@ world_draw_walls :: proc(floor: int) {
 }
 
 
-world_draw_tiles :: proc(floor: int) {
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
-	// gl.Disable(gl.BLEND)
-
-	chunks_it := world_iterate_visible_chunks()
-	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		chunk_draw_tiles(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
-	}
-	// gl.Enable(gl.BLEND)
-}
-
 world_update :: proc() {
 	aabb := camera.get_aabb()
 	world_previously_visible_chunks_start = camera.visible_chunks_start
@@ -202,11 +163,7 @@ world_update :: proc() {
 }
 
 init_world :: proc() {
-	for x in 0 ..< constants.WORLD_CHUNK_WIDTH {
-		for z in 0 ..< constants.WORLD_CHUNK_DEPTH {
-			chunk_init(&world_chunks[x][z])
-		}
-	}
+	tile.chunk_init()
 
 	// The house
 	add_house_floor_walls(0, .Varg, .Varg)
@@ -215,15 +172,15 @@ init_world :: proc() {
 
 	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {
-			world_set_tile(
+			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 
-		world_set_tile(
+		tile.set_tile(
 			{i32(x), 0, 4},
-			chunk_tile(
+			tile.chunk_tile(
 				 {
 					texture = .Asphalt_Horizontal_Line,
 					mask_texture = .Full_Mask,
@@ -231,53 +188,53 @@ init_world :: proc() {
 			),
 		)
 		for z in 5 ..= 7 {
-			world_set_tile(
+			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 	}
 
 	for x in 1 ..= 7 {
-		world_set_tile(
+		tile.set_tile(
 			{i32(x), 0, 4},
-			chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+			tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 		)
 	}
 
 	for z in 8 ..< constants.WORLD_WIDTH {
 		for x in 1 ..= 3 {
-			world_set_tile(
+			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 
-		world_set_tile(
+		tile.set_tile(
 			{4, 0, i32(z)},
-			chunk_tile(
+			tile.chunk_tile(
 				{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
 			),
 		)
 		for x in 5 ..= 7 {
-			world_set_tile(
+			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 			)
 		}
 	}
 
 	for x in 8 ..< constants.WORLD_WIDTH {
-		world_set_tile(
+		tile.set_tile(
 			{i32(x), 0, 8},
-			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 
 	for z in 9 ..< constants.WORLD_WIDTH {
-		world_set_tile(
+		tile.set_tile(
 			{8, 0, i32(z)},
-			chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 }
@@ -288,49 +245,49 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 		mask_texture = .Full_Mask,
 	}
 
-	world_set_tile_triangle({house_x + 4, floor, house_z}, .West, tri)
-	world_set_tile_triangle({house_x + 4, floor, house_z}, .North, tri)
+	tile.set_tile_triangle({house_x + 4, floor, house_z}, .West, tri)
+	tile.set_tile_triangle({house_x + 4, floor, house_z}, .North, tri)
 
-	world_set_tile_triangle({house_x, floor, house_z + 4}, .South, tri)
-	world_set_tile_triangle({house_x, floor, house_z + 4}, .East, tri)
+	tile.set_tile_triangle({house_x, floor, house_z + 4}, .South, tri)
+	tile.set_tile_triangle({house_x, floor, house_z + 4}, .East, tri)
 
-	world_set_tile_triangle({house_x, floor, house_z + 6}, .North, tri)
-	world_set_tile_triangle({house_x, floor, house_z + 6}, .East, tri)
+	tile.set_tile_triangle({house_x, floor, house_z + 6}, .North, tri)
+	tile.set_tile_triangle({house_x, floor, house_z + 6}, .East, tri)
 
-	world_set_tile_triangle({house_x + 4, floor, house_z + 10}, .South, tri)
-	world_set_tile_triangle({house_x + 4, floor, house_z + 10}, .West, tri)
+	tile.set_tile_triangle({house_x + 4, floor, house_z + 10}, .South, tri)
+	tile.set_tile_triangle({house_x + 4, floor, house_z + 10}, .West, tri)
 
 	for x in 0 ..< 4 {
 		for z in 0 ..< 4 {
-			world_set_tile(
+			tile.set_tile(
 				{house_x + i32(x), floor, house_z + i32(z)},
-				chunk_tile(tri),
+				tile.chunk_tile(tri),
 			)
 		}
 	}
 
 	for x in 0 ..< 3 {
 		for z in 0 ..< 3 {
-			world_set_tile(
+			tile.set_tile(
 				{house_x + i32(x) + 1, floor, house_z + i32(z) + 4},
-				chunk_tile(tri),
+				tile.chunk_tile(tri),
 			)
 		}
 	}
 
 	for x in 0 ..< 4 {
 		for z in 0 ..< 4 {
-			world_set_tile(
+			tile.set_tile(
 				{house_x + i32(x), floor, house_z + i32(z) + 7},
-				chunk_tile(tri),
+				tile.chunk_tile(tri),
 			)
 		}
 	}
 
 	for z in 0 ..< 9 {
-		world_set_tile(
+		tile.set_tile(
 			{house_x + 4, floor, house_z + i32(z) + 1},
-			chunk_tile(tri),
+			tile.chunk_tile(tri),
 		)
 	}
 }
@@ -626,7 +583,7 @@ draw_world :: proc() {
 
 	for floor in 0 ..< constants.CHUNK_HEIGHT {
 	    gl.UseProgram(shader_program)
-		world_draw_tiles(floor)
+		tile.draw_tiles(floor)
 		world_draw_walls(floor)
 		billboard.draw_billboards(floor)
 	}

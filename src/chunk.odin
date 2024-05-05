@@ -9,14 +9,6 @@ import "camera"
 import "tile"
 import "terrain"
 
-Chunk_Tiles :: struct {
-	triangles:     [constants.CHUNK_WIDTH][constants.CHUNK_DEPTH][tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
-	dirty:         bool,
-	initialized:   bool,
-	vao, vbo, ebo: u32,
-	num_indices:   i32,
-}
-
 Chunk_Walls :: struct {
 	north_south:           map[glsl.ivec2]Wall,
 	east_west:             map[glsl.ivec2]Wall,
@@ -30,7 +22,6 @@ Chunk_Walls :: struct {
 
 
 Chunk_Floor :: struct {
-	tiles:          Chunk_Tiles,
 	walls:          Chunk_Walls,
 }
 
@@ -60,115 +51,6 @@ Chunk_Tile_Triangle_Iterator_Index :: struct {
 	side: tile.Tile_Triangle_Side,
 }
 
-chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
-	floor := &chunk.floors[pos.y]
-	if !floor.tiles.initialized {
-		floor.tiles.initialized = true
-		floor.tiles.dirty = true
-		gl.GenVertexArrays(1, &floor.tiles.vao)
-		gl.BindVertexArray(floor.tiles.vao)
-		gl.GenBuffers(1, &floor.tiles.vbo)
-		gl.BindBuffer(gl.ARRAY_BUFFER, floor.tiles.vbo)
-
-		gl.GenBuffers(1, &floor.tiles.ebo)
-
-		gl.VertexAttribPointer(
-			0,
-			3,
-			gl.FLOAT,
-			gl.FALSE,
-			size_of(tile.Tile_Triangle_Vertex),
-			offset_of(tile.Tile_Triangle_Vertex, pos),
-		)
-		gl.EnableVertexAttribArray(0)
-
-		gl.VertexAttribPointer(
-			1,
-			3,
-			gl.FLOAT,
-			gl.FALSE,
-			size_of(tile.Tile_Triangle_Vertex),
-			offset_of(tile.Tile_Triangle_Vertex, light),
-		)
-		gl.EnableVertexAttribArray(1)
-
-		gl.VertexAttribPointer(
-			2,
-			4,
-			gl.FLOAT,
-			gl.FALSE,
-			size_of(tile.Tile_Triangle_Vertex),
-			offset_of(tile.Tile_Triangle_Vertex, texcoords),
-		)
-		gl.EnableVertexAttribArray(2)
-	}
-
-	gl.BindVertexArray(floor.tiles.vao)
-	gl.BindBuffer(gl.ARRAY_BUFFER, floor.tiles.vbo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, floor.tiles.ebo)
-
-	if floor.tiles.dirty {
-		floor.tiles.dirty = false
-		it := chunk_iterate_all_tile_triangle(chunk, pos)
-
-		vertices: [dynamic]tile.Tile_Triangle_Vertex
-		indices: [dynamic]u32
-		defer delete(vertices)
-		defer delete(indices)
-
-		for tile_triangle, index in chunk_tile_triangle_iterator_next(&it) {
-			side := index.side
-			pos := glsl.vec2{f32(index.pos.x), f32(index.pos.z)}
-
-			x := int(index.pos.x)
-			z := int(index.pos.z)
-			lights := terrain.get_terrain_tile_triangle_lights(side, x, z, 1)
-
-			heights := terrain.get_terrain_tile_triangle_heights(side, x, z, 1)
-
-			for i in 0 ..< 3 {
-				heights[i] += f32(index.pos.y * constants.WALL_HEIGHT)
-			}
-
-			tile.draw_tile_triangle(
-				tile_triangle^,
-				side,
-				lights,
-				heights,
-				pos,
-				1,
-				&vertices,
-				&indices,
-			)
-		}
-
-		gl.BufferData(
-			gl.ARRAY_BUFFER,
-			len(vertices) * size_of(Vertex),
-			raw_data(vertices),
-			gl.STATIC_DRAW,
-		)
-
-		gl.BufferData(
-			gl.ELEMENT_ARRAY_BUFFER,
-			len(indices) * size_of(u32),
-			raw_data(indices),
-			gl.STATIC_DRAW,
-		)
-		floor.tiles.num_indices = i32(len(indices))
-	}
-
-	gl.DrawElements(
-		gl.TRIANGLES,
-		floor.tiles.num_indices,
-		gl.UNSIGNED_INT,
-		nil,
-	)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
-}
 
 chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	floor := &chunk.floors[pos.y]
@@ -292,60 +174,60 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
 }
-
-chunk_tile_triangle_iterator_has_next :: proc(
-	iterator: ^Chunk_Tile_Triangle_Iterator,
-) -> bool {
-	return(
-		iterator.pos.x < iterator.end.x &&
-		iterator.pos.z < iterator.end.z &&
-		iterator.pos.x >= iterator.start.x &&
-		iterator.pos.z >= iterator.start.z \
-	)
-}
-
-chunk_tile_triangle_iterator_next :: proc(
-	iterator: ^Chunk_Tile_Triangle_Iterator,
-) -> (
-	value: Chunk_Tile_Triangle_Iterator_Value,
-	index: Chunk_Tile_Triangle_Iterator_Index,
-	has_next: bool = true,
-) {
-	ok: bool = false
-	for !ok {
-		chunk_tile_triangle_iterator_has_next(iterator) or_return
-		index.side = iterator.side
-
-		value, ok =
-		&iterator.chunk.floors[iterator.pos.y].tiles.triangles[iterator.pos.x][iterator.pos.z][iterator.side].?
-
-		index.pos = iterator.chunk_pos + iterator.pos
-		switch iterator.side {
-		case .West:
-			iterator.side = .South
-			iterator.pos.x += 1
-		case .South:
-			iterator.side = .East
-		case .East:
-			iterator.side = .North
-		case .North:
-			iterator.side = .West
-		}
-
-		if iterator.pos.x >= iterator.end.x {
-			iterator.pos.x = iterator.start.x
-			iterator.pos.z += 1
-		}
-
-		// if iterator.pos.z >= iterator.end.z {
-		// 	iterator.pos.x = iterator.start.x
-		// 	iterator.pos.z = iterator.start.z
-		// 	iterator.pos.y += 1
-		// }
-	}
-
-	return
-}
+//
+// chunk_tile_triangle_iterator_has_next :: proc(
+// 	iterator: ^Chunk_Tile_Triangle_Iterator,
+// ) -> bool {
+// 	return(
+// 		iterator.pos.x < iterator.end.x &&
+// 		iterator.pos.z < iterator.end.z &&
+// 		iterator.pos.x >= iterator.start.x &&
+// 		iterator.pos.z >= iterator.start.z \
+// 	)
+// }
+//
+// chunk_tile_triangle_iterator_next :: proc(
+// 	iterator: ^Chunk_Tile_Triangle_Iterator,
+// ) -> (
+// 	value: Chunk_Tile_Triangle_Iterator_Value,
+// 	index: Chunk_Tile_Triangle_Iterator_Index,
+// 	has_next: bool = true,
+// ) {
+// 	ok: bool = false
+// 	for !ok {
+// 		chunk_tile_triangle_iterator_has_next(iterator) or_return
+// 		index.side = iterator.side
+//
+// 		value, ok =
+// 		&iterator.chunk.floors[iterator.pos.y].tiles.triangles[iterator.pos.x][iterator.pos.z][iterator.side].?
+//
+// 		index.pos = iterator.chunk_pos + iterator.pos
+// 		switch iterator.side {
+// 		case .West:
+// 			iterator.side = .South
+// 			iterator.pos.x += 1
+// 		case .South:
+// 			iterator.side = .East
+// 		case .East:
+// 			iterator.side = .North
+// 		case .North:
+// 			iterator.side = .West
+// 		}
+//
+// 		if iterator.pos.x >= iterator.end.x {
+// 			iterator.pos.x = iterator.start.x
+// 			iterator.pos.z += 1
+// 		}
+//
+// 		// if iterator.pos.z >= iterator.end.z {
+// 		// 	iterator.pos.x = iterator.start.x
+// 		// 	iterator.pos.z = iterator.start.z
+// 		// 	iterator.pos.y += 1
+// 		// }
+// 	}
+//
+// 	return
+// }
 
 chunk_iterate_all_tile_triangle :: proc(
 	chunk: ^Chunk,
@@ -427,71 +309,6 @@ chunk_iterator_next :: proc(
 		}
 	}
 	return
-}
-
-chunk_tile :: proc(
-	tile_triangle: tile.Tile_Triangle,
-) -> [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
-	return(
-		 {
-			.West = tile_triangle,
-			.South = tile_triangle,
-			.East = tile_triangle,
-			.North = tile_triangle,
-		} \
-	)
-}
-
-chunk_init :: proc(chunk: ^Chunk) {
-	for x in 0 ..< constants.CHUNK_WIDTH {
-		for z in 0 ..< constants.CHUNK_DEPTH {
-			for side in tile.Tile_Triangle_Side {
-				chunk.floors[0].tiles.triangles[x][z][side] = tile.Tile_Triangle {
-					texture      = .Grass,
-					mask_texture = .Grid_Mask,
-				}
-			}
-		}
-	}
-}
-
-chunk_get_tile :: proc(
-	chunk: ^Chunk,
-	pos: glsl.ivec3,
-) -> ^[tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
-	return(
-		&chunk.floors[pos.y].tiles.triangles[pos.x % constants.CHUNK_WIDTH][pos.z % constants.CHUNK_DEPTH] \
-	)
-}
-
-chunk_set_tile :: proc(
-	chunk: ^Chunk,
-	pos: glsl.ivec3,
-	tile: [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
-) {
-	chunk_get_tile(chunk, pos)^ = tile
-}
-
-chunk_set_tile_triangle :: proc(
-	chunk: ^Chunk,
-	pos: glsl.ivec3,
-	side: tile.Tile_Triangle_Side,
-	tile_triangle: Maybe(tile.Tile_Triangle),
-) {
-	chunk_get_tile(chunk, pos)[side] = tile_triangle
-}
-
-chunk_set_tile_mask_texture :: proc(
-	chunk: ^Chunk,
-	pos: glsl.ivec3,
-	mask_texture: tile.Mask,
-) {
-	item := chunk_get_tile(chunk, pos)
-	for side in tile.Tile_Triangle_Side {
-		if tile_triangle, ok := &item[side].?; ok {
-			tile_triangle.mask_texture = mask_texture
-		}
-	}
 }
 
 

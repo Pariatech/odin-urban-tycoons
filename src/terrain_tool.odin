@@ -12,6 +12,7 @@ import "mouse"
 import "terrain"
 import "cursor"
 import "billboard"
+import "tile"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: billboard.Key
@@ -76,7 +77,7 @@ terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 	for i in start.x ..= end.x {
 		for j in start.y ..= end.y {
 			for floor in 0 ..< constants.CHUNK_HEIGHT {
-				world_chunks[i][j].floors[floor].tiles.dirty = true
+				tile.chunks[floor][i][j].dirty = true
 			}
 		}
 	}
@@ -333,7 +334,7 @@ terrain_tool_deinit :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 
@@ -357,7 +358,7 @@ terrain_tool_deinit :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 		terrain_tool_mark_array_dirty(
@@ -384,7 +385,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	} else {
@@ -400,7 +401,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Grid_Mask)
+				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
 	}
@@ -518,7 +519,7 @@ terrain_tool_update :: proc() {
 
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Leveling_Brush)
+				tile.set_tile_mask_texture({x, 0, z}, .Leveling_Brush)
 			}
 		}
 	} else {
@@ -534,7 +535,7 @@ terrain_tool_update :: proc() {
 		)
 		for x in start_x ..< end_x {
 			for z in start_z ..< end_z {
-				world_set_tile_mask_texture({x, 0, z}, .Dotted_Grid)
+				tile.set_tile_mask_texture({x, 0, z}, .Dotted_Grid)
 			}
 		}
 	}

@@ -18,23 +18,14 @@ TEXTURE_SIZE :: 128
 VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
-texture_array: u32
-mask_array: u32
 vbo, vao, ubo: u32
 shader_program: u32
-world_vertices: [dynamic]Vertex
+world_vertices: [dynamic]tile.Vertex
 world_indices: [dynamic]u32
 uniform_object: Uniform_Object
 
 Uniform_Object :: struct {
 	proj, view: m.mat4,
-}
-
-Vertex :: struct {
-	pos:       m.vec3,
-	light:     m.vec3,
-	texcoords: m.vec4,
-	depth_map: f32,
 }
 
 gl_debug_callback :: proc "c" (
@@ -132,8 +123,8 @@ load_texture_2D_array :: proc(
 
 load_mask_array :: proc() -> (ok: bool) {
 	gl.ActiveTexture(gl.TEXTURE1)
-	gl.GenTextures(1, &mask_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_array)
+	gl.GenTextures(1, &tile.mask_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, tile.mask_array)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -146,8 +137,8 @@ load_mask_array :: proc() -> (ok: bool) {
 
 load_texture_array :: proc() -> (ok: bool = true) {
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.GenTextures(1, &texture_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
+	gl.GenTextures(1, &tile.texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, tile.texture_array)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -218,8 +209,8 @@ init_renderer :: proc() -> (ok: bool = true) {
 		3,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, pos),
+		size_of(tile.Vertex),
+		offset_of(tile.Vertex, pos),
 	)
 	gl.EnableVertexAttribArray(0)
 
@@ -228,8 +219,8 @@ init_renderer :: proc() -> (ok: bool = true) {
 		3,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, light),
+		size_of(tile.Vertex),
+		offset_of(tile.Vertex, light),
 	)
 	gl.EnableVertexAttribArray(1)
 
@@ -238,8 +229,8 @@ init_renderer :: proc() -> (ok: bool = true) {
 		4,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, texcoords),
+		size_of(tile.Vertex),
+		offset_of(tile.Vertex, texcoords),
 	)
 	gl.EnableVertexAttribArray(2)
 
@@ -248,8 +239,8 @@ init_renderer :: proc() -> (ok: bool = true) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, depth_map),
+		size_of(tile.Vertex),
+		offset_of(tile.Vertex, depth_map),
 	)
 	gl.EnableVertexAttribArray(3)
 
@@ -278,8 +269,8 @@ init_renderer :: proc() -> (ok: bool = true) {
 }
 
 deinit_renderer :: proc() {
-	gl.DeleteTextures(1, &texture_array)
-	gl.DeleteTextures(1, &mask_array)
+	gl.DeleteTextures(1, &tile.texture_array)
+	gl.DeleteTextures(1, &tile.mask_array)
 	gl.DeleteBuffers(1, &vao)
 	gl.DeleteBuffers(1, &vbo)
 	gl.DeleteBuffers(1, &ubo)
@@ -307,7 +298,7 @@ end_draw :: proc() {
 	}
 }
 
-draw_triangle :: proc(v0, v1, v2: Vertex) {
+draw_triangle :: proc(v0, v1, v2: tile.Vertex) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, v0, v1, v2)
 	append(
@@ -318,7 +309,7 @@ draw_triangle :: proc(v0, v1, v2: Vertex) {
 	)
 }
 
-draw_quad :: proc(v0, v1, v2, v3: Vertex) {
+draw_quad :: proc(v0, v1, v2, v3: tile.Vertex) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, v0, v1, v2, v3)
 	append(
@@ -332,7 +323,7 @@ draw_quad :: proc(v0, v1, v2, v3: Vertex) {
 	)
 }
 
-draw_mesh :: proc(verts: []Vertex, idxs: []u32) {
+draw_mesh :: proc(verts: []tile.Vertex, idxs: []u32) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, ..verts)
 	for idx in idxs {

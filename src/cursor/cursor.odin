@@ -173,7 +173,7 @@ intersect_with_tile :: proc(
 		x := int(pos.x)
 		z := int(pos.y)
 
-		heights := terrain.get_terrain_tile_triangle_heights(side, x, z, 1)
+		heights := tile.get_terrain_tile_triangle_heights(side, x, z, 1)
 		for h in &heights {
 			h += f32(floor) * constants.WALL_HEIGHT
 		}
