@@ -4,146 +4,50 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-import "constants"
-import "camera"
-import "tile"
 import "billboard"
+import "camera"
+import "constants"
+import "tile"
 import "wall"
 
 house_x: i32 = 12
 house_z: i32 = 12
 
-world_chunks: [constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
-
-world_tiles_dirty: bool
 world_previously_visible_chunks_start: glsl.ivec2
 world_previously_visible_chunks_end: glsl.ivec2
 
-world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
-	return &world_chunks[pos.x / constants.CHUNK_WIDTH][pos.y / constants.CHUNK_DEPTH]
-}
 
-world_set_north_south_wall :: proc(pos: glsl.ivec3, w: wall.Wall) {
-	chunk_set_north_south_wall(world_get_chunk(pos.xz), pos, w)
-}
+// world_iterate_all_chunks :: proc() -> Chunk_Iterator {
+// 	return(
+// 		 {
+// 			{0, 0},
+// 			{0, 0},
+// 			{constants.WORLD_CHUNK_WIDTH, constants.WORLD_CHUNK_DEPTH},
+// 		} \
+// 	)
+// }
 
-world_get_north_south_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
-	return chunk_get_north_south_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_has_north_south_wall :: proc(pos: glsl.ivec3) -> bool {
-	return(
-		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
-		chunk_has_north_south_wall(world_get_chunk(pos.xz), pos) \
-	)
-}
-
-world_remove_north_south_wall :: proc(pos: glsl.ivec3) {
-	chunk_remove_north_south_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_set_east_west_wall :: proc(pos: glsl.ivec3, w: wall.Wall) {
-	chunk_set_east_west_wall(world_get_chunk(pos.xz), pos, w)
-}
-
-world_get_east_west_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
-	return chunk_get_east_west_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_has_east_west_wall :: proc(pos: glsl.ivec3) -> bool {
-	return(
-		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
-		chunk_has_east_west_wall(world_get_chunk(pos.xz), pos) \
-	)
-}
-
-world_remove_east_west_wall :: proc(pos: glsl.ivec3) {
-	chunk_remove_east_west_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: wall.Wall) {
-	chunk_set_north_west_south_east_wall(world_get_chunk(pos.xz), pos, wall)
-}
-
-world_has_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> bool {
-	return(
-		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
-		chunk_has_north_west_south_east_wall(world_get_chunk(pos.xz), pos) \
-	)
-}
-
-world_get_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
-	return chunk_get_north_west_south_east_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
-	chunk_remove_north_west_south_east_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: wall.Wall) {
-	chunk_set_south_west_north_east_wall(world_get_chunk(pos.xz), pos, wall)
-}
-
-world_has_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> bool {
-	return(
-		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
-		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
-		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
-		chunk_has_south_west_north_east_wall(world_get_chunk(pos.xz), pos) \
-	)
-}
-
-world_get_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> (wall.Wall, bool) {
-	return chunk_get_south_west_north_east_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_remove_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
-	chunk_remove_south_west_north_east_wall(world_get_chunk(pos.xz), pos)
-}
-
-world_iterate_all_chunks :: proc() -> Chunk_Iterator {
-	return {{0, 0}, {0, 0}, {constants.WORLD_CHUNK_WIDTH, constants.WORLD_CHUNK_DEPTH}}
-}
-
-world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
-	it := Chunk_Iterator{}
-
-	switch camera.rotation {
-	case .South_West:
-		it.pos = camera.visible_chunks_end - {1, 1}
-	case .South_East:
-		it.pos.x = camera.visible_chunks_end.x - 1
-		it.pos.y = camera.visible_chunks_start.y
-	case .North_East:
-		it.pos = camera.visible_chunks_start
-	case .North_West:
-		it.pos.x = camera.visible_chunks_start.x
-		it.pos.y = camera.visible_chunks_end.y - 1
-	}
-
-	it.start = camera.visible_chunks_start
-	it.end = camera.visible_chunks_end
-
-	return it
-}
-
-world_draw_walls :: proc(floor: int) {
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall.wall_texture_array)
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall.wall_mask_array)
-
-	chunks_it := world_iterate_visible_chunks()
-	for chunk, chunk_pos in chunk_iterator_next(&chunks_it) {
-		chunk_draw_walls(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
-	}
-}
+// world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
+// 	it := Chunk_Iterator{}
+//
+// 	switch camera.rotation {
+// 	case .South_West:
+// 		it.pos = camera.visible_chunks_end - {1, 1}
+// 	case .South_East:
+// 		it.pos.x = camera.visible_chunks_end.x - 1
+// 		it.pos.y = camera.visible_chunks_start.y
+// 	case .North_East:
+// 		it.pos = camera.visible_chunks_start
+// 	case .North_West:
+// 		it.pos.x = camera.visible_chunks_start.x
+// 		it.pos.y = camera.visible_chunks_end.y - 1
+// 	}
+//
+// 	it.start = camera.visible_chunks_start
+// 	it.end = camera.visible_chunks_end
+//
+// 	return it
+// }
 
 
 world_update :: proc() {
@@ -160,7 +64,6 @@ world_update :: proc() {
 		(aabb.y + aabb.h) / constants.CHUNK_DEPTH + 1,
 		constants.WORLD_CHUNK_DEPTH,
 	)
-	world_tiles_dirty = false
 }
 
 init_world :: proc() {
@@ -175,7 +78,9 @@ init_world :: proc() {
 		for z in 1 ..= 3 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile(
+					{texture = .Asphalt, mask_texture = .Full_Mask},
+				),
 			)
 		}
 
@@ -191,7 +96,9 @@ init_world :: proc() {
 		for z in 5 ..= 7 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile(
+					{texture = .Asphalt, mask_texture = .Full_Mask},
+				),
 			)
 		}
 	}
@@ -207,7 +114,9 @@ init_world :: proc() {
 		for x in 1 ..= 3 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile(
+					{texture = .Asphalt, mask_texture = .Full_Mask},
+				),
 			)
 		}
 
@@ -220,7 +129,9 @@ init_world :: proc() {
 		for x in 5 ..= 7 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+				tile.chunk_tile(
+					{texture = .Asphalt, mask_texture = .Full_Mask},
+				),
 			)
 		}
 	}
@@ -299,7 +210,7 @@ add_house_floor_walls :: proc(
 	outside_texture: wall.Wall_Texture,
 ) {
 	// The house's front wall
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x, floor, house_z},
 		 {
 			type = .Side_Right_Corner,
@@ -307,7 +218,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 	for i in 0 ..< 2 {
-		world_set_north_south_wall(
+		wall.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 1},
 			 {
 				type = .Side_Side,
@@ -318,7 +229,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	}
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x, floor, house_z + 3},
 		 {
 			type = .Right_Corner_Side,
@@ -326,7 +237,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	world_set_south_west_north_east_wall(
+	wall.set_south_west_north_east_wall(
 		{house_x, floor, house_z + 4},
 		 {
 			type = .Side_Side,
@@ -337,7 +248,7 @@ add_house_floor_walls :: proc(
 	// door?
 	mask := wall.Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x + 1, floor, house_z + 5},
 		 {
 			type = .Left_Corner_Left_Corner,
@@ -375,7 +286,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	world_set_north_west_south_east_wall(
+	wall.set_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
 		 {
 			type = .End_Side,
@@ -383,7 +294,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x, floor, house_z + 7},
 		 {
 			type = .Side_Right_Corner,
@@ -392,7 +303,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		world_set_north_south_wall(
+		wall.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 8},
 			 {
 				type = .Side_Side,
@@ -420,7 +331,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x, floor, house_z + 10},
 		 {
 			type = .Right_Corner_Side,
@@ -429,7 +340,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's right side wall
-	world_set_east_west_wall(
+	wall.set_east_west_wall(
 		{house_x, floor, house_z},
 		 {
 			type = .Left_Corner_Side,
@@ -438,7 +349,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		world_set_east_west_wall(
+		wall.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z},
 			 {
 				type = .Side_Side,
@@ -467,7 +378,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	world_set_east_west_wall(
+	wall.set_east_west_wall(
 		{house_x + 3, floor, house_z},
 		 {
 			type = .Side_Left_Corner,
@@ -476,7 +387,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's left side wall
-	world_set_east_west_wall(
+	wall.set_east_west_wall(
 		{house_x, floor, house_z + 11},
 		 {
 			type = .Right_Corner_Side,
@@ -485,7 +396,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		world_set_east_west_wall(
+		wall.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
 				type = .Side_Side,
@@ -513,7 +424,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	}
-	world_set_east_west_wall(
+	wall.set_east_west_wall(
 		{house_x + 3, floor, house_z + 11},
 		 {
 			type = .Side_Right_Corner,
@@ -522,7 +433,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's back wall
-	world_set_south_west_north_east_wall(
+	wall.set_south_west_north_east_wall(
 		{house_x + 4, floor, house_z},
 		 {
 			type = .Side_Side,
@@ -530,7 +441,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x + 5, floor, house_z + 1},
 		 {
 			type = .Side_Left_Corner,
@@ -539,7 +450,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 7 {
-		world_set_north_south_wall(
+		wall.set_north_south_wall(
 			{house_x + 5, floor, house_z + i32(i) + 2},
 			 {
 				type = .Side_Side,
@@ -551,7 +462,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	world_set_north_south_wall(
+	wall.set_north_south_wall(
 		{house_x + 5, floor, house_z + 9},
 		 {
 			type = .Left_Corner_Side,
@@ -559,7 +470,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	world_set_north_west_south_east_wall(
+	wall.set_north_west_south_east_wall(
 		{house_x + 4, floor, house_z + 10},
 		 {
 			type = .End_Side,
@@ -583,28 +494,27 @@ draw_world :: proc() {
 
 
 	for floor in 0 ..< constants.CHUNK_HEIGHT {
-	    gl.UseProgram(shader_program)
+		gl.UseProgram(shader_program)
 		tile.draw_tiles(floor)
-		world_draw_walls(floor)
+		wall.draw_walls(floor)
 		billboard.draw_billboards(floor)
 	}
 }
 
 world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	wall_tool_move_cursor()
-    billboard.update_after_rotation()
+	billboard.update_after_rotation()
 	switch rotated {
 	case .Counter_Clockwise:
-        billboard.update_after_counter_clockwise_rotation()
+		billboard.update_after_counter_clockwise_rotation()
 	case .Clockwise:
-        billboard.update_after_clockwise_rotation()
+		billboard.update_after_clockwise_rotation()
 	}
-	for row in &world_chunks {
-		for chunk in &row {
-			for floor in 0 ..< constants.CHUNK_HEIGHT {
-				chunk.floors[floor].walls.dirty = true
+	for floor in &wall.chunks {
+		for row in &floor {
+			for chunk in &row {
+				chunk.dirty = true
 			}
 		}
 	}
 }
-

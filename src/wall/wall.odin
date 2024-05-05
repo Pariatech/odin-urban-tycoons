@@ -5,11 +5,11 @@ import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-import "../constants"
 import "../camera"
-import "../utils"
-import "../terrain"
+import "../constants"
 import "../renderer"
+import "../terrain"
+import "../utils"
 
 
 Wall_Texture :: enum (u16) {
@@ -17,7 +17,7 @@ Wall_Texture :: enum (u16) {
 	Brick,
 	Varg,
 	Nyana,
-    Frame,
+	Frame,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -90,6 +90,17 @@ Wall_Vertex :: struct {
 	pos:       glsl.vec3,
 	light:     glsl.vec3,
 	texcoords: glsl.vec4,
+}
+
+Chunk :: struct {
+	north_south:           map[glsl.ivec2]Wall,
+	east_west:             map[glsl.ivec2]Wall,
+	south_west_north_east: map[glsl.ivec2]Wall,
+	north_west_south_east: map[glsl.ivec2]Wall,
+	vao, vbo, ebo:         u32,
+	dirty:                 bool,
+	initialized:           bool,
+	num_indices:           i32,
 }
 
 Wall_Index :: u32
@@ -194,8 +205,8 @@ wall_end_vertices := []Wall_Vertex {
 		texcoords = {0.115, 0, 0, 0},
 	},
 }
-wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
+wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
 wall_full_top_vertices := []Wall_Vertex {
 	 {
@@ -219,6 +230,7 @@ wall_full_top_vertices := []Wall_Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
+
 wall_top_vertices := []Wall_Vertex {
 	 {
 		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
@@ -241,7 +253,10 @@ wall_top_vertices := []Wall_Vertex {
 		texcoords = {0, 0, 0, 0},
 	},
 }
+
 wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
+
+chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
 WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
 	.End =  {
@@ -855,7 +870,8 @@ draw_wall :: proc(
 
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * constants.WALL_HEIGHT + terrain.terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT +
+		terrain.terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
@@ -901,4 +917,347 @@ draw_wall :: proc(
 		vertex_buffer,
 		index_buffer,
 	)
+}
+
+get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
+	return(
+		&chunks[pos.y][pos.x / constants.CHUNK_WIDTH][pos.z / constants.CHUNK_DEPTH] \
+	)
+}
+
+set_north_south_wall :: proc(pos: glsl.ivec3, w: Wall) {
+	chunk_set_north_south_wall(get_chunk(pos), pos, w)
+}
+
+get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+	return chunk_get_north_south_wall(get_chunk(pos), pos)
+}
+
+has_north_south_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
+		chunk_has_north_south_wall(get_chunk(pos), pos) \
+	)
+}
+
+remove_north_south_wall :: proc(pos: glsl.ivec3) {
+	chunk_remove_north_south_wall(get_chunk(pos), pos)
+}
+
+set_east_west_wall :: proc(pos: glsl.ivec3, w: Wall) {
+	chunk_set_east_west_wall(get_chunk(pos), pos, w)
+}
+
+get_east_west_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+	return chunk_get_east_west_wall(get_chunk(pos), pos)
+}
+
+has_east_west_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
+		chunk_has_east_west_wall(get_chunk(pos), pos) \
+	)
+}
+
+remove_east_west_wall :: proc(pos: glsl.ivec3) {
+	chunk_remove_east_west_wall(get_chunk(pos), pos)
+}
+
+set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_north_west_south_east_wall(get_chunk(pos), pos, wall)
+}
+
+has_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
+		chunk_has_north_west_south_east_wall(get_chunk(pos), pos) \
+	)
+}
+
+get_north_west_south_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+	return chunk_get_north_west_south_east_wall(get_chunk(pos), pos)
+}
+
+remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
+	chunk_remove_north_west_south_east_wall(get_chunk(pos), pos)
+}
+
+set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	chunk_set_south_west_north_east_wall(get_chunk(pos), pos, wall)
+}
+
+has_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> bool {
+	return(
+		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&
+		(pos.y >= 0 && pos.y < constants.WORLD_HEIGHT) &&
+		(pos.z >= 0 && pos.z < constants.WORLD_DEPTH) &&
+		chunk_has_south_west_north_east_wall(get_chunk(pos), pos) \
+	)
+}
+
+get_south_west_north_east_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
+	return chunk_get_south_west_north_east_wall(get_chunk(pos), pos)
+}
+
+remove_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
+	chunk_remove_south_west_north_east_wall(get_chunk(pos), pos)
+}
+
+chunk_set_north_south_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+	wall: Wall,
+) {
+	chunk.north_south[pos.xz] = wall
+	chunk.dirty = true
+}
+
+chunk_has_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
+	return pos.xz in chunk.north_south
+}
+
+chunk_get_north_south_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.north_south[pos.xz]
+}
+
+chunk_remove_north_south_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	delete_key(&chunk.north_south, glsl.ivec2(pos.xz))
+	chunk.dirty = true
+}
+
+chunk_set_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3, wall: Wall) {
+	chunk.east_west[pos.xz] = wall
+	chunk.dirty = true
+}
+
+chunk_has_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) -> bool {
+	return pos.xz in chunk.east_west
+}
+
+chunk_get_east_west_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.east_west[pos.xz]
+}
+
+chunk_remove_east_west_wall :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	delete_key(&chunk.east_west, glsl.ivec2(pos.xz))
+	chunk.dirty = true
+}
+
+
+chunk_set_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+	wall: Wall,
+) {
+	chunk.north_west_south_east[pos.xz] = wall
+	chunk.dirty = true
+}
+
+chunk_has_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> bool {
+	return pos.xz in chunk.north_west_south_east
+}
+
+chunk_get_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.north_west_south_east[pos.xz]
+}
+
+chunk_remove_north_west_south_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) {
+	delete_key(&chunk.north_west_south_east, glsl.ivec2(pos.xz))
+	chunk.dirty = true
+}
+
+chunk_set_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+	wall: Wall,
+) {
+	chunk.south_west_north_east[pos.xz] = wall
+	chunk.dirty = true
+}
+
+chunk_has_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> bool {
+	return pos.xz in chunk.south_west_north_east
+}
+
+chunk_get_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) -> (
+	Wall,
+	bool,
+) {
+	return chunk.south_west_north_east[pos.xz]
+}
+
+chunk_remove_south_west_north_east_wall :: proc(
+	chunk: ^Chunk,
+	pos: glsl.ivec3,
+) {
+	delete_key(&chunk.south_west_north_east, glsl.ivec2(pos.xz))
+	chunk.dirty = true
+}
+
+chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+	if !chunk.initialized {
+		chunk.initialized = true
+		chunk.dirty = true
+		gl.GenVertexArrays(1, &chunk.vao)
+		gl.BindVertexArray(chunk.vao)
+		gl.GenBuffers(1, &chunk.vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, chunk.vbo)
+
+		gl.GenBuffers(1, &chunk.ebo)
+
+		gl.VertexAttribPointer(
+			0,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, pos),
+		)
+		gl.EnableVertexAttribArray(0)
+
+		gl.VertexAttribPointer(
+			1,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, light),
+		)
+		gl.EnableVertexAttribArray(1)
+
+		gl.VertexAttribPointer(
+			2,
+			4,
+			gl.FLOAT,
+			gl.FALSE,
+			size_of(Wall_Vertex),
+			offset_of(Wall_Vertex, texcoords),
+		)
+		gl.EnableVertexAttribArray(2)
+	}
+
+	gl.BindVertexArray(chunk.vao)
+	gl.BindBuffer(gl.ARRAY_BUFFER, chunk.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.ebo)
+
+	if chunk.dirty {
+		chunk.dirty = false
+
+		vertices: [dynamic]Wall_Vertex
+		indices: [dynamic]Wall_Index
+		defer delete(vertices)
+		defer delete(indices)
+
+		for wall_pos, w in chunk.east_west {
+			draw_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				w,
+				.East_West,
+				&vertices,
+				&indices,
+			)
+		}
+
+		for wall_pos, w in chunk.north_south {
+			draw_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				w,
+				.North_South,
+				&vertices,
+				&indices,
+			)
+		}
+
+		for wall_pos, w in chunk.south_west_north_east {
+			draw_diagonal_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				w,
+				.South_West_North_East,
+				&vertices,
+				&indices,
+			)
+		}
+
+		for wall_pos, w in chunk.north_west_south_east {
+			draw_diagonal_wall(
+				{wall_pos.x, pos.y, wall_pos.y},
+				w,
+				.North_West_South_East,
+				&vertices,
+				&indices,
+			)
+		}
+
+		gl.BufferData(
+			gl.ARRAY_BUFFER,
+			len(vertices) * size_of(Wall_Vertex),
+			raw_data(vertices),
+			gl.STATIC_DRAW,
+		)
+
+		gl.BufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			len(indices) * size_of(Wall_Index),
+			raw_data(indices),
+			gl.STATIC_DRAW,
+		)
+		chunk.num_indices = i32(len(indices))
+	}
+
+	gl.DrawElements(gl.TRIANGLES, chunk.num_indices, gl.UNSIGNED_INT, nil)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+}
+
+
+draw_walls :: proc(floor: int) {
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
+
+	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
+		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
+            chunk := &chunks[floor][x][z]
+	        chunk_draw_walls(chunk, {x, i32(floor), z})
+		}
+	}
 }
