@@ -10,24 +10,23 @@ import "window"
 import "keyboard"
 import "mouse"
 import "camera"
+import "cursor"
+import "terrain"
 
-WIDTH :: 1920
-HEIGHT :: 1080
 TITLE :: "My Window!"
 
 framebuffer_resized: bool
-window_size := glsl.vec2{WIDTH, HEIGHT}
 delta_time: f64
 
 framebuffer_size_callback :: proc "c" (
-	window: glfw.WindowHandle,
+	_: glfw.WindowHandle,
 	width, height: i32,
 ) {
 	context = runtime.default_context()
 
 	framebuffer_resized = true
-	window_size.x = f32(width)
-	window_size.y = f32(height)
+	window.size.x = f32(width)
+	window.size.y = f32(height)
 }
 
 start :: proc() -> (ok: bool = false) {
@@ -37,7 +36,7 @@ start :: proc() -> (ok: bool = false) {
 	}
 
 	glfw.WindowHint(glfw.SAMPLES, 4)
-	window.handle = glfw.CreateWindow(WIDTH, HEIGHT, TITLE, nil, nil)
+	window.handle = glfw.CreateWindow(window.WIDTH, window.HEIGHT, TITLE, nil, nil)
 
 	defer glfw.DestroyWindow(window.handle)
 	defer glfw.Terminate()
@@ -59,10 +58,10 @@ start :: proc() -> (ok: bool = false) {
 
 	keyboard.init()
     mouse.init()
-	init_cursor()
+	cursor.init()
 
 	billboard_init_draw_contexts() or_return
-	init_terrain()
+	terrain.init_terrain()
 	init_world()
 
     gui_init() or_return
@@ -112,7 +111,7 @@ start :: proc() -> (ok: bool = false) {
 
 		keyboard.update()
         mouse.update()
-		update_cursor()
+		cursor.update()
 
 		frames += 1
 	}

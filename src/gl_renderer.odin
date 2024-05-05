@@ -9,6 +9,7 @@ import "vendor:glfw"
 import stbi "vendor:stb/image"
 
 import "window"
+import "tile"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
@@ -139,7 +140,7 @@ load_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(mask_paths)
+	return load_texture_2D_array(tile.MASK_PATHS)
 }
 
 load_texture_array :: proc() -> (ok: bool = true) {
@@ -168,7 +169,7 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return load_texture_2D_array(texture_paths)
+	return load_texture_2D_array(tile.TEXTURE_PATHS)
 }
 
 

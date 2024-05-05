@@ -6,6 +6,7 @@ import "core:testing"
 
 import "constants"
 import "keyboard"
+import "tile"
 
 FLOOR_OFFSET :: 0.0004
 
@@ -49,10 +50,10 @@ floor_update :: proc() {
                     chunk.floors[floor].tiles.dirty = true
 					for x in 0 ..< constants.CHUNK_WIDTH {
 						for z in 0 ..< constants.CHUNK_DEPTH {
-							tile := &chunk.floors[floor].tiles.triangles[x][z]
-							for tri, side in tile {
+							t := &chunk.floors[floor].tiles.triangles[x][z]
+							for tri, side in t {
 								if tri == nil {
-									tile[side] = Tile_Triangle {
+									t[side] = tile.Tile_Triangle {
 										texture      = .Floor_Marker,
 										mask_texture = .Full_Mask,
 									}

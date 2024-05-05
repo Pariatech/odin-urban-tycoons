@@ -10,6 +10,7 @@ import stbi "vendor:stb/image"
 
 import "constants"
 import "camera"
+import "terrain"
 
 BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
@@ -637,7 +638,7 @@ billboard_1x1_remove :: proc(key: Billboard_Key) {
 }
 
 get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
-    terrain_height := get_terrain_height({i32(pos.x), i32(pos.z)})
+    terrain_height := terrain.get_terrain_height({i32(pos.x), i32(pos.z)})
     return clamp(int((pos.y - terrain_height) / constants.WALL_HEIGHT), 0, constants.CHUNK_HEIGHT - 1)
 }
 

@@ -1,12 +1,14 @@
-package main
+package terrain
 
 import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:math/noise"
 
-import "constants"
-import "utils"
+import "../constants"
+import "../utils"
+import "../tile"
 
+sun := glsl.vec3{1, -3, 1}
 terrain_heights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]f32
 terrain_lights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]glsl.vec3
 
@@ -165,7 +167,7 @@ calculate_terrain_light :: proc(x, z: int) {
 }
 
 get_terrain_tile_triangle_lights :: proc(
-	side: Tile_Triangle_Side,
+	side: tile.Tile_Triangle_Side,
 	x, z, w: int,
 ) -> (
 	lights: [3]glsl.vec3,
@@ -203,7 +205,7 @@ get_terrain_tile_triangle_lights :: proc(
 }
 
 get_terrain_tile_triangle_heights :: proc(
-	side: Tile_Triangle_Side,
+	side: tile.Tile_Triangle_Side,
 	x, z, w: int,
 ) -> (
 	heights: [3]f32,

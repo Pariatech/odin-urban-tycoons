@@ -37,6 +37,9 @@ bottom: f32
 
 scroll: glsl.vec2
 
+visible_chunks_start: glsl.ivec2
+visible_chunks_end: glsl.ivec2
+
 Rotation :: enum {
 	South_West,
 	South_East,

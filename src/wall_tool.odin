@@ -8,6 +8,8 @@ import "constants"
 import "keyboard"
 import "camera"
 import "mouse"
+import "cursor"
+import "terrain"
 
 wall_tool_billboard: Billboard_Key
 wall_tool_start_billboard: Maybe(Billboard_Key)
@@ -26,7 +28,7 @@ wall_tool_init :: proc() {
 		wall_tool_billboard,
 		{light = {1, 1, 1}, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
 	)
-	cursor_intersect_with_tiles(wall_tool_on_tile_intersect)
+	cursor.intersect_with_tiles(wall_tool_on_tile_intersect, floor)
 	wall_tool_move_cursor()
 }
 
@@ -621,7 +623,7 @@ wall_tool_removing_line :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+	cursor.on_tile_intersect(wall_tool_on_tile_intersect, previous_floor, floor)
 
 	if previous_tool_position != wall_tool_position ||
 	   previous_floor != floor {
@@ -667,7 +669,7 @@ wall_tool_adding_line :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+	cursor.on_tile_intersect(wall_tool_on_tile_intersect, previous_floor, floor)
 
 	if previous_tool_position != wall_tool_position {
 		wall_tool_move_cursor()
@@ -717,7 +719,7 @@ wall_tool_adding_rectangle :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+	cursor.on_tile_intersect(wall_tool_on_tile_intersect, previous_floor, floor)
 
 	if previous_tool_position != wall_tool_position {
 		wall_tool_move_cursor()
@@ -755,7 +757,7 @@ wall_tool_removing_rectangle :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor_on_tile_intersect(wall_tool_on_tile_intersect)
+	cursor.on_tile_intersect(wall_tool_on_tile_intersect, previous_floor, floor)
 
 	if previous_tool_position != wall_tool_position {
 		wall_tool_move_cursor()
@@ -826,7 +828,7 @@ wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 		wall_tool_start_billboard = Billboard_Key {
 			pos =  {
 				f32(wall_tool_drag_start.x),
-				terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
+				terrain.terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
 				f32(floor) * constants.WALL_HEIGHT,
 				f32(wall_tool_drag_start.y),
 			},
@@ -852,7 +854,7 @@ wall_tool_remove_drag_start_billboard :: proc() {
 
 wall_tool_move_cursor :: proc() {
 	position: glsl.vec3
-	position.y = terrain_heights[wall_tool_position.x][wall_tool_position.y]
+	position.y = terrain.terrain_heights[wall_tool_position.x][wall_tool_position.y]
 	position.y += f32(floor) * constants.WALL_HEIGHT
 
 	switch camera.rotation {

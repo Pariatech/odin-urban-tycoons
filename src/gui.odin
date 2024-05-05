@@ -5,6 +5,8 @@ import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
+import "window"
+
 gui_vbo, gui_vao: u32
 gui_texture: u32
 gui_texture_size: glsl.ivec2
@@ -79,8 +81,8 @@ gui_init :: proc() -> (ok: bool = false) {
 }
 
 gui_to_screen_space :: proc(pos: glsl.ivec2) -> (screen_pos: glsl.vec2) {
-	screen_pos.x = f32(pos.x) / f32(window_size.x) * 2 - 1
-	screen_pos.y = f32(pos.y) / f32(window_size.y) * 2 - 1
+	screen_pos.x = f32(pos.x) / f32(window.size.x) * 2 - 1
+	screen_pos.y = f32(pos.y) / f32(window.size.y) * 2 - 1
 
 	return screen_pos
 }
@@ -100,20 +102,20 @@ gui_draw :: proc() {
 
 	gui_vertices[0].pos = gui_to_screen_space(
 		glsl.ivec2 {
-			i32(window_size.x) - gui_texture_size.x - 5,
-			i32(window_size.y) - gui_texture_size.y - 5,
+			i32(window.size.x) - gui_texture_size.x - 5,
+			i32(window.size.y) - gui_texture_size.y - 5,
 		},
 	)
 	gui_vertices[1].pos = gui_to_screen_space(
 		glsl.ivec2 {
-			i32(window_size.x) - 5,
-			i32(window_size.y) - gui_texture_size.y - 5,
+			i32(window.size.x) - 5,
+			i32(window.size.y) - gui_texture_size.y - 5,
 		},
 	)
 	gui_vertices[2].pos = gui_to_screen_space(
 		glsl.ivec2 {
-			i32(window_size.x) - 5,
-			i32(window_size.y) - 5,
+			i32(window.size.x) - 5,
+			i32(window.size.y) - 5,
 		},
 	)
 
@@ -122,8 +124,8 @@ gui_draw :: proc() {
 
 	gui_vertices[5].pos = gui_to_screen_space(
 		glsl.ivec2 {
-			i32(window_size.x) - gui_texture_size.x - 5,
-			i32(window_size.y) - 5,
+			i32(window.size.x) - gui_texture_size.x - 5,
+			i32(window.size.y) - 5,
 		},
 	)
 

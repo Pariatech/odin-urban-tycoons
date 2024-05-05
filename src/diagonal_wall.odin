@@ -6,6 +6,7 @@ import glsl "core:math/linalg/glsl"
 
 import "constants"
 import "camera"
+import "terrain"
 
 Diagonal_Wall_Axis :: enum {
 	South_West_North_East,
@@ -802,7 +803,7 @@ draw_diagonal_wall :: proc(
 	draw := draw_map[axis][wall.type][camera.rotation]
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * constants.WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT + terrain.terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)

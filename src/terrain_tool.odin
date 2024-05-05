@@ -9,6 +9,8 @@ import "vendor:glfw"
 import "constants"
 import "keyboard"
 import "mouse"
+import "terrain"
+import "cursor"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: Billboard_Key
@@ -31,14 +33,14 @@ TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 terrain_tool_init :: proc() {
-	cursor_intersect_with_tiles(terrain_tool_on_intersect)
-	terrain_tool_cursor_pos = cursor_ray.origin
+	cursor.intersect_with_tiles(terrain_tool_on_intersect, floor)
+	terrain_tool_cursor_pos = cursor.ray.origin
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
 	position.z = math.ceil(position.z) - 0.5
 	position.y =
-		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 
 	terrain_tool_billboard = {
 		type = .Shovel_Cursor,
@@ -87,23 +89,23 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
 		if mouse.is_button_up(.Left) && mouse.is_button_up(.Right) {
-			height := terrain_heights[drag_start.x][drag_start.y]
+			height := terrain.terrain_heights[drag_start.x][drag_start.y]
 			for x in start_x ..= end_x {
 				for z in start_z ..= end_z {
 					if terrain_tool_drag_clip {
-						point_height := terrain_heights[x][z]
+						point_height := terrain.terrain_heights[x][z]
 						if point_height > height {
-							set_terrain_height(int(x), int(z), height)
+							terrain.set_terrain_height(int(x), int(z), height)
 						}
 					} else {
-						set_terrain_height(int(x), int(z), height)
+						terrain.set_terrain_height(int(x), int(z), height)
 					}
 				}
 			}
 
 			for x in start_x ..= end_x {
 				for z in start_z ..= end_z {
-					calculate_terrain_light(int(x), int(z))
+					terrain.calculate_terrain_light(int(x), int(z))
 				}
 			}
 			terrain_tool_drag_start = nil
@@ -167,12 +169,12 @@ terrain_tool_smooth_brush :: proc() {
 
 				for x in start_x ..= end_x {
 					for z in start_z ..= end_z {
-						average += terrain_heights[x][z] / points
+						average += terrain.terrain_heights[x][z] / points
 					}
 				}
 
-				movement := average - terrain_heights[x][z]
-				terrain_heights[x][z] += movement * terrain_tool_brush_strength
+				movement := average - terrain.terrain_heights[x][z]
+				terrain.terrain_heights[x][z] += movement * terrain_tool_brush_strength
 			}
 		}
 
@@ -202,7 +204,7 @@ terrain_tool_calculate_lights :: proc() {
 	)
 	for x in start_x ..= end_x {
 		for z in start_z ..= end_z {
-			calculate_terrain_light(int(x), int(z))
+			terrain.calculate_terrain_light(int(x), int(z))
 		}
 	}
 }
@@ -256,12 +258,12 @@ terrain_tool_move_point :: proc() {
 }
 
 terrain_tool_move_point_height :: proc(x, z: int, movement: f32) {
-	height := terrain_heights[x][z]
+	height := terrain.terrain_heights[x][z]
 	height += movement
 
 	height = clamp(height, TERRAIN_TOOL_LOW, TERRAIN_TOOL_HIGH)
 
-	set_terrain_height(x, z, height)
+	terrain.set_terrain_height(x, z, height)
 }
 
 terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
@@ -462,7 +464,7 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-	cursor_on_tile_intersect(terrain_tool_on_intersect)
+	cursor.on_tile_intersect(terrain_tool_on_intersect, previous_floor, floor)
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
@@ -495,7 +497,7 @@ terrain_tool_update :: proc() {
 	}
 
 	position.y =
-		terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 	billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 

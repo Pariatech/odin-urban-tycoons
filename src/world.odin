@@ -6,8 +6,8 @@ import gl "vendor:OpenGL"
 
 import "constants"
 import "camera"
+import "tile"
 
-sun := glsl.vec3{1, -3, 1}
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -17,8 +17,6 @@ world_chunks: [constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 world_tiles_dirty: bool
 world_previously_visible_chunks_start: glsl.ivec2
 world_previously_visible_chunks_end: glsl.ivec2
-world_visible_chunks_start: glsl.ivec2
-world_visible_chunks_end: glsl.ivec2
 
 world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
 	return &world_chunks[pos.x / constants.CHUNK_WIDTH][pos.y / constants.CHUNK_DEPTH]
@@ -26,25 +24,25 @@ world_get_chunk :: proc(pos: glsl.ivec2) -> ^Chunk {
 
 world_set_tile :: proc(
 	pos: glsl.ivec3,
-	tile: [Tile_Triangle_Side]Maybe(Tile_Triangle),
+	tile: [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
 ) {
 	chunk_set_tile(world_get_chunk(pos.xz), pos, tile)
 }
 
 world_get_tile :: proc(
 	pos: glsl.ivec3,
-) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
+) -> ^[tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
 	return chunk_get_tile(world_get_chunk(pos.xz), pos)
 }
 
-world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: Mask) {
+world_set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: tile.Mask) {
 	chunk_set_tile_mask_texture(world_get_chunk(pos.xz), pos, mask_texture)
 }
 
 world_set_tile_triangle :: proc(
 	pos: glsl.ivec3,
-	side: Tile_Triangle_Side,
-	tile_triangle: Maybe(Tile_Triangle),
+	side: tile.Tile_Triangle_Side,
+	tile_triangle: Maybe(tile.Tile_Triangle),
 ) {
 	chunk_set_tile_triangle(world_get_chunk(pos.xz), pos, side, tile_triangle)
 }
@@ -142,19 +140,19 @@ world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
 
 	switch camera.rotation {
 	case .South_West:
-		it.pos = world_visible_chunks_end - {1, 1}
+		it.pos = camera.visible_chunks_end - {1, 1}
 	case .South_East:
-		it.pos.x = world_visible_chunks_end.x - 1
-		it.pos.y = world_visible_chunks_start.y
+		it.pos.x = camera.visible_chunks_end.x - 1
+		it.pos.y = camera.visible_chunks_start.y
 	case .North_East:
-		it.pos = world_visible_chunks_start
+		it.pos = camera.visible_chunks_start
 	case .North_West:
-		it.pos.x = world_visible_chunks_start.x
-		it.pos.y = world_visible_chunks_end.y - 1
+		it.pos.x = camera.visible_chunks_start.x
+		it.pos.y = camera.visible_chunks_end.y - 1
 	}
 
-	it.start = world_visible_chunks_start
-	it.end = world_visible_chunks_end
+	it.start = camera.visible_chunks_start
+	it.end = camera.visible_chunks_end
 
 	return it
 }
@@ -247,15 +245,15 @@ world_draw_billboards :: proc(floor: int) {
 
 world_update :: proc() {
 	aabb := camera.get_aabb()
-	world_previously_visible_chunks_start = world_visible_chunks_start
-	world_previously_visible_chunks_end = world_visible_chunks_end
-	world_visible_chunks_start.x = max(aabb.x / constants.CHUNK_WIDTH - 1, 0)
-	world_visible_chunks_start.y = max(aabb.y / constants.CHUNK_DEPTH - 1, 0)
-	world_visible_chunks_end.x = min(
+	world_previously_visible_chunks_start = camera.visible_chunks_start
+	world_previously_visible_chunks_end = camera.visible_chunks_end
+	camera.visible_chunks_start.x = max(aabb.x / constants.CHUNK_WIDTH - 1, 0)
+	camera.visible_chunks_start.y = max(aabb.y / constants.CHUNK_DEPTH - 1, 0)
+	camera.visible_chunks_end.x = min(
 		(aabb.x + aabb.w) / constants.CHUNK_WIDTH + 1,
 		constants.WORLD_CHUNK_WIDTH,
 	)
-	world_visible_chunks_end.y = min(
+	camera.visible_chunks_end.y = min(
 		(aabb.y + aabb.h) / constants.CHUNK_DEPTH + 1,
 		constants.WORLD_CHUNK_DEPTH,
 	)
@@ -343,8 +341,8 @@ init_world :: proc() {
 	}
 }
 
-add_house_floor_triangles :: proc(floor: i32, texture: Texture) {
-	tri := Tile_Triangle {
+add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
+	tri := tile.Tile_Triangle {
 		texture      = texture,
 		mask_texture = .Full_Mask,
 	}

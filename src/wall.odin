@@ -8,6 +8,7 @@ import gl "vendor:OpenGL"
 import "constants"
 import "camera"
 import "utils"
+import "terrain"
 
 Wall_Axis :: enum {
 	North_South,
@@ -824,7 +825,7 @@ draw_wall :: proc(
 
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * constants.WALL_HEIGHT + terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT + terrain.terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)

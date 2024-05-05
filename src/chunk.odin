@@ -6,9 +6,11 @@ import gl "vendor:OpenGL"
 
 import "constants"
 import "camera"
+import "tile"
+import "terrain"
 
 Chunk_Tiles :: struct {
-	triangles:     [constants.CHUNK_WIDTH][constants.CHUNK_DEPTH][Tile_Triangle_Side]Maybe(Tile_Triangle),
+	triangles:     [constants.CHUNK_WIDTH][constants.CHUNK_DEPTH][tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
 	dirty:         bool,
 	initialized:   bool,
 	vao, vbo, ebo: u32,
@@ -56,14 +58,14 @@ Chunk_Tile_Triangle_Iterator :: struct {
 	pos:       glsl.ivec3,
 	start:     glsl.ivec3,
 	end:       glsl.ivec3,
-	side:      Tile_Triangle_Side,
+	side:      tile.Tile_Triangle_Side,
 }
 
-Chunk_Tile_Triangle_Iterator_Value :: ^Tile_Triangle
+Chunk_Tile_Triangle_Iterator_Value :: ^tile.Tile_Triangle
 
 Chunk_Tile_Triangle_Iterator_Index :: struct {
 	pos:  glsl.ivec3,
-	side: Tile_Triangle_Side,
+	side: tile.Tile_Triangle_Side,
 }
 
 chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
@@ -83,8 +85,8 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Tile_Triangle_Vertex),
-			offset_of(Tile_Triangle_Vertex, pos),
+			size_of(tile.Tile_Triangle_Vertex),
+			offset_of(tile.Tile_Triangle_Vertex, pos),
 		)
 		gl.EnableVertexAttribArray(0)
 
@@ -93,8 +95,8 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			3,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Tile_Triangle_Vertex),
-			offset_of(Tile_Triangle_Vertex, light),
+			size_of(tile.Tile_Triangle_Vertex),
+			offset_of(tile.Tile_Triangle_Vertex, light),
 		)
 		gl.EnableVertexAttribArray(1)
 
@@ -103,8 +105,8 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			4,
 			gl.FLOAT,
 			gl.FALSE,
-			size_of(Tile_Triangle_Vertex),
-			offset_of(Tile_Triangle_Vertex, texcoords),
+			size_of(tile.Tile_Triangle_Vertex),
+			offset_of(tile.Tile_Triangle_Vertex, texcoords),
 		)
 		gl.EnableVertexAttribArray(2)
 	}
@@ -117,7 +119,7 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		floor.tiles.dirty = false
 		it := chunk_iterate_all_tile_triangle(chunk, pos)
 
-		vertices: [dynamic]Tile_Triangle_Vertex
+		vertices: [dynamic]tile.Tile_Triangle_Vertex
 		indices: [dynamic]u32
 		defer delete(vertices)
 		defer delete(indices)
@@ -128,15 +130,15 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 			x := int(index.pos.x)
 			z := int(index.pos.z)
-			lights := get_terrain_tile_triangle_lights(side, x, z, 1)
+			lights := terrain.get_terrain_tile_triangle_lights(side, x, z, 1)
 
-			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
+			heights := terrain.get_terrain_tile_triangle_heights(side, x, z, 1)
 
 			for i in 0 ..< 3 {
 				heights[i] += f32(index.pos.y * constants.WALL_HEIGHT)
 			}
 
-			draw_tile_triangle(
+			tile.draw_tile_triangle(
 				tile_triangle^,
 				side,
 				lights,
@@ -436,8 +438,8 @@ chunk_iterator_next :: proc(
 }
 
 chunk_tile :: proc(
-	tile_triangle: Tile_Triangle,
-) -> [Tile_Triangle_Side]Maybe(Tile_Triangle) {
+	tile_triangle: tile.Tile_Triangle,
+) -> [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
 	return(
 		 {
 			.West = tile_triangle,
@@ -451,8 +453,8 @@ chunk_tile :: proc(
 chunk_init :: proc(chunk: ^Chunk) {
 	for x in 0 ..< constants.CHUNK_WIDTH {
 		for z in 0 ..< constants.CHUNK_DEPTH {
-			for side in Tile_Triangle_Side {
-				chunk.floors[0].tiles.triangles[x][z][side] = Tile_Triangle {
+			for side in tile.Tile_Triangle_Side {
+				chunk.floors[0].tiles.triangles[x][z][side] = tile.Tile_Triangle {
 					texture      = .Grass,
 					mask_texture = .Grid_Mask,
 				}
@@ -464,7 +466,7 @@ chunk_init :: proc(chunk: ^Chunk) {
 chunk_get_tile :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-) -> ^[Tile_Triangle_Side]Maybe(Tile_Triangle) {
+) -> ^[tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle) {
 	return(
 		&chunk.floors[pos.y].tiles.triangles[pos.x % constants.CHUNK_WIDTH][pos.z % constants.CHUNK_DEPTH] \
 	)
@@ -473,7 +475,7 @@ chunk_get_tile :: proc(
 chunk_set_tile :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	tile: [Tile_Triangle_Side]Maybe(Tile_Triangle),
+	tile: [tile.Tile_Triangle_Side]Maybe(tile.Tile_Triangle),
 ) {
 	chunk_get_tile(chunk, pos)^ = tile
 }
@@ -481,8 +483,8 @@ chunk_set_tile :: proc(
 chunk_set_tile_triangle :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	side: Tile_Triangle_Side,
-	tile_triangle: Maybe(Tile_Triangle),
+	side: tile.Tile_Triangle_Side,
+	tile_triangle: Maybe(tile.Tile_Triangle),
 ) {
 	chunk_get_tile(chunk, pos)[side] = tile_triangle
 }
@@ -490,10 +492,10 @@ chunk_set_tile_triangle :: proc(
 chunk_set_tile_mask_texture :: proc(
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
-	mask_texture: Mask,
+	mask_texture: tile.Mask,
 ) {
 	item := chunk_get_tile(chunk, pos)
-	for side in Tile_Triangle_Side {
+	for side in tile.Tile_Triangle_Side {
 		if tile_triangle, ok := &item[side].?; ok {
 			tile_triangle.mask_texture = mask_texture
 		}
