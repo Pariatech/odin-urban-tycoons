@@ -1,19 +1,19 @@
-package main
+package floor
 
 import "core:fmt"
 import m "core:math/linalg/glsl"
 import "core:testing"
 
-import "constants"
-import "keyboard"
-import "tile"
+import "../constants"
+import "../keyboard"
+import "../tile"
 
 FLOOR_OFFSET :: 0.0004
 
 previous_floor: int
 floor: int
 
-floor_update :: proc() {
+update :: proc() {
 	previous_floor = floor
 	if keyboard.is_key_press(.Key_Equal) {
 		floor = min(floor + 1, constants.WORLD_HEIGHT - 1)

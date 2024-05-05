@@ -14,6 +14,9 @@ import "cursor"
 import "terrain"
 import "billboard"
 import "wall"
+import "floor"
+import "tools/terrain_tool"
+import "tools"
 
 TITLE :: "My Window!"
 
@@ -68,7 +71,7 @@ start :: proc() -> (ok: bool = false) {
 
     gui_init() or_return
 
-	terrain_tool_init()
+	terrain_tool.init()
 
 	should_close := false
 	current_time_ns := time.now()
@@ -96,9 +99,9 @@ start :: proc() -> (ok: bool = false) {
 		begin_draw()
 		camera.update(delta_time, world_update_after_rotation)
         world_update()
-        floor_update()
+        floor.update()
 
-        tools_controller_update()
+        tools.update(delta_time)
 
 		draw_world()
 

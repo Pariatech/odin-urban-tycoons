@@ -9,6 +9,7 @@ import "camera"
 import "constants"
 import "tile"
 import "wall"
+import "tools/wall_tool"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -502,7 +503,7 @@ draw_world :: proc() {
 }
 
 world_update_after_rotation :: proc(rotated: camera.Rotated) {
-	wall_tool_move_cursor()
+	wall_tool.move_cursor()
 	billboard.update_after_rotation()
 	switch rotated {
 	case .Counter_Clockwise:

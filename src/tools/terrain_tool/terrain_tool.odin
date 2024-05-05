@@ -1,4 +1,4 @@
-package main
+package terrain_tool
 
 import "core:fmt"
 import "core:math"
@@ -6,13 +6,14 @@ import "core:math/linalg/glsl"
 import "core:math/rand"
 import "vendor:glfw"
 
-import "constants"
-import "keyboard"
-import "mouse"
-import "terrain"
-import "cursor"
-import "billboard"
-import "tile"
+import "../../constants"
+import "../../keyboard"
+import "../../mouse"
+import "../../terrain"
+import "../../cursor"
+import "../../billboard"
+import "../../tile"
+import "../../floor"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: billboard.Key
@@ -34,8 +35,8 @@ TERRAIN_TOOL_MIN_SLOPE :: 0.1
 TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
-terrain_tool_init :: proc() {
-	cursor.intersect_with_tiles(terrain_tool_on_intersect, floor)
+init :: proc() {
+	cursor.intersect_with_tiles(on_intersect, floor.floor)
 	terrain_tool_cursor_pos = cursor.ray.origin
 
 	position := terrain_tool_intersect
@@ -57,11 +58,11 @@ terrain_tool_init :: proc() {
 	terrain_tool_drag_end = nil
 }
 
-terrain_tool_on_intersect :: proc(intersect: glsl.vec3) {
+on_intersect :: proc(intersect: glsl.vec3) {
 	terrain_tool_intersect = intersect
 }
 
-terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
+mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 	start := start
 	end := end
 	start.x /= constants.CHUNK_WIDTH
@@ -83,7 +84,7 @@ terrain_tool_mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 	}
 }
 
-terrain_tool_move_points :: proc(position: glsl.vec3) {
+move_points :: proc(position: glsl.vec3) {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
 		start_z := min(drag_start.y, terrain_tool_position.y)
@@ -112,7 +113,7 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 			}
 			terrain_tool_drag_start = nil
 
-			terrain_tool_mark_array_dirty(
+			mark_array_dirty(
 				 {
 					start_x - terrain_tool_brush_size,
 					start_z - terrain_tool_brush_size,
@@ -126,14 +127,14 @@ terrain_tool_move_points :: proc(position: glsl.vec3) {
 			terrain_tool_drag_end = terrain_tool_position
 		}
 
-		terrain_tool_mark_array_dirty({start_x, start_z}, {end_x, end_z})
+		mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	} else if mouse.is_button_down(.Left) || mouse.is_button_down(.Right) {
 		terrain_tool_drag_clip = mouse.is_button_down(.Right)
 		terrain_tool_drag_start = terrain_tool_position
 	}
 }
 
-terrain_tool_smooth_brush :: proc() {
+smooth_brush :: proc(delta_time: f64) {
 	if mouse.is_button_down(.Left) {
 		terrain_tool_tick_timer += delta_time
 	} else if mouse.is_button_release(.Left) && terrain_tool_tick_timer > 0 {
@@ -180,7 +181,7 @@ terrain_tool_smooth_brush :: proc() {
 			}
 		}
 
-		terrain_tool_calculate_lights()
+		calculate_lights()
 
 		if terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 			terrain_tool_tick_timer = math.max(
@@ -189,11 +190,11 @@ terrain_tool_smooth_brush :: proc() {
 			)
 		}
 
-		terrain_tool_mark_array_dirty({start_x, start_z}, {end_x, end_z})
+		mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	}
 }
 
-terrain_tool_calculate_lights :: proc() {
+calculate_lights :: proc() {
 	start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
 	end_x := min(
 		terrain_tool_position.x + terrain_tool_brush_size,
@@ -211,7 +212,7 @@ terrain_tool_calculate_lights :: proc() {
 	}
 }
 
-terrain_tool_move_point :: proc() {
+move_point :: proc(delta_time: f64) {
 	movement: f32 = 0
 	if mouse.is_button_down(.Left) {
 		movement = terrain_tool_brush_strength
@@ -225,19 +226,19 @@ terrain_tool_move_point :: proc() {
 
 	if terrain_tool_tick_timer == delta_time ||
 	   terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
-		terrain_tool_move_point_height(
+		move_point_height(
 			int(terrain_tool_position.x),
 			int(terrain_tool_position.y),
 			movement,
 		)
-		terrain_tool_adjust_points(
+		adjust_points(
 			int(terrain_tool_position.x),
 			int(terrain_tool_position.y),
 			0,
 			0,
 			movement,
 		)
-		terrain_tool_calculate_lights()
+		calculate_lights()
 
 		if terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 			terrain_tool_tick_timer = math.max(
@@ -246,7 +247,7 @@ terrain_tool_move_point :: proc() {
 			)
 		}
 
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				terrain_tool_position.x - terrain_tool_brush_size,
 				terrain_tool_position.y - terrain_tool_brush_size,
@@ -259,7 +260,7 @@ terrain_tool_move_point :: proc() {
 	}
 }
 
-terrain_tool_move_point_height :: proc(x, z: int, movement: f32) {
+move_point_height :: proc(x, z: int, movement: f32) {
 	height := terrain.terrain_heights[x][z]
 	height += movement
 
@@ -268,7 +269,7 @@ terrain_tool_move_point_height :: proc(x, z: int, movement: f32) {
 	terrain.set_terrain_height(x, z, height)
 }
 
-terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
+adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	for i in 1 ..< int(terrain_tool_brush_size) {
 		start_x := max(x - i, 0) + 1
 		end_x := max(x + i, 0)
@@ -277,7 +278,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 
 		if x - i >= 0 {
 			for z in start_z ..= end_z {
-				terrain_tool_move_point_height(
+				move_point_height(
 					x - i,
 					z,
 					movement *
@@ -289,7 +290,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 
 		if x + w + i < constants.WORLD_WIDTH {
 			for z in start_z ..= end_z {
-				terrain_tool_move_point_height(
+				move_point_height(
 					x + w + i,
 					z,
 					movement *
@@ -301,7 +302,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 
 		if z - i >= 0 {
 			for x in start_x ..< end_x {
-				terrain_tool_move_point_height(
+				move_point_height(
 					x,
 					z - i,
 					movement *
@@ -313,7 +314,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 
 		if z + h + i < constants.WORLD_DEPTH {
 			for x in start_x ..< end_x {
-				terrain_tool_move_point_height(
+				move_point_height(
 					x,
 					z + h + i,
 					movement *
@@ -325,7 +326,7 @@ terrain_tool_adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	}
 }
 
-terrain_tool_deinit :: proc() {
+deinit :: proc() {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
 		start_z := min(drag_start.y, terrain_tool_position.y)
@@ -338,7 +339,7 @@ terrain_tool_deinit :: proc() {
 			}
 		}
 
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				start_x - terrain_tool_brush_size,
 				start_z - terrain_tool_brush_size,
@@ -361,7 +362,7 @@ terrain_tool_deinit :: proc() {
 				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
 			}
 		}
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				terrain_tool_position.x - terrain_tool_brush_size,
 				terrain_tool_position.y - terrain_tool_brush_size,
@@ -376,7 +377,7 @@ terrain_tool_deinit :: proc() {
 
 }
 
-terrain_tool_update :: proc() {
+update :: proc(delta_time: f64) {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
 		start_z := min(drag_start.y, terrain_tool_position.y)
@@ -425,7 +426,7 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size += 1
 			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
 		}
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				terrain_tool_position.x - terrain_tool_brush_size,
 				terrain_tool_position.y - terrain_tool_brush_size,
@@ -454,7 +455,7 @@ terrain_tool_update :: proc() {
 			terrain_tool_brush_size -= 1
 			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
 		}
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				terrain_tool_position.x - terrain_tool_brush_size - 1,
 				terrain_tool_position.y - terrain_tool_brush_size - 1,
@@ -466,7 +467,7 @@ terrain_tool_update :: proc() {
 		)
 	}
 
-	cursor.on_tile_intersect(terrain_tool_on_intersect, previous_floor, floor)
+	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
@@ -476,7 +477,7 @@ terrain_tool_update :: proc() {
 	terrain_tool_position.y = i32(position.z + 0.5)
 
 	if terrain_tool_position != previous_tool_position {
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				terrain_tool_position.x - terrain_tool_brush_size,
 				terrain_tool_position.y - terrain_tool_brush_size,
@@ -486,7 +487,7 @@ terrain_tool_update :: proc() {
 				terrain_tool_position.y + terrain_tool_brush_size,
 			},
 		)
-		terrain_tool_mark_array_dirty(
+		mark_array_dirty(
 			 {
 				previous_tool_position.x - terrain_tool_brush_size,
 				previous_tool_position.y - terrain_tool_brush_size,
@@ -504,11 +505,11 @@ terrain_tool_update :: proc() {
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
 	if shift_down || terrain_tool_drag_start != nil {
-		terrain_tool_move_points(position)
+		move_points(position)
 	} else if keyboard.is_key_down(.Key_Left_Control) {
-		terrain_tool_smooth_brush()
+		smooth_brush(delta_time)
 	} else {
-		terrain_tool_move_point()
+		move_point(delta_time)
 	}
 
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
