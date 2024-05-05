@@ -510,11 +510,5 @@ world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	case .Clockwise:
 		billboard.update_after_clockwise_rotation()
 	}
-	for floor in &wall.chunks {
-		for row in &floor {
-			for chunk in &row {
-				chunk.dirty = true
-			}
-		}
-	}
+    wall.update_after_rotation()
 }
