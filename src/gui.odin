@@ -6,6 +6,7 @@ import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
 import "window"
+import "renderer"
 
 gui_vbo, gui_vao: u32
 gui_texture: u32
@@ -51,7 +52,7 @@ gui_init :: proc() -> (ok: bool = false) {
 	gl.BindTexture(gl.TEXTURE_2D, gui_texture)
 	gui_load_texture(GUI_TEXTURE_PATH) or_return
 
-	load_shader_program(
+	renderer.load_shader_program(
 		&gui_shader,
 		GUI_VERTEX_SHADER_PATH,
 		GUI_FRAGMENT_SHADER_PATH,

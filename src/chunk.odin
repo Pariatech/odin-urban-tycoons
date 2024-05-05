@@ -28,18 +28,10 @@ Chunk_Walls :: struct {
 	num_indices:           i32,
 }
 
-Chunk_Billboards :: struct($T: typeid) {
-	instances:   map[Billboard_Key]T,
-	vao, ibo:    u32,
-	dirty:       bool,
-	initialized: bool,
-}
 
 Chunk_Floor :: struct {
 	tiles:          Chunk_Tiles,
 	walls:          Chunk_Walls,
-	billboards_1x1: Chunk_Billboards(Billboard_1x1),
-	billboards_2x2: Chunk_Billboards(Billboard_2x2),
 }
 
 Chunk :: struct {

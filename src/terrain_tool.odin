@@ -11,9 +11,10 @@ import "keyboard"
 import "mouse"
 import "terrain"
 import "cursor"
+import "billboard"
 
 terrain_tool_cursor_pos: glsl.vec3
-terrain_tool_billboard: Billboard_Key
+terrain_tool_billboard: billboard.Key
 terrain_tool_intersect: glsl.vec3
 terrain_tool_position: glsl.ivec2
 terrain_tool_tick_timer: f64
@@ -46,7 +47,7 @@ terrain_tool_init :: proc() {
 		type = .Shovel_Cursor,
 		pos  = position,
 	}
-	billboard_1x1_set(
+	billboard.billboard_1x1_set(
 		terrain_tool_billboard,
 		{light = {1, 1, 1}, texture = .Shovel_1_SW, depth_map = .Shovel_1_SW},
 	)
@@ -370,7 +371,7 @@ terrain_tool_deinit :: proc() {
 			},
 		)
 	}
-	billboard_1x1_remove(terrain_tool_billboard)
+	billboard.billboard_1x1_remove(terrain_tool_billboard)
 
 }
 
@@ -413,10 +414,10 @@ terrain_tool_update :: proc() {
 			)
 
 			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard_1x1_set_texture(
+			billboard.billboard_1x1_set_texture(
 				terrain_tool_billboard,
-				Billboard_Texture_1x1(
-					int(Billboard_Texture_1x1.Shovel_1_SW) + t,
+				billboard.Texture_1x1(
+					int(billboard.Texture_1x1.Shovel_1_SW) + t,
 				),
 			)
 		} else {
@@ -442,10 +443,10 @@ terrain_tool_update :: proc() {
 			)
 
 			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard_1x1_set_texture(
+			billboard.billboard_1x1_set_texture(
 				terrain_tool_billboard,
-				Billboard_Texture_1x1(
-					int(Billboard_Texture_1x1.Shovel_1_SW) + t,
+				billboard.Texture_1x1(
+					int(billboard.Texture_1x1.Shovel_1_SW) + t,
 				),
 			)
 		} else {
@@ -498,7 +499,7 @@ terrain_tool_update :: proc() {
 
 	position.y =
 		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-	billboard_1x1_move(&terrain_tool_billboard, position)
+	billboard.billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
 	if shift_down || terrain_tool_drag_start != nil {

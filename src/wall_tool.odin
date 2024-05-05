@@ -10,9 +10,10 @@ import "camera"
 import "mouse"
 import "cursor"
 import "terrain"
+import "billboard"
 
-wall_tool_billboard: Billboard_Key
-wall_tool_start_billboard: Maybe(Billboard_Key)
+wall_tool_billboard: billboard.Key
+wall_tool_start_billboard: Maybe(billboard.Key)
 wall_tool_position: glsl.ivec2
 wall_tool_drag_start: glsl.ivec2
 wall_tool_north_south_walls: map[glsl.ivec3]Wall
@@ -24,7 +25,7 @@ wall_tool_init :: proc() {
 	wall_tool_billboard = {
 		type = .Wall_Cursor,
 	}
-	billboard_1x1_set(
+	billboard.billboard_1x1_set(
 		wall_tool_billboard,
 		{light = {1, 1, 1}, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
 	)
@@ -33,7 +34,7 @@ wall_tool_init :: proc() {
 }
 
 wall_tool_deinit :: proc() {
-	billboard_1x1_remove(wall_tool_billboard)
+	billboard.billboard_1x1_remove(wall_tool_billboard)
 }
 
 wall_tool_on_tile_intersect :: proc(intersect: glsl.vec3) {
@@ -796,7 +797,7 @@ wall_tool_update_rectangle :: proc() {
 
 wall_tool_update :: proc() {
 	if keyboard.is_key_release(.Key_Left_Control) {
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			wall_tool_billboard,
 			 {
 				light = {1, 1, 1},
@@ -805,7 +806,7 @@ wall_tool_update :: proc() {
 			},
 		)
 	} else if keyboard.is_key_press(.Key_Left_Control) {
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			wall_tool_billboard,
 			 {
 				light = {1, 0, 0},
@@ -825,7 +826,7 @@ wall_tool_update :: proc() {
 wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 	if wall_tool_start_billboard == nil &&
 	   wall_tool_drag_start != wall_tool_position {
-		wall_tool_start_billboard = Billboard_Key {
+		wall_tool_start_billboard = billboard.Key {
 			pos =  {
 				f32(wall_tool_drag_start.x),
 				terrain.terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
@@ -834,7 +835,7 @@ wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 			},
 			type = .Wall_Cursor,
 		}
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			wall_tool_start_billboard.?,
 			{light = light, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
 		)
@@ -847,7 +848,7 @@ wall_tool_update_drag_start_billboard :: proc(light: glsl.vec3) {
 wall_tool_remove_drag_start_billboard :: proc() {
 	if wall_tool_start_billboard != nil &&
 	   wall_tool_drag_start != wall_tool_position {
-		billboard_1x1_remove(wall_tool_start_billboard.?)
+		billboard.billboard_1x1_remove(wall_tool_start_billboard.?)
 		wall_tool_start_billboard = nil
 	}
 }
@@ -872,5 +873,5 @@ wall_tool_move_cursor :: proc() {
 		position.z = f32(wall_tool_position.y - 1)
 	}
 
-	billboard_1x1_move(&wall_tool_billboard, position)
+	billboard.billboard_1x1_move(&wall_tool_billboard, position)
 }

@@ -1,4 +1,4 @@
-package main
+package billboard
 
 import "core:fmt"
 import "core:math"
@@ -8,9 +8,10 @@ import gl "vendor:OpenGL"
 import "vendor:cgltf"
 import stbi "vendor:stb/image"
 
-import "constants"
-import "camera"
-import "terrain"
+import "../camera"
+import "../constants"
+import "../renderer"
+import "../terrain"
 
 BILLBOARD_VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
 BILLBOARD_FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
@@ -26,6 +27,19 @@ billboard_uniform_object: Billboard_Uniform_Object
 billboard_ubo: u32
 billboard_1x1_draw_context: Billboard_Draw_Context
 billboard_2x2_draw_context: Billboard_Draw_Context
+chunks_1x1: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Billboard_Chunk(
+	Billboard_1x1,
+)
+chunks_2x2: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Billboard_Chunk(
+	Billboard_2x2,
+)
+
+Billboard_Chunk :: struct($T: typeid) {
+	instances:   map[Key]T,
+	vao, ibo:    u32,
+	dirty:       bool,
+	initialized: bool,
+}
 
 Billboard_Type :: enum {
 	Door,
@@ -34,7 +48,7 @@ Billboard_Type :: enum {
 	Wall_Cursor,
 }
 
-Billboard_Key :: struct {
+Key :: struct {
 	pos:  glsl.vec3,
 	type: Billboard_Type,
 }
@@ -56,14 +70,14 @@ Billboard_Instance :: struct {
 
 Billboard_1x1 :: struct {
 	light:     glsl.vec3,
-	texture:   Billboard_Texture_1x1,
-	depth_map: Billboard_Texture_1x1,
+	texture:   Texture_1x1,
+	depth_map: Texture_1x1,
 }
 
 Billboard_2x2 :: struct {
 	light:     glsl.vec3,
-	texture:   Billboard_Texture_2x2,
-	depth_map: Billboard_Texture_2x2,
+	texture:   Texture_2x2,
+	depth_map: Texture_2x2,
 }
 
 Billboard_Vertex :: struct {
@@ -75,7 +89,7 @@ Billboard_Uniform_Object :: struct {
 	proj, view: glsl.mat4,
 }
 
-Billboard_Texture_1x1 :: enum u8 {
+Texture_1x1 :: enum u8 {
 	// Chair_Wood_SW,
 	// Chair_Wood_SE,
 	// Chair_Wood_NE,
@@ -102,7 +116,7 @@ Billboard_Texture_1x1 :: enum u8 {
 }
 
 BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 ::
-	[Billboard_Texture_1x1]Billboard_Texture_1x1 {
+	[Texture_1x1]Texture_1x1 {
 		.Door_Wood_SW   = .Door_Wood_SE,
 		.Door_Wood_SE   = .Door_Wood_NE,
 		.Door_Wood_NE   = .Door_Wood_NW,
@@ -125,7 +139,7 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 ::
 	}
 
 BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 ::
-	[Billboard_Texture_1x1]Billboard_Texture_1x1 {
+	[Texture_1x1]Texture_1x1 {
 		.Door_Wood_SW   = .Door_Wood_NW,
 		.Door_Wood_SE   = .Door_Wood_SW,
 		.Door_Wood_NE   = .Door_Wood_SE,
@@ -147,7 +161,7 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 ::
 		.Wall_Cursor    = .Wall_Cursor,
 	}
 
-Billboard_Texture_2x2 :: enum u8 {
+Texture_2x2 :: enum u8 {
 	Table_Wood_SW,
 	Table_Wood_SE,
 	Table_Wood_NE,
@@ -159,7 +173,7 @@ Billboard_Texture_2x2 :: enum u8 {
 }
 
 BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2 ::
-	[Billboard_Texture_2x2]Billboard_Texture_2x2 {
+	[Texture_2x2]Texture_2x2 {
 		.Table_Wood_SW          = .Table_Wood_SE,
 		.Table_Wood_SE          = .Table_Wood_NE,
 		.Table_Wood_NE          = .Table_Wood_NW,
@@ -171,7 +185,7 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2 ::
 	}
 
 BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2 ::
-	[Billboard_Texture_2x2]Billboard_Texture_2x2 {
+	[Texture_2x2]Texture_2x2 {
 		.Table_Wood_SW          = .Table_Wood_NW,
 		.Table_Wood_SE          = .Table_Wood_SW,
 		.Table_Wood_NE          = .Table_Wood_SE,
@@ -182,7 +196,7 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2 ::
 		.Table_8_Places_Wood_NW = .Table_8_Places_Wood_NE,
 	}
 
-BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
+BILLBOARD_TEXTURE_PATHS :: [Texture_1x1]cstring {
 		// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
 		// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
 		// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
@@ -208,7 +222,7 @@ BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 		.Wall_Cursor    = "resources/textures/billboards/wall-cursor/diffuse.png",
 	}
 
-FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_2x2]cstring {
+FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Texture_2x2]cstring {
 		.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
 		.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
 		.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
@@ -219,7 +233,7 @@ FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Billboard_Texture_2x2]cstring {
 		.Table_8_Places_Wood_NW = "resources/textures/billboards/table-8places-wood/nw-diffuse.png",
 	}
 
-BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
+BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_1x1]cstring {
 		// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
 		// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
 		// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
@@ -246,7 +260,7 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Billboard_Texture_1x1]cstring {
 	}
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS ::
-	[Billboard_Texture_2x2]cstring {
+	[Texture_2x2]cstring {
 		.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
 		.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
 		.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
@@ -317,7 +331,7 @@ billboard_init_draw_context :: proc(
 		expected_texture_height,
 	) or_return
 
-	load_shader_program(
+	renderer.load_shader_program(
 		&billboard_shader_program,
 		BILLBOARD_VERTEX_SHADER_PATH,
 		BILLBOARD_FRAGMENT_SHADER_PATH,
@@ -593,7 +607,7 @@ load_billboard_texture_array :: proc(
 	return
 }
 
-billboard_init_draw_contexts :: proc() -> bool {
+init_draw_contexts :: proc() -> bool {
 	gl.GenBuffers(1, &billboard_ubo)
 
 	billboard_init_draw_context(
@@ -617,58 +631,71 @@ billboard_init_draw_contexts :: proc() -> bool {
 	return true
 }
 
-billboard_1x1_set_texture :: proc(
-	key: Billboard_Key,
-	texture: Billboard_Texture_1x1,
-) {
-    floor := get_floor_from_vec3(key.pos)
-	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	billboard, ok := &chunk.floors[floor].billboards_1x1.instances[key]
+get_chunk_1x1 :: proc(pos: glsl.vec3) -> ^Billboard_Chunk(Billboard_1x1) {
+	floor := get_floor_from_vec3(pos)
+	x := int(pos.x / constants.CHUNK_WIDTH)
+	z := int(pos.z / constants.CHUNK_DEPTH)
+	return &chunks_1x1[floor][x][z]
+}
+
+get_billboard_1x1 :: proc(key: Key) -> (^Billboard_1x1, bool) {
+	chunk := get_chunk_1x1(key.pos)
+	return &chunk.instances[key]
+}
+
+mark_chunk_1x1_dirty :: proc(key: Key) {
+	chunk := get_chunk_1x1(key.pos)
+	chunk.dirty = true
+}
+
+billboard_1x1_set_texture :: proc(key: Key, texture: Texture_1x1) {
+	chunk := get_chunk_1x1(key.pos)
+	billboard, ok := &chunk.instances[key]
 	if ok {
 		billboard.texture = texture
-		chunk.floors[floor].billboards_1x1.dirty = true
+		chunk.dirty = true
 	}
 }
 
-billboard_1x1_remove :: proc(key: Billboard_Key) {
-    floor := get_floor_from_vec3(key.pos)
-	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	delete_key(&chunk.floors[floor].billboards_1x1.instances, key)
-	chunk.floors[floor].billboards_1x1.dirty = true
+billboard_1x1_remove :: proc(key: Key) {
+	chunk := get_chunk_1x1(key.pos)
+	delete_key(&chunk.instances, key)
+	chunk.dirty = true
 }
 
 get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
-    terrain_height := terrain.get_terrain_height({i32(pos.x), i32(pos.z)})
-    return clamp(int((pos.y - terrain_height) / constants.WALL_HEIGHT), 0, constants.CHUNK_HEIGHT - 1)
+	terrain_height := terrain.get_terrain_height({i32(pos.x), i32(pos.z)})
+	return clamp(
+		int((pos.y - terrain_height) / constants.WALL_HEIGHT),
+		0,
+		constants.CHUNK_HEIGHT - 1,
+	)
 }
 
-billboard_1x1_move :: proc(of: ^Billboard_Key, to: glsl.vec3) {
-    of_floor := get_floor_from_vec3(of.pos)
-    to_floor := get_floor_from_vec3(to)
+billboard_1x1_move :: proc(of: ^Key, to: glsl.vec3) {
 	if of.pos == to {
 		return
 	}
-	from_chunk := world_get_chunk({i32(of.pos.x), i32(of.pos.z)})
-	to_chunk := world_get_chunk({i32(to.x), i32(to.z)})
-	billboard, ok := from_chunk.floors[of_floor].billboards_1x1.instances[of^]
+	from_chunk := get_chunk_1x1(of.pos)
+	to_chunk := get_chunk_1x1(to)
+	billboard, ok := from_chunk.instances[of^]
 	if ok {
-		delete_key(&from_chunk.floors[of_floor].billboards_1x1.instances, of^)
+		delete_key(&from_chunk.instances, of^)
 		of.pos = to
-		to_chunk.floors[to_floor].billboards_1x1.instances[of^] = billboard
-		to_chunk.floors[to_floor].billboards_1x1.dirty = true
-		from_chunk.floors[of_floor].billboards_1x1.dirty = true
+		to_chunk.instances[of^] = billboard
+		to_chunk.dirty = true
+		from_chunk.dirty = true
 	}
 }
 
-billboard_1x1_set :: proc(key: Billboard_Key, billboard: Billboard_1x1) {
-    floor := get_floor_from_vec3(key.pos)
-	chunk := world_get_chunk({i32(key.pos.x), i32(key.pos.z)})
-	chunk.floors[floor].billboards_1x1.instances[key] = billboard
-	chunk.floors[floor].billboards_1x1.dirty = true
+billboard_1x1_set :: proc(key: Key, billboard: Billboard_1x1) {
+	chunk := get_chunk_1x1(key.pos)
+	chunk.instances[key] = billboard
+	chunk.dirty = true
 }
 
 chunk_billboards_draw :: proc(
-	billboards: ^Chunk_Billboards($T),
+	billboards: ^Billboard_Chunk($T),
 	billboard_draw_context: Billboard_Draw_Context,
 ) {
 	if !billboards.initialized {
@@ -817,7 +844,142 @@ billboard_update_draw_context_after_rotation :: proc(draw_context: $T) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 }
 
-billboard_update_after_rotation :: proc() {
+update_after_rotation :: proc() {
 	billboard_update_draw_context_after_rotation(billboard_1x1_draw_context)
 	billboard_update_draw_context_after_rotation(billboard_2x2_draw_context)
+}
+
+update_after_clockwise_rotation :: proc() {
+	for floor in &chunks_1x1 {
+		for row in &floor {
+			for chunk in &row {
+				update_after_clockwise_rotation_1x1(&chunk)
+			}
+		}
+	}
+	for floor in &chunks_2x2 {
+		for row in &floor {
+			for chunk in &row {
+				update_after_clockwise_rotation_2x2(&chunk)
+			}
+		}
+	}
+}
+
+update_after_counter_clockwise_rotation :: proc() {
+	for floor in &chunks_1x1 {
+		for row in &floor {
+			for chunk in &row {
+				update_after_counter_clockwise_rotation_1x1(&chunk)
+			}
+		}
+	}
+	for floor in &chunks_2x2 {
+		for row in &floor {
+			for chunk in &row {
+				update_after_counter_clockwise_rotation_2x2(&chunk)
+			}
+		}
+	}
+}
+
+update_after_counter_clockwise_rotation_1x1 :: proc(
+	billboards: ^Billboard_Chunk(Billboard_1x1),
+) {
+	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1
+	for _, billboard in &billboards.instances {
+		billboard.texture = rotation_table[billboard.texture]
+		billboard.depth_map = rotation_table[billboard.depth_map]
+	}
+	billboards.dirty = true
+}
+
+update_after_counter_clockwise_rotation_2x2 :: proc(
+	billboards: ^Billboard_Chunk(Billboard_2x2),
+) {
+	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2
+	for _, billboard in &billboards.instances {
+		billboard.texture = rotation_table[billboard.texture]
+		billboard.depth_map = rotation_table[billboard.depth_map]
+	}
+	billboards.dirty = true
+}
+
+update_after_clockwise_rotation_1x1 :: proc(
+	billboards: ^Billboard_Chunk(Billboard_1x1),
+) {
+	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1
+	for _, billboard in &billboards.instances {
+		billboard.texture = rotation_table[billboard.texture]
+		billboard.depth_map = rotation_table[billboard.depth_map]
+	}
+	billboards.dirty = true
+}
+
+update_after_clockwise_rotation_2x2 :: proc(
+	billboards: ^Billboard_Chunk(Billboard_2x2),
+) {
+	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2
+	for _, billboard in &billboards.instances {
+		billboard.texture = rotation_table[billboard.texture]
+		billboard.depth_map = rotation_table[billboard.depth_map]
+	}
+	billboards.dirty = true
+}
+
+draw_billboards :: proc(floor: int) {
+	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
+
+	billboard_uniform_object.view = camera.view
+	billboard_uniform_object.proj = camera.proj
+
+	gl.BufferData(
+		gl.UNIFORM_BUFFER,
+		size_of(Billboard_Uniform_Object),
+		&billboard_uniform_object,
+		gl.STATIC_DRAW,
+	)
+
+	gl.UseProgram(billboard_shader_program)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_1x1_draw_context.texture_array,
+	)
+
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_1x1_draw_context.depth_map_texture_array,
+	)
+
+	for floor in &chunks_1x1 {
+		for row in &floor {
+			for chunk in &row {
+				chunk_billboards_draw(&chunk, billboard_1x1_draw_context)
+			}
+		}
+	}
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_2x2_draw_context.texture_array,
+	)
+
+	gl.ActiveTexture(gl.TEXTURE1)
+	gl.BindTexture(
+		gl.TEXTURE_2D_ARRAY,
+		billboard_2x2_draw_context.depth_map_texture_array,
+	)
+
+	for floor in &chunks_2x2 {
+		for row in &floor {
+			for chunk in &row {
+				chunk_billboards_draw(&chunk, billboard_2x2_draw_context)
+			}
+		}
+	}
 }

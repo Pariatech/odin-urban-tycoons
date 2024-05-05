@@ -7,7 +7,7 @@ import gl "vendor:OpenGL"
 import "constants"
 import "camera"
 import "tile"
-
+import "billboard"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -182,65 +182,6 @@ world_draw_tiles :: proc(floor: int) {
 		chunk_draw_tiles(chunk, {chunk_pos.x, i32(floor), chunk_pos.z})
 	}
 	// gl.Enable(gl.BLEND)
-}
-
-world_draw_billboards :: proc(floor: int) {
-	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
-
-	billboard_uniform_object.view = camera.view
-	billboard_uniform_object.proj = camera.proj
-
-	gl.BufferData(
-		gl.UNIFORM_BUFFER,
-		size_of(Billboard_Uniform_Object),
-		&billboard_uniform_object,
-		gl.STATIC_DRAW,
-	)
-
-	gl.UseProgram(billboard_shader_program)
-
-	chunks_it := world_iterate_visible_chunks()
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_1x1_draw_context.texture_array,
-	)
-
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_1x1_draw_context.depth_map_texture_array,
-	)
-
-	billboards_1x1_it := chunks_it
-	for chunk in chunk_iterator_next(&billboards_1x1_it) {
-		chunk_billboards_draw(
-			&chunk.floors[floor].billboards_1x1,
-			billboard_1x1_draw_context,
-		)
-	}
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_2x2_draw_context.texture_array,
-	)
-
-	gl.ActiveTexture(gl.TEXTURE1)
-	gl.BindTexture(
-		gl.TEXTURE_2D_ARRAY,
-		billboard_2x2_draw_context.depth_map_texture_array,
-	)
-
-	billboards_2x2_it := chunks_it
-	for chunk in chunk_iterator_next(&billboards_2x2_it) {
-		chunk_billboards_draw(
-			&chunk.floors[floor].billboards_2x2,
-			billboard_1x1_draw_context,
-		)
-	}
 }
 
 world_update :: proc() {
@@ -447,7 +388,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 	if floor > 0 {
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			 {
 				type = .Window,
 				pos =  {
@@ -463,7 +404,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	} else {
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			 {
 				type = .Door,
 				pos = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
@@ -504,7 +445,7 @@ add_house_floor_walls :: proc(
 				mask = .Window_Opening,
 			},
 		)
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			 {
 				type = .Window,
 				pos =  {
@@ -551,7 +492,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			 {
 				type = .Window,
 				pos =  {
@@ -598,7 +539,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		billboard_1x1_set(
+		billboard.billboard_1x1_set(
 			 {
 				type = .Window,
 				pos =  {
@@ -687,18 +628,18 @@ draw_world :: proc() {
 	    gl.UseProgram(shader_program)
 		world_draw_tiles(floor)
 		world_draw_walls(floor)
-		world_draw_billboards(floor)
+		billboard.draw_billboards(floor)
 	}
 }
 
 world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	wall_tool_move_cursor()
-	billboard_update_after_rotation()
+    billboard.update_after_rotation()
 	switch rotated {
 	case .Counter_Clockwise:
-		world_update_after_counter_clockwise_rotation()
+        billboard.update_after_counter_clockwise_rotation()
 	case .Clockwise:
-		world_update_after_clockwise_rotation()
+        billboard.update_after_clockwise_rotation()
 	}
 	for row in &world_chunks {
 		for chunk in &row {
@@ -709,76 +650,3 @@ world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	}
 }
 
-world_update_after_clockwise_rotation :: proc() {
-	for row in &world_chunks {
-		for chunk in &row {
-			for floor in 0 ..< constants.CHUNK_HEIGHT {
-				chunk_billboards_update_after_clockwise_rotation_1x1(
-					&chunk.floors[floor].billboards_1x1,
-				)
-				chunk_billboards_update_after_clockwise_rotation_2x2(
-					&chunk.floors[floor].billboards_2x2,
-				)
-			}
-		}
-	}
-}
-
-chunk_billboards_update_after_clockwise_rotation_1x1 :: proc(
-	billboards: ^Chunk_Billboards(Billboard_1x1),
-) {
-	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1
-	for _, billboard in &billboards.instances {
-		billboard.texture = rotation_table[billboard.texture]
-		billboard.depth_map = rotation_table[billboard.depth_map]
-	}
-	billboards.dirty = true
-}
-
-chunk_billboards_update_after_clockwise_rotation_2x2 :: proc(
-	billboards: ^Chunk_Billboards(Billboard_2x2),
-) {
-	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2
-	for _, billboard in &billboards.instances {
-		billboard.texture = rotation_table[billboard.texture]
-		billboard.depth_map = rotation_table[billboard.depth_map]
-	}
-	billboards.dirty = true
-}
-
-world_update_after_counter_clockwise_rotation :: proc() {
-	for row in &world_chunks {
-		for chunk in &row {
-			for floor in 0 ..< constants.CHUNK_HEIGHT {
-				chunk_billboards_update_after_counter_clockwise_rotation_1x1(
-					&chunk.floors[floor].billboards_1x1,
-				)
-				chunk_billboards_update_after_counter_clockwise_rotation_2x2(
-					&chunk.floors[floor].billboards_2x2,
-				)
-			}
-		}
-	}
-}
-
-chunk_billboards_update_after_counter_clockwise_rotation_1x1 :: proc(
-	billboards: ^Chunk_Billboards(Billboard_1x1),
-) {
-	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1
-	for _, billboard in &billboards.instances {
-		billboard.texture = rotation_table[billboard.texture]
-		billboard.depth_map = rotation_table[billboard.depth_map]
-	}
-	billboards.dirty = true
-}
-
-chunk_billboards_update_after_counter_clockwise_rotation_2x2 :: proc(
-	billboards: ^Chunk_Billboards(Billboard_2x2),
-) {
-	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2
-	for _, billboard in &billboards.instances {
-		billboard.texture = rotation_table[billboard.texture]
-		billboard.depth_map = rotation_table[billboard.depth_map]
-	}
-	billboards.dirty = true
-}

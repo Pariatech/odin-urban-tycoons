@@ -12,6 +12,7 @@ import "mouse"
 import "camera"
 import "cursor"
 import "terrain"
+import "billboard"
 
 TITLE :: "My Window!"
 
@@ -60,7 +61,7 @@ start :: proc() -> (ok: bool = false) {
     mouse.init()
 	cursor.init()
 
-	billboard_init_draw_contexts() or_return
+	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 	init_world()
 
