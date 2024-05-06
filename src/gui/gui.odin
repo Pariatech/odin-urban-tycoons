@@ -1,12 +1,12 @@
-package main
+package gui
 
 import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
-import "window"
-import "renderer"
+import "../window"
+import "../renderer"
 
 gui_vbo, gui_vao: u32
 gui_texture: u32
@@ -30,7 +30,7 @@ Gui_Vertex :: struct {
 	texcoords: glsl.vec2,
 }
 
-gui_init :: proc() -> (ok: bool = false) {
+init :: proc() -> (ok: bool = false) {
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	defer gl.UseProgram(0)
@@ -50,7 +50,7 @@ gui_init :: proc() -> (ok: bool = false) {
 	gl.GenTextures(1, &gui_texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, gui_texture)
-	gui_load_texture(GUI_TEXTURE_PATH) or_return
+	load_texture(GUI_TEXTURE_PATH) or_return
 
 	renderer.load_shader_program(
 		&gui_shader,
@@ -88,7 +88,7 @@ gui_to_screen_space :: proc(pos: glsl.ivec2) -> (screen_pos: glsl.vec2) {
 	return screen_pos
 }
 
-gui_draw :: proc() {
+draw :: proc() {
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	defer gl.UseProgram(0)
@@ -140,7 +140,7 @@ gui_draw :: proc() {
 	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(gui_vertices)))
 }
 
-gui_load_texture :: proc(path: cstring) -> (ok: bool = false) {
+load_texture :: proc(path: cstring) -> (ok: bool = false) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 

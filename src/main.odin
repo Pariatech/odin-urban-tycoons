@@ -17,6 +17,7 @@ import "wall"
 import "floor"
 import "tools/terrain_tool"
 import "tools"
+import "gui"
 
 TITLE :: "My Window!"
 
@@ -69,7 +70,7 @@ start :: proc() -> (ok: bool = false) {
 	terrain.init_terrain()
 	init_world()
 
-    gui_init() or_return
+    gui.init() or_return
 
 	terrain_tool.init()
 
@@ -105,7 +106,7 @@ start :: proc() -> (ok: bool = false) {
 
 		draw_world()
 
-        gui_draw()
+        gui.draw()
 
 		end_draw()
 
