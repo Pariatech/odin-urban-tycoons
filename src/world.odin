@@ -17,40 +17,6 @@ house_z: i32 = 12
 world_previously_visible_chunks_start: glsl.ivec2
 world_previously_visible_chunks_end: glsl.ivec2
 
-
-// world_iterate_all_chunks :: proc() -> Chunk_Iterator {
-// 	return(
-// 		 {
-// 			{0, 0},
-// 			{0, 0},
-// 			{constants.WORLD_CHUNK_WIDTH, constants.WORLD_CHUNK_DEPTH},
-// 		} \
-// 	)
-// }
-
-// world_iterate_visible_chunks :: proc() -> Chunk_Iterator {
-// 	it := Chunk_Iterator{}
-//
-// 	switch camera.rotation {
-// 	case .South_West:
-// 		it.pos = camera.visible_chunks_end - {1, 1}
-// 	case .South_East:
-// 		it.pos.x = camera.visible_chunks_end.x - 1
-// 		it.pos.y = camera.visible_chunks_start.y
-// 	case .North_East:
-// 		it.pos = camera.visible_chunks_start
-// 	case .North_West:
-// 		it.pos.x = camera.visible_chunks_start.x
-// 		it.pos.y = camera.visible_chunks_end.y - 1
-// 	}
-//
-// 	it.start = camera.visible_chunks_start
-// 	it.end = camera.visible_chunks_end
-//
-// 	return it
-// }
-
-
 world_update :: proc() {
 	aabb := camera.get_aabb()
 	world_previously_visible_chunks_start = camera.visible_chunks_start
