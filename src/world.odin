@@ -45,7 +45,7 @@ init_world :: proc() {
 		for z in 1 ..= 3 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile(
+				tile.tile(
 					{texture = .Asphalt, mask_texture = .Full_Mask},
 				),
 			)
@@ -53,7 +53,7 @@ init_world :: proc() {
 
 		tile.set_tile(
 			{i32(x), 0, 4},
-			tile.chunk_tile(
+			tile.tile(
 				 {
 					texture = .Asphalt_Horizontal_Line,
 					mask_texture = .Full_Mask,
@@ -63,7 +63,7 @@ init_world :: proc() {
 		for z in 5 ..= 7 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile(
+				tile.tile(
 					{texture = .Asphalt, mask_texture = .Full_Mask},
 				),
 			)
@@ -73,7 +73,7 @@ init_world :: proc() {
 	for x in 1 ..= 7 {
 		tile.set_tile(
 			{i32(x), 0, 4},
-			tile.chunk_tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+			tile.tile({texture = .Asphalt, mask_texture = .Full_Mask}),
 		)
 	}
 
@@ -81,7 +81,7 @@ init_world :: proc() {
 		for x in 1 ..= 3 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile(
+				tile.tile(
 					{texture = .Asphalt, mask_texture = .Full_Mask},
 				),
 			)
@@ -89,14 +89,14 @@ init_world :: proc() {
 
 		tile.set_tile(
 			{4, 0, i32(z)},
-			tile.chunk_tile(
+			tile.tile(
 				{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
 			),
 		)
 		for x in 5 ..= 7 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
-				tile.chunk_tile(
+				tile.tile(
 					{texture = .Asphalt, mask_texture = .Full_Mask},
 				),
 			)
@@ -106,14 +106,14 @@ init_world :: proc() {
 	for x in 8 ..< constants.WORLD_WIDTH {
 		tile.set_tile(
 			{i32(x), 0, 8},
-			tile.chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 
 	for z in 9 ..< constants.WORLD_WIDTH {
 		tile.set_tile(
 			{8, 0, i32(z)},
-			tile.chunk_tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
 		)
 	}
 }
@@ -140,7 +140,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 		for z in 0 ..< 4 {
 			tile.set_tile(
 				{house_x + i32(x), floor, house_z + i32(z)},
-				tile.chunk_tile(tri),
+				tile.tile(tri),
 			)
 		}
 	}
@@ -149,7 +149,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 		for z in 0 ..< 3 {
 			tile.set_tile(
 				{house_x + i32(x) + 1, floor, house_z + i32(z) + 4},
-				tile.chunk_tile(tri),
+				tile.tile(tri),
 			)
 		}
 	}
@@ -158,7 +158,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 		for z in 0 ..< 4 {
 			tile.set_tile(
 				{house_x + i32(x), floor, house_z + i32(z) + 7},
-				tile.chunk_tile(tri),
+				tile.tile(tri),
 			)
 		}
 	}
@@ -166,7 +166,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 	for z in 0 ..< 9 {
 		tile.set_tile(
 			{house_x + 4, floor, house_z + i32(z) + 1},
-			tile.chunk_tile(tri),
+			tile.tile(tri),
 		)
 	}
 }

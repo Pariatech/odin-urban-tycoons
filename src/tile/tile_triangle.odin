@@ -391,7 +391,7 @@ get_terrain_tile_triangle_heights :: proc(
 	return
 }
 
-chunk_tile :: proc(
+tile :: proc(
 	tile_triangle: Tile_Triangle,
 ) -> [Tile_Triangle_Side]Maybe(Tile_Triangle) {
 	return(
@@ -456,12 +456,10 @@ set_tile_triangle :: proc(
 	} else {
 		delete_key(&chunk.triangles, key)
 	}
+	chunk.dirty = true
 }
 
-get_tile :: proc(
-	pos: glsl.ivec3,
-	side: Tile_Triangle_Side,
-) -> [Tile_Triangle_Side]Maybe(Tile_Triangle) {
+get_tile :: proc(pos: glsl.ivec3) -> [Tile_Triangle_Side]Maybe(Tile_Triangle) {
 	chunk := get_chunk(pos)
 	result := [Tile_Triangle_Side]Maybe(Tile_Triangle){}
 
@@ -496,6 +494,17 @@ set_tile_mask_texture :: proc(pos: glsl.ivec3, mask_texture: Mask) {
 		tri, ok := get_tile_triangle(pos, side)
 		if ok {
 			tri.mask_texture = mask_texture
+			set_tile_triangle(pos, side, tri)
+		}
+	}
+}
+
+set_tile_texture :: proc(pos: glsl.ivec3, texture: Texture) {
+	chunk := get_chunk(pos)
+	for side in Tile_Triangle_Side {
+		tri, ok := get_tile_triangle(pos, side)
+		if ok {
+			tri.texture = texture
 			set_tile_triangle(pos, side, tri)
 		}
 	}
