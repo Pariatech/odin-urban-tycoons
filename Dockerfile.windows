@@ -1,0 +1,15 @@
+# FROM microsoft/windowsservercore
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+RUN @powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
+
+RUN choco install visualcpp-build-tools --version "15.0.26228.20170424" -y
+
+WORKDIR /game
+
+COPY . .
+
+RUN cd deps/Odin && cmd.exe build.bat
+
+ENTRYPOINT ["deps/Odin/odin.exe"]
+CMD ["build src/ -out=urban-tycoons.exe -o:speed"]
