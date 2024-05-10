@@ -2,7 +2,16 @@
 
 git submodule init
 
-cd deps/Odin
+pwd=$(pwd)
+
+cd "$pwd/deps/glfw"
+mkdir build
+cd build
+cmake ..
+make -j4
+cp src/libglfw3.a "$pwd/deps/Odin/vendor/glfw/lib/"
+
+cd "$pwd/deps/Odin"
 
 ./build_odin.sh
 
@@ -11,3 +20,4 @@ make
 
 cd ../../stb/src
 make
+

@@ -1,0 +1,12 @@
+FROM debian:latest
+WORKDIR /game
+RUN apt update && \
+    apt install -y git clang clang-16 llvm-16 make libxml2 cmake libwayland-dev libxkbcommon-dev xorg-dev
+
+COPY . .
+
+RUN ./scripts/build-deps.sh
+
+ENTRYPOINT ["/bin/bash"]
+CMD ["./scripts/build-linux-release.sh"]
+
