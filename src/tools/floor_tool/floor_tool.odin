@@ -6,6 +6,7 @@ import "core:math/linalg/glsl"
 
 import "../../cursor"
 import "../../floor"
+import "../../keyboard"
 import "../../mouse"
 import "../../tile"
 
@@ -14,6 +15,7 @@ previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
 )
 position: glsl.ivec2
 drag_start: glsl.ivec3
+active_texture: tile.Texture = .Wood
 
 revert_tile :: proc(position: glsl.ivec3) {
 	previous_tile := previous_tiles[position]
@@ -39,7 +41,7 @@ set_tile :: proc(position: glsl.ivec3) {
 
 	tile.set_tile(
 		position,
-		tile.tile({texture = .Wood, mask_texture = .Grid_Mask}),
+		tile.tile({texture = active_texture, mask_texture = .Grid_Mask}),
 	)
 }
 
@@ -77,7 +79,6 @@ revert_tiles :: proc(position: glsl.ivec2) {
 }
 
 set_tiles :: proc() {
-	fmt.println(drag_start)
 	start_x := min(drag_start.x, position.x)
 	end_x := max(drag_start.x, position.x)
 	start_y := min(drag_start.y, floor.floor)
@@ -98,23 +99,29 @@ update :: proc() {
 	previous_position := position
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
+	reset :=
+		previous_position != position || floor.previous_floor != floor.floor
+	if keyboard.is_key_press(.Key_1) {
+		active_texture = .Wood
+		reset = true
+	} else if keyboard.is_key_press(.Key_2) {
+		active_texture = .Gravel
+		reset = true
+	}
 
 	if mouse.is_button_press(.Left) {
-		fmt.println("uh??")
 		drag_start = {position.x, floor.floor, position.y}
 	} else if mouse.is_button_down(.Left) {
-		if previous_position != position ||
-		   floor.previous_floor != floor.floor {
+		if reset {
 			revert_tiles(previous_position)
 			clear(&previous_tiles)
 			set_tiles()
 		}
 	} else if mouse.is_button_release(.Left) {
 		clear(&previous_tiles)
-	    copy_tile({position.x, floor.floor, position.y})
+		copy_tile({position.x, floor.floor, position.y})
 	} else {
-		if previous_position != position ||
-		   floor.previous_floor != floor.floor {
+		if reset {
 			revert_tile(
 				 {
 					previous_position.x,
