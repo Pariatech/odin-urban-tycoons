@@ -1,6 +1,6 @@
 [submodule "deps/Odin"]
 	path = deps/Odin
-	url = https://github.com/odin-lang/Odin.git
+	url = https://github.com/Pariatech/Odin.git
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
