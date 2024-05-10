@@ -8,27 +8,39 @@ import "../../cursor"
 import "../../floor"
 import "../../tile"
 
-previous_tiles: map[tile.Key]tile.Tile_Triangle
+previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
+	tile.Tile_Triangle,
+)
 position: glsl.ivec2
-drag_start: glsl.ivec2
+drag_start: glsl.ivec3
 
-copy_tile :: proc() {
-	chunk := tile.get_chunk({position.x, i32(floor.floor), position.y})
-	for side in tile.Tile_Triangle_Side {
-		key := tile.Key {
-			x    = int(position.x),
-			z    = int(position.y),
-			side = side,
+revert_tile :: proc(position: glsl.ivec2) {
+	pos := glsl.ivec3{position.x, floor.previous_floor, position.y}
+	previous_tile := previous_tiles[pos]
+	if floor.previous_floor != floor.floor {
+		for side in tile.Tile_Triangle_Side {
+			if tri, ok := previous_tile[side].?; ok {
+				if tri.texture == .Floor_Marker {
+					tile.set_tile_triangle(pos, side, nil)
+				} else {
+					tile.set_tile_triangle(pos, side, tri)
+				}
+			} else {
+				tile.set_tile_triangle(pos, side, nil)
+			}
 		}
-		tri, ok := chunk.triangles[key]
-		if ok {
-			previous_tiles[key] = tri
-		}
+	} else {
+		tile.set_tile(pos, previous_tile)
 	}
 }
 
+copy_tile :: proc() {
+	pos := glsl.ivec3{position.x, floor.floor, position.y}
+	previous_tiles[pos] = tile.get_tile(pos)
+}
+
 init :: proc() {
-    copy_tile()
+	copy_tile()
 }
 
 deinit :: proc() {
@@ -43,26 +55,12 @@ update :: proc() {
 	previous_position := position
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
-	if previous_position != position {
-		previous_chunk := tile.get_chunk(
-			{previous_position.x, i32(floor.floor), previous_position.y},
-		)
-		for side in tile.Tile_Triangle_Side {
-			key := tile.Key {
-				x    = int(previous_position.x),
-				z    = int(previous_position.y),
-				side = side,
-			}
-			tile.set_tile_triangle(
-				{previous_position.x, i32(floor.floor), previous_position.y},
-				side,
-				previous_tiles[key],
-			)
-		}
+	if previous_position != position || floor.previous_floor != floor.floor {
+		revert_tile(previous_position)
 
 		clear(&previous_tiles)
 
-        copy_tile()
+		copy_tile()
 
 		tile.set_tile(
 			{position.x, i32(floor.floor), position.y},

@@ -165,7 +165,7 @@ intersect_with_tile_triangle :: proc(
 intersect_with_tile :: proc(
 	x, z: f32,
 	on_intersect: proc(_: glsl.vec3),
-    floor: int,
+    floor: i32,
 ) -> bool {
 	for side in tile.Tile_Triangle_Side {
 		pos := glsl.vec2{math.floor(x), math.floor(z)}
@@ -190,7 +190,7 @@ intersect_with_tile :: proc(
 	return false
 }
 
-intersect_with_tiles_south_west :: proc(on_intersect: proc(_: glsl.vec3), floor: int) {
+intersect_with_tiles_south_west :: proc(on_intersect: proc(_: glsl.vec3), floor: i32) {
 	x := ray.origin.x + 0.5
 	z := ray.origin.z + 0.5
 	dx := ray.direction.x
@@ -240,7 +240,7 @@ intersect_with_tiles_south_west :: proc(on_intersect: proc(_: glsl.vec3), floor:
 	}
 }
 
-intersect_with_tiles_south_east :: proc(on_intersect: proc(_: glsl.vec3), floor: int) {
+intersect_with_tiles_south_east :: proc(on_intersect: proc(_: glsl.vec3), floor: i32) {
 	x := ray.origin.x - 0.5
 	z := ray.origin.z + 0.5
 	dx := ray.direction.x
@@ -293,7 +293,7 @@ intersect_with_tiles_south_east :: proc(on_intersect: proc(_: glsl.vec3), floor:
 	}
 }
 
-intersect_with_tiles_north_west :: proc(on_intersect: proc(_: glsl.vec3), floor: int) {
+intersect_with_tiles_north_west :: proc(on_intersect: proc(_: glsl.vec3), floor: i32) {
 	x := ray.origin.x + 0.5
 	z := ray.origin.z - 0.5
 	dx := ray.direction.x
@@ -347,7 +347,7 @@ intersect_with_tiles_north_west :: proc(on_intersect: proc(_: glsl.vec3), floor:
 
 intersect_with_tiles_north_east :: proc(
 	on_intersect: proc(_: glsl.vec3),
-    floor: int,
+    floor: i32,
 ) {
 	x := ray.origin.x - 0.5
 	z := ray.origin.z - 0.5
@@ -402,7 +402,7 @@ intersect_with_tiles_north_east :: proc(
 	}
 }
 
-intersect_with_tiles :: proc(on_intersect: proc(_: glsl.vec3), floor: int) {
+intersect_with_tiles :: proc(on_intersect: proc(_: glsl.vec3), floor: i32) {
 	switch camera.rotation {
 	case .South_West:
 		intersect_with_tiles_south_west(on_intersect, floor)
@@ -418,8 +418,8 @@ intersect_with_tiles :: proc(on_intersect: proc(_: glsl.vec3), floor: int) {
 
 on_tile_intersect :: proc(
 	on_intersect: proc(_: glsl.vec3),
-	previous_floor: int,
-	floor: int,
+	previous_floor: i32,
+	floor: i32,
 ) {
 	if moved || previous_floor != floor {
 		intersect_with_tiles(on_intersect, floor)

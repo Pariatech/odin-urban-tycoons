@@ -10,8 +10,8 @@ import "../tile"
 
 FLOOR_OFFSET :: 0.0004
 
-previous_floor: int
-floor: int
+previous_floor: i32
+floor: i32
 
 update :: proc() {
 	previous_floor = floor
