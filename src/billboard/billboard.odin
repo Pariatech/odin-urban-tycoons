@@ -845,16 +845,16 @@ update_after_rotation :: proc() {
 }
 
 update_after_clockwise_rotation :: proc() {
-	for floor in &chunks_1x1 {
-		for row in &floor {
-			for chunk in &row {
+	for &floor in chunks_1x1 {
+		for &row in floor {
+			for &chunk in row {
 				update_after_clockwise_rotation_1x1(&chunk)
 			}
 		}
 	}
-	for floor in &chunks_2x2 {
-		for row in &floor {
-			for chunk in &row {
+	for &floor in chunks_2x2 {
+		for &row in floor {
+			for &chunk in row {
 				update_after_clockwise_rotation_2x2(&chunk)
 			}
 		}
@@ -862,16 +862,16 @@ update_after_clockwise_rotation :: proc() {
 }
 
 update_after_counter_clockwise_rotation :: proc() {
-	for floor in &chunks_1x1 {
-		for row in &floor {
-			for chunk in &row {
+	for &floor in chunks_1x1 {
+		for &row in floor {
+			for &chunk in row {
 				update_after_counter_clockwise_rotation_1x1(&chunk)
 			}
 		}
 	}
-	for floor in &chunks_2x2 {
-		for row in &floor {
-			for chunk in &row {
+	for &floor in chunks_2x2 {
+		for &row in floor {
+			for &chunk in row {
 				update_after_counter_clockwise_rotation_2x2(&chunk)
 			}
 		}

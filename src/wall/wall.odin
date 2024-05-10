@@ -1263,9 +1263,9 @@ draw_walls :: proc(floor: int) {
 }
 
 update_after_rotation :: proc() {
-	for floor in &chunks {
-		for row in &floor {
-			for chunk in &row {
+	for &floor in chunks {
+		for &row in floor {
+			for &chunk in row {
 				chunk.dirty = true
 			}
 		}
