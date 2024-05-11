@@ -14,6 +14,7 @@ previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
 	tile.Tile_Triangle,
 )
 position: glsl.ivec2
+side: tile.Tile_Triangle_Side
 drag_start: glsl.ivec3
 active_texture: tile.Texture = .Wood
 
@@ -36,13 +37,24 @@ revert_tile :: proc(position: glsl.ivec3) {
 	}
 }
 
-set_tile :: proc(position: glsl.ivec3) {
+set_tile :: proc(position: glsl.ivec3, triangle_mode: bool) {
 	copy_tile(position)
 
-	tile.set_tile(
-		position,
-		tile.tile({texture = active_texture, mask_texture = .Grid_Mask}),
-	)
+	if triangle_mode {
+		tile.set_tile_triangle(
+			position,
+			side,
+			tile.Tile_Triangle {
+				texture = active_texture,
+				mask_texture = .Grid_Mask,
+			},
+		)
+	} else {
+		tile.set_tile(
+			position,
+			tile.tile({texture = active_texture, mask_texture = .Grid_Mask}),
+		)
+	}
 }
 
 copy_tile :: proc(position: glsl.ivec3) {
@@ -59,6 +71,19 @@ deinit :: proc() {
 on_intersect :: proc(intersect: glsl.vec3) {
 	position.x = i32(intersect.x + 0.5)
 	position.y = i32(intersect.z + 0.5)
+
+	x := intersect.x - math.floor(intersect.x + 0.5)
+	z := intersect.z - math.floor(intersect.z + 0.5)
+
+	if x >= z && x <= -z {
+		side = .South
+	} else if z >= -x && z <= x {
+		side = .East
+	} else if x >= -z && x <= z {
+		side = .North
+	} else {
+		side = .West
+	}
 }
 
 revert_tiles :: proc(position: glsl.ivec2) {
@@ -89,7 +114,7 @@ set_tiles :: proc() {
 	for x in start_x ..= end_x {
 		for y in start_y ..= end_y {
 			for z in start_z ..= end_z {
-				set_tile({x, y, z})
+				set_tile({x, y, z}, false)
 			}
 		}
 	}
@@ -97,6 +122,7 @@ set_tiles :: proc() {
 
 update :: proc() {
 	previous_position := position
+    previous_side := side
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
 	reset :=
@@ -108,6 +134,11 @@ update :: proc() {
 		active_texture = .Gravel
 		reset = true
 	}
+
+	triangle_mode := keyboard.is_key_down(.Key_Left_Control)
+    if triangle_mode && previous_side != side {
+        reset = true
+    }
 
 	if mouse.is_button_press(.Left) {
 		drag_start = {position.x, floor.floor, position.y}
@@ -130,7 +161,7 @@ update :: proc() {
 				},
 			)
 			clear(&previous_tiles)
-			set_tile({position.x, floor.floor, position.y})
+			set_tile({position.x, floor.floor, position.y}, triangle_mode)
 		}
 	}
 }
