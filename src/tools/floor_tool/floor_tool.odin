@@ -135,7 +135,10 @@ update :: proc() {
 		reset = true
 	}
 
-	triangle_mode := keyboard.is_key_down(.Key_Left_Control)
+	triangle_mode := keyboard.is_key_down(.Key_Left_Shift)
+    if keyboard.is_key_press(.Key_Left_Shift) || keyboard.is_key_release(.Key_Left_Shift) {
+        reset = true
+    }
     if triangle_mode && previous_side != side {
         reset = true
     }
