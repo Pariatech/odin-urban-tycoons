@@ -18,6 +18,7 @@ side: tile.Tile_Triangle_Side
 drag_start: glsl.ivec3
 drag_start_side: tile.Tile_Triangle_Side
 active_texture: tile.Texture = .Wood
+triangle_mode: bool = false
 
 revert_tile :: proc(position: glsl.ivec3) {
 	previous_tile := previous_tiles[position]
@@ -38,11 +39,7 @@ revert_tile :: proc(position: glsl.ivec3) {
 	}
 }
 
-set_tile :: proc(
-	position: glsl.ivec3,
-	triangle_mode: bool,
-	delete_mode: bool,
-) {
+set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 	copy_tile(position)
 
 	active_texture := active_texture
@@ -77,7 +74,15 @@ copy_tile :: proc(position: glsl.ivec3) {
 }
 
 init :: proc() {
-	copy_tile({position.x, floor.floor, position.y})
+	// clear(&previous_tiles)
+	if len(previous_tiles) == 0 {
+		copy_tile({position.x, floor.floor, position.y})
+	} else {
+		revert_tiles(position)
+	 //    drag_start = {position.x, floor.floor, position.y}	
+		// position = {0, 0}
+	}
+	triangle_mode = false
 }
 
 deinit :: proc() {
@@ -133,7 +138,7 @@ set_tiles :: proc(delete_mode: bool) {
 	for x in start_x ..= end_x {
 		for y in start_y ..= end_y {
 			for z in start_z ..= end_z {
-				set_tile({x, y, z}, false, delete_mode)
+				set_tile({x, y, z}, delete_mode)
 			}
 		}
 	}
@@ -154,9 +159,12 @@ update :: proc() {
 		reset = true
 	}
 
-	triangle_mode := keyboard.is_key_down(.Key_Left_Shift)
-	if keyboard.is_key_press(.Key_Left_Shift) ||
-	   keyboard.is_key_release(.Key_Left_Shift) {
+	previous_triangle_mode := triangle_mode
+	if keyboard.is_key_down(.Key_Left_Control) &&
+	   keyboard.is_key_press(.Key_F) {
+		triangle_mode = true
+	}
+	if triangle_mode != previous_triangle_mode {
 		reset = true
 	}
 	if triangle_mode && previous_side != side {
@@ -175,11 +183,7 @@ update :: proc() {
 	} else if mouse.is_button_down(.Left) {
 		if reset {
 			if triangle_mode {
-				set_tile(
-					{position.x, floor.floor, position.y},
-					triangle_mode,
-					delete_mode,
-				)
+				set_tile({position.x, floor.floor, position.y}, delete_mode)
 			} else {
 				revert_tiles(previous_position)
 				clear(&previous_tiles)
@@ -190,6 +194,7 @@ update :: proc() {
 		clear(&previous_tiles)
 		copy_tile({position.x, floor.floor, position.y})
 	} else {
+		drag_start = {position.x, floor.floor, position.y}
 		if reset {
 			revert_tile(
 				 {
@@ -199,11 +204,7 @@ update :: proc() {
 				},
 			)
 			clear(&previous_tiles)
-			set_tile(
-				{position.x, floor.floor, position.y},
-				triangle_mode,
-				delete_mode,
-			)
+			set_tile({position.x, floor.floor, position.y}, delete_mode)
 		}
 	}
 }

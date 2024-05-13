@@ -180,5 +180,7 @@ set_terrain_height :: proc(x, z: int, height: f32) {
 }
 
 get_terrain_height :: proc(pos: glsl.ivec2) -> f32 {
-    return terrain_heights[pos.x][pos.y]
+	return(
+		terrain_heights[clamp(pos.x, 0, constants.WORLD_WIDTH + 1)][clamp(pos.y, 0, constants.WORLD_DEPTH + 1)] \
+	)
 }

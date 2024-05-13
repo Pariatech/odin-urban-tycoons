@@ -499,13 +499,19 @@ draw_world :: proc() {
 }
 
 world_update_after_rotation :: proc(rotated: camera.Rotated) {
+    fmt.println("wall_tool.move_cursor")
 	wall_tool.move_cursor()
+    fmt.println("billboard.update_after_rotation")
 	billboard.update_after_rotation()
 	switch rotated {
 	case .Counter_Clockwise:
+        fmt.println("billboard.update_after_counter_clockwise_rotation")
 		billboard.update_after_counter_clockwise_rotation()
 	case .Clockwise:
+        fmt.println("billboard.update_after_clockwise_rotation")
 		billboard.update_after_clockwise_rotation()
 	}
+    fmt.println("wall.update_after_rotation")
 	wall.update_after_rotation()
+    fmt.println("all done")
 }
