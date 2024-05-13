@@ -392,7 +392,7 @@ get_terrain_tile_triangle_heights :: proc(
 }
 
 tile :: proc(
-	tile_triangle: Tile_Triangle,
+	tile_triangle: Maybe(Tile_Triangle),
 ) -> [Tile_Triangle_Side]Maybe(Tile_Triangle) {
 	return(
 		 {

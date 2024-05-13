@@ -16,6 +16,7 @@ previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
 position: glsl.ivec2
 side: tile.Tile_Triangle_Side
 drag_start: glsl.ivec3
+drag_start_side: tile.Tile_Triangle_Side
 active_texture: tile.Texture = .Wood
 
 revert_tile :: proc(position: glsl.ivec3) {
@@ -37,23 +38,37 @@ revert_tile :: proc(position: glsl.ivec3) {
 	}
 }
 
-set_tile :: proc(position: glsl.ivec3, triangle_mode: bool) {
+set_tile :: proc(
+	position: glsl.ivec3,
+	triangle_mode: bool,
+	delete_mode: bool,
+) {
 	copy_tile(position)
 
+	active_texture := active_texture
+	tile_triangle: Maybe(tile.Tile_Triangle) = tile.Tile_Triangle {
+		texture      = active_texture,
+		mask_texture = .Grid_Mask,
+	}
+	if delete_mode {
+		if position.y == 0 {
+			if tile_triangle, ok := &tile_triangle.?; ok {
+				tile_triangle.texture = .Grass
+			}
+		} else if position.y == floor.floor {
+			if tile_triangle, ok := &tile_triangle.?; ok {
+				tile_triangle.texture = .Floor_Marker
+				tile_triangle.mask_texture = .Full_Mask
+			}
+		} else {
+			tile_triangle = nil
+		}
+	}
+
 	if triangle_mode {
-		tile.set_tile_triangle(
-			position,
-			side,
-			tile.Tile_Triangle {
-				texture = active_texture,
-				mask_texture = .Grid_Mask,
-			},
-		)
+		tile.set_tile_triangle(position, side, tile_triangle)
 	} else {
-		tile.set_tile(
-			position,
-			tile.tile({texture = active_texture, mask_texture = .Grid_Mask}),
-		)
+		tile.set_tile(position, tile.tile(tile_triangle))
 	}
 }
 
@@ -103,7 +118,11 @@ revert_tiles :: proc(position: glsl.ivec2) {
 	}
 }
 
-set_tiles :: proc() {
+set_diagonal_tiles :: proc() {
+
+}
+
+set_tiles :: proc(delete_mode: bool) {
 	start_x := min(drag_start.x, position.x)
 	end_x := max(drag_start.x, position.x)
 	start_y := min(drag_start.y, floor.floor)
@@ -114,7 +133,7 @@ set_tiles :: proc() {
 	for x in start_x ..= end_x {
 		for y in start_y ..= end_y {
 			for z in start_z ..= end_z {
-				set_tile({x, y, z}, false)
+				set_tile({x, y, z}, false, delete_mode)
 			}
 		}
 	}
@@ -122,7 +141,7 @@ set_tiles :: proc() {
 
 update :: proc() {
 	previous_position := position
-    previous_side := side
+	previous_side := side
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
 	reset :=
@@ -136,20 +155,36 @@ update :: proc() {
 	}
 
 	triangle_mode := keyboard.is_key_down(.Key_Left_Shift)
-    if keyboard.is_key_press(.Key_Left_Shift) || keyboard.is_key_release(.Key_Left_Shift) {
-        reset = true
-    }
-    if triangle_mode && previous_side != side {
-        reset = true
-    }
+	if keyboard.is_key_press(.Key_Left_Shift) ||
+	   keyboard.is_key_release(.Key_Left_Shift) {
+		reset = true
+	}
+	if triangle_mode && previous_side != side {
+		reset = true
+	}
+
+	delete_mode := keyboard.is_key_down(.Key_Left_Control)
+	if keyboard.is_key_press(.Key_Left_Control) ||
+	   keyboard.is_key_release(.Key_Left_Control) {
+		reset = true
+	}
 
 	if mouse.is_button_press(.Left) {
 		drag_start = {position.x, floor.floor, position.y}
+		drag_start_side = side
 	} else if mouse.is_button_down(.Left) {
 		if reset {
-			revert_tiles(previous_position)
-			clear(&previous_tiles)
-			set_tiles()
+			if triangle_mode {
+				set_tile(
+					{position.x, floor.floor, position.y},
+					triangle_mode,
+					delete_mode,
+				)
+			} else {
+				revert_tiles(previous_position)
+				clear(&previous_tiles)
+				set_tiles(delete_mode)
+			}
 		}
 	} else if mouse.is_button_release(.Left) {
 		clear(&previous_tiles)
@@ -164,7 +199,11 @@ update :: proc() {
 				},
 			)
 			clear(&previous_tiles)
-			set_tile({position.x, floor.floor, position.y}, triangle_mode)
+			set_tile(
+				{position.x, floor.floor, position.y},
+				triangle_mode,
+				delete_mode,
+			)
 		}
 	}
 }

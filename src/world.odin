@@ -8,8 +8,8 @@ import "billboard"
 import "camera"
 import "constants"
 import "tile"
-import "wall"
 import "tools/wall_tool"
+import "wall"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -46,7 +46,10 @@ init_world :: proc() {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
 				tile.tile(
-					{texture = .Asphalt, mask_texture = .Full_Mask},
+					tile.Tile_Triangle {
+						texture = .Asphalt,
+						mask_texture = .Full_Mask,
+					},
 				),
 			)
 		}
@@ -54,7 +57,7 @@ init_world :: proc() {
 		tile.set_tile(
 			{i32(x), 0, 4},
 			tile.tile(
-				 {
+				tile.Tile_Triangle {
 					texture = .Asphalt_Horizontal_Line,
 					mask_texture = .Full_Mask,
 				},
@@ -64,7 +67,10 @@ init_world :: proc() {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
 				tile.tile(
-					{texture = .Asphalt, mask_texture = .Full_Mask},
+					tile.Tile_Triangle {
+						texture = .Asphalt,
+						mask_texture = .Full_Mask,
+					},
 				),
 			)
 		}
@@ -73,7 +79,12 @@ init_world :: proc() {
 	for x in 1 ..= 7 {
 		tile.set_tile(
 			{i32(x), 0, 4},
-			tile.tile({texture = .Asphalt, mask_texture = .Full_Mask}),
+			tile.tile(
+				tile.Tile_Triangle {
+					texture = .Asphalt,
+					mask_texture = .Full_Mask,
+				},
+			),
 		)
 	}
 
@@ -82,7 +93,10 @@ init_world :: proc() {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
 				tile.tile(
-					{texture = .Asphalt, mask_texture = .Full_Mask},
+					tile.Tile_Triangle {
+						texture = .Asphalt,
+						mask_texture = .Full_Mask,
+					},
 				),
 			)
 		}
@@ -90,14 +104,20 @@ init_world :: proc() {
 		tile.set_tile(
 			{4, 0, i32(z)},
 			tile.tile(
-				{texture = .Asphalt_Vertical_Line, mask_texture = .Full_Mask},
+				tile.Tile_Triangle {
+					texture = .Asphalt_Vertical_Line,
+					mask_texture = .Full_Mask,
+				},
 			),
 		)
 		for x in 5 ..= 7 {
 			tile.set_tile(
 				{i32(x), 0, i32(z)},
 				tile.tile(
-					{texture = .Asphalt, mask_texture = .Full_Mask},
+					tile.Tile_Triangle {
+						texture = .Asphalt,
+						mask_texture = .Full_Mask,
+					},
 				),
 			)
 		}
@@ -106,14 +126,24 @@ init_world :: proc() {
 	for x in 8 ..< constants.WORLD_WIDTH {
 		tile.set_tile(
 			{i32(x), 0, 8},
-			tile.tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.tile(
+				tile.Tile_Triangle {
+					texture = .Sidewalk,
+					mask_texture = .Full_Mask,
+				},
+			),
 		)
 	}
 
 	for z in 9 ..< constants.WORLD_WIDTH {
 		tile.set_tile(
 			{8, 0, i32(z)},
-			tile.tile({texture = .Sidewalk, mask_texture = .Full_Mask}),
+			tile.tile(
+				tile.Tile_Triangle {
+					texture = .Sidewalk,
+					mask_texture = .Full_Mask,
+				},
+			),
 		)
 	}
 }
@@ -477,5 +507,5 @@ world_update_after_rotation :: proc(rotated: camera.Rotated) {
 	case .Clockwise:
 		billboard.update_after_clockwise_rotation()
 	}
-    wall.update_after_rotation()
+	wall.update_after_rotation()
 }
