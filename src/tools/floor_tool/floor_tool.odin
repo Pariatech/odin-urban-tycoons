@@ -74,18 +74,16 @@ copy_tile :: proc(position: glsl.ivec3) {
 }
 
 init :: proc() {
-	// clear(&previous_tiles)
 	if len(previous_tiles) == 0 {
 		copy_tile({position.x, floor.floor, position.y})
 	} else {
 		revert_tiles(position)
-	 //    drag_start = {position.x, floor.floor, position.y}	
-		// position = {0, 0}
 	}
 	triangle_mode = false
 }
 
 deinit :: proc() {
+	revert_tiles(position)
 }
 
 on_intersect :: proc(intersect: glsl.vec3) {
