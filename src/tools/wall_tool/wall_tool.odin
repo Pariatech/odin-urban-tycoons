@@ -15,7 +15,6 @@ import "../../wall"
 import "../../floor"
 
 wall_tool_billboard: billboard.Key
-wall_tool_start_billboard: Maybe(billboard.Key)
 wall_tool_position: glsl.ivec2
 wall_tool_drag_start: glsl.ivec2
 wall_tool_north_south_walls: map[glsl.ivec3]wall.Wall
@@ -638,7 +637,6 @@ removing_line :: proc() {
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
 	} else if mouse.is_button_down(.Left) {
-		update_drag_start_billboard({1, 0, 0})
 		update_walls_line(
 			removing_south_west_north_east_wall,
 			removing_north_west_south_east_wall,
@@ -653,7 +651,6 @@ removing_line :: proc() {
 			removing_north_south_wall,
 		)
 	} else {
-		remove_drag_start_billboard()
 		wall_tool_drag_start = wall_tool_position
 	}
 
@@ -683,7 +680,6 @@ adding_line :: proc() {
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
 	} else if mouse.is_button_down(.Left) {
-		update_drag_start_billboard({1, 1, 1})
 		update_walls_line(
 			set_south_west_north_east_wall_frame,
 			set_north_west_south_east_wall_frame,
@@ -698,7 +694,6 @@ adding_line :: proc() {
 			set_north_south_wall_drywall,
 		)
 	} else {
-		remove_drag_start_billboard()
 		wall_tool_drag_start = wall_tool_position
 	}
 }
@@ -733,7 +728,6 @@ adding_rectangle :: proc() {
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
 	} else if mouse.is_button_down(.Left) {
-		update_drag_start_billboard({1, 1, 1})
 		update_walls_rectangle(
 			set_east_west_wall_frame,
 			set_north_south_wall_frame,
@@ -744,7 +738,6 @@ adding_rectangle :: proc() {
 			set_north_south_wall_drywall,
 		)
 	} else {
-		remove_drag_start_billboard()
 		wall_tool_drag_start = wall_tool_position
 	}
 }
@@ -771,7 +764,6 @@ removing_rectangle :: proc() {
 		clear(&wall_tool_east_west_walls)
 		clear(&wall_tool_north_south_walls)
 	} else if mouse.is_button_down(.Left) {
-		update_drag_start_billboard({1, 0, 0})
 		update_walls_rectangle(
 			removing_east_west_wall,
 			removing_north_south_wall,
@@ -782,7 +774,6 @@ removing_rectangle :: proc() {
 			removing_north_south_wall,
 		)
 	} else {
-		remove_drag_start_billboard()
 		wall_tool_drag_start = wall_tool_position
 	}
 }
@@ -820,36 +811,6 @@ update :: proc() {
 		update_rectangle()
 	} else {
 		update_line()
-	}
-}
-
-update_drag_start_billboard :: proc(light: glsl.vec3) {
-	if wall_tool_start_billboard == nil &&
-	   wall_tool_drag_start != wall_tool_position {
-		wall_tool_start_billboard = billboard.Key {
-			pos =  {
-				f32(wall_tool_drag_start.x),
-				terrain.terrain_heights[wall_tool_drag_start.x][wall_tool_drag_start.y] +
-				f32(floor.floor) * constants.WALL_HEIGHT,
-				f32(wall_tool_drag_start.y),
-			},
-			type = .Wall_Cursor,
-		}
-		billboard.billboard_1x1_set(
-			wall_tool_start_billboard.?,
-			{light = light, texture = .Wall_Cursor, depth_map = .Wall_Cursor},
-		)
-	} else if wall_tool_start_billboard != nil &&
-	   wall_tool_drag_start == wall_tool_position {
-		wall_tool_start_billboard = nil
-	}
-}
-
-remove_drag_start_billboard :: proc() {
-	if wall_tool_start_billboard != nil &&
-	   wall_tool_drag_start != wall_tool_position {
-		billboard.billboard_1x1_remove(wall_tool_start_billboard.?)
-		wall_tool_start_billboard = nil
 	}
 }
 
