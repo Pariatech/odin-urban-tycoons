@@ -175,7 +175,15 @@ update :: proc() {
 		reset = true
 	}
 
-	if mouse.is_button_press(.Left) {
+	if keyboard.is_key_down(.Key_Left_Shift) && mouse.is_button_press(.Left) {
+		pos := glsl.ivec3{position.x, floor.floor, position.y}
+		tile_triangle, ok := previous_tiles[pos][side].?
+		if ok {
+			flood_fill(pos, side, tile_triangle.texture, active_texture)
+			set_tile(pos, delete_mode)
+			// clear(&previous_tiles)
+		}
+	} else if mouse.is_button_press(.Left) {
 		drag_start = {position.x, floor.floor, position.y}
 		drag_start_side = side
 	} else if mouse.is_button_down(.Left) {
