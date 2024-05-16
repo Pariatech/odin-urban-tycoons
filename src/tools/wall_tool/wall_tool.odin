@@ -4,15 +4,15 @@ import "core:fmt"
 import "core:math"
 import "core:math/linalg/glsl"
 
-import "../../constants"
-import "../../keyboard"
-import "../../camera"
-import "../../mouse"
-import "../../cursor"
-import "../../terrain"
 import "../../billboard"
-import "../../wall"
+import "../../camera"
+import "../../constants"
+import "../../cursor"
 import "../../floor"
+import "../../keyboard"
+import "../../mouse"
+import "../../terrain"
+import "../../wall"
 
 wall_tool_billboard: billboard.Key
 wall_tool_position: glsl.ivec2
@@ -50,10 +50,7 @@ update_walls_line :: proc(
 	north_south: proc(_: glsl.ivec3),
 ) {
 	if is_diagonal() {
-		diagonal_update(
-			south_west_north_east_fn,
-			north_west_south_east_fn,
-		)
+		diagonal_update(south_west_north_east_fn, north_west_south_east_fn)
 	} else {
 		cardinal_update(east_west, north_south)
 	}
@@ -209,16 +206,12 @@ update_north_south_neighbors :: proc(pos: glsl.ivec3) {
 	update_east_west_wall(pos + {1, 0, 1})
 }
 
-update_south_west_north_east_wall_and_neighbors :: proc(
-	pos: glsl.ivec3,
-) {
+update_south_west_north_east_wall_and_neighbors :: proc(pos: glsl.ivec3) {
 	update_south_west_north_east_wall(pos)
 	update_south_west_north_east_neighbors(pos)
 }
 
-update_north_west_south_east_wall_and_neighbors :: proc(
-	pos: glsl.ivec3,
-) {
+update_north_west_south_east_wall_and_neighbors :: proc(pos: glsl.ivec3) {
 	update_north_west_south_east_wall(pos)
 	update_north_west_south_east_neighbors(pos)
 }
@@ -294,7 +287,10 @@ remove_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 update_east_west_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
+	if pos.x < 0 ||
+	   pos.z < 0 ||
+	   pos.x >= constants.WORLD_WIDTH ||
+	   pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -339,7 +335,10 @@ update_east_west_wall :: proc(pos: glsl.ivec3) {
 }
 
 update_north_south_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
+	if pos.x < 0 ||
+	   pos.z < 0 ||
+	   pos.x >= constants.WORLD_WIDTH ||
+	   pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -384,7 +383,10 @@ update_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
+	if pos.x < 0 ||
+	   pos.z < 0 ||
+	   pos.x >= constants.WORLD_WIDTH ||
+	   pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -431,7 +433,10 @@ update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 }
 
 update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
-	if pos.x < 0 || pos.z < 0 || pos.x >= constants.WORLD_WIDTH || pos.z >= constants.WORLD_DEPTH {
+	if pos.x < 0 ||
+	   pos.z < 0 ||
+	   pos.x >= constants.WORLD_WIDTH ||
+	   pos.z >= constants.WORLD_DEPTH {
 		return
 	}
 
@@ -494,6 +499,11 @@ set_south_west_north_east_wall :: proc(
 		return
 	}
 
+	if terrain.get_terrain_height({pos.x, pos.z}) !=
+	   terrain.get_terrain_height({pos.x + 1, pos.z + 1}) {
+		return
+	}
+
 	wall.set_south_west_north_east_wall(
 		pos,
 		 {
@@ -520,6 +530,12 @@ set_north_west_south_east_wall :: proc(
 		wall_tool_north_west_south_east_walls[pos] = wall
 		return
 	}
+    
+	if terrain.get_terrain_height({pos.x, pos.z + 1}) !=
+	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
+		return
+	}
+
 	wall.set_north_west_south_east_wall(
 		pos,
 		 {
@@ -544,6 +560,12 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 		wall_tool_east_west_walls[pos] = wall
 		return
 	}
+    
+	if terrain.get_terrain_height({pos.x, pos.z}) !=
+	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
+		return
+	}
+
 	wall.set_east_west_wall(
 		pos,
 		 {
@@ -562,14 +584,17 @@ set_north_south_wall_drywall :: proc(pos: glsl.ivec3) {
 	set_north_south_wall(pos, .Brick)
 }
 
-set_north_south_wall :: proc(
-	pos: glsl.ivec3,
-	texture: wall.Wall_Texture,
-) {
+set_north_south_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 	if wall, ok := wall.get_north_south_wall(pos); ok {
 		wall_tool_north_south_walls[pos] = wall
 		return
 	}
+    
+	if terrain.get_terrain_height({pos.x, pos.z}) !=
+	   terrain.get_terrain_height({pos.x, pos.z + 1}) {
+		return
+	}
+
 	wall.set_north_south_wall(
 		pos,
 		 {
@@ -623,7 +648,11 @@ removing_line :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor.on_tile_intersect(on_tile_intersect, floor.previous_floor, floor.floor)
+	cursor.on_tile_intersect(
+		on_tile_intersect,
+		floor.previous_floor,
+		floor.floor,
+	)
 
 	if previous_tool_position != wall_tool_position ||
 	   floor.previous_floor != floor.floor {
@@ -667,7 +696,11 @@ adding_line :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor.on_tile_intersect(on_tile_intersect, floor.previous_floor, floor.floor)
+	cursor.on_tile_intersect(
+		on_tile_intersect,
+		floor.previous_floor,
+		floor.floor,
+	)
 
 	if previous_tool_position != wall_tool_position {
 		move_cursor()
@@ -708,14 +741,15 @@ update_line :: proc() {
 
 adding_rectangle :: proc() {
 	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
-		update_walls_rectangle(
-			remove_east_west_wall,
-			remove_north_south_wall,
-		)
+		update_walls_rectangle(remove_east_west_wall, remove_north_south_wall)
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor.on_tile_intersect(on_tile_intersect, floor.previous_floor, floor.floor)
+	cursor.on_tile_intersect(
+		on_tile_intersect,
+		floor.previous_floor,
+		floor.floor,
+	)
 
 	if previous_tool_position != wall_tool_position {
 		move_cursor()
@@ -751,7 +785,11 @@ removing_rectangle :: proc() {
 	}
 
 	previous_tool_position := wall_tool_position
-	cursor.on_tile_intersect(on_tile_intersect, floor.previous_floor, floor.floor)
+	cursor.on_tile_intersect(
+		on_tile_intersect,
+		floor.previous_floor,
+		floor.floor,
+	)
 
 	if previous_tool_position != wall_tool_position {
 		move_cursor()
@@ -816,7 +854,8 @@ update :: proc() {
 
 move_cursor :: proc() {
 	position: glsl.vec3
-	position.y = terrain.terrain_heights[wall_tool_position.x][wall_tool_position.y]
+	position.y =
+		terrain.terrain_heights[wall_tool_position.x][wall_tool_position.y]
 	position.y += f32(floor.floor) * constants.WALL_HEIGHT
 
 	switch camera.rotation {
