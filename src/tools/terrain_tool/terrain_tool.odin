@@ -6,14 +6,15 @@ import "core:math/linalg/glsl"
 import "core:math/rand"
 import "vendor:glfw"
 
+import "../../billboard"
 import "../../constants"
+import "../../cursor"
+import "../../floor"
 import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
-import "../../cursor"
-import "../../billboard"
 import "../../tile"
-import "../../floor"
+import "../../wall"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: billboard.Key
@@ -98,10 +99,10 @@ move_points :: proc(position: glsl.vec3) {
 					if terrain_tool_drag_clip {
 						point_height := terrain.terrain_heights[x][z]
 						if point_height > height {
-							terrain.set_terrain_height(int(x), int(z), height)
+							set_terrain_height(x, z, height)
 						}
 					} else {
-						terrain.set_terrain_height(int(x), int(z), height)
+						set_terrain_height(x, z, height)
 					}
 				}
 			}
@@ -177,7 +178,12 @@ smooth_brush :: proc(delta_time: f64) {
 				}
 
 				movement := average - terrain.terrain_heights[x][z]
-				terrain.terrain_heights[x][z] += movement * terrain_tool_brush_strength
+				set_terrain_height(
+					x,
+					z,
+					terrain.terrain_heights[x][z] +
+					movement * terrain_tool_brush_strength,
+				)
 			}
 		}
 
@@ -192,6 +198,44 @@ smooth_brush :: proc(delta_time: f64) {
 
 		mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	}
+}
+
+set_terrain_height :: proc(x, z: i32, height: f32) {
+	if x > 0 && z < constants.WORLD_DEPTH {
+		if _, ok := wall.get_east_west_wall({x - 1, 0, z}); ok {return}
+		if x < constants.WORLD_WIDTH {
+			if _, ok := wall.get_east_west_wall({x, 0, z}); ok {return}
+		}
+	}
+
+	if x < constants.WORLD_WIDTH && z > 0 {
+		if _, ok := wall.get_north_south_wall({x, 0, z - 1}); ok {return}
+		if z < constants.WORLD_DEPTH {
+			if _, ok := wall.get_north_south_wall({x, 0, z}); ok {return}
+		}
+	}
+
+	if x > 0 && z > 0 {
+		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z - 1})
+		if ok {return}
+	}
+
+	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
+		_, ok := wall.get_south_west_north_east_wall({x, 0, z})
+		if ok {return}
+	}
+
+	if x < constants.WORLD_WIDTH && z > 0 {
+		_, ok := wall.get_north_west_south_east_wall({x, 0, z - 1})
+		if ok {return}
+	}
+
+	if x > 0 && z < constants.WORLD_DEPTH {
+		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z})
+		if ok {return}
+	}
+
+	terrain.terrain_heights[x][z] = height
 }
 
 calculate_lights :: proc() {
@@ -227,8 +271,8 @@ move_point :: proc(delta_time: f64) {
 	if terrain_tool_tick_timer == delta_time ||
 	   terrain_tool_tick_timer >= TERRAIN_TOOL_TICK_SPEED {
 		move_point_height(
-			int(terrain_tool_position.x),
-			int(terrain_tool_position.y),
+			terrain_tool_position.x,
+			terrain_tool_position.y,
 			movement,
 		)
 		adjust_points(
@@ -260,13 +304,13 @@ move_point :: proc(delta_time: f64) {
 	}
 }
 
-move_point_height :: proc(x, z: int, movement: f32) {
+move_point_height :: proc(x, z: i32, movement: f32) {
 	height := terrain.terrain_heights[x][z]
 	height += movement
 
 	height = clamp(height, TERRAIN_TOOL_LOW, TERRAIN_TOOL_HIGH)
 
-	terrain.set_terrain_height(x, z, height)
+	set_terrain_height(x, z, height)
 }
 
 adjust_points :: proc(x, z, w, h: int, movement: f32) {
@@ -279,8 +323,8 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 		if x - i >= 0 {
 			for z in start_z ..= end_z {
 				move_point_height(
-					x - i,
-					z,
+					i32(x - i),
+					i32(z),
 					movement *
 					f32(terrain_tool_brush_size - i32(i)) /
 					f32(terrain_tool_brush_size),
@@ -291,8 +335,8 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 		if x + w + i < constants.WORLD_WIDTH {
 			for z in start_z ..= end_z {
 				move_point_height(
-					x + w + i,
-					z,
+					i32(x + w + i),
+					i32(z),
 					movement *
 					f32(terrain_tool_brush_size - i32(i)) /
 					f32(terrain_tool_brush_size),
@@ -303,8 +347,8 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 		if z - i >= 0 {
 			for x in start_x ..< end_x {
 				move_point_height(
-					x,
-					z - i,
+					i32(x),
+					i32(z - i),
 					movement *
 					f32(terrain_tool_brush_size - i32(i)) /
 					f32(terrain_tool_brush_size),
@@ -315,8 +359,8 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 		if z + h + i < constants.WORLD_DEPTH {
 			for x in start_x ..< end_x {
 				move_point_height(
-					x,
-					z + h + i,
+					i32(x),
+					i32(z + h + i),
 					movement *
 					f32(terrain_tool_brush_size - i32(i)) /
 					f32(terrain_tool_brush_size),
