@@ -225,6 +225,26 @@ set_terrain_height :: proc(x, z: i32, height: f32) {
 		if ok {return}
 	}
 
+	if x > 0 && z < constants.WORLD_DEPTH {
+		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z})
+		if ok {return}
+	}
+
+	if x < constants.WORLD_WIDTH && z > 0 {
+		_, ok := wall.get_south_west_north_east_wall({x, 0, z - 1})
+		if ok {return}
+	}
+
+	if x > 0 && z > 0 {
+		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z - 1})
+		if ok {return}
+	}
+
+	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
+		_, ok := wall.get_north_west_south_east_wall({x, 0, z})
+		if ok {return}
+	}
+
 	if x < constants.WORLD_WIDTH && z > 0 {
 		_, ok := wall.get_north_west_south_east_wall({x, 0, z - 1})
 		if ok {return}
