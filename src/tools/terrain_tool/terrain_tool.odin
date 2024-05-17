@@ -200,60 +200,97 @@ smooth_brush :: proc(delta_time: f64) {
 	}
 }
 
-set_terrain_height :: proc(x, z: i32, height: f32) {
+intersect_with_wall :: proc(x, z: i32) -> bool {
 	if x > 0 && z < constants.WORLD_DEPTH {
-		if _, ok := wall.get_east_west_wall({x - 1, 0, z}); ok {return}
+		if _, ok := wall.get_east_west_wall({x - 1, 0, z}); ok {
+			return true
+		}
 		if x < constants.WORLD_WIDTH {
-			if _, ok := wall.get_east_west_wall({x, 0, z}); ok {return}
+			if _, ok := wall.get_east_west_wall({x, 0, z}); ok {
+				return true
+			}
 		}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
-		if _, ok := wall.get_north_south_wall({x, 0, z - 1}); ok {return}
+		if _, ok := wall.get_north_south_wall({x, 0, z - 1}); ok {
+			return true
+		}
 		if z < constants.WORLD_DEPTH {
-			if _, ok := wall.get_north_south_wall({x, 0, z}); ok {return}
+			if _, ok := wall.get_north_south_wall({x, 0, z}); ok {
+				return true
+			}
 		}
 	}
 
 	if x > 0 && z > 0 {
 		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z - 1})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
 		_, ok := wall.get_south_west_north_east_wall({x, 0, z})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x > 0 && z < constants.WORLD_DEPTH {
 		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
 		_, ok := wall.get_south_west_north_east_wall({x, 0, z - 1})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x > 0 && z > 0 {
 		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z - 1})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
 		_, ok := wall.get_north_west_south_east_wall({x, 0, z})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
 		_, ok := wall.get_north_west_south_east_wall({x, 0, z - 1})
-		if ok {return}
+		if ok {return true}
 	}
 
 	if x > 0 && z < constants.WORLD_DEPTH {
 		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z})
-		if ok {return}
+		if ok {return true}
 	}
+
+	return false
+}
+
+intersect_with_floor :: proc(x, z: i32) -> bool {
+	for y in 0 ..< constants.WORLD_HEIGHT {
+		start_x := math.max(x - 1, 0)
+		start_z := math.max(z - 1, 0)
+		end_x := math.min(x, constants.WORLD_WIDTH - 1)
+		end_z := math.min(z, constants.WORLD_DEPTH - 1)
+		for x in start_x ..= end_x {
+			for z in start_z ..= end_z {
+				triangles := tile.get_tile({x, i32(y), z})
+				for side in tile.Tile_Triangle_Side {
+					if triangle, ok := triangles[side].?; ok {
+						if triangle.texture != .Grass {
+							return true
+						}
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+set_terrain_height :: proc(x, z: i32, height: f32) {
+	if intersect_with_wall(x, z) {return}
+	if intersect_with_floor(x, z) {return}
 
 	terrain.terrain_heights[x][z] = height
 }
