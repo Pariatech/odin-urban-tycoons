@@ -107,6 +107,12 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	fs.callbackUpdate = font_atlas_update
 	fs.userData = ctx
 	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
+    fontstash.AddFallbackFont(&fs, font, 
+        fontstash.AddFont(&fs, "ComicMono", "resources/fonts/NotoSans-Regular.ttf"),
+    )
+    fontstash.AddFallbackFont(&fs, font, 
+        fontstash.AddFont(&fs, "ComicMono", "resources/fonts/NotoSansJP-Regular.ttf"),
+    )
 
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -191,11 +197,11 @@ draw :: proc(using ctx: ^Context) {
 	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 
-	it := fontstash.TextIterInit(&fs, 10, 40, "Hello, World!")
+	it := fontstash.TextIterInit(&fs, 10, 40, "Hello, World! hola, cómo estás, こんにちは, Straße")
 	quad: fontstash.Quad
 	for fontstash.TextIterNext(&fs, &it, &quad) {
 		vertices := QUAD_VERTICES
-		log.info(quad)
+		// log.info(quad)
 		vertices[0].pos = glsl.vec2 {
 			quad.x0 / window.size.x * 2 - 1,
 			-(quad.y0 / window.size.y * 2 - 1),
