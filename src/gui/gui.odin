@@ -34,6 +34,7 @@ init :: proc() -> (ok: bool = false) {
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	defer gl.UseProgram(0)
+	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	gl.GenVertexArrays(1, &gui_vao)
 	gl.BindVertexArray(gui_vao)
@@ -93,6 +94,7 @@ draw :: proc() {
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	defer gl.UseProgram(0)
 	defer gl.Enable(gl.DEPTH_TEST)
+	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	gl.Disable(gl.DEPTH_TEST)
 
@@ -129,6 +131,9 @@ draw :: proc() {
 			i32(window.size.y) - 5,
 		},
 	)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, gui_texture)
 
 	gl.BufferData(
 		gl.ARRAY_BUFFER,

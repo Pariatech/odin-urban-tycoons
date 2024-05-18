@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:runtime"
 import "core:time"
+import "core:log"
 import "vendor:glfw"
 
 import "window"
@@ -18,11 +19,14 @@ import "floor"
 import "tools/terrain_tool"
 import "tools"
 import "gui"
+import "ui"
 
 TITLE :: "My Window!"
 
 framebuffer_resized: bool
 delta_time: f64
+
+ui_ctx: ui.Context
 
 framebuffer_size_callback :: proc "c" (
 	_: glfw.WindowHandle,
@@ -36,6 +40,8 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
+    context.logger = log.create_console_logger()
+
 	if !bool(glfw.Init()) {
 		fmt.eprintln("GLFW has failed to load.")
 		return
@@ -71,6 +77,7 @@ start :: proc() -> (ok: bool = false) {
 	init_world()
 
     gui.init() or_return
+    ui.init(&ui_ctx) or_return
 
 	terrain_tool.init()
 
@@ -106,7 +113,8 @@ start :: proc() -> (ok: bool = false) {
 
 		draw_world()
 
-        gui.draw()
+        // gui.draw()
+        ui.draw(&ui_ctx)
 
 		end_draw()
 
