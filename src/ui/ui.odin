@@ -107,12 +107,24 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	fs.callbackUpdate = font_atlas_update
 	fs.userData = ctx
 	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
-    fontstash.AddFallbackFont(&fs, font, 
-        fontstash.AddFont(&fs, "ComicMono", "resources/fonts/NotoSans-Regular.ttf"),
-    )
-    fontstash.AddFallbackFont(&fs, font, 
-        fontstash.AddFont(&fs, "ComicMono", "resources/fonts/NotoSansJP-Regular.ttf"),
-    )
+	fontstash.AddFallbackFont(
+		&fs,
+		font,
+		fontstash.AddFont(
+			&fs,
+			"ComicMono",
+			"resources/fonts/NotoSans-Regular.ttf",
+		),
+	)
+	fontstash.AddFallbackFont(
+		&fs,
+		font,
+		fontstash.AddFont(
+			&fs,
+			"ComicMono",
+			"resources/fonts/NotoSansJP-Regular.ttf",
+		),
+	)
 
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -124,12 +136,12 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	// gl.BufferData(
-	// 	gl.ARRAY_BUFFER,
-	// 	len(vertices) * size_of(Vertex),
-	// 	raw_data(vertices),
-	// 	gl.STATIC_DRAW,
-	// )
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(QUAD_VERTICES) * size_of(Vertex),
+		nil,
+		gl.STATIC_DRAW,
+	)
 
 	// gl.GenTextures(1, &font_atlas)
 	// gl.ActiveTexture(gl.TEXTURE0)
@@ -197,7 +209,12 @@ draw :: proc(using ctx: ^Context) {
 	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 
-	it := fontstash.TextIterInit(&fs, 10, 40, "Hello, World! hola, cómo estás, こんにちは, Straße")
+	it := fontstash.TextIterInit(
+		&fs,
+		10,
+		40,
+		"Hello, World! hola, cómo estás, こんにちは, Straße",
+	)
 	quad: fontstash.Quad
 	for fontstash.TextIterNext(&fs, &it, &quad) {
 		vertices := QUAD_VERTICES
@@ -224,40 +241,34 @@ draw :: proc(using ctx: ^Context) {
 			-(quad.y1 / window.size.y * 2 - 1),
 		}
 		vertices[5].texcoords = glsl.vec2{quad.s0, quad.t1}
-		// vertices[1].pos = gui_to_screen_space(
-		// 	glsl.ivec2 {
-		// 		i32(window.size.x) - 5,
-		// 		i32(window.size.y) - gui_texture_size.y - 5,
-		// 	},
-		// )
-		// vertices[2].pos = gui_to_screen_space(
-		// 	glsl.ivec2{i32(window.size.x) - 5, i32(window.size.y) - 5},
-		// )
-		//
-		// vertices[3] = gui_vertices[0]
-		// vertices[4] = gui_vertices[2]
-		//
-		// vertices[5].pos = gui_to_screen_space(
-		// 	glsl.ivec2 {
-		// 		i32(window.size.x) - gui_texture_size.x - 5,
-		// 		i32(window.size.y) - 5,
-		// 	},
-		gl.BufferData(
+		gl.BufferSubData(
 			gl.ARRAY_BUFFER,
+			0,
 			len(vertices) * size_of(Vertex),
 			raw_data(&vertices),
-			gl.STATIC_DRAW,
 		)
+		// gl.BufferData(
+		// 	gl.ARRAY_BUFFER,
+		// 	len(vertices) * size_of(Vertex),
+		// 	raw_data(&vertices),
+		// 	gl.STATIC_DRAW,
+		// )
 
 		gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 	}
 	vertices := QUAD_VERTICES
-	gl.BufferData(
+	gl.BufferSubData(
 		gl.ARRAY_BUFFER,
+		0,
 		len(vertices) * size_of(Vertex),
 		raw_data(&vertices),
-		gl.STATIC_DRAW,
 	)
+	// gl.BufferData(
+	// 	gl.ARRAY_BUFFER,
+	// 	len(vertices) * size_of(Vertex),
+	// 	raw_data(&vertices),
+	// 	gl.STATIC_DRAW,
+	// )
 
 	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 
