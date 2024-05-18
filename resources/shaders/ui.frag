@@ -8,11 +8,8 @@ layout(location = 0) out vec4 color;
 
 void main() {
     float gray = texture(texture_sampler, texcoord).r;
-    color = vec4(gray, gray, gray, 1);
-    
-    // vec4 tex = texture(texture_sampler, texcoord);
-    // if (tex.a < 0.01) {
-    //     discard;
-    // }
-    // color = tex;
+    if (gray < 0.01) {
+        discard;
+    }
+    color = vec4(gray);
 }
