@@ -98,8 +98,17 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	fs.callbackResize = font_atlas_resize
 	fs.callbackUpdate = font_atlas_update
 	fs.userData = ctx
-	// font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
-	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicNeue-Regular.otf")
+	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
+	// font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicNeue-Regular.otf")
+	fontstash.AddFallbackFont(
+		&fs,
+		font,
+		fontstash.AddFont(
+			&fs,
+			"NotoSans-Regular",
+			"resources/fonts/ComicNeue-Bold.otf",
+		),
+	)
 	fontstash.AddFallbackFont(
 		&fs,
 		font,
@@ -109,15 +118,6 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 			"resources/fonts/Symbola_hint.ttf",
 		),
 	)
-	// fontstash.AddFallbackFont(
-	// 	&fs,
-	// 	font,
-	// 	fontstash.AddFont(
-	// 		&fs,
-	// 		"NotoSans-Regular",
-	// 		"resources/fonts/NotoSans-Regular.ttf",
-	// 	),
-	// )
 	fontstash.AddFallbackFont(
 		&fs,
 		font,
@@ -215,7 +215,7 @@ draw :: proc(using ctx: ^Context) {
 		&fs,
 		10,
 		40,
-		"📌☻😆😻 Hello, World! hola, cómo estás, こんにちは, Straße",
+		"📌☻😆😻 Hello, World! hola, cómo estás, こんにちは, Straße $398",
 	)
 	quad: fontstash.Quad
 	for fontstash.TextIterNext(&fs, &it, &quad) {
