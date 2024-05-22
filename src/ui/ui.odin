@@ -23,12 +23,16 @@ QUAD_VERTICES := [?]Vertex {
 	{pos = {-1, 1}, texcoords = {0, 0}},
 }
 
-Context :: struct {
+Font :: struct {
 	fs:          fontstash.FontContext,
 	vbo, vao:    u32,
-	font:        int,
-	font_atlas:  u32,
-	font_shader: u32,
+	id:        int,
+	atlas:  u32,
+	shader: u32,
+}
+
+Context :: struct {
+    font: Font,
 }
 
 Vertex :: struct {
@@ -39,7 +43,7 @@ Vertex :: struct {
 font_atlas_resize :: proc(data: rawptr, w, h: int) {
 	using ctx := (^Context)(data)
 
-	gl.DeleteTextures(1, &font_atlas)
+	gl.DeleteTextures(1, &font.atlas)
 	create_font_atlas_texture(ctx)
 }
 
@@ -51,28 +55,28 @@ font_atlas_update :: proc(
 	using ctx := (^Context)(data)
 
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
-	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
+	gl.BindTexture(gl.TEXTURE_2D, font.atlas)
 
 	gl.TexSubImage2D(
 		gl.TEXTURE_2D,
 		0,
 		0,
 		0,
-		i32(fs.width),
-		i32(fs.height),
+		i32(font.fs.width),
+		i32(font.fs.height),
 		gl.RED,
 		gl.UNSIGNED_BYTE,
-		raw_data(fs.textureData),
+		raw_data(font.fs.textureData),
 	)
 
 	// font_atlas_resize(ctx, 0, 0)
 }
 
 create_font_atlas_texture :: proc(using ctx: ^Context) {
-	gl.CreateTextures(gl.TEXTURE_2D, 1, &font_atlas)
+	gl.CreateTextures(gl.TEXTURE_2D, 1, &font.atlas)
 
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
-	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
+	gl.BindTexture(gl.TEXTURE_2D, font.atlas)
 
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -84,45 +88,45 @@ create_font_atlas_texture :: proc(using ctx: ^Context) {
 		gl.TEXTURE_2D,
 		0,
 		gl.RED,
-		i32(fs.width),
-		i32(fs.height),
+		i32(font.fs.width),
+		i32(font.fs.height),
 		0,
 		gl.RED,
 		gl.UNSIGNED_BYTE,
-		raw_data(fs.textureData),
+		raw_data(font.fs.textureData),
 	)
 }
 
 init :: proc(using ctx: ^Context) -> (ok: bool = false) {
-	fontstash.Init(&fs, 1024, 1024, .TOPLEFT)
-	fs.callbackResize = font_atlas_resize
-	fs.callbackUpdate = font_atlas_update
-	fs.userData = ctx
-	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
+	fontstash.Init(&font.fs, 1024, 1024, .TOPLEFT)
+	font.fs.callbackResize = font_atlas_resize
+	font.fs.callbackUpdate = font_atlas_update
+	font.fs.userData = ctx
+	font.id = fontstash.AddFont(&font.fs, "ComicMono", "resources/fonts/ComicMono.ttf")
 	// font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicNeue-Regular.otf")
 	fontstash.AddFallbackFont(
-		&fs,
-		font,
+		&font.fs,
+		font.id,
 		fontstash.AddFont(
-			&fs,
+			&font.fs,
 			"NotoSans-Regular",
 			"resources/fonts/ComicNeue-Bold.otf",
 		),
 	)
 	fontstash.AddFallbackFont(
-		&fs,
-		font,
+		&font.fs,
+		font.id,
 		fontstash.AddFont(
-			&fs,
+			&font.fs,
 			"NotoColorEmoji",
 			"resources/fonts/Symbola_hint.ttf",
 		),
 	)
 	fontstash.AddFallbackFont(
-		&fs,
-		font,
+		&font.fs,
+		font.id,
 		fontstash.AddFont(
-			&fs,
+			&font.fs,
 			"NotoSansJP-Regular",
 			"resources/fonts/NotoSansJP-Regular.ttf",
 		),
@@ -133,11 +137,11 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	defer gl.UseProgram(0)
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
+	gl.GenVertexArrays(1, &font.vao)
+	gl.BindVertexArray(font.vao)
 
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.GenBuffers(1, &font.vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, font.vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
 		len(QUAD_VERTICES) * size_of(Vertex),
@@ -152,7 +156,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	create_font_atlas_texture(ctx)
 
 	renderer.load_shader_program(
-		&font_shader,
+		&font.shader,
 		FONT_VERTEX_SHADER,
 		FONT_FRAGMENT_SHADER,
 	) or_return
@@ -181,14 +185,14 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 }
 
 draw_text :: proc(using ctx: ^Context, position: glsl.vec2, text: string) {
-	fontstash.BeginState(&fs)
-	fontstash.SetFont(&fs, font)
-	fontstash.SetSize(&fs, 32)
-	fontstash.SetColor(&fs, {1, 1, 1, 1})
-	fontstash.SetAlignVertical(&fs, .BASELINE)
-	fontstash.SetAlignHorizontal(&fs, .LEFT)
-	fontstash.SetSpacing(&fs, 1)
-	fontstash.SetBlur(&fs, 0)
+	fontstash.BeginState(&font.fs)
+	fontstash.SetFont(&font.fs, font.id)
+	fontstash.SetSize(&font.fs, 32)
+	fontstash.SetColor(&font.fs, {1, 1, 1, 1})
+	fontstash.SetAlignVertical(&font.fs, .BASELINE)
+	fontstash.SetAlignHorizontal(&font.fs, .LEFT)
+	fontstash.SetSpacing(&font.fs, 1)
+	fontstash.SetBlur(&font.fs, 0)
 
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -198,15 +202,15 @@ draw_text :: proc(using ctx: ^Context, position: glsl.vec2, text: string) {
 
 	gl.Disable(gl.DEPTH_TEST)
 
-	gl.BindVertexArray(vao)
-	gl.UseProgram(font_shader)
+	gl.BindVertexArray(font.vao)
+	gl.UseProgram(font.shader)
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BindTexture(gl.TEXTURE_2D, font.atlas)
+	gl.BindBuffer(gl.ARRAY_BUFFER, font.vbo)
 
-	it := fontstash.TextIterInit(&fs, position.x, position.y, text)
+	it := fontstash.TextIterInit(&font.fs, position.x, position.y, text)
 	quad: fontstash.Quad
-	for fontstash.TextIterNext(&fs, &it, &quad) {
+	for fontstash.TextIterNext(&font.fs, &it, &quad) {
 		vertices := QUAD_VERTICES
 		vertices[0].pos = glsl.vec2 {
 			quad.x0 / window.size.x * 2 - 1,
@@ -239,7 +243,7 @@ draw_text :: proc(using ctx: ^Context, position: glsl.vec2, text: string) {
 		gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 	}
 
-	fontstash.EndState(&fs)
+	fontstash.EndState(&font.fs)
 }
 
 draw :: proc(using ctx: ^Context) {
