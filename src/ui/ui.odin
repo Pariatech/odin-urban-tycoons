@@ -15,18 +15,12 @@ FRAGMENT_SHADER :: "resources/shaders/ui.frag"
 FONT :: "resources/fonts/ComicMono.ttf"
 
 QUAD_VERTICES := [?]Vertex {
-	// {pos = {-1, -1}, texcoords = {0, 1}},
-	// {pos = {1, -1}, texcoords = {1, 1}},
-	// {pos = {1, 1}, texcoords = {1, 0}},
-	// {pos = {-1, -1}, texcoords = {0, 1}},
-	// {pos = {1, 1}, texcoords = {1, 0}},
-	// {pos = {-1, 1}, texcoords = {0, 0}},
-	{pos = {-.5, -.5}, texcoords = {0, 1}},
-	{pos = {.5, -.5}, texcoords = {1, 1}},
-	{pos = {.5, .5}, texcoords = {1, 0}},
-	{pos = {-.5, -.5}, texcoords = {0, 1}},
-	{pos = {.5, .5}, texcoords = {1, 0}},
-	{pos = {-.5, .5}, texcoords = {0, 0}},
+	{pos = {-1, -1}, texcoords = {0, 1}},
+	{pos = {1, -1}, texcoords = {1, 1}},
+	{pos = {1, 1}, texcoords = {1, 0}},
+	{pos = {-1, -1}, texcoords = {0, 1}},
+	{pos = {1, 1}, texcoords = {1, 0}},
+	{pos = {-1, 1}, texcoords = {0, 0}},
 }
 
 Context :: struct {
@@ -45,7 +39,6 @@ Vertex :: struct {
 font_atlas_resize :: proc(data: rawptr, w, h: int) {
 	using ctx := (^Context)(data)
 
-	log.info("resize?")
 	gl.DeleteTextures(1, &font_atlas)
 	create_font_atlas_texture(ctx)
 }
@@ -57,7 +50,6 @@ font_atlas_update :: proc(
 ) {
 	using ctx := (^Context)(data)
 
-	log.info("update?", dirty_rect)
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
 
@@ -106,22 +98,32 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	fs.callbackResize = font_atlas_resize
 	fs.callbackUpdate = font_atlas_update
 	fs.userData = ctx
-	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
+	// font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicMono.ttf")
+	font = fontstash.AddFont(&fs, "ComicMono", "resources/fonts/ComicNeue-Regular.otf")
 	fontstash.AddFallbackFont(
 		&fs,
 		font,
 		fontstash.AddFont(
 			&fs,
-			"ComicMono",
-			"resources/fonts/NotoSans-Regular.ttf",
+			"NotoColorEmoji",
+			"resources/fonts/Symbola_hint.ttf",
 		),
 	)
+	// fontstash.AddFallbackFont(
+	// 	&fs,
+	// 	font,
+	// 	fontstash.AddFont(
+	// 		&fs,
+	// 		"NotoSans-Regular",
+	// 		"resources/fonts/NotoSans-Regular.ttf",
+	// 	),
+	// )
 	fontstash.AddFallbackFont(
 		&fs,
 		font,
 		fontstash.AddFont(
 			&fs,
-			"ComicMono",
+			"NotoSansJP-Regular",
 			"resources/fonts/NotoSansJP-Regular.ttf",
 		),
 	)
@@ -213,7 +215,7 @@ draw :: proc(using ctx: ^Context) {
 		&fs,
 		10,
 		40,
-		"Hello, World! hola, cómo estás, こんにちは, Straße",
+		"📌☻😆😻 Hello, World! hola, cómo estás, こんにちは, Straße",
 	)
 	quad: fontstash.Quad
 	for fontstash.TextIterNext(&fs, &it, &quad) {
@@ -256,13 +258,13 @@ draw :: proc(using ctx: ^Context) {
 
 		gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 	}
-	vertices := QUAD_VERTICES
-	gl.BufferSubData(
-		gl.ARRAY_BUFFER,
-		0,
-		len(vertices) * size_of(Vertex),
-		raw_data(&vertices),
-	)
+	// vertices := QUAD_VERTICES
+	// gl.BufferSubData(
+	// 	gl.ARRAY_BUFFER,
+	// 	0,
+	// 	len(vertices) * size_of(Vertex),
+	// 	raw_data(&vertices),
+	// )
 	// gl.BufferData(
 	// 	gl.ARRAY_BUFFER,
 	// 	len(vertices) * size_of(Vertex),
@@ -270,7 +272,7 @@ draw :: proc(using ctx: ^Context) {
 	// 	gl.STATIC_DRAW,
 	// )
 
-	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
+	// gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 
 	fontstash.EndState(&fs)
 }

@@ -15,9 +15,9 @@ floor: i32
 
 update :: proc() {
 	previous_floor = floor
-	if keyboard.is_key_press(.Key_Equal) {
+	if keyboard.is_key_press(.Key_Page_Up) {
 		floor = min(floor + 1, constants.WORLD_HEIGHT - 1)
-	} else if keyboard.is_key_press(.Key_Minus) {
+	} else if keyboard.is_key_press(.Key_Page_Down) {
 		floor = max(floor - 1, 0)
 	}
 
