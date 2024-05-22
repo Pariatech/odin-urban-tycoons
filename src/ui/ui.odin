@@ -10,8 +10,8 @@ import stbi "vendor:stb/image"
 import "../renderer"
 import "../window"
 
-VERTEX_SHADER :: "resources/shaders/ui.vert"
-FRAGMENT_SHADER :: "resources/shaders/ui.frag"
+FONT_VERTEX_SHADER :: "resources/shaders/ui/font.vert"
+FONT_FRAGMENT_SHADER :: "resources/shaders/ui/font.frag"
 FONT :: "resources/fonts/ComicMono.ttf"
 
 QUAD_VERTICES := [?]Vertex {
@@ -24,11 +24,11 @@ QUAD_VERTICES := [?]Vertex {
 }
 
 Context :: struct {
-	fs:         fontstash.FontContext,
-	vbo, vao:   u32,
-	font:       int,
-	font_atlas: u32,
-	shader:     u32,
+	fs:          fontstash.FontContext,
+	vbo, vao:    u32,
+	font:        int,
+	font_atlas:  u32,
+	font_shader: u32,
 }
 
 Vertex :: struct {
@@ -152,9 +152,9 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	create_font_atlas_texture(ctx)
 
 	renderer.load_shader_program(
-		&shader,
-		VERTEX_SHADER,
-		FRAGMENT_SHADER,
+		&font_shader,
+		FONT_VERTEX_SHADER,
+		FONT_FRAGMENT_SHADER,
 	) or_return
 
 	gl.EnableVertexAttribArray(0)
@@ -181,10 +181,6 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 }
 
 draw_text :: proc(using ctx: ^Context, position: glsl.vec2, text: string) {
-
-}
-
-draw :: proc(using ctx: ^Context) {
 	fontstash.BeginState(&fs)
 	fontstash.SetFont(&fs, font)
 	fontstash.SetSize(&fs, 32)
@@ -193,9 +189,6 @@ draw :: proc(using ctx: ^Context) {
 	fontstash.SetAlignHorizontal(&fs, .LEFT)
 	fontstash.SetSpacing(&fs, 1)
 	fontstash.SetBlur(&fs, 0)
-	// fontstash.set
-	// fs.dirtyRect
-	// font_atlas_update(ctx, fs.dirtyRect, &fs.textureData)
 
 	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -206,21 +199,15 @@ draw :: proc(using ctx: ^Context) {
 	gl.Disable(gl.DEPTH_TEST)
 
 	gl.BindVertexArray(vao)
-	gl.UseProgram(shader)
+	gl.UseProgram(font_shader)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, font_atlas)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 
-	it := fontstash.TextIterInit(
-		&fs,
-		10,
-		40,
-		"📌☻😆😻 Hello, World! hola, cómo estás, こんにちは, Straße $398",
-	)
+	it := fontstash.TextIterInit(&fs, position.x, position.y, text)
 	quad: fontstash.Quad
 	for fontstash.TextIterNext(&fs, &it, &quad) {
 		vertices := QUAD_VERTICES
-		// log.info(quad)
 		vertices[0].pos = glsl.vec2 {
 			quad.x0 / window.size.x * 2 - 1,
 			-(quad.y0 / window.size.y * 2 - 1),
@@ -249,30 +236,16 @@ draw :: proc(using ctx: ^Context) {
 			len(vertices) * size_of(Vertex),
 			raw_data(&vertices),
 		)
-		// gl.BufferData(
-		// 	gl.ARRAY_BUFFER,
-		// 	len(vertices) * size_of(Vertex),
-		// 	raw_data(&vertices),
-		// 	gl.STATIC_DRAW,
-		// )
-
 		gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 	}
-	// vertices := QUAD_VERTICES
-	// gl.BufferSubData(
-	// 	gl.ARRAY_BUFFER,
-	// 	0,
-	// 	len(vertices) * size_of(Vertex),
-	// 	raw_data(&vertices),
-	// )
-	// gl.BufferData(
-	// 	gl.ARRAY_BUFFER,
-	// 	len(vertices) * size_of(Vertex),
-	// 	raw_data(&vertices),
-	// 	gl.STATIC_DRAW,
-	// )
-
-	// gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 
 	fontstash.EndState(&fs)
+}
+
+draw :: proc(using ctx: ^Context) {
+	draw_text(
+		ctx,
+		{10, 40},
+		"📌☻😆😻 Hello, World! hola, cómo estás, こんにちは, Straße $398",
+	)
 }
