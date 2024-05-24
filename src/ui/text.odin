@@ -25,11 +25,11 @@ FONT_QUAD_VERTICES := [?]Text_Vertex {
 }
 
 Text_Renderer :: struct {
-	fs:       fontstash.FontContext,
-	vbo, vao: u32,
-	id:       int,
-	atlas:    u32,
-	shader:   u32,
+	fs:     fontstash.FontContext,
+	id:     int,
+	atlas:  u32,
+	shader: u32,
+	draws:  map[Text]Text_Draw,
 }
 
 Text_Vertex :: struct {
@@ -37,6 +37,22 @@ Text_Vertex :: struct {
 	texcoords: glsl.vec2,
 	color:     glsl.vec4,
 }
+
+Text :: struct {
+	position: glsl.vec2,
+	str:      string,
+	ah:       fontstash.AlignHorizontal,
+	av:       fontstash.AlignVertical,
+	size:     f32,
+	color:    glsl.vec4,
+}
+
+Text_Draw :: struct {
+	vao, vbo: u32,
+	count:    i32,
+	stale:    bool,
+}
+
 
 font_atlas_resize :: proc(data: rawptr, w, h: int) {
 	using ctx := (^Context)(data)
@@ -132,22 +148,10 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		),
 	)
 
-	defer gl.BindVertexArray(0)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	defer gl.UseProgram(0)
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
-	gl.GenVertexArrays(1, &text_renderer.vao)
-	gl.BindVertexArray(text_renderer.vao)
-
-	gl.GenBuffers(1, &text_renderer.vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, text_renderer.vbo)
-	gl.BufferData(
-		gl.ARRAY_BUFFER,
-		len(FONT_QUAD_VERTICES) * size_of(Text_Vertex),
-		nil,
-		gl.STATIC_DRAW,
-	)
 
 	// gl.GenTextures(1, &font_atlas)
 	// gl.ActiveTexture(gl.TEXTURE0)
@@ -160,6 +164,21 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		FONT_VERTEX_SHADER,
 		FONT_FRAGMENT_SHADER,
 	) or_return
+
+
+	return true
+}
+
+init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
+	draw: Text_Draw
+
+	gl.GenVertexArrays(1, &draw.vao)
+	gl.BindVertexArray(draw.vao)
+	defer gl.BindVertexArray(0)
+
+	gl.GenBuffers(1, &draw.vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, draw.vbo)
+	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 	gl.EnableVertexAttribArray(0)
 	gl.VertexAttribPointer(
@@ -191,51 +210,23 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		offset_of(Text_Vertex, color),
 	)
 
-	return true
-}
+	lines := strings.split_lines(str)
+	defer delete(lines)
 
-draw_text :: proc(
-	using ctx: ^Context,
-	position: glsl.vec2,
-	text: string,
-	ah: fontstash.AlignHorizontal = .LEFT,
-	av: fontstash.AlignVertical = .BASELINE,
-	size: f32 = 32,
-	color: glsl.vec4 = {1, 1, 1, 1},
-) {
-	using text_renderer
+	text_vertices: [dynamic]Text_Vertex
+	defer delete(text_vertices)
+
 	fontstash.BeginState(&fs)
 	fontstash.SetFont(&fs, id)
 	fontstash.SetSize(&fs, size)
-	// fontstash.SetColor(&fs, {0, 0, 0, 0})
 	fontstash.SetAlignVertical(&fs, av)
 	fontstash.SetAlignHorizontal(&fs, ah)
-	// fontstash.SetSpacing(&fs, 0)
-	// fontstash.SetBlur(&fs, 0.0)
-
-	defer gl.BindVertexArray(0)
-	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	defer gl.UseProgram(0)
-	defer gl.Enable(gl.DEPTH_TEST)
-	defer gl.BindTexture(gl.TEXTURE_2D, 0)
-
-	gl.Disable(gl.DEPTH_TEST)
-
-	gl.BindVertexArray(vao)
-	gl.UseProgram(shader)
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, atlas)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-
-	lines := strings.split_lines(text)
-	defer delete(lines)
-
-    y := position.y
+	y := position.y
 	for line in lines {
 		it := fontstash.TextIterInit(&fs, position.x, y, line)
 
-        miny, maxy := fontstash.LineBounds(&fs, y)
-        y = maxy
+		miny, maxy := fontstash.LineBounds(&fs, y)
+		y = maxy
 
 		quad: fontstash.Quad
 		for fontstash.TextIterNext(&fs, &it, &quad) {
@@ -253,15 +244,65 @@ draw_text :: proc(
 			for &v in vertices {
 				v.color = color
 			}
-			gl.BufferSubData(
-				gl.ARRAY_BUFFER,
-				0,
-				len(vertices) * size_of(Text_Vertex),
-				raw_data(&vertices),
-			)
-			gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
+			append(&text_vertices, ..vertices[:])
 		}
 	}
-
 	fontstash.EndState(&fs)
+
+	gl.BufferData(
+		gl.ARRAY_BUFFER,
+		len(text_vertices) * size_of(Text_Vertex),
+		raw_data(text_vertices),
+		gl.STATIC_DRAW,
+	)
+
+	draw.count = i32(len(text_vertices))
+	gl.DrawArrays(gl.TRIANGLES, 0, draw.count)
+
+	draws[text] = draw
+}
+
+draw_text :: proc(
+	using ctx: ^Context,
+	position: glsl.vec2,
+	str: string,
+	ah: fontstash.AlignHorizontal = .LEFT,
+	av: fontstash.AlignVertical = .BASELINE,
+	size: f32 = 32,
+	color: glsl.vec4 = {1, 1, 1, 1},
+) {
+	using text_renderer
+
+	text := Text {
+		position = position,
+		str      = str,
+		ah       = ah,
+		av       = av,
+		size     = size,
+		color    = color,
+	}
+
+	gl.Disable(gl.DEPTH_TEST)
+	defer gl.Enable(gl.DEPTH_TEST)
+
+	gl.UseProgram(shader)
+	defer gl.UseProgram(0)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, atlas)
+	defer gl.BindTexture(gl.TEXTURE_2D, 0)
+
+	if draw, ok := draws[text]; ok {
+		draw.stale = false
+
+		gl.BindVertexArray(draw.vao)
+		defer gl.BindVertexArray(0)
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, draw.vbo)
+		defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+
+		gl.DrawArrays(gl.TRIANGLES, 0, draw.count)
+	} else {
+		init_text_draw(&text_renderer, text)
+	}
 }
