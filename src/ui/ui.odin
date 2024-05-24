@@ -69,6 +69,10 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 	return {pos.x / window.size.x * 2 - 1, -(pos.y / window.size.y * 2 - 1)}
 }
 
+update :: proc(using ctx: ^Context) {
+    update_text_draws(&text_renderer)
+}
+
 draw :: proc(using ctx: ^Context) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	defer gl.BindBuffer(gl.UNIFORM_BUFFER, 0)

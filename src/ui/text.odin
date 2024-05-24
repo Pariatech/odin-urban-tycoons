@@ -292,7 +292,7 @@ draw_text :: proc(
 	gl.BindTexture(gl.TEXTURE_2D, atlas)
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
-	if draw, ok := draws[text]; ok {
+	if draw, ok := &draws[text]; ok {
 		draw.stale = false
 
 		gl.BindVertexArray(draw.vao)
@@ -305,4 +305,15 @@ draw_text :: proc(
 	} else {
 		init_text_draw(&text_renderer, text)
 	}
+}
+
+update_text_draws :: proc(using ctx: ^Text_Renderer) {
+    for k,v in draws {
+        if v.stale {
+            delete_key(&draws, k)
+        } else {
+            v := &draws[k]
+            v.stale = true
+        }
+    }
 }
