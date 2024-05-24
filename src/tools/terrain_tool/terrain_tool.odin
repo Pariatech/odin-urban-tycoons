@@ -427,7 +427,7 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	}
 }
 
-deinit :: proc() {
+cleanup :: proc() {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
 		start_z := min(drag_start.y, terrain_tool_position.y)
@@ -474,39 +474,15 @@ deinit :: proc() {
 			},
 		)
 	}
-	billboard.billboard_1x1_remove(terrain_tool_billboard)
+}
 
+deinit :: proc() {
+    cleanup()
+	billboard.billboard_1x1_remove(terrain_tool_billboard)
 }
 
 update :: proc(delta_time: f64) {
-	if drag_start, ok := terrain_tool_drag_start.?; ok {
-		start_x := min(drag_start.x, terrain_tool_position.x)
-		start_z := min(drag_start.y, terrain_tool_position.y)
-		end_x := max(drag_start.x, terrain_tool_position.x)
-		end_z := max(drag_start.y, terrain_tool_position.y)
-
-		for x in start_x ..< end_x {
-			for z in start_z ..< end_z {
-				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
-			}
-		}
-	} else {
-		start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
-		end_x := min(
-			terrain_tool_position.x + terrain_tool_brush_size,
-			constants.WORLD_WIDTH,
-		)
-		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
-		end_z := min(
-			terrain_tool_position.y + terrain_tool_brush_size,
-			constants.WORLD_DEPTH,
-		)
-		for x in start_x ..< end_x {
-			for z in start_z ..< end_z {
-				tile.set_tile_mask_texture({x, 0, z}, .Grid_Mask)
-			}
-		}
-	}
+    cleanup()
 
 	if keyboard.is_key_press(.Key_Equal) {
 		if keyboard.is_key_down(.Key_Left_Shift) {

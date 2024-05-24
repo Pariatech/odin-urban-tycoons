@@ -17,6 +17,7 @@ import "billboard"
 import "wall"
 import "floor"
 import "tools/terrain_tool"
+import "tools/floor_tool"
 import "tools"
 import "gui"
 import "ui"
@@ -79,6 +80,7 @@ start :: proc() -> (ok: bool = false) {
     gui.init() or_return
     ui.init(&ui_ctx) or_return
 
+    floor_tool.init()
 	terrain_tool.init()
 
 	should_close := false
