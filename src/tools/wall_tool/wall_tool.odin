@@ -530,7 +530,7 @@ set_north_west_south_east_wall :: proc(
 		wall_tool_north_west_south_east_walls[pos] = wall
 		return
 	}
-    
+
 	if terrain.get_terrain_height({pos.x, pos.z + 1}) !=
 	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
 		return
@@ -560,7 +560,7 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 		wall_tool_east_west_walls[pos] = wall
 		return
 	}
-    
+
 	if terrain.get_terrain_height({pos.x, pos.z}) !=
 	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
 		return
@@ -589,7 +589,7 @@ set_north_south_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 		wall_tool_north_south_walls[pos] = wall
 		return
 	}
-    
+
 	if terrain.get_terrain_height({pos.x, pos.z}) !=
 	   terrain.get_terrain_height({pos.x, pos.z + 1}) {
 		return
@@ -686,14 +686,7 @@ removing_line :: proc() {
 }
 
 adding_line :: proc() {
-	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
-		update_walls_line(
-			remove_south_west_north_east_wall,
-			remove_north_west_south_east_wall,
-			remove_east_west_wall,
-			remove_north_south_wall,
-		)
-	}
+	revert_walls_line()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
@@ -740,9 +733,7 @@ update_line :: proc() {
 }
 
 adding_rectangle :: proc() {
-	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
-		update_walls_rectangle(remove_east_west_wall, remove_north_south_wall)
-	}
+    revert_walls_rectangle()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
@@ -824,6 +815,23 @@ update_rectangle :: proc() {
 	}
 }
 
+revert_walls_rectangle :: proc() {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
+		update_walls_rectangle(remove_east_west_wall, remove_north_south_wall)
+	}
+}
+
+revert_walls_line :: proc() {
+	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
+		update_walls_line(
+			remove_south_west_north_east_wall,
+			remove_north_west_south_east_wall,
+			remove_east_west_wall,
+			remove_north_south_wall,
+		)
+	}
+}
+
 update :: proc() {
 	if keyboard.is_key_release(.Key_Left_Control) {
 		billboard.billboard_1x1_set(
@@ -843,6 +851,12 @@ update :: proc() {
 				depth_map = .Wall_Cursor,
 			},
 		)
+	}
+
+	if keyboard.is_key_release(.Key_Left_Shift) {
+        revert_walls_rectangle()
+	} else if keyboard.is_key_press(.Key_Left_Shift) {
+        revert_walls_line()
 	}
 
 	if keyboard.is_key_down(.Key_Left_Shift) {
