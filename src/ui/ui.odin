@@ -16,13 +16,13 @@ RECT_VERTEX_SHADER :: "resources/shaders/ui/rect.vert"
 RECT_FRAGMENT_SHADER :: "resources/shaders/ui/rect.frag"
 FONT :: "resources/fonts/ComicMono.ttf"
 
-FONT_QUAD_VERTICES := [?]Vertex {
-	{pos = {-1, -1}, texcoords = {0, 1}},
-	{pos = {1, -1}, texcoords = {1, 1}},
-	{pos = {1, 1}, texcoords = {1, 0}},
-	{pos = {-1, -1}, texcoords = {0, 1}},
-	{pos = {1, 1}, texcoords = {1, 0}},
-	{pos = {-1, 1}, texcoords = {0, 0}},
+FONT_QUAD_VERTICES := [?]Text_Vertex {
+	{pos = {-1, -1}, texcoords = {0, 1}, color = {1, 1, 1, 1}},
+	{pos = {1, -1}, texcoords = {1, 1}, color = {1, 1, 1, 1}},
+	{pos = {1, 1}, texcoords = {1, 0}, color = {1, 1, 1, 1}},
+	{pos = {-1, -1}, texcoords = {0, 1}, color = {1, 1, 1, 1}},
+	{pos = {1, 1}, texcoords = {1, 0}, color = {1, 1, 1, 1}},
+	{pos = {-1, 1}, texcoords = {0, 0}, color = {1, 1, 1, 1}},
 }
 
 RECT_QUAD_VERTICES := [?]Rect_Vertex {
@@ -59,9 +59,10 @@ Context :: struct {
 	rect_renderer:  Rect_Renderer,
 }
 
-Vertex :: struct {
+Text_Vertex :: struct {
 	pos:       glsl.vec2,
 	texcoords: glsl.vec2,
+	color:     glsl.vec4,
 }
 
 Rect_Vertex :: struct {
@@ -272,7 +273,7 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, text_renderer.vbo)
 	gl.BufferData(
 		gl.ARRAY_BUFFER,
-		len(FONT_QUAD_VERTICES) * size_of(Vertex),
+		len(FONT_QUAD_VERTICES) * size_of(Text_Vertex),
 		nil,
 		gl.STATIC_DRAW,
 	)
@@ -295,8 +296,8 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		2,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, pos),
+		size_of(Text_Vertex),
+		offset_of(Text_Vertex, pos),
 	)
 
 	gl.EnableVertexAttribArray(1)
@@ -305,8 +306,18 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		2,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Vertex),
-		offset_of(Vertex, texcoords),
+		size_of(Text_Vertex),
+		offset_of(Text_Vertex, texcoords),
+	)
+
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointer(
+		2,
+		4,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Text_Vertex),
+		offset_of(Text_Vertex, color),
 	)
 
 	return true
@@ -322,7 +333,8 @@ draw_text :: proc(
 	text: string,
 	ah: fontstash.AlignHorizontal = .LEFT,
 	av: fontstash.AlignVertical = .BASELINE,
-    size: f32 = 32,
+	size: f32 = 32,
+	color: glsl.vec4 = {1, 1, 1, 1},
 ) {
 	using text_renderer
 	fontstash.BeginState(&fs)
@@ -362,10 +374,13 @@ draw_text :: proc(
 		vertices[4] = vertices[2]
 		vertices[5].pos = to_screen_pos({quad.x0, quad.y1})
 		vertices[5].texcoords = glsl.vec2{quad.s0, quad.t1}
+		for &v in vertices {
+			v.color = color
+		}
 		gl.BufferSubData(
 			gl.ARRAY_BUFFER,
 			0,
-			len(vertices) * size_of(Vertex),
+			len(vertices) * size_of(Text_Vertex),
 			raw_data(&vertices),
 		)
 		gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
