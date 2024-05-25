@@ -70,7 +70,7 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 }
 
 update :: proc(using ctx: ^Context) {
-    update_text_draws(&text_renderer)
+	update_text_draws(&text_renderer)
 }
 
 draw :: proc(using ctx: ^Context) {
@@ -131,6 +131,8 @@ Ctrl Shift Left Click & Drag:   Remove Wall Rectangle
 		ah = .LEFT,
 		av = .TOP,
 		size = 18,
+		clip_start = {185, 210},
+		clip_end = {175 + 500 - 10, 200 + 400 - 10},
 	)
 
 	for icon, i in Menu_Icon {

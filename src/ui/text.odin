@@ -3,6 +3,7 @@ package ui
 import "core:log"
 import "core:math/linalg/glsl"
 import "core:strings"
+import "core:math"
 
 import gl "vendor:OpenGL"
 import "vendor:fontstash"
@@ -33,18 +34,22 @@ Text_Renderer :: struct {
 }
 
 Text_Vertex :: struct {
-	pos:       glsl.vec2,
-	texcoords: glsl.vec2,
-	color:     glsl.vec4,
+	pos:        glsl.vec2,
+	texcoords:  glsl.vec2,
+	color:      glsl.vec4,
+	clip_start: glsl.vec2,
+	clip_end:   glsl.vec2,
 }
 
 Text :: struct {
-	position: glsl.vec2,
-	str:      string,
-	ah:       fontstash.AlignHorizontal,
-	av:       fontstash.AlignVertical,
-	size:     f32,
-	color:    glsl.vec4,
+	position:   glsl.vec2,
+	str:        string,
+	ah:         fontstash.AlignHorizontal,
+	av:         fontstash.AlignVertical,
+	size:       f32,
+	color:      glsl.vec4,
+	clip_start: glsl.vec2,
+	clip_end:   glsl.vec2,
 }
 
 Text_Draw :: struct {
@@ -210,6 +215,26 @@ init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
 		offset_of(Text_Vertex, color),
 	)
 
+	gl.EnableVertexAttribArray(3)
+	gl.VertexAttribPointer(
+		3,
+		2,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Text_Vertex),
+		offset_of(Text_Vertex, clip_start),
+	)
+
+	gl.EnableVertexAttribArray(4)
+	gl.VertexAttribPointer(
+		4,
+		2,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Text_Vertex),
+		offset_of(Text_Vertex, clip_end),
+	)
+
 	lines := strings.split_lines(str)
 	defer delete(lines)
 
@@ -241,8 +266,11 @@ init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
 			vertices[4] = vertices[2]
 			vertices[5].pos = to_screen_pos({quad.x0, quad.y1})
 			vertices[5].texcoords = glsl.vec2{quad.s0, quad.t1}
+			log.info(clip_end)
 			for &v in vertices {
 				v.color = color
+				v.clip_start = clip_start
+				v.clip_end = clip_end
 			}
 			append(&text_vertices, ..vertices[:])
 		}
@@ -270,16 +298,20 @@ draw_text :: proc(
 	av: fontstash.AlignVertical = .BASELINE,
 	size: f32 = 32,
 	color: glsl.vec4 = {1, 1, 1, 1},
+	clip_start: glsl.vec2 = {math.F32_MIN,math.F32_MIN},
+	clip_end: glsl.vec2 = {math.F32_MAX, math.F32_MAX},
 ) {
 	using text_renderer
 
 	text := Text {
-		position = position,
-		str      = str,
-		ah       = ah,
-		av       = av,
-		size     = size,
-		color    = color,
+		position   = position,
+		str        = str,
+		ah         = ah,
+		av         = av,
+		size       = size,
+		color      = color,
+		clip_start = clip_start,
+		clip_end   = clip_end,
 	}
 
 	gl.Disable(gl.DEPTH_TEST)
@@ -308,12 +340,12 @@ draw_text :: proc(
 }
 
 update_text_draws :: proc(using ctx: ^Text_Renderer) {
-    for k,v in draws {
-        if v.stale {
-            delete_key(&draws, k)
-        } else {
-            v := &draws[k]
-            v.stale = true
-        }
-    }
+	for k, v in draws {
+		if v.stale {
+			delete_key(&draws, k)
+		} else {
+			v := &draws[k]
+			v.stale = true
+		}
+	}
 }
