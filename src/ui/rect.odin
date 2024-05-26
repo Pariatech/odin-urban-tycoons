@@ -35,6 +35,8 @@ Rect :: struct {
 	color:      glsl.vec4,
 }
 
+Rect_Draw_Call :: Rect
+
 init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	using ctx.rect_renderer
 
@@ -142,5 +144,9 @@ draw_rect :: proc(using ctx: ^Context, rect: Rect) {
 		raw_data(&vertices),
 	)
 	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
+}
+
+rect :: proc(using ctx: ^Context, rect: Rect) {
+    append(&draw_calls, rect)
 }
 

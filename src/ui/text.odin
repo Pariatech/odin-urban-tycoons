@@ -1,9 +1,9 @@
 package ui
 
 import "core:log"
+import "core:math"
 import "core:math/linalg/glsl"
 import "core:strings"
-import "core:math"
 
 import gl "vendor:OpenGL"
 import "vendor:fontstash"
@@ -56,6 +56,11 @@ Text_Draw :: struct {
 	vao, vbo: u32,
 	count:    i32,
 	stale:    bool,
+}
+
+Text_Draw_Call :: struct {
+	text: Text,
+	draw: Text_Draw,
 }
 
 
@@ -290,7 +295,7 @@ init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
 	draws[text] = draw
 }
 
-draw_text :: proc(
+text :: proc(
 	using ctx: ^Context,
 	position: glsl.vec2,
 	str: string,
@@ -298,11 +303,9 @@ draw_text :: proc(
 	av: fontstash.AlignVertical = .BASELINE,
 	size: f32 = 32,
 	color: glsl.vec4 = {1, 1, 1, 1},
-	clip_start: glsl.vec2 = {math.F32_MIN,math.F32_MIN},
+	clip_start: glsl.vec2 = {math.F32_MIN, math.F32_MIN},
 	clip_end: glsl.vec2 = {math.F32_MAX, math.F32_MAX},
 ) {
-	using text_renderer
-
 	text := Text {
 		position   = position,
 		str        = str,
@@ -313,6 +316,12 @@ draw_text :: proc(
 		clip_start = clip_start,
 		clip_end   = clip_end,
 	}
+
+    append(&draw_calls, text)
+}
+
+draw_text :: proc(using ctx: ^Context, text: Text) {
+	using text_renderer
 
 	gl.Disable(gl.DEPTH_TEST)
 	defer gl.Enable(gl.DEPTH_TEST)

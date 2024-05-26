@@ -29,25 +29,23 @@ Icon_Vertex :: struct {
 }
 
 Icon_Renderer :: struct {
-	vbo, vao:      u32,
-	shader:        u32,
-	texture_array: u32,
-	texture_size:  glsl.ivec2,
+	vbo, vao:     u32,
+	shader:       u32,
+	texture_size: glsl.ivec2,
 }
 
 Icon :: struct {
-	pos:     glsl.vec2,
-	size:    glsl.vec2,
-	color:   glsl.vec4,
-	texture: int,
+	pos:           glsl.vec2,
+	size:          glsl.vec2,
+	color:         glsl.vec4,
+	texture_array: u32,
+	texture:       int,
 }
 
-init_icon_renderer :: proc(
-	using ctx: ^Icon_Renderer,
-	textures: []cstring,
-) -> (
-	ok: bool = false,
-) {
+Icon_Draw_Call :: Icon
+
+init_icon_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
+    using icon_renderer
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 	defer gl.BindVertexArray(0)
@@ -120,9 +118,12 @@ init_icon_renderer :: proc(
 		offset_of(Icon_Vertex, texcoord),
 	)
 
-	gl.CreateTextures(gl.TEXTURE_2D_ARRAY, 1, &texture_array)
+	return true
+}
 
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
+init_icon_texture_array :: proc(texture_array: ^u32, textures: []cstring) -> (ok: bool = true) {
+	gl.CreateTextures(gl.TEXTURE_2D_ARRAY, 1, texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array^)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
@@ -131,12 +132,17 @@ init_icon_renderer :: proc(
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	load_texture_2D_array(textures, &texture_size.x, &texture_size.y) or_return
+	load_texture_2D_array(textures) or_return
 
-	return true
+    return
 }
 
-draw_icon :: proc(using ctx: ^Icon_Renderer, using icon: Icon) {
+icon :: proc(using ctx: ^Context, icon: Icon) {
+	append(&draw_calls, icon)
+}
+
+draw_icon :: proc(using ctx: ^Context, using icon: Icon) {
+	using icon_renderer
 	gl.Disable(gl.DEPTH_TEST)
 	defer gl.Enable(gl.DEPTH_TEST)
 
@@ -179,13 +185,7 @@ draw_icon :: proc(using ctx: ^Icon_Renderer, using icon: Icon) {
 	gl.DrawArrays(gl.TRIANGLES, 0, i32(len(vertices)))
 }
 
-load_texture_2D_array :: proc(
-	paths: []cstring,
-	width: ^i32,
-	height: ^i32,
-) -> (
-	ok: bool = true,
-) {
+load_texture_2D_array :: proc(paths: []cstring) -> (ok: bool = true) {
 	textures := i32(len(paths))
 	if (textures == 0) {
 		log.info("No textures to load.")
@@ -195,16 +195,10 @@ load_texture_2D_array :: proc(
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	stbi.info(paths[0], width, height, nil)
+	width, height: i32
+	stbi.info(paths[0], &width, &height, nil)
 
-	gl.TexStorage3D(
-		gl.TEXTURE_2D_ARRAY,
-		3,
-		gl.RGBA8,
-		width^,
-		height^,
-		textures,
-	)
+	gl.TexStorage3D(gl.TEXTURE_2D_ARRAY, 3, gl.RGBA8, width, height, textures)
 
 	for path, i in paths {
 		w, h: i32
@@ -216,7 +210,7 @@ load_texture_2D_array :: proc(
 			return false
 		}
 
-		if w != width^ {
+		if w != width {
 			log.error(
 				"Texture: ",
 				path,
@@ -228,7 +222,7 @@ load_texture_2D_array :: proc(
 			return false
 		}
 
-		if h != height^ {
+		if h != height {
 			log.error(
 				"Texture: ",
 				path,
@@ -246,8 +240,8 @@ load_texture_2D_array :: proc(
 			0,
 			0,
 			i32(i),
-			width^,
-			height^,
+			width,
+			height,
 			1,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
