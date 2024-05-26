@@ -1,4 +1,4 @@
-package main
+package renderer
 
 import "core:fmt"
 import m "core:math/linalg/glsl"
@@ -8,9 +8,8 @@ import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"
 
-import "window"
-import "tile"
-import "renderer"
+import "../window"
+import "../tile"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 5
@@ -22,6 +21,7 @@ shader_program: u32
 world_vertices: [dynamic]tile.Vertex
 world_indices: [dynamic]u32
 uniform_object: Uniform_Object
+framebuffer_resized: bool
 
 Uniform_Object :: struct {
 	proj, view: m.mat4,
@@ -52,7 +52,7 @@ load_mask_array :: proc() -> (ok: bool) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return renderer.load_texture_2D_array(tile.MASK_PATHS)
+	return load_texture_2D_array(tile.MASK_PATHS)
 }
 
 load_texture_array :: proc() -> (ok: bool = true) {
@@ -81,10 +81,10 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	return renderer.load_texture_2D_array(tile.TEXTURE_PATHS)
+	return load_texture_2D_array(tile.TEXTURE_PATHS)
 }
 
-init_renderer :: proc() -> (ok: bool = true) {
+init :: proc() -> (ok: bool = true) {
 	gl.load_up_to(GL_MAJOR_VERSION, GL_MINOR_VERSION, glfw.gl_set_proc_address)
 
 	gl.Enable(gl.MULTISAMPLE)
@@ -164,7 +164,7 @@ init_renderer :: proc() -> (ok: bool = true) {
 	)
 	gl.EnableVertexAttribArray(3)
 
-	renderer.load_shader_program(
+	load_shader_program(
 		&shader_program,
 		VERTEX_SHADER_PATH,
 		FRAGMENT_SHADER_PATH,
@@ -188,7 +188,7 @@ init_renderer :: proc() -> (ok: bool = true) {
 	return
 }
 
-deinit_renderer :: proc() {
+deinit :: proc() {
 	gl.DeleteTextures(1, &tile.texture_array)
 	gl.DeleteTextures(1, &tile.mask_array)
 	gl.DeleteBuffers(1, &vao)

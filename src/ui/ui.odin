@@ -5,8 +5,10 @@ import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
-import "../window"
 import "../floor"
+import "../window"
+import "../camera"
+import "../world"
 
 MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/info.png",
@@ -89,13 +91,17 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	switch item {
 	case .Info:
-		help_window_opened = true
+		help_window_opened = !help_window_opened
 	case .Floor_Up:
-        floor.move_up()
+		floor.move_up()
 	case .Floor_Down:
-        floor.move_down()
+		floor.move_down()
 	case .Camera_Rotate_Left:
+		camera.rotate_clockwise()
+		world.update_after_rotation(.Clockwise)
 	case .Camera_Rotate_Right:
+		camera.rotate_counter_clockwise()
+		world.update_after_rotation(.Counter_Clockwise)
 	case .Landscape:
 	case .Wall:
 	case .Floor:

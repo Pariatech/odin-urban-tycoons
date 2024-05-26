@@ -20,10 +20,11 @@ import "tools/terrain_tool"
 import "ui"
 import "wall"
 import "window"
+import "world"
+import "renderer"
 
 TITLE :: "My Window!"
 
-framebuffer_resized: bool
 delta_time: f64
 
 ui_ctx: ui.Context
@@ -34,7 +35,7 @@ framebuffer_size_callback :: proc "c" (
 ) {
 	context = runtime.default_context()
 
-	framebuffer_resized = true
+	renderer.framebuffer_resized = true
 	window.size.x = f32(width)
 	window.size.y = f32(height)
 }
@@ -69,8 +70,8 @@ start :: proc() -> (ok: bool = false) {
 	glfw.MakeContextCurrent(window.handle)
 	glfw.SwapInterval(0)
 
-	if (!init_renderer()) do return
-	defer deinit_renderer()
+	if (!renderer.init()) do return
+	defer renderer.deinit()
 
 	wall.init_wall_renderer() or_return
 
@@ -80,7 +81,7 @@ start :: proc() -> (ok: bool = false) {
 
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
-	init_world()
+	world.init()
 
 	ui.init(&ui_ctx) or_return
 
@@ -110,29 +111,29 @@ start :: proc() -> (ok: bool = false) {
 		glfw.PollEvents()
 
 
-		begin_draw()
+		renderer.begin_draw()
 
 		floor.update()
 		ui.update(&ui_ctx)
 
 		if keyboard.is_key_press(.Key_Q) {
 			camera.rotate_counter_clockwise()
-			world_update_after_rotation(.Counter_Clockwise)
+			world.update_after_rotation(.Counter_Clockwise)
 		} else if keyboard.is_key_press(.Key_E) {
 			camera.rotate_clockwise()
-			world_update_after_rotation(.Clockwise)
+			world.update_after_rotation(.Clockwise)
 		}
 		camera.update(delta_time)
 
-		world_update()
+		world.update()
 
 		tools.update(delta_time)
 
-		draw_world()
+		world.draw()
 
 		ui.draw(&ui_ctx)
 
-		end_draw()
+		renderer.end_draw()
 
 
 		should_close =

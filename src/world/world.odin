@@ -1,15 +1,16 @@
-package main
+package world
 
 import "core:fmt"
 import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
-import "billboard"
-import "camera"
-import "constants"
-import "tile"
-import "tools/wall_tool"
-import "wall"
+import "../billboard"
+import "../camera"
+import "../constants"
+import "../tile"
+import "../tools/wall_tool"
+import "../wall"
+import "../renderer"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -17,7 +18,7 @@ house_z: i32 = 12
 world_previously_visible_chunks_start: glsl.ivec2
 world_previously_visible_chunks_end: glsl.ivec2
 
-world_update :: proc() {
+update :: proc() {
 	aabb := camera.get_aabb()
 	world_previously_visible_chunks_start = camera.visible_chunks_start
 	world_previously_visible_chunks_end = camera.visible_chunks_end
@@ -33,7 +34,7 @@ world_update :: proc() {
 	)
 }
 
-init_world :: proc() {
+init :: proc() {
 	tile.chunk_init()
 
 	// The house
@@ -476,29 +477,29 @@ add_house_floor_walls :: proc(
 	)
 }
 
-draw_world :: proc() {
-	uniform_object.view = camera.view
-	uniform_object.proj = camera.proj
+draw :: proc() {
+	renderer.uniform_object.view = camera.view
+	renderer.uniform_object.proj = camera.proj
 
-	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, renderer.ubo)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, renderer.ubo)
 	gl.BufferSubData(
 		gl.UNIFORM_BUFFER,
 		0,
-		size_of(Uniform_Object),
-		&uniform_object,
+		size_of(renderer.Uniform_Object),
+		&renderer.uniform_object,
 	)
 
 
 	for floor in 0 ..< constants.CHUNK_HEIGHT {
-		gl.UseProgram(shader_program)
+		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(floor)
 		wall.draw_walls(floor)
 		billboard.draw_billboards(floor)
 	}
 }
 
-world_update_after_rotation :: proc(rotated: camera.Rotated) {
+update_after_rotation :: proc(rotated: camera.Rotated) {
 	wall_tool.move_cursor()
 	billboard.update_after_rotation()
 	switch rotated {
