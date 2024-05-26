@@ -35,7 +35,7 @@ W,A,S,D:      Move camera
 Q,E:          Rotate camera
 Mouse Scroll: Zoom
 
----- Terrain Tool [T] ----
+---- Land Tool [T] ----
 Only work on grass tiles
 
 Left Click:              Raise land
@@ -44,15 +44,23 @@ Right Click:             Lower land
 -:                       Reduce brush size
 Shift +:                 Increase brush strength
 Shift -:                 Reduce brush strength
-Ctrl Click:              Smooth terrain
-Shift Click & Drag:      Level terrain
-Ctrl Shift Click & Drag: Flatten terrain
+Ctrl Click:              Smooth land
+Shift Click & Drag:      Level land
+Ctrl Shift Click & Drag: Flatten land
 
 ---- Wall Tool [G] ----
 Left Click & Drag:              Place Wall
 Shift Left Click & Drag:        Place Wall Rectangle
 Ctrl Left Click & Drag:         Remove Wall
 Ctrl Shift Left Click & Drag:   Remove Wall Rectangle
+
+---- Floor Tool [F] ----
+Left Click & Drag:              Place
+Ctrl Left Click & Drag:         Remove
+Shift Left Click:               Fill/Replace
+
+---- Triangle Floor Tool [Ctrl F] ----
+Left Click:                     Place
 `,
 		ah = .LEFT,
 		av = .TOP,
