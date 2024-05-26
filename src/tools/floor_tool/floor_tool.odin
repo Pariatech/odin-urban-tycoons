@@ -178,7 +178,15 @@ update :: proc() {
 	if keyboard.is_key_down(.Key_Left_Shift) && mouse.is_button_press(.Left) {
 		pos := glsl.ivec3{position.x, floor.floor, position.y}
 		revert_tile(pos)
-		flood_fill(pos, side, active_texture)
+		if delete_mode {
+            if floor.floor == 0 {
+			    flood_fill(pos, side, .Grass)
+            } else {
+			    flood_fill(pos, side, .Floor_Marker)
+            }
+		} else {
+			flood_fill(pos, side, active_texture)
+		}
 		set_tile(pos, delete_mode)
 	} else if mouse.is_button_press(.Left) {
 		drag_start = {position.x, floor.floor, position.y}
