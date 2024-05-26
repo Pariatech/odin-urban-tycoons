@@ -95,6 +95,19 @@ update :: proc(using ctx: ^Context) {
 
 	rect(
 		ctx,
+		 {
+			x = 175 + 500 - 22,
+			y = 179,
+			w = 18,
+			h = 18,
+			color = {0.255, 0.412, 0.882, 1},
+		},
+	)
+
+	text(ctx, {175 + 500 - 13, 178}, "x", .CENTER, .TOP, 21)
+
+	rect(
+		ctx,
 		{x = 175, y = 200, w = 500, h = 400, color = {0.255, 0.412, 0.882, 1}},
 	)
 
