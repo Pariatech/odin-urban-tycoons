@@ -1,25 +1,25 @@
 package main
 
 import "core:fmt"
+import "core:log"
 import "core:math/linalg/glsl"
 import "core:runtime"
 import "core:time"
-import "core:log"
 import "vendor:glfw"
 
-import "window"
-import "keyboard"
-import "mouse"
+import "billboard"
 import "camera"
 import "cursor"
-import "terrain"
-import "billboard"
-import "wall"
 import "floor"
-import "tools/terrain_tool"
-import "tools/floor_tool"
+import "keyboard"
+import "mouse"
+import "terrain"
 import "tools"
+import "tools/floor_tool"
+import "tools/terrain_tool"
 import "ui"
+import "wall"
+import "window"
 
 TITLE :: "My Window!"
 
@@ -40,7 +40,7 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
-    context.logger = log.create_console_logger()
+	context.logger = log.create_console_logger()
 
 	if !bool(glfw.Init()) {
 		fmt.eprintln("GLFW has failed to load.")
@@ -48,7 +48,13 @@ start :: proc() -> (ok: bool = false) {
 	}
 
 	glfw.WindowHint(glfw.SAMPLES, 4)
-	window.handle = glfw.CreateWindow(window.WIDTH, window.HEIGHT, TITLE, nil, nil)
+	window.handle = glfw.CreateWindow(
+		window.WIDTH,
+		window.HEIGHT,
+		TITLE,
+		nil,
+		nil,
+	)
 
 	defer glfw.DestroyWindow(window.handle)
 	defer glfw.Terminate()
@@ -69,16 +75,16 @@ start :: proc() -> (ok: bool = false) {
 	wall.init_wall_renderer() or_return
 
 	keyboard.init()
-    mouse.init()
+	mouse.init()
 	cursor.init()
 
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 	init_world()
 
-    ui.init(&ui_ctx) or_return
+	ui.init(&ui_ctx) or_return
 
-    floor_tool.init()
+	floor_tool.init()
 	terrain_tool.init()
 
 	should_close := false
@@ -105,16 +111,26 @@ start :: proc() -> (ok: bool = false) {
 
 
 		begin_draw()
-		camera.update(delta_time, world_update_after_rotation)
-        world_update()
-        floor.update()
 
-        tools.update(delta_time)
+		floor.update()
+		ui.update(&ui_ctx)
+
+		if keyboard.is_key_press(.Key_Q) {
+			camera.rotate_counter_clockwise()
+			world_update_after_rotation(.Counter_Clockwise)
+		} else if keyboard.is_key_press(.Key_E) {
+			camera.rotate_clockwise()
+			world_update_after_rotation(.Clockwise)
+		}
+		camera.update(delta_time)
+
+		world_update()
+
+		tools.update(delta_time)
 
 		draw_world()
 
-        ui.update(&ui_ctx)
-        ui.draw(&ui_ctx)
+		ui.draw(&ui_ctx)
 
 		end_draw()
 
@@ -124,7 +140,7 @@ start :: proc() -> (ok: bool = false) {
 			keyboard.is_key_down(.Key_Escape)
 
 		keyboard.update()
-        mouse.update()
+		mouse.update()
 		cursor.update()
 
 		frames += 1

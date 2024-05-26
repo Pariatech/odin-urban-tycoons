@@ -13,14 +13,19 @@ FLOOR_OFFSET :: 0.0004
 previous_floor: i32
 floor: i32
 
-update :: proc() {
+move_up :: proc() {
 	previous_floor = floor
-	if keyboard.is_key_press(.Key_Page_Up) {
-		floor = min(floor + 1, constants.WORLD_HEIGHT - 1)
-	} else if keyboard.is_key_press(.Key_Page_Down) {
-		floor = max(floor - 1, 0)
-	}
+	floor = min(floor + 1, constants.WORLD_HEIGHT - 1)
+    update_markers()
+}
 
+move_down :: proc() {
+	previous_floor = floor
+	floor = max(floor - 1, 0)
+    update_markers()
+}
+
+update_markers :: proc() {
 	if previous_floor != floor {
 		if previous_floor > 0 {
 			for x in 0 ..< constants.WORLD_CHUNK_WIDTH {
@@ -63,4 +68,15 @@ update :: proc() {
 			}
 		}
 	}
+}
+
+update :: proc() {
+	previous_floor = floor
+	if keyboard.is_key_press(.Key_Page_Up) {
+        move_up()
+	} else if keyboard.is_key_press(.Key_Page_Down) {
+        move_down()
+	}
+    
+    update_markers()
 }

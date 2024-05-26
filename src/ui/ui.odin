@@ -6,6 +6,7 @@ import "core:math/linalg/glsl"
 import gl "vendor:OpenGL"
 
 import "../window"
+import "../floor"
 
 MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/info.png",
@@ -17,6 +18,8 @@ MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/wall.png",
 	"resources/icons/floor.png",
 }
+
+ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
 
 Menu_Icon :: enum (int) {
 	Info,
@@ -43,6 +46,7 @@ Context :: struct {
 	icon_renderer:           Icon_Renderer,
 	draw_calls:              [dynamic]Draw_Call,
 	menu_icon_texture_array: u32,
+	help_window_opened:      bool,
 }
 
 Uniform_Object :: struct {
@@ -82,80 +86,40 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 	return {pos.x / window.size.x * 2 - 1, -(pos.y / window.size.y * 2 - 1)}
 }
 
+handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
+	switch item {
+	case .Info:
+		help_window_opened = true
+	case .Floor_Up:
+        floor.move_up()
+	case .Floor_Down:
+        floor.move_down()
+	case .Camera_Rotate_Left:
+	case .Camera_Rotate_Right:
+	case .Landscape:
+	case .Wall:
+	case .Floor:
+	}
+}
+
 update :: proc(using ctx: ^Context) {
 	update_text_draws(&text_renderer)
 	clear(&draw_calls)
 
-	rect(
-		ctx,
-		{x = 175, y = 175, w = 500, h = 26, color = {0.0, 0.251, 0.502, 1}},
-	)
-
-	text(ctx, {175 + 500 / 2, 180}, "Help", .CENTER, .TOP, 16)
-
-	rect(
-		ctx,
-		 {
-			x = 175 + 500 - 22,
-			y = 179,
-			w = 18,
-			h = 18,
-			color = {0.255, 0.412, 0.882, 1},
-		},
-	)
-
-	text(ctx, {175 + 500 - 13, 178}, "x", .CENTER, .TOP, 21)
-
-	rect(
-		ctx,
-		{x = 175, y = 200, w = 500, h = 400, color = {0.255, 0.412, 0.882, 1}},
-	)
-
-	text(
-		ctx,
-		{185, 210},
-		`---- Camera ----
-W,A,S,D:      Move camera
-Q,E:          Rotate camera
-Mouse Scroll: Zoom
-
----- Terrain Tool [T] ----
-Only work on grass tiles
-
-Left Click:              Raise land
-Right Click:             Lower land
-+:                       Increase brush size
--:                       Reduce brush size
-Shift +:                 Increase brush strength
-Shift -:                 Reduce brush strength
-Ctrl Click:              Smooth terrain
-Shift Click & Drag:      Level terrain
-Ctrl Shift Click & Drag: Flatten terrain
-
----- Wall Tool [G] ----
-Left Click & Drag:              Place Wall
-Shift Left Click & Drag:        Place Wall Rectangle
-Ctrl Left Click & Drag:         Remove Wall
-Ctrl Shift Left Click & Drag:   Remove Wall Rectangle
-`,
-		ah = .LEFT,
-		av = .TOP,
-		size = 18,
-		clip_start = {185, 210},
-		clip_end = {175 + 500 - 10, 200 + 400 - 10},
-	)
+	if help_window_opened {
+		help_window(ctx)
+	}
 
 	for ic, i in Menu_Icon {
-		icon(
-			ctx,
-			 {
-				texture_array = menu_icon_texture_array,
-				pos = {f32(i * 31) - 3, window.size.y - 29},
-				size = {32, 32},
-				color = {0.255, 0.412, 0.882, 1},
-				texture = int(ic),
-			},
-		)
+		if icon_button(
+			   ctx,
+			   {f32(i * 31) - 3, window.size.y - 29},
+			   {32, 32},
+			   menu_icon_texture_array,
+			   int(ic),
+		   ) {
+			handle_menu_item_clicked(ctx, ic)
+		}
 	}
 }
 

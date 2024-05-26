@@ -155,10 +155,9 @@ draw_icon :: proc(using ctx: ^Context, using icon: Icon) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
+	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
-
-	gl.ActiveTexture(gl.TEXTURE0)
 
 	vertices := ICON_QUAD_VERTICES
 

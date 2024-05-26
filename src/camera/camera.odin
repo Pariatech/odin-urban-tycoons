@@ -5,9 +5,9 @@ import "core:math/linalg"
 import "core:math/linalg/glsl"
 import "vendor:glfw"
 
-import "../window"
 import "../keyboard"
 import "../utils"
+import "../window"
 
 SPEED :: 8.0
 ZOOM_SPEED :: 0.05
@@ -48,11 +48,23 @@ Rotation :: enum {
 }
 
 Rotated :: enum {
-    Clockwise,
-    Counter_Clockwise,
+	Clockwise,
+	Counter_Clockwise,
 }
 
-update :: proc(delta_time: f64, on_rotated: proc(Rotated)) {
+rotate_counter_clockwise :: proc() {
+	translate *= glsl.vec3{-1, 1, 1}
+	translate.zx = translate.xz
+	rotation = Rotation((int(rotation) + 3) % 4)
+}
+
+rotate_clockwise :: proc() {
+	translate *= glsl.vec3{1, 1, -1}
+	translate.zx = translate.xz
+	rotation = Rotation((int(rotation) + 1) % 4)
+}
+
+update :: proc(delta_time: f64) {
 	zoom -= scroll.y * ZOOM_SPEED
 	zoom = math.clamp(zoom, ZOOM_MIN, ZOOM_MAX)
 
@@ -62,18 +74,6 @@ update :: proc(delta_time: f64, on_rotated: proc(Rotated)) {
 		f32(SPEED * delta_time) * (zoom + 1),
 		0,
 		f32(SPEED * delta_time) * (zoom + 1),
-	}
-
-	if keyboard.is_key_press(.Key_Q) {
-		translate *= glsl.vec3{-1, 1, 1}
-		translate.zx = translate.xz
-		rotation = Rotation((int(rotation) + 3) % 4)
-        on_rotated(.Counter_Clockwise)
-	} else if keyboard.is_key_press(.Key_E) {
-		translate *= glsl.vec3{1, 1, -1}
-		translate.zx = translate.xz
-		rotation = Rotation((int(rotation) + 1) % 4)
-        on_rotated(.Clockwise)
 	}
 
 	movement *= translate / distance
@@ -90,11 +90,7 @@ update :: proc(delta_time: f64, on_rotated: proc(Rotated)) {
 		position += glsl.vec3{-movement.z, 0, movement.x}
 	}
 
-	view = glsl.mat4LookAt(
-		position + translate,
-		position,
-		{0, 1, 0},
-	)
+	view = glsl.mat4LookAt(position + translate, position, {0, 1, 0})
 	aspect_ratio := f32(height) / f32(width)
 	scale := f32(width) / (176.775 / zoom)
 
@@ -103,17 +99,10 @@ update :: proc(delta_time: f64, on_rotated: proc(Rotated)) {
 	bottom = -aspect_ratio * scale
 	top = aspect_ratio * scale
 
-	proj = glsl.mat4Ortho3d(
-		left,
-		right,
-	 	bottom,
-		top,
-		0.1,
-		100.0,
-	)
+	proj = glsl.mat4Ortho3d(left, right, bottom, top, 0.1, 100.0)
 
 	view_proj = proj * view
-    inverse_view_proj = linalg.inverse(view_proj)
+	inverse_view_proj = linalg.inverse(view_proj)
 }
 
 get_view_corner :: proc(screen_point: glsl.vec2) -> glsl.vec2 {
@@ -143,11 +132,11 @@ get_aabb :: proc() -> utils.Rectangle {
 		height := top_left.y - camera.z
 
 		aabb = utils.Rectangle {
-				x = i32(camera.x),
-				y = i32(camera.z),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
+			x = i32(camera.x),
+			y = i32(camera.z),
+			w = i32(math.ceil(width)),
+			h = i32(math.ceil(height)),
+		}
 	case .South_East:
 		camera.x = bottom_right.x
 		camera.z = bottom_left.y
@@ -155,11 +144,11 @@ get_aabb :: proc() -> utils.Rectangle {
 		height := top_right.y - camera.z
 
 		aabb = utils.Rectangle {
-				x = i32(top_left.x),
-				y = i32(camera.z),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
+			x = i32(top_left.x),
+			y = i32(camera.z),
+			w = i32(math.ceil(width)),
+			h = i32(math.ceil(height)),
+		}
 	case .North_East:
 		camera.x = bottom_left.x
 		camera.z = bottom_right.y
@@ -167,11 +156,11 @@ get_aabb :: proc() -> utils.Rectangle {
 		height := camera.z - top_left.y
 
 		aabb = utils.Rectangle {
-				x = i32(top_right.x),
-				y = i32(top_left.y),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
+			x = i32(top_right.x),
+			y = i32(top_left.y),
+			w = i32(math.ceil(width)),
+			h = i32(math.ceil(height)),
+		}
 	case .North_West:
 		camera.x = bottom_right.x
 		camera.z = bottom_left.y
@@ -179,11 +168,11 @@ get_aabb :: proc() -> utils.Rectangle {
 		height := camera.z - top_right.y
 
 		aabb = utils.Rectangle {
-				x = i32(camera.x),
-				y = i32(top_right.y),
-				w = i32(math.ceil(width)),
-				h = i32(math.ceil(height)),
-			}
+			x = i32(camera.x),
+			y = i32(top_right.y),
+			w = i32(math.ceil(width)),
+			h = i32(math.ceil(height)),
+		}
 	}
 
 	return aabb
