@@ -55,12 +55,13 @@ Ctrl Left Click & Drag:         Remove Wall
 Ctrl Shift Left Click & Drag:   Remove Wall Rectangle
 
 ---- Floor Tool [F] ----
-Left Click & Drag:              Place
-Ctrl Left Click & Drag:         Remove
-Shift Left Click:               Fill/Replace
+Left Click & Drag:          Place
+Ctrl Left Click & Drag:     Remove
+Shift Left Click:           Fill Place
+Ctrl Shift Left Click:      Fill Remove
 
 ---- Triangle Floor Tool [Ctrl F] ----
-Left Click:                     Place
+Left Click: Place
 `,
 		ah = .LEFT,
 		av = .TOP,
