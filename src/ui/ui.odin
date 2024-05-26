@@ -5,9 +5,10 @@ import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
-import "../floor"
-import "../window"
 import "../camera"
+import "../floor"
+import "../tools"
+import "../window"
 import "../world"
 
 MENU_ICON_TEXTURES :: []cstring {
@@ -103,8 +104,11 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 		camera.rotate_counter_clockwise()
 		world.update_after_rotation(.Counter_Clockwise)
 	case .Landscape:
+		tools.open_land_tool()
 	case .Wall:
+		tools.open_wall_tool()
 	case .Floor:
+		tools.open_floor_tool()
 	}
 }
 
