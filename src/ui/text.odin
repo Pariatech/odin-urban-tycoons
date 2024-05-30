@@ -179,6 +179,63 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	return true
 }
 
+text_bounds :: proc(
+	using ctx: ^Context,
+	position: glsl.vec2,
+	str: string,
+	ah: fontstash.AlignHorizontal = .LEFT,
+	av: fontstash.AlignVertical = .BASELINE,
+	size: f32 = 32,
+) -> (
+	min: glsl.vec2,
+	max: glsl.vec2,
+) {
+	using text_renderer
+
+	lines := strings.split_lines(str)
+	defer delete(lines)
+
+	min.x = position.x
+	min.y = position.y
+
+	max.x = position.x
+	max.y = position.y
+
+	fontstash.BeginState(&fs)
+	fontstash.SetFont(&fs, id)
+	fontstash.SetSize(&fs, size)
+	fontstash.SetAlignVertical(&fs, av)
+	fontstash.SetAlignHorizontal(&fs, ah)
+	y := position.y
+	for line in lines {
+		it := fontstash.TextIterInit(&fs, position.x, y, line)
+
+		miny, maxy := fontstash.LineBounds(&fs, y)
+		y = maxy
+
+		// min.y = miny
+
+		quad: fontstash.Quad
+		for fontstash.TextIterNext(&fs, &it, &quad) {
+			if quad.x0 < min.x {
+				min.x = quad.x0
+			}
+			if quad.x1 > max.x {
+				max.x = quad.x1
+			}
+			if quad.y0 < min.y {
+				min.y = quad.y0
+			}
+			if quad.y1 > max.y {
+				max.y = quad.y1
+			}
+		}
+	}
+	fontstash.EndState(&fs)
+
+	return
+}
+
 init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
 	draw: Text_Draw
 
@@ -317,7 +374,7 @@ text :: proc(
 		clip_end   = clip_end,
 	}
 
-    append(&draw_calls, text)
+	append(&draw_calls, text)
 }
 
 draw_text :: proc(using ctx: ^Context, text: Text) {

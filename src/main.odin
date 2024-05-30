@@ -13,6 +13,7 @@ import "cursor"
 import "floor"
 import "keyboard"
 import "mouse"
+import "renderer"
 import "terrain"
 import "tools"
 import "tools/floor_tool"
@@ -21,7 +22,6 @@ import "ui"
 import "wall"
 import "window"
 import "world"
-import "renderer"
 
 TITLE :: "My Window!"
 
@@ -68,7 +68,9 @@ start :: proc() -> (ok: bool = false) {
 	glfw.SetFramebufferSizeCallback(window.handle, framebuffer_size_callback)
 
 	glfw.MakeContextCurrent(window.handle)
-	glfw.SwapInterval(0)
+	when ODIN_DEBUG {
+		glfw.SwapInterval(0)
+	}
 
 	if (!renderer.init()) do return
 	defer renderer.deinit()

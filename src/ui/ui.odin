@@ -22,6 +22,7 @@ MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/floor.png",
 }
 
+
 ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
 
 Menu_Icon :: enum (int) {
@@ -39,17 +40,20 @@ Draw_Call :: union {
 	Text,
 	Rect,
 	Icon,
+	Scroll_Bar,
 }
 
 Context :: struct {
-	ubo:                     u32,
-	uniform_object:          Uniform_Object,
-	text_renderer:           Text_Renderer,
-	rect_renderer:           Rect_Renderer,
-	icon_renderer:           Icon_Renderer,
-	draw_calls:              [dynamic]Draw_Call,
-	menu_icon_texture_array: u32,
-	help_window_opened:      bool,
+	ubo:                      u32,
+	uniform_object:           Uniform_Object,
+	text_renderer:            Text_Renderer,
+	rect_renderer:            Rect_Renderer,
+	icon_renderer:            Icon_Renderer,
+	scroll_bar_renderer:      Scroll_Bar_Renderer,
+	draw_calls:               [dynamic]Draw_Call,
+	menu_icon_texture_array:  u32,
+	scroll_bar_texture_array: u32,
+	help_window_ctx:              Help_Window,
 }
 
 Uniform_Object :: struct {
@@ -76,10 +80,16 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_text_renderer(ctx) or_return
 	init_rect_renderer(ctx) or_return
 	init_icon_renderer(ctx) or_return
+	init_scroll_bar_renderer(ctx) or_return
 
 	init_icon_texture_array(
 		&menu_icon_texture_array,
 		MENU_ICON_TEXTURES,
+	) or_return
+
+	init_icon_texture_array(
+		&scroll_bar_texture_array,
+		SCROLL_BAR_TEXTURES,
 	) or_return
 
 	return true
@@ -92,7 +102,7 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	switch item {
 	case .Info:
-		help_window_opened = !help_window_opened
+		help_window_ctx.opened = !help_window_ctx.opened
 	case .Floor_Up:
 		floor.move_up()
 	case .Floor_Down:
@@ -116,7 +126,7 @@ update :: proc(using ctx: ^Context) {
 	update_text_draws(&text_renderer)
 	clear(&draw_calls)
 
-	if help_window_opened {
+	if help_window_ctx.opened {
 		help_window(ctx)
 	}
 
@@ -158,6 +168,8 @@ draw :: proc(using ctx: ^Context) {
 			draw_rect(ctx, dc)
 		case Icon:
 			draw_icon(ctx, dc)
+		case Scroll_Bar:
+			draw_scroll_bar(ctx, dc)
 		}
 	}
 

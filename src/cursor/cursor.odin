@@ -12,6 +12,7 @@ import "../terrain"
 import "../tile"
 import "../window"
 
+previous_pos: glsl.vec2
 pos: glsl.vec2
 moved: bool
 ray: Ray
@@ -67,6 +68,7 @@ init :: proc() {
 update :: proc() {
 	camera.scroll = {0, 0}
 	update_ray()
+    previous_pos = pos
 }
 
 ray_intersect_plane :: proc(
