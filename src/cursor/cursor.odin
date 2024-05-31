@@ -51,22 +51,11 @@ update_ray :: proc() {
 	ray.direction = glsl.normalize(ray.direction)
 }
 
-scroll_callback :: proc "c" (
-	window: glfw.WindowHandle,
-	xoffset, yoffset: f64,
-) {
-	context = runtime.default_context()
-	camera.scroll.x = f32(xoffset)
-	camera.scroll.y = f32(yoffset)
-}
-
 init :: proc() {
 	glfw.SetCursorPosCallback(window.handle, pos_callback)
-	glfw.SetScrollCallback(window.handle, scroll_callback)
 }
 
 update :: proc() {
-	camera.scroll = {0, 0}
 	update_ray()
     previous_pos = pos
 }

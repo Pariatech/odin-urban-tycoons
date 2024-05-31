@@ -1,6 +1,8 @@
 package mouse
 
+import "core:math/linalg/glsl"
 import "core:runtime"
+
 import "vendor:glfw"
 
 import "../window"
@@ -30,6 +32,30 @@ buttons: [Button]Button_State
 @(private)
 buttons_captured: [Button]bool
 
+@(private)
+scroll: glsl.vec2
+
+get_scroll :: proc() -> glsl.vec2 {
+    return scroll
+}
+
+vertical_scroll :: proc() -> f32 {
+    return scroll.y
+}
+
+capture_vertical_scroll :: proc() {
+    scroll.y = 0
+}
+
+scroll_callback :: proc "c" (
+	window: glfw.WindowHandle,
+	xoffset, yoffset: f64,
+) {
+	context = runtime.default_context()
+	scroll.x = f32(xoffset)
+	scroll.y = f32(yoffset)
+}
+
 on_button :: proc "c" (
 	window: glfw.WindowHandle,
 	button: i32,
@@ -49,9 +75,12 @@ on_button :: proc "c" (
 
 init :: proc() {
 	glfw.SetMouseButtonCallback(window.handle, on_button)
+	glfw.SetScrollCallback(window.handle, scroll_callback)
 }
 
 update :: proc() {
+	scroll = {0, 0}
+
 	for &capture in buttons_captured {
 		capture = false
 	}

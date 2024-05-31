@@ -5,6 +5,7 @@ import "core:math/linalg/glsl"
 
 import "../camera"
 import "../cursor"
+import "../mouse"
 
 HELP_TEXT :: `---- Camera ----
 W,A,S,D:      Move camera
@@ -98,9 +99,9 @@ help_window :: proc(using ctx: ^Context) {
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
-		scroll_bar_offset -= (camera.scroll.y / percent) * 4
+		scroll_bar_offset -= (mouse.vertical_scroll() / percent) * 4
 		scroll_bar_offset = clamp(scroll_bar_offset, 0, size.y * (1 - percent))
-        camera.scroll.y = 0
+        mouse.capture_vertical_scroll()
 	}
 
 	text(

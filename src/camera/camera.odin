@@ -8,6 +8,7 @@ import "vendor:glfw"
 import "../keyboard"
 import "../utils"
 import "../window"
+import "../mouse"
 
 SPEED :: 8.0
 ZOOM_SPEED :: 0.05
@@ -34,8 +35,6 @@ left: f32
 right: f32
 top: f32
 bottom: f32
-
-scroll: glsl.vec2
 
 visible_chunks_start: glsl.ivec2
 visible_chunks_end: glsl.ivec2
@@ -65,7 +64,7 @@ rotate_clockwise :: proc() {
 }
 
 update :: proc(delta_time: f64) {
-	zoom -= scroll.y * ZOOM_SPEED
+	zoom -= mouse.get_scroll().y * ZOOM_SPEED
 	zoom = math.clamp(zoom, ZOOM_MIN, ZOOM_MAX)
 
 	width, height := glfw.GetWindowSize(window.handle)
