@@ -85,13 +85,11 @@ help_window :: proc(using ctx: ^Context) {
 		size = 18,
 	)
 
-	icon(ctx, {})
-
 	// log.info("min:", min, "max:", max)
 
 	text(
 		ctx,
-		{185, 210},
+		{185, 210 - scroll_bar_offset},
 		HELP_TEXT,
 		ah = .LEFT,
 		av = .TOP,
