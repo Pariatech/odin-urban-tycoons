@@ -1,6 +1,7 @@
 package floor_tool
 
 import "core:fmt"
+import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
 
@@ -19,6 +20,7 @@ drag_start: glsl.ivec3
 drag_start_side: tile.Tile_Triangle_Side
 active_texture: tile.Texture = .Wood
 triangle_mode: bool = false
+placing: bool = false
 
 revert_tile :: proc(position: glsl.ivec3) {
 	previous_tile := previous_tiles[position]
@@ -176,6 +178,7 @@ update :: proc() {
 	}
 
 	if keyboard.is_key_down(.Key_Left_Shift) && mouse.is_button_press(.Left) {
+        placing = true
 		pos := glsl.ivec3{position.x, floor.floor, position.y}
 		revert_tile(pos)
 		if delete_mode {
@@ -189,9 +192,10 @@ update :: proc() {
 		}
 		set_tile(pos, delete_mode)
 	} else if mouse.is_button_press(.Left) {
+        placing = true
 		drag_start = {position.x, floor.floor, position.y}
 		drag_start_side = side
-	} else if mouse.is_button_down(.Left) {
+	} else if placing && mouse.is_button_down(.Left) {
 		if reset {
 			if triangle_mode {
 				set_tile({position.x, floor.floor, position.y}, delete_mode)
@@ -201,7 +205,8 @@ update :: proc() {
 				set_tiles(delete_mode)
 			}
 		}
-	} else if mouse.is_button_release(.Left) {
+	} else if placing && mouse.is_button_release(.Left) {
+        placing = false
 		clear(&previous_tiles)
 		copy_tile({position.x, floor.floor, position.y})
 	} else {

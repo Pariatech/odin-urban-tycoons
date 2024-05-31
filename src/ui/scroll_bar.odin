@@ -125,7 +125,7 @@ scroll_bar :: proc(
 	   cursor.pos.y >= pos.y + offset^ &&
 	   cursor.pos.y < pos.y + offset^ + size.y * percent {
 		dragging^ = true
-		mouse.buttons[.Left] = .Up
+        mouse.capture(.Left)
 	} else if dragging^ && mouse.is_button_release(.Left) {
 		dragging^ = false
 	} else if mouse.is_button_down(.Left) &&
@@ -136,7 +136,7 @@ scroll_bar :: proc(
 		offset^ = cursor.pos.y - pos.y
 		offset^ = clamp(offset^, 0, size.y * (1 - percent))
 		dragging^ = true
-		mouse.buttons[.Left] = .Up
+        mouse.capture(.Left)
 	} 
  //    else if cursor.pos.x >= pos.x &&
 	//    cursor.pos.x < pos.x + size.x &&

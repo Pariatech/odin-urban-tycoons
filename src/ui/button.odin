@@ -33,7 +33,7 @@ button :: proc(
 		   cursor.pos.x < pos.x + size.x &&
 		   cursor.pos.y >= pos.y &&
 		   cursor.pos.y < pos.y + size.y {
-			mouse.buttons[.Left] = .Up
+            mouse.capture(.Left)
 
 			return true
 		}
@@ -68,7 +68,7 @@ icon_button :: proc(
 		   cursor.pos.x < pos.x + size.x &&
 		   cursor.pos.y >= pos.y &&
 		   cursor.pos.y < pos.y + size.y {
-			mouse.buttons[.Left] = .Up
+            mouse.capture(.Left)
 
 			return true
 		}

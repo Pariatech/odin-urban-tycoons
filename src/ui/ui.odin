@@ -53,7 +53,8 @@ Context :: struct {
 	draw_calls:               [dynamic]Draw_Call,
 	menu_icon_texture_array:  u32,
 	scroll_bar_texture_array: u32,
-	help_window_ctx:              Help_Window,
+	help_window_ctx:          Help_Window,
+	floor_panel_ctx:          Floor_Panel,
 }
 
 Uniform_Object :: struct {
@@ -100,9 +101,11 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 }
 
 handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
+	help_window_ctx.opened = false
+    floor_panel_ctx.opened = false
 	switch item {
 	case .Info:
-		help_window_ctx.opened = !help_window_ctx.opened
+		help_window_ctx.opened = true
 	case .Floor_Up:
 		floor.move_up()
 	case .Floor_Down:
@@ -118,6 +121,7 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Wall:
 		tools.open_wall_tool()
 	case .Floor:
+        floor_panel_ctx.opened = true
 		tools.open_floor_tool()
 	}
 }
@@ -129,6 +133,10 @@ update :: proc(using ctx: ^Context) {
 	if help_window_ctx.opened {
 		help_window(ctx)
 	}
+
+    if floor_panel_ctx.opened {
+        floor_panel(ctx)
+    }
 
 	for ic, i in Menu_Icon {
 		if icon_button(

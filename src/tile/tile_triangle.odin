@@ -17,8 +17,8 @@ Vertex :: struct {
 
 Texture :: enum (u16) {
 	Floor_Marker,
-	Wood,
 	Grass,
+	Wood,
 	Gravel,
 	Asphalt,
 	Asphalt_Vertical_Line,

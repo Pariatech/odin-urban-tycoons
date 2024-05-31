@@ -24,7 +24,11 @@ Button :: enum {
 	Eight,
 }
 
+@(private)
 buttons: [Button]Button_State
+
+@(private)
+buttons_captured: [Button]bool
 
 on_button :: proc "c" (
 	window: glfw.WindowHandle,
@@ -48,6 +52,10 @@ init :: proc() {
 }
 
 update :: proc() {
+	for &capture in buttons_captured {
+		capture = false
+	}
+
 	for &state in buttons {
 		switch state {
 		case .Press, .Repeat, .Down:
@@ -59,21 +67,26 @@ update :: proc() {
 }
 
 is_button_press :: proc(button: Button) -> bool {
-	return buttons[button] == .Press
+	return !buttons_captured[button] && buttons[button] == .Press
 }
 
 is_button_down :: proc(button: Button) -> bool {
 	return(
-		buttons[button] == .Press ||
-		buttons[button] == .Down ||
-		buttons[button] == .Repeat \
+		!buttons_captured[button] &&
+		(buttons[button] == .Press ||
+				buttons[button] == .Down ||
+				buttons[button] == .Repeat) \
 	)
 }
 
 is_button_release :: proc(button: Button) -> bool {
-	return buttons[button] == .Release
+	return !buttons_captured[button] && buttons[button] == .Release
 }
 
 is_button_up :: proc(button: Button) -> bool {
 	return buttons[button] == .Release || buttons[button] == .Up
+}
+
+capture :: proc(button: Button) {
+	buttons_captured[button] = true
 }
