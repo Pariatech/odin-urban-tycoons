@@ -72,7 +72,6 @@ help_window :: proc(using ctx: ^Context) {
 		   {0.255, 0.412, 0.882, 1},
 		   txt_size = 26,
 	   ) {
-		log.info("button clicked!")
 		opened = false
 	}
 
@@ -92,16 +91,16 @@ help_window :: proc(using ctx: ^Context) {
 
 	// log.info("min:", min, "max:", max)
 
-    pos := glsl.vec2{175, 200}
-    size := glsl.vec2{500, 400}
+	pos := glsl.vec2{175, 200}
+	size := glsl.vec2{500, 400}
 	percent := 400 / (max.y - min.y)
-    if cursor.pos.x >= pos.x &&
+	if cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
 		scroll_bar_offset -= (mouse.vertical_scroll() / percent) * 4
 		scroll_bar_offset = clamp(scroll_bar_offset, 0, size.y * (1 - percent))
-        mouse.capture_vertical_scroll()
+		mouse.capture_vertical_scroll()
 	}
 
 	text(
