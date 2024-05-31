@@ -1,5 +1,7 @@
 package ui
 
+import "core:math/linalg/glsl"
+
 import "../tile"
 import "../tools/floor_tool"
 import "../window"
@@ -12,7 +14,11 @@ FLOOR_PANEL_HEIGHT :: 74
 FLOOR_PANEL_TILE_SIZE :: 32
 FLOOR_PANEL_PADDING :: 4
 
-floor_panel_body :: proc(using ctx: ^Context) {
+floor_panel_body :: proc(
+	using ctx: ^Context,
+	pos: glsl.vec2,
+	size: glsl.vec2,
+) {
 	i: int = 0
 	for tex in tile.Texture {
 		if tex == .Floor_Marker || tex == .Grass {

@@ -47,6 +47,10 @@ capture_vertical_scroll :: proc() {
 	scroll.y = 0
 }
 
+capture_scroll :: proc() {
+	scroll = {}
+}
+
 scroll_callback :: proc "c" (
 	window: glfw.WindowHandle,
 	xoffset, yoffset: f64,
@@ -118,10 +122,13 @@ is_button_up :: proc(button: Button) -> bool {
 
 capture :: proc(button: Button) {
 	buttons_captured[button] = true
+    // buttons[button] = .Up
 }
 
 capture_all :: proc() {
 	for &capture in buttons_captured {
 		capture = true
 	}
+
+    capture_scroll()
 }

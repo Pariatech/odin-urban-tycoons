@@ -101,11 +101,12 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 }
 
 handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
-	help_window_ctx.opened = false
-    floor_panel_ctx.opened = false
+	// help_window_ctx.opened = false
+    // floor_panel_ctx.opened = false
 	switch item {
 	case .Info:
-		help_window_ctx.opened = true
+		// help_window_ctx.opened = true
+        help_window_ctx.opened = !help_window_ctx.opened
 	case .Floor_Up:
 		floor.move_up()
 	case .Floor_Down:
@@ -117,8 +118,10 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 		camera.rotate_counter_clockwise()
 		world.update_after_rotation(.Counter_Clockwise)
 	case .Landscape:
+        floor_panel_ctx.opened = false
 		tools.open_land_tool()
 	case .Wall:
+        floor_panel_ctx.opened = false
 		tools.open_wall_tool()
 	case .Floor:
         floor_panel_ctx.opened = true

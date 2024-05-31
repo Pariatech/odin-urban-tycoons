@@ -328,7 +328,6 @@ init_text_draw :: proc(using ctx: ^Text_Renderer, using text: Text) {
 			vertices[4] = vertices[2]
 			vertices[5].pos = to_screen_pos({quad.x0, quad.y1})
 			vertices[5].texcoords = glsl.vec2{quad.s0, quad.t1}
-			log.info(clip_end)
 			for &v in vertices {
 				v.color = color
 				v.clip_start = clip_start

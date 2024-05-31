@@ -128,7 +128,7 @@ scroll_bar :: proc(
         mouse.capture(.Left)
 	} else if dragging^ && mouse.is_button_release(.Left) {
 		dragging^ = false
-	} else if mouse.is_button_down(.Left) &&
+	} else if !dragging^ && mouse.is_button_down(.Left) &&
 	   cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
