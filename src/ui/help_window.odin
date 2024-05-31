@@ -42,11 +42,11 @@ Ctrl Shift Left Click:      Fill Remove
 Left Click: Place
 `
 
-HELP_WINDOW_WIDTH :: 526
 HELP_WINDOW_BODY_WIDTH :: 500
 HELP_WINDOW_BODY_HEIGHT :: 400
 HELP_WINDOW_PADDING :: 10
-HELP_WINDOW_SCROLL_BAR_WIDTH :: 26
+HELP_WINDOW_SCROLL_BAR_WIDTH :: 16
+HELP_WINDOW_WIDTH :: HELP_WINDOW_BODY_WIDTH + HELP_WINDOW_SCROLL_BAR_WIDTH
 
 Help_Window :: struct {
 	opened:              bool,
@@ -70,16 +70,16 @@ help_window_header :: proc(
 		16,
 	)
 
-	if button(
-		   ctx,
-		   {pos.x + HELP_WINDOW_WIDTH - 26, pos.y},
-		   {26, 26},
-		   "x",
-		   {0.255, 0.412, 0.882, 1},
-		   txt_size = 32,
-	   ) {
-		opened = false
-	}
+	// if button(
+	// 	   ctx,
+	// 	   {pos.x + HELP_WINDOW_WIDTH - 26, pos.y},
+	// 	   {26, 26},
+	// 	   "x",
+	// 	   {0.255, 0.412, 0.882, 1},
+	// 	   txt_size = 32,
+	//    ) {
+	// 	opened = false
+	// }
 }
 
 help_window_body :: proc(
