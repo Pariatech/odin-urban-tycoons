@@ -5,6 +5,7 @@ import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
+import "../camera"
 import "../cursor"
 import "../mouse"
 import "../renderer"
@@ -136,8 +137,16 @@ scroll_bar :: proc(
 		offset^ = clamp(offset^, 0, size.y * (1 - percent))
 		dragging^ = true
 		mouse.buttons[.Left] = .Up
-	}
-
+	} 
+ //    else if cursor.pos.x >= pos.x &&
+	//    cursor.pos.x < pos.x + size.x &&
+	//    cursor.pos.y >= pos.y &&
+	//    cursor.pos.y < pos.y + size.y {
+	// 	offset^ -= (camera.scroll.y / percent) * 4
+	// 	offset^ = clamp(offset^, 0, size.y * (1 - percent))
+ //        camera.scroll.y = 0
+	// }
+	//
 	if dragging^ && cursor.previous_pos != cursor.pos {
 		offset^ += cursor.pos.y - cursor.previous_pos.y
 		offset^ = clamp(offset^, 0, size.y * (1 - percent))

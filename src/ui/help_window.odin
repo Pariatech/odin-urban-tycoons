@@ -1,6 +1,10 @@
 package ui
 
 import "core:log"
+import "core:math/linalg/glsl"
+
+import "../camera"
+import "../cursor"
 
 HELP_TEXT :: `---- Camera ----
 W,A,S,D:      Move camera
@@ -87,6 +91,18 @@ help_window :: proc(using ctx: ^Context) {
 
 	// log.info("min:", min, "max:", max)
 
+    pos := glsl.vec2{175, 200}
+    size := glsl.vec2{500, 400}
+	percent := 400 / (max.y - min.y)
+    if cursor.pos.x >= pos.x &&
+	   cursor.pos.x < pos.x + size.x &&
+	   cursor.pos.y >= pos.y &&
+	   cursor.pos.y < pos.y + size.y {
+		scroll_bar_offset -= (camera.scroll.y / percent) * 4
+		scroll_bar_offset = clamp(scroll_bar_offset, 0, size.y * (1 - percent))
+        camera.scroll.y = 0
+	}
+
 	text(
 		ctx,
 		{185, 210 - scroll_bar_offset},
@@ -98,7 +114,6 @@ help_window :: proc(using ctx: ^Context) {
 		clip_end = {175 + 500 - 10, 200 + 400 - 10},
 	)
 
-	percent := 400 / (max.y - min.y)
 	scroll_bar(
 		ctx,
 		{675, 200},
