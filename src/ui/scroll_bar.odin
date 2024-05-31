@@ -1,7 +1,7 @@
 package ui
 
-import "core:math/linalg/glsl"
 import "core:log"
+import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
@@ -120,19 +120,28 @@ scroll_bar :: proc(
 ) {
 	if mouse.is_button_press(.Left) &&
 	   cursor.pos.x >= pos.x &&
-	   cursor.pos.x < pos.x + size.x * percent &&
-	   cursor.pos.y >= pos.y &&
-	   cursor.pos.y < pos.y + size.y * percent {
+	   cursor.pos.x < pos.x + size.x &&
+	   cursor.pos.y >= pos.y + offset^ &&
+	   cursor.pos.y < pos.y + offset^ + size.y * percent {
 		dragging^ = true
-        mouse.buttons[.Left] = .Up
+		mouse.buttons[.Left] = .Up
 	} else if dragging^ && mouse.is_button_release(.Left) {
 		dragging^ = false
-    }
+	} else if mouse.is_button_down(.Left) &&
+	   cursor.pos.x >= pos.x &&
+	   cursor.pos.x < pos.x + size.x &&
+	   cursor.pos.y >= pos.y &&
+	   cursor.pos.y < pos.y + size.y {
+		offset^ = cursor.pos.y - pos.y
+		offset^ = clamp(offset^, 0, size.y * (1 - percent))
+		dragging^ = true
+		mouse.buttons[.Left] = .Up
+	}
 
 	if dragging^ && cursor.previous_pos != cursor.pos {
 		offset^ += cursor.pos.y - cursor.previous_pos.y
-        offset^ = clamp(offset^, 0, size.y * (1 - percent))
-        log.info(offset^)
+		offset^ = clamp(offset^, 0, size.y * (1 - percent))
+		log.info(offset^)
 	}
 
 	append(
