@@ -19,10 +19,14 @@ RECT_QUAD_VERTICES := [?]Rect_Vertex {
 }
 
 Rect_Vertex :: struct {
-	pos:   glsl.vec2,
-	start: glsl.vec2,
-	end:   glsl.vec2,
-	color: glsl.vec4,
+	pos:                 glsl.vec2,
+	start:               glsl.vec2,
+	end:                 glsl.vec2,
+	color:               glsl.vec4,
+	left_border_width:   f32,
+	right_border_width:  f32,
+	top_border_width:    f32,
+	bottom_border_width: f32,
 }
 
 Rect_Renderer :: struct {
@@ -33,6 +37,10 @@ Rect_Renderer :: struct {
 Rect :: struct {
 	x, y, w, h: f32,
 	color:      glsl.vec4,
+	left_border_width:   f32,
+	right_border_width:  f32,
+	top_border_width:    f32,
+	bottom_border_width: f32,
 }
 
 Rect_Draw_Call :: Rect
@@ -102,6 +110,46 @@ init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		offset_of(Rect_Vertex, color),
 	)
 
+	gl.EnableVertexAttribArray(4)
+	gl.VertexAttribPointer(
+		4,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, left_border_width),
+	)
+
+	gl.EnableVertexAttribArray(5)
+	gl.VertexAttribPointer(
+		5,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, right_border_width),
+	)
+
+	gl.EnableVertexAttribArray(6)
+	gl.VertexAttribPointer(
+		6,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, top_border_width),
+	)
+
+	gl.EnableVertexAttribArray(7)
+	gl.VertexAttribPointer(
+		7,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, bottom_border_width),
+	)
+
 	return true
 }
 
@@ -135,6 +183,10 @@ draw_rect :: proc(using ctx: ^Context, rect: Rect) {
 		// v.start = to_screen_pos({rect.x, rect.y})
 		// v.end = to_screen_pos({rect.x + rect.w, rect.y + rect.h})
 		v.color = rect.color
+        v.left_border_width = rect.left_border_width
+        v.right_border_width = rect.right_border_width
+        v.top_border_width = rect.top_border_width
+        v.bottom_border_width = rect.bottom_border_width
 	}
 
 	gl.BufferSubData(
@@ -147,6 +199,5 @@ draw_rect :: proc(using ctx: ^Context, rect: Rect) {
 }
 
 rect :: proc(using ctx: ^Context, rect: Rect) {
-    append(&draw_calls, rect)
+	append(&draw_calls, rect)
 }
-

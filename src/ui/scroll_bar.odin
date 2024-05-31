@@ -105,6 +105,46 @@ init_scroll_bar_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		offset_of(Icon_Vertex, texcoord),
 	)
 
+	gl.EnableVertexAttribArray(5)
+	gl.VertexAttribPointer(
+		5,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, left_border_width),
+	)
+
+	gl.EnableVertexAttribArray(6)
+	gl.VertexAttribPointer(
+		6,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, right_border_width),
+	)
+
+	gl.EnableVertexAttribArray(7)
+	gl.VertexAttribPointer(
+		7,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, top_border_width),
+	)
+
+	gl.EnableVertexAttribArray(8)
+	gl.VertexAttribPointer(
+		8,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, bottom_border_width),
+	)
+
 	init_icon_texture_array(&texture_array, SCROLL_BAR_TEXTURES) or_return
 
 	return true
@@ -201,6 +241,10 @@ draw_scroll_bar :: proc(using ctx: ^Context, using scroll_bar: Scroll_Bar) {
 		v.color = color
 		v.texcoord.z = f32(Scroll_Bar_Texture.Background)
 		v.texcoord.y *= scale
+        v.left_border_width = BORDER_WIDTH
+        v.right_border_width = BORDER_WIDTH
+        v.top_border_width = BORDER_WIDTH
+        v.bottom_border_width = BORDER_WIDTH
 	}
 
 	gl.BufferSubData(

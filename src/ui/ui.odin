@@ -25,6 +25,8 @@ MENU_ICON_TEXTURES :: []cstring {
 
 ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
 
+BORDER_WIDTH :: 1
+
 Menu_Icon :: enum (int) {
 	Info,
 	Floor_Up,
@@ -102,11 +104,11 @@ to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 
 handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	// help_window_ctx.opened = false
-    // floor_panel_ctx.opened = false
+	// floor_panel_ctx.opened = false
 	switch item {
 	case .Info:
 		// help_window_ctx.opened = true
-        help_window_ctx.opened = !help_window_ctx.opened
+		help_window_ctx.opened = !help_window_ctx.opened
 	case .Floor_Up:
 		floor.move_up()
 	case .Floor_Down:
@@ -118,14 +120,34 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 		camera.rotate_counter_clockwise()
 		world.update_after_rotation(.Counter_Clockwise)
 	case .Landscape:
-        floor_panel_ctx.opened = false
+		floor_panel_ctx.opened = false
 		tools.open_land_tool()
 	case .Wall:
-        floor_panel_ctx.opened = false
+		floor_panel_ctx.opened = false
 		tools.open_wall_tool()
 	case .Floor:
-        floor_panel_ctx.opened = true
+		floor_panel_ctx.opened = true
 		tools.open_floor_tool()
+	}
+}
+
+menu :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
+	for ic, i in Menu_Icon {
+		left_border_width: f32 = 0
+        if i > 0 {
+            left_border_width = BORDER_WIDTH
+        }
+		if icon_button(
+			   ctx,
+			   {f32(i * 31) + pos.x, pos.y},
+			   {32, 32},
+			   menu_icon_texture_array,
+			   int(ic),
+			   left_border_width = 0,
+			   bottom_border_width = 0,
+		   ) {
+			handle_menu_item_clicked(ctx, ic)
+		}
 	}
 }
 
@@ -137,21 +159,16 @@ update :: proc(using ctx: ^Context) {
 		help_window(ctx)
 	}
 
-    if floor_panel_ctx.opened {
-        floor_panel(ctx)
-    }
-
-	for ic, i in Menu_Icon {
-		if icon_button(
-			   ctx,
-			   {f32(i * 31) - 3, window.size.y - 29},
-			   {32, 32},
-			   menu_icon_texture_array,
-			   int(ic),
-		   ) {
-			handle_menu_item_clicked(ctx, ic)
-		}
+	if floor_panel_ctx.opened {
+		floor_panel(ctx)
 	}
+
+	container(
+		ctx,
+		pos = {0, window.size.y - 32},
+		size = {len(Menu_Icon) * 31, 32},
+		body = menu,
+	)
 }
 
 draw :: proc(using ctx: ^Context) {

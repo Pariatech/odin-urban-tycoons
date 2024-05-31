@@ -33,7 +33,7 @@ button :: proc(
 		   cursor.pos.x < pos.x + size.x &&
 		   cursor.pos.y >= pos.y &&
 		   cursor.pos.y < pos.y + size.y {
-            mouse.capture(.Left)
+			mouse.capture(.Left)
 
 			return true
 		}
@@ -49,6 +49,10 @@ icon_button :: proc(
 	texture_array: u32,
 	texture: int,
 	color: glsl.vec4 = ROYAL_BLUE,
+	left_border_width: f32 = BORDER_WIDTH,
+	right_border_width: f32 = BORDER_WIDTH,
+	top_border_width: f32 = BORDER_WIDTH,
+	bottom_border_width: f32 = BORDER_WIDTH,
 ) -> (
 	clicked: bool = false,
 ) {
@@ -60,6 +64,10 @@ icon_button :: proc(
 			color = color,
 			texture_array = texture_array,
 			texture = texture,
+			left_border_width = left_border_width,
+			right_border_width = right_border_width,
+			top_border_width = top_border_width,
+			bottom_border_width = bottom_border_width,
 		},
 	)
 
@@ -68,7 +76,7 @@ icon_button :: proc(
 		   cursor.pos.x < pos.x + size.x &&
 		   cursor.pos.y >= pos.y &&
 		   cursor.pos.y < pos.y + size.y {
-            mouse.capture(.Left)
+			mouse.capture(.Left)
 
 			return true
 		}

@@ -21,11 +21,15 @@ ICON_QUAD_VERTICES := [?]Icon_Vertex {
 }
 
 Icon_Vertex :: struct {
-	pos:      glsl.vec2,
-	start:    glsl.vec2,
-	end:      glsl.vec2,
-	color:    glsl.vec4,
-	texcoord: glsl.vec3,
+	pos:                 glsl.vec2,
+	start:               glsl.vec2,
+	end:                 glsl.vec2,
+	color:               glsl.vec4,
+	texcoord:            glsl.vec3,
+	left_border_width:   f32,
+	right_border_width:  f32,
+	top_border_width:    f32,
+	bottom_border_width: f32,
 }
 
 Icon_Renderer :: struct {
@@ -35,17 +39,21 @@ Icon_Renderer :: struct {
 }
 
 Icon :: struct {
-	pos:           glsl.vec2,
-	size:          glsl.vec2,
-	color:         glsl.vec4,
-	texture_array: u32,
-	texture:       int,
+	pos:                 glsl.vec2,
+	size:                glsl.vec2,
+	color:               glsl.vec4,
+	texture_array:       u32,
+	texture:             int,
+	left_border_width:   f32,
+	right_border_width:  f32,
+	top_border_width:    f32,
+	bottom_border_width: f32,
 }
 
 Icon_Draw_Call :: Icon
 
 init_icon_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
-    using icon_renderer
+	using icon_renderer
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 	defer gl.BindVertexArray(0)
@@ -118,10 +126,55 @@ init_icon_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		offset_of(Icon_Vertex, texcoord),
 	)
 
+	gl.EnableVertexAttribArray(5)
+	gl.VertexAttribPointer(
+		5,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, left_border_width),
+	)
+
+	gl.EnableVertexAttribArray(6)
+	gl.VertexAttribPointer(
+		6,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, right_border_width),
+	)
+
+	gl.EnableVertexAttribArray(7)
+	gl.VertexAttribPointer(
+		7,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, top_border_width),
+	)
+
+	gl.EnableVertexAttribArray(8)
+	gl.VertexAttribPointer(
+		8,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Icon_Vertex),
+		offset_of(Icon_Vertex, bottom_border_width),
+	)
+
 	return true
 }
 
-init_icon_texture_array :: proc(texture_array: ^u32, textures: []cstring) -> (ok: bool = true) {
+init_icon_texture_array :: proc(
+	texture_array: ^u32,
+	textures: []cstring,
+) -> (
+	ok: bool = true,
+) {
 	gl.CreateTextures(gl.TEXTURE_2D_ARRAY, 1, texture_array)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array^)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
@@ -134,7 +187,7 @@ init_icon_texture_array :: proc(texture_array: ^u32, textures: []cstring) -> (ok
 
 	load_texture_2D_array(textures) or_return
 
-    return
+	return
 }
 
 icon :: proc(using ctx: ^Context, icon: Icon) {
@@ -173,6 +226,11 @@ draw_icon :: proc(using ctx: ^Context, using icon: Icon) {
 		v.end = pos + size
 		v.color = color
 		v.texcoord.z = f32(texture)
+
+        v.left_border_width = left_border_width
+        v.right_border_width = right_border_width
+        v.top_border_width = top_border_width
+        v.bottom_border_width = bottom_border_width
 	}
 
 	gl.BufferSubData(
