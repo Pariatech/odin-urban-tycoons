@@ -45,23 +45,13 @@ HELP_WINDOW_WIDTH :: 516
 
 Help_Window :: struct {
 	opened:              bool,
+	scroll_bar_percent:  f32,
 	scroll_bar_offset:   f32,
 	scroll_bar_dragging: bool,
 }
 
-help_window :: proc(using ctx: ^Context) {
+help_window_header :: proc(using ctx: ^Context) {
 	using help_window_ctx
-	rect(
-		ctx,
-		 {
-			x = 175,
-			y = 175,
-			w = HELP_WINDOW_WIDTH,
-			h = 26,
-			color = {0.0, 0.251, 0.502, 1},
-		},
-	)
-
 	text(ctx, {175 + HELP_WINDOW_WIDTH / 2, 180}, "Help", .CENTER, .TOP, 16)
 
 	if button(
@@ -74,11 +64,10 @@ help_window :: proc(using ctx: ^Context) {
 	   ) {
 		opened = false
 	}
+}
 
-	rect(
-		ctx,
-		{x = 175, y = 200, w = 500, h = 400, color = {0.255, 0.412, 0.882, 1}},
-	)
+help_window_body :: proc(using ctx: ^Context) {
+	using help_window_ctx
 
 	min, max := text_bounds(
 		ctx,
@@ -93,13 +82,17 @@ help_window :: proc(using ctx: ^Context) {
 
 	pos := glsl.vec2{175, 200}
 	size := glsl.vec2{500, 400}
-	percent := 400 / (max.y - min.y)
+	scroll_bar_percent = 400 / (max.y - min.y)
 	if cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
-		scroll_bar_offset -= (mouse.vertical_scroll() / percent) * 4
-		scroll_bar_offset = clamp(scroll_bar_offset, 0, size.y * (1 - percent))
+		scroll_bar_offset -= (mouse.vertical_scroll() / scroll_bar_percent) * 4
+		scroll_bar_offset = clamp(
+			scroll_bar_offset,
+			0,
+			size.y * (1 - scroll_bar_percent),
+		)
 		mouse.capture_vertical_scroll()
 	}
 
@@ -113,12 +106,30 @@ help_window :: proc(using ctx: ^Context) {
 		clip_start = {185, 210},
 		clip_end = {175 + 500 - 10, 200 + 400 - 10},
 	)
+}
+
+help_window :: proc(using ctx: ^Context) {
+	using help_window_ctx
+	container(
+		ctx,
+		pos = {175, 175},
+		size = {HELP_WINDOW_WIDTH, 26},
+		color = {0.0, 0.251, 0.502, 1},
+		body = help_window_header,
+	)
+
+	container(
+		ctx,
+		pos = {175, 200},
+		size = {500, 400},
+		body = help_window_body,
+	)
 
 	scroll_bar(
 		ctx,
 		{675, 200},
 		{16, 400},
-		percent,
+		scroll_bar_percent,
 		&scroll_bar_offset,
 		&scroll_bar_dragging,
 	)

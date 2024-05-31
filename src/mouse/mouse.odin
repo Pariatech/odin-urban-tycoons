@@ -36,15 +36,15 @@ buttons_captured: [Button]bool
 scroll: glsl.vec2
 
 get_scroll :: proc() -> glsl.vec2 {
-    return scroll
+	return scroll
 }
 
 vertical_scroll :: proc() -> f32 {
-    return scroll.y
+	return scroll.y
 }
 
 capture_vertical_scroll :: proc() {
-    scroll.y = 0
+	scroll.y = 0
 }
 
 scroll_callback :: proc "c" (
@@ -118,4 +118,10 @@ is_button_up :: proc(button: Button) -> bool {
 
 capture :: proc(button: Button) {
 	buttons_captured[button] = true
+}
+
+capture_all :: proc() {
+	for &capture in buttons_captured {
+		capture = true
+	}
 }
