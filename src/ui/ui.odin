@@ -97,6 +97,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	) or_return
 
     init_land_panel() or_return
+    init_wall_panel() or_return
 
 	return true
 }
@@ -167,6 +168,7 @@ update :: proc(using ctx: ^Context) {
 	}
 
     land_panel(ctx)
+    wall_panel(ctx)
 
 	container(
 		ctx,
