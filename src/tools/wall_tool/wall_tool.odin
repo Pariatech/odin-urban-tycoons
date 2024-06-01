@@ -22,6 +22,16 @@ wall_tool_east_west_walls: map[glsl.ivec3]wall.Wall
 wall_tool_south_west_north_east_walls: map[glsl.ivec3]wall.Wall
 wall_tool_north_west_south_east_walls: map[glsl.ivec3]wall.Wall
 
+@(private)
+mode: Mode
+
+Mode :: enum {
+	Build,
+	Demolish,
+	Rectangle,
+	Demolish_Rectangle,
+}
+
 init :: proc() {
 	wall_tool_billboard = {
 		type = .Wall_Cursor,
@@ -36,6 +46,76 @@ init :: proc() {
 
 deinit :: proc() {
 	billboard.billboard_1x1_remove(wall_tool_billboard)
+}
+
+update :: proc() {
+	if keyboard.is_key_release(.Key_Left_Control) {
+		billboard.billboard_1x1_set(
+			wall_tool_billboard,
+			 {
+				light = {1, 1, 1},
+				texture = .Wall_Cursor,
+				depth_map = .Wall_Cursor,
+			},
+		)
+	} else if keyboard.is_key_press(.Key_Left_Control) {
+		billboard.billboard_1x1_set(
+			wall_tool_billboard,
+			 {
+				light = {1, 0, 0},
+				texture = .Wall_Cursor,
+				depth_map = .Wall_Cursor,
+			},
+		)
+	}
+
+	if keyboard.is_key_release(.Key_Left_Shift) {
+		revert_walls_rectangle()
+	} else if keyboard.is_key_press(.Key_Left_Shift) {
+		revert_walls_line()
+	}
+
+	if mode == .Rectangle ||
+	   mode == .Demolish_Rectangle ||
+	   keyboard.is_key_down(.Key_Left_Shift) {
+		update_rectangle()
+	} else {
+		update_line()
+	}
+}
+
+get_mode :: proc() -> Mode {return mode}
+
+set_mode :: proc(m: Mode) {
+	if (mode == .Demolish || mode == .Demolish_Rectangle) &&
+	   (m == .Build || m == .Rectangle) {
+		billboard.billboard_1x1_set(
+			wall_tool_billboard,
+			 {
+				light = {1, 1, 1},
+				texture = .Wall_Cursor,
+				depth_map = .Wall_Cursor,
+			},
+		)
+	} else if (mode == .Build || mode == .Rectangle) &&
+	   (m == .Demolish || m == .Demolish_Rectangle) {
+		billboard.billboard_1x1_set(
+			wall_tool_billboard,
+			 {
+				light = {1, 0, 0},
+				texture = .Wall_Cursor,
+				depth_map = .Wall_Cursor,
+			},
+		)
+	}
+
+	if mode == .Build && m == .Rectangle {
+		revert_walls_line()
+	} else if mode == .Rectangle && m == .Build {
+		revert_walls_rectangle()
+	}
+
+	mode = m
 }
 
 on_tile_intersect :: proc(intersect: glsl.vec3) {
@@ -733,7 +813,7 @@ update_line :: proc() {
 }
 
 adding_rectangle :: proc() {
-    revert_walls_rectangle()
+	revert_walls_rectangle()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
@@ -808,7 +888,7 @@ removing_rectangle :: proc() {
 }
 
 update_rectangle :: proc() {
-	if keyboard.is_key_down(.Key_Left_Control) {
+	if mode == .Demolish_Rectangle || keyboard.is_key_down(.Key_Left_Control) {
 		removing_rectangle()
 	} else {
 		adding_rectangle()
@@ -829,40 +909,6 @@ revert_walls_line :: proc() {
 			remove_east_west_wall,
 			remove_north_south_wall,
 		)
-	}
-}
-
-update :: proc() {
-	if keyboard.is_key_release(.Key_Left_Control) {
-		billboard.billboard_1x1_set(
-			wall_tool_billboard,
-			 {
-				light = {1, 1, 1},
-				texture = .Wall_Cursor,
-				depth_map = .Wall_Cursor,
-			},
-		)
-	} else if keyboard.is_key_press(.Key_Left_Control) {
-		billboard.billboard_1x1_set(
-			wall_tool_billboard,
-			 {
-				light = {1, 0, 0},
-				texture = .Wall_Cursor,
-				depth_map = .Wall_Cursor,
-			},
-		)
-	}
-
-	if keyboard.is_key_release(.Key_Left_Shift) {
-        revert_walls_rectangle()
-	} else if keyboard.is_key_press(.Key_Left_Shift) {
-        revert_walls_line()
-	}
-
-	if keyboard.is_key_down(.Key_Left_Shift) {
-		update_rectangle()
-	} else {
-		update_line()
 	}
 }
 

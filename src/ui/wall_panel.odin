@@ -30,40 +30,48 @@ init_wall_panel :: proc() -> (ok: bool = true) {
 }
 
 wall_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
+	demolish_active :=
+		wall_tool.get_mode() == .Demolish ||
+		wall_tool.get_mode() == .Demolish_Rectangle
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 4, pos.y + 4},
 		   size = {66, 66},
-		   // color = DARK_BLUE if terrain_tool.mode == .Raise else ROYAL_BLUE,
-		   color = DARK_BLUE,
+		   color = DARK_BLUE if demolish_active else ROYAL_BLUE,
 		   texture_array = wall_panel_texture_array,
-		   texture = int(Wall_Panel_Texture.Build),
+		   texture = int(Wall_Panel_Texture.Demolish),
 	   ) {
-        // terrain_tool.mode = .Raise
+		if wall_tool.get_mode() == .Build {
+			wall_tool.set_mode(.Demolish)
+		} else if wall_tool.get_mode() == .Rectangle {
+			wall_tool.set_mode(.Demolish_Rectangle)
+		} else if wall_tool.get_mode() == .Demolish {
+			wall_tool.set_mode(.Build)
+		} else if wall_tool.get_mode() == .Demolish_Rectangle {
+			wall_tool.set_mode(.Rectangle)
+		}
 	}
 
+	rectangle_active :=
+		wall_tool.get_mode() == .Rectangle ||
+		wall_tool.get_mode() == .Demolish_Rectangle
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 4 + 68, pos.y + 4},
 		   size = {66, 66},
-		   // color = DARK_BLUE if terrain_tool.mode == .Raise else ROYAL_BLUE,
-		   color = DARK_BLUE,
-		   texture_array = wall_panel_texture_array,
-		   texture = int(Wall_Panel_Texture.Demolish),
-	   ) {
-        // terrain_tool.mode = .Raise
-	}
-
-	if icon_button(
-		   ctx,
-		   pos = {pos.x + 4 + 68 * 2, pos.y + 4},
-		   size = {66, 66},
-		   // color = DARK_BLUE if terrain_tool.mode == .Raise else ROYAL_BLUE,
-		   color = DARK_BLUE,
+		   color = DARK_BLUE if rectangle_active else ROYAL_BLUE,
 		   texture_array = wall_panel_texture_array,
 		   texture = int(Wall_Panel_Texture.Rectangle),
 	   ) {
-        // terrain_tool.mode = .Raise
+		if wall_tool.get_mode() == .Rectangle {
+			wall_tool.set_mode(.Build)
+		} else if wall_tool.get_mode() == .Demolish_Rectangle {
+			wall_tool.set_mode(.Demolish)
+		} else if wall_tool.get_mode() == .Build {
+			wall_tool.set_mode(.Rectangle)
+		} else if wall_tool.get_mode() == .Demolish {
+			wall_tool.set_mode(.Demolish_Rectangle)
+		}
 	}
 }
 
