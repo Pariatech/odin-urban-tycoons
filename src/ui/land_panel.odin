@@ -9,11 +9,21 @@ import "../window"
 LAND_ICON_TEXTURES :: []cstring {
 	"resources/icons/land_brush_size.png",
 	"resources/icons/land_brush_strength.png",
+	"resources/icons/land_raise.png",
+	"resources/icons/land_lower.png",
+	"resources/icons/land_level.png",
+	"resources/icons/land_trim.png",
+	"resources/icons/land_smooth.png",
 }
 
 Land_Icon_Texture :: enum {
 	Brush_Size,
 	Brush_Strength,
+	Raise,
+	Lower,
+    Level,
+    Trim,
+    Smooth,
 }
 
 land_panel_texture_array: u32
@@ -28,6 +38,67 @@ init_land_panel :: proc() -> (ok: bool = true) {
 }
 
 land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 4, pos.y + 4},
+		   size = {32, 32},
+		   color = ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Raise),
+	   ) {
+
+	}
+
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 4, pos.y + size.y - 32 - 4},
+		   size = {32, 32},
+		   color = ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Lower),
+	   ) {
+
+	}
+
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 32 + 4 + 2, pos.y + 4},
+		   size = {32, 32},
+		   color = ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Level),
+	   ) {
+
+	}
+
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 34 + 4, pos.y + size.y - 32 - 4},
+		   size = {32, 32},
+		   color = ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Trim),
+	   ) {
+
+	}
+
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 68 + 4, pos.y + 4},
+		   size = {32, 32},
+		   color = ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Smooth),
+	   ) {
+
+	}
+}
+
+land_panel_brush_body :: proc(
+	using ctx: ^Context,
+	pos: glsl.vec2,
+	size: glsl.vec2,
+) {
 	if button(
 		   ctx,
 		   {pos.x + 2, pos.y + 4},
@@ -104,8 +175,15 @@ land_panel :: proc(using ctx: ^Context) {
 		container(
 			ctx,
 			pos = {0, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
-			size = {249, FLOOR_PANEL_HEIGHT},
+			size = {56, FLOOR_PANEL_HEIGHT},
 			left_border_width = 0,
+			body = land_panel_brush_body,
+		)
+
+		container(
+			ctx,
+			pos = {55, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
+			size = {249 - 55, FLOOR_PANEL_HEIGHT},
 			body = land_panel_body,
 		)
 	}
