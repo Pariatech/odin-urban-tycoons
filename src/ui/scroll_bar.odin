@@ -165,10 +165,11 @@ scroll_bar :: proc(
 	   cursor.pos.y >= pos.y + offset^ &&
 	   cursor.pos.y < pos.y + offset^ + size.y * percent {
 		dragging^ = true
-        mouse.capture(.Left)
+		mouse.capture(.Left)
 	} else if dragging^ && mouse.is_button_release(.Left) {
 		dragging^ = false
-	} else if !dragging^ && mouse.is_button_down(.Left) &&
+	} else if !dragging^ &&
+	   mouse.is_button_down(.Left) &&
 	   cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
@@ -176,15 +177,15 @@ scroll_bar :: proc(
 		offset^ = cursor.pos.y - pos.y
 		offset^ = clamp(offset^, 0, size.y * (1 - percent))
 		dragging^ = true
-        mouse.capture(.Left)
-	} 
- //    else if cursor.pos.x >= pos.x &&
+		mouse.capture(.Left)
+	}
+	//    else if cursor.pos.x >= pos.x &&
 	//    cursor.pos.x < pos.x + size.x &&
 	//    cursor.pos.y >= pos.y &&
 	//    cursor.pos.y < pos.y + size.y {
 	// 	offset^ -= (camera.scroll.y / percent) * 4
 	// 	offset^ = clamp(offset^, 0, size.y * (1 - percent))
- //        camera.scroll.y = 0
+	//        camera.scroll.y = 0
 	// }
 	//
 	if dragging^ && cursor.previous_pos != cursor.pos {
@@ -241,10 +242,10 @@ draw_scroll_bar :: proc(using ctx: ^Context, using scroll_bar: Scroll_Bar) {
 		v.color = color
 		v.texcoord.z = f32(Scroll_Bar_Texture.Background)
 		v.texcoord.y *= scale
-        v.left_border_width = BORDER_WIDTH
-        v.right_border_width = BORDER_WIDTH
-        v.top_border_width = BORDER_WIDTH
-        v.bottom_border_width = BORDER_WIDTH
+		v.left_border_width = BORDER_WIDTH
+		v.right_border_width = BORDER_WIDTH
+		v.top_border_width = BORDER_WIDTH
+		v.bottom_border_width = BORDER_WIDTH
 	}
 
 	gl.BufferSubData(
@@ -264,6 +265,10 @@ draw_scroll_bar :: proc(using ctx: ^Context, using scroll_bar: Scroll_Bar) {
 			w = size.x,
 			h = size.y * percent,
 			color = {0, .251, .502, 1},
+			left_border_width = BORDER_WIDTH,
+			right_border_width = BORDER_WIDTH,
+			top_border_width = BORDER_WIDTH,
+			bottom_border_width = BORDER_WIDTH,
 		},
 	)
 }
