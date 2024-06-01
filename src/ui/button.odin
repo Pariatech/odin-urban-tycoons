@@ -11,15 +11,33 @@ button :: proc(
 	pos: glsl.vec2,
 	size: glsl.vec2,
 	txt: string,
-	color: glsl.vec4,
+	color: glsl.vec4 = ROYAL_BLUE,
 	txt_size: f32 = 32,
+	left_border_width: f32 = BORDER_WIDTH,
+	right_border_width: f32 = BORDER_WIDTH,
+	top_border_width: f32 = BORDER_WIDTH,
+	bottom_border_width: f32 = BORDER_WIDTH,
+	padding_top: f32 = 0,
 ) -> (
 	clicked: bool = false,
 ) {
-	rect(ctx, {x = pos.x, y = pos.y, w = size.x, h = size.y, color = color})
+	rect(
+		ctx,
+		 {
+			x = pos.x,
+			y = pos.y,
+			w = size.x,
+			h = size.y,
+			color = color,
+			left_border_width = left_border_width,
+			right_border_width = right_border_width,
+			top_border_width = top_border_width,
+			bottom_border_width = bottom_border_width,
+		},
+	)
 	text(
 		ctx,
-		{pos.x + size.x / 2, pos.y + size.y / 2},
+		{pos.x + size.x / 2, pos.y + size.y / 2 + padding_top},
 		txt,
 		ah = .CENTER,
 		av = .MIDDLE,

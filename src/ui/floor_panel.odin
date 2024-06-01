@@ -49,8 +49,9 @@ floor_panel_body :: proc(
 floor_panel :: proc(using ctx: ^Context) {
 	container(
 		ctx,
-		pos = {-3, window.size.y - 29 - FLOOR_PANEL_HEIGHT},
+		pos = {0, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
 		size = {249, FLOOR_PANEL_HEIGHT},
+		left_border_width = 0,
 		body = floor_panel_body,
 	)
 }

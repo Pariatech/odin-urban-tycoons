@@ -95,6 +95,8 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		SCROLL_BAR_TEXTURES,
 	) or_return
 
+    init_land_panel() or_return
+
 	return true
 }
 
@@ -162,6 +164,8 @@ update :: proc(using ctx: ^Context) {
 	if floor_panel_ctx.opened {
 		floor_panel(ctx)
 	}
+
+    land_panel(ctx)
 
 	container(
 		ctx,

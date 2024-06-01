@@ -1,5 +1,6 @@
 package ui
 
+import "core:log"
 import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
@@ -35,8 +36,8 @@ Rect_Renderer :: struct {
 }
 
 Rect :: struct {
-	x, y, w, h: f32,
-	color:      glsl.vec4,
+	x, y, w, h:          f32,
+	color:               glsl.vec4,
 	left_border_width:   f32,
 	right_border_width:  f32,
 	top_border_width:    f32,
@@ -116,8 +117,8 @@ init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Icon_Vertex),
-		offset_of(Icon_Vertex, left_border_width),
+		size_of(Rect_Vertex),
+		offset_of(Rect_Vertex, left_border_width),
 	)
 
 	gl.EnableVertexAttribArray(5)
@@ -126,8 +127,8 @@ init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Icon_Vertex),
-		offset_of(Icon_Vertex, right_border_width),
+		size_of(Rect_Vertex),
+		offset_of(Rect_Vertex, right_border_width),
 	)
 
 	gl.EnableVertexAttribArray(6)
@@ -136,8 +137,8 @@ init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Icon_Vertex),
-		offset_of(Icon_Vertex, top_border_width),
+		size_of(Rect_Vertex),
+		offset_of(Rect_Vertex, top_border_width),
 	)
 
 	gl.EnableVertexAttribArray(7)
@@ -146,8 +147,8 @@ init_rect_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(Icon_Vertex),
-		offset_of(Icon_Vertex, bottom_border_width),
+		size_of(Rect_Vertex),
+		offset_of(Rect_Vertex, bottom_border_width),
 	)
 
 	return true
@@ -177,16 +178,17 @@ draw_rect :: proc(using ctx: ^Context, rect: Rect) {
 	vertices[4] = vertices[2]
 	vertices[5].pos = to_screen_pos({rect.x, rect.y + rect.h})
 
+	// log.info(rect)
 	for &v in vertices {
 		v.start = {rect.x, rect.y}
 		v.end = {rect.x + rect.w, rect.y + rect.h}
 		// v.start = to_screen_pos({rect.x, rect.y})
 		// v.end = to_screen_pos({rect.x + rect.w, rect.y + rect.h})
 		v.color = rect.color
-        v.left_border_width = rect.left_border_width
-        v.right_border_width = rect.right_border_width
-        v.top_border_width = rect.top_border_width
-        v.bottom_border_width = rect.bottom_border_width
+		v.left_border_width = rect.left_border_width
+		v.right_border_width = rect.right_border_width
+		v.top_border_width = rect.top_border_width
+		v.bottom_border_width = rect.bottom_border_width
 	}
 
 	gl.BufferSubData(

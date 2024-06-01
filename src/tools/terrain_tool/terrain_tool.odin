@@ -24,6 +24,7 @@ terrain_tool_tick_timer: f64
 terrain_tool_drag_start: Maybe(glsl.ivec2)
 terrain_tool_drag_end: Maybe(glsl.ivec2)
 terrain_tool_drag_clip: bool
+terrain_tool_previous_brush_size: i32 = 1
 terrain_tool_brush_size: i32 = 1
 terrain_tool_brush_strength: f32 = 0.1
 
@@ -442,20 +443,29 @@ cleanup :: proc() {
 
 		mark_array_dirty(
 			 {
-				start_x - terrain_tool_brush_size,
-				start_z - terrain_tool_brush_size,
+				start_x - terrain_tool_previous_brush_size,
+				start_z - terrain_tool_previous_brush_size,
 			},
-			{end_x + terrain_tool_brush_size, end_z + terrain_tool_brush_size},
+			 {
+				end_x + terrain_tool_previous_brush_size,
+				end_z + terrain_tool_previous_brush_size,
+			},
 		)
 	} else {
-		start_x := max(terrain_tool_position.x - terrain_tool_brush_size, 0)
-		start_z := max(terrain_tool_position.y - terrain_tool_brush_size, 0)
+		start_x := max(
+			terrain_tool_position.x - terrain_tool_previous_brush_size,
+			0,
+		)
+		start_z := max(
+			terrain_tool_position.y - terrain_tool_previous_brush_size,
+			0,
+		)
 		end_x := min(
-			terrain_tool_position.x + terrain_tool_brush_size,
+			terrain_tool_position.x + terrain_tool_previous_brush_size,
 			constants.WORLD_WIDTH,
 		)
 		end_z := min(
-			terrain_tool_position.y + terrain_tool_brush_size,
+			terrain_tool_position.y + terrain_tool_previous_brush_size,
 			constants.WORLD_DEPTH,
 		)
 		for x in start_x ..< end_x {
@@ -465,43 +475,31 @@ cleanup :: proc() {
 		}
 		mark_array_dirty(
 			 {
-				terrain_tool_position.x - terrain_tool_brush_size,
-				terrain_tool_position.y - terrain_tool_brush_size,
+				terrain_tool_position.x - terrain_tool_previous_brush_size,
+				terrain_tool_position.y - terrain_tool_previous_brush_size,
 			},
 			 {
-				terrain_tool_position.x + terrain_tool_brush_size,
-				terrain_tool_position.y + terrain_tool_brush_size,
+				terrain_tool_position.x + terrain_tool_previous_brush_size,
+				terrain_tool_position.y + terrain_tool_previous_brush_size,
 			},
 		)
 	}
+	terrain_tool_previous_brush_size = terrain_tool_brush_size
 }
 
 deinit :: proc() {
-    cleanup()
+	cleanup()
 	billboard.billboard_1x1_remove(terrain_tool_billboard)
 }
 
 update :: proc(delta_time: f64) {
-    cleanup()
+	cleanup()
 
 	if keyboard.is_key_press(.Key_Equal) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
-			terrain_tool_brush_strength += TERRAIN_TOOL_BRUSH_MIN_STRENGTH
-			terrain_tool_brush_strength = min(
-				terrain_tool_brush_strength,
-				TERRAIN_TOOL_BRUSH_MAX_STRENGTH,
-			)
-
-			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard.billboard_1x1_set_texture(
-				terrain_tool_billboard,
-				billboard.Texture_1x1(
-					int(billboard.Texture_1x1.Shovel_1_SW) + t,
-				),
-			)
+			increase_brush_strength()
 		} else {
-			terrain_tool_brush_size += 1
-			terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
+			increase_brush_size()
 		}
 		mark_array_dirty(
 			 {
@@ -515,22 +513,9 @@ update :: proc(delta_time: f64) {
 		)
 	} else if keyboard.is_key_press(.Key_Minus) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
-			terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
-			terrain_tool_brush_strength = max(
-				terrain_tool_brush_strength,
-				TERRAIN_TOOL_BRUSH_MIN_STRENGTH,
-			)
-
-			t := int(terrain_tool_brush_strength * 10 - 1)
-			billboard.billboard_1x1_set_texture(
-				terrain_tool_billboard,
-				billboard.Texture_1x1(
-					int(billboard.Texture_1x1.Shovel_1_SW) + t,
-				),
-			)
+			decrease_brush_strength()
 		} else {
-			terrain_tool_brush_size -= 1
-			terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
+			decrease_brush_size()
 		}
 		mark_array_dirty(
 			 {
@@ -617,4 +602,42 @@ update :: proc(delta_time: f64) {
 			}
 		}
 	}
+}
+
+increase_brush_size :: proc() {
+	terrain_tool_brush_size += 1
+	terrain_tool_brush_size = min(terrain_tool_brush_size, 10)
+}
+
+decrease_brush_size :: proc() {
+	terrain_tool_brush_size -= 1
+	terrain_tool_brush_size = max(terrain_tool_brush_size, 1)
+}
+
+increase_brush_strength :: proc() {
+	terrain_tool_brush_strength += TERRAIN_TOOL_BRUSH_MIN_STRENGTH
+	terrain_tool_brush_strength = min(
+		terrain_tool_brush_strength,
+		TERRAIN_TOOL_BRUSH_MAX_STRENGTH,
+	)
+
+	t := int(terrain_tool_brush_strength * 10 - 1)
+	billboard.billboard_1x1_set_texture(
+		terrain_tool_billboard,
+		billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t),
+	)
+}
+
+decrease_brush_strength :: proc() {
+	terrain_tool_brush_strength -= TERRAIN_TOOL_BRUSH_MIN_STRENGTH
+	terrain_tool_brush_strength = max(
+		terrain_tool_brush_strength,
+		TERRAIN_TOOL_BRUSH_MIN_STRENGTH,
+	)
+
+	t := int(terrain_tool_brush_strength * 10 - 1)
+	billboard.billboard_1x1_set_texture(
+		terrain_tool_billboard,
+		billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t),
+	)
 }
