@@ -24,6 +24,7 @@ MENU_ICON_TEXTURES :: []cstring {
 
 
 ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
+DARK_BLUE :: glsl.vec4{0.0, 0.251, 0.502, 1}
 
 BORDER_WIDTH :: 1
 

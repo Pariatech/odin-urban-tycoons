@@ -27,6 +27,15 @@ terrain_tool_drag_clip: bool
 terrain_tool_previous_brush_size: i32 = 1
 terrain_tool_brush_size: i32 = 1
 terrain_tool_brush_strength: f32 = 0.1
+mode: Mode = .Raise
+
+Mode :: enum {
+	Raise,
+	Lower,
+	Level,
+	Trim,
+	Smooth,
+}
 
 TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_LOW :: 0
@@ -131,7 +140,9 @@ move_points :: proc(position: glsl.vec3) {
 
 		mark_array_dirty({start_x, start_z}, {end_x, end_z})
 	} else if mouse.is_button_down(.Left) || mouse.is_button_down(.Right) {
-		terrain_tool_drag_clip = mouse.is_button_down(.Right)
+		terrain_tool_drag_clip =
+			mouse.is_button_down(.Right) ||
+			(mode == .Trim && mouse.is_button_down(.Left))
 		terrain_tool_drag_start = terrain_tool_position
 	}
 }
@@ -316,10 +327,11 @@ calculate_lights :: proc() {
 
 move_point :: proc(delta_time: f64) {
 	movement: f32 = 0
-	if mouse.is_button_down(.Left) {
+	if mouse.is_button_down(.Left) && mode == .Raise {
 		movement = terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
-	} else if mouse.is_button_down(.Right) {
+	} else if (mouse.is_button_down(.Right) && mode == .Raise) ||
+	   (mouse.is_button_down(.Left) && mode == .Lower) {
 		movement = -terrain_tool_brush_strength
 		terrain_tool_tick_timer += delta_time
 	} else if mouse.is_button_release(.Left) && terrain_tool_tick_timer > 0 {
@@ -566,9 +578,12 @@ update :: proc(delta_time: f64) {
 	billboard.billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
-	if shift_down || terrain_tool_drag_start != nil {
+	if shift_down ||
+	   mode == .Level ||
+	   mode == .Trim ||
+	   terrain_tool_drag_start != nil {
 		move_points(position)
-	} else if keyboard.is_key_down(.Key_Left_Control) {
+	} else if keyboard.is_key_down(.Key_Left_Control) || mode == .Smooth {
 		smooth_brush(delta_time)
 	} else {
 		move_point(delta_time)

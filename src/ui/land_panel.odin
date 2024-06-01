@@ -42,55 +42,55 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 		   ctx,
 		   pos = {pos.x + 4, pos.y + 4},
 		   size = {32, 32},
-		   color = ROYAL_BLUE,
+		   color = DARK_BLUE if terrain_tool.mode == .Raise else ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Raise),
 	   ) {
-
+        terrain_tool.mode = .Raise
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 4, pos.y + size.y - 32 - 4},
 		   size = {32, 32},
-		   color = ROYAL_BLUE,
+		   color = DARK_BLUE if terrain_tool.mode == .Lower else ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Lower),
 	   ) {
-
+        terrain_tool.mode = .Lower
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 32 + 4 + 2, pos.y + 4},
 		   size = {32, 32},
-		   color = ROYAL_BLUE,
+		   color = DARK_BLUE if terrain_tool.mode == .Level else ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Level),
 	   ) {
-
+        terrain_tool.mode = .Level
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 34 + 4, pos.y + size.y - 32 - 4},
 		   size = {32, 32},
-		   color = ROYAL_BLUE,
+		   color = DARK_BLUE if terrain_tool.mode == .Trim else ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Trim),
 	   ) {
-
+        terrain_tool.mode = .Trim
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 68 + 4, pos.y + 4},
 		   size = {32, 32},
-		   color = ROYAL_BLUE,
+		   color = DARK_BLUE if terrain_tool.mode == .Smooth else ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Smooth),
 	   ) {
-
+        terrain_tool.mode = .Smooth
 	}
 }
 
