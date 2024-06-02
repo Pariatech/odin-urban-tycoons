@@ -4,6 +4,7 @@ import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
 
+import "../../camera"
 import "../../cursor"
 import "../../floor"
 import "../../mouse"
@@ -17,6 +18,8 @@ found_wall: bool
 found_wall_position: glsl.ivec3
 found_wall_axis: wall.Wall_Axis
 found_wall_texture: wall.Wall_Texture
+
+texture: wall.Wall_Texture = .Nyana
 
 init :: proc() {
 
@@ -54,14 +57,14 @@ update :: proc() {
 				   previous_found_wall_position != found_wall_position ||
 				   previous_found_wall_axis != found_wall_axis) {
 			if mouse.is_button_down(.Left) {
-				found_wall_texture = .Nyana
+				found_wall_texture = texture
 			} else {
 				found_wall_texture = get_found_wall_texture()
 			}
 			paint_wall(found_wall_position, found_wall_axis, .Nyana)
 		}
 	} else if found_wall && mouse.is_button_press(.Left) {
-		found_wall_texture = .Nyana
+		found_wall_texture = texture
 	}
 }
 
@@ -82,10 +85,84 @@ paint_wall :: proc(
 	axis: wall.Wall_Axis,
 	texture: wall.Wall_Texture,
 ) {
+	switch camera.rotation {
+	case .South_West:
+		paint_south_west_wall(position, axis, texture)
+	case .South_East:
+		paint_south_east_wall(position, axis, texture)
+	case .North_East:
+		paint_north_east_wall(position, axis, texture)
+	case .North_West:
+		paint_north_west_wall(position, axis, texture)
+	}
+}
+
+paint_south_west_wall :: proc(
+	position: glsl.ivec3,
+	axis: wall.Wall_Axis,
+	texture: wall.Wall_Texture,
+) {
 	switch axis {
 	case .East_West:
 		if w, ok := wall.get_east_west_wall(position); ok {
 			w.textures[.Outside] = texture
+			wall.set_east_west_wall(position, w)
+		}
+	case .North_South:
+		if w, ok := wall.get_north_south_wall(position); ok {
+			w.textures[.Outside] = texture
+			wall.set_north_south_wall(position, w)
+		}
+	}
+}
+
+paint_south_east_wall :: proc(
+	position: glsl.ivec3,
+	axis: wall.Wall_Axis,
+	texture: wall.Wall_Texture,
+) {
+	switch axis {
+	case .East_West:
+		if w, ok := wall.get_east_west_wall(position); ok {
+			w.textures[.Outside] = texture
+			wall.set_east_west_wall(position, w)
+		}
+	case .North_South:
+		if w, ok := wall.get_north_south_wall(position); ok {
+			w.textures[.Inside] = texture
+			wall.set_north_south_wall(position, w)
+		}
+	}
+}
+
+paint_north_east_wall :: proc(
+	position: glsl.ivec3,
+	axis: wall.Wall_Axis,
+	texture: wall.Wall_Texture,
+) {
+	switch axis {
+	case .East_West:
+		if w, ok := wall.get_east_west_wall(position); ok {
+			w.textures[.Inside] = texture
+			wall.set_east_west_wall(position, w)
+		}
+	case .North_South:
+		if w, ok := wall.get_north_south_wall(position); ok {
+			w.textures[.Inside] = texture
+			wall.set_north_south_wall(position, w)
+		}
+	}
+}
+
+paint_north_west_wall :: proc(
+	position: glsl.ivec3,
+	axis: wall.Wall_Axis,
+	texture: wall.Wall_Texture,
+) {
+	switch axis {
+	case .East_West:
+		if w, ok := wall.get_east_west_wall(position); ok {
+			w.textures[.Inside] = texture
 			wall.set_east_west_wall(position, w)
 		}
 	case .North_South:
@@ -115,27 +192,50 @@ on_intersect :: proc(intersect: glsl.vec3) {
 	}
 }
 
-find_wall_intersect :: proc() -> (ok: bool) {
+find_wall_intersect :: proc() -> bool {
+	switch camera.rotation {
+	case .South_West:
+		return find_south_west_wall_intersect()
+	case .South_East:
+		return find_south_east_wall_intersect()
+	case .North_East:
+		return find_north_east_wall_intersect()
+	case .North_West:
+		return find_north_west_wall_intersect()
+	}
+
+	return false
+}
+
+find_south_west_wall_intersect :: proc() -> bool {
 	switch side {
 	case .South, .East:
-		if wall.has_north_south_wall(position - {2, 0, 3}) {
-			found_wall_position = position - {2, 0, 3}
+		if pos := position - {3, 0, 4}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
-		} else if wall.has_east_west_wall(position - {2, 0, 2}) {
-			found_wall_position = position - {2, 0, 2}
+		} else if pos := position - {3, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
-		} else if wall.has_north_south_wall(position - {1, 0, 2}) {
-			found_wall_position = position - {1, 0, 2}
+		} else if pos := position - {2, 0, 3}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
-		} else if wall.has_east_west_wall(position - {1, 0, 1}) {
-			found_wall_position = position - {1, 0, 1}
+		} else if pos := position - {2, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
-		} else if wall.has_north_south_wall(position - {0, 0, 1}) {
-			found_wall_position = position - {0, 0, 1}
+		} else if pos := position - {1, 0, 2}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {1, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {0, 0, 1}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
 		} else if wall.has_east_west_wall(position) {
@@ -144,24 +244,32 @@ find_wall_intersect :: proc() -> (ok: bool) {
 			return true
 		}
 	case .North, .West:
-		if wall.has_east_west_wall(position - {3, 0, 2}) {
-			found_wall_position = position - {3, 0, 2}
+		if pos := position - {4, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
-		} else if wall.has_north_south_wall(position - {2, 0, 2}) {
-			found_wall_position = position - {2, 0, 2}
+		} else if pos := position - {3, 0, 3}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
-		} else if wall.has_east_west_wall(position - {2, 0, 1}) {
-			found_wall_position = position - {2, 0, 1}
+		} else if pos := position - {3, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
-		} else if wall.has_north_south_wall(position - {1, 0, 1}) {
-			found_wall_position = position - {1, 0, 1}
+		} else if pos := position - {2, 0, 2}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
-		} else if wall.has_east_west_wall(position - {1, 0, 0}) {
-			found_wall_position = position - {1, 0, 0}
+		} else if pos := position - {2, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {1, 0, 1}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {1, 0, 0}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
 		} else if wall.has_north_south_wall(position) {
@@ -171,5 +279,76 @@ find_wall_intersect :: proc() -> (ok: bool) {
 		}
 	}
 
+	return false
+}
+
+find_south_east_wall_intersect :: proc() -> bool {
+	switch side {
+	case .South, .West:
+		if pos := position - {-3, 0, 3}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-2, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-2, 0, 2};
+		   wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-1, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-1, 0, 1};
+		   wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if wall.has_east_west_wall(position) {
+			found_wall_position = position
+			found_wall_axis = .East_West
+			return true
+		}
+	case .North, .East:
+		if pos := position - {-3, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-3, 0, 2};
+		   wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-2, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-2, 0, 1};
+		   wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-1, 0, 0}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if wall.has_north_south_wall(position) {
+			found_wall_position = position
+			found_wall_axis = .North_South
+			return true
+		}
+	}
+
+	return false
+}
+
+find_north_east_wall_intersect :: proc() -> bool {
+	return false
+}
+
+find_north_west_wall_intersect :: proc() -> bool {
 	return false
 }
