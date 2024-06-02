@@ -805,7 +805,7 @@ adding_line :: proc() {
 }
 
 update_line :: proc() {
-	if keyboard.is_key_down(.Key_Left_Control) {
+	if mode == .Demolish || keyboard.is_key_down(.Key_Left_Control) {
 		removing_line()
 	} else {
 		adding_line()
