@@ -164,10 +164,14 @@ set_texture :: proc(
 	using visited: Visited_Tile_Triangle,
 	texture: tile.Texture,
 ) {
+    mask_texture: tile.Mask = .Grid_Mask
+    if texture == .Floor_Marker {
+        mask_texture = .Full_Mask
+    }
 	tile.set_tile_triangle(
 		{position.x, floor.floor, position.y},
 		side,
-		tile.Tile_Triangle{texture = texture, mask_texture = .Grid_Mask},
+		tile.Tile_Triangle{texture = texture, mask_texture = mask_texture},
 	)
 }
 

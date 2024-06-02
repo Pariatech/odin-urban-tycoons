@@ -123,13 +123,11 @@ revert_tile :: proc(position: glsl.ivec3) {
 		for side in tile.Tile_Triangle_Side {
 			if tri, ok := previous_tile[side].?; ok {
 				if tri.texture == .Floor_Marker {
-					log.info("uh?")
 					tile.set_tile_triangle(position, side, nil)
 				} else {
 					tile.set_tile_triangle(position, side, tri)
 				}
 			} else {
-				log.info("wtf?")
 				tile.set_tile_triangle(position, side, nil)
 			}
 		}
