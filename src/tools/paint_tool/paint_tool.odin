@@ -285,7 +285,15 @@ find_south_west_wall_intersect :: proc() -> bool {
 find_south_east_wall_intersect :: proc() -> bool {
 	switch side {
 	case .South, .West:
-		if pos := position - {-3, 0, 3}; wall.has_north_south_wall(pos) {
+		if pos := position - {-4, 0, 4}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-3, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-3, 0, 3}; wall.has_north_south_wall(pos) {
 			found_wall_position = pos
 			found_wall_axis = .North_South
 			return true
@@ -313,7 +321,16 @@ find_south_east_wall_intersect :: proc() -> bool {
 			return true
 		}
 	case .North, .East:
-		if pos := position - {-3, 0, 2}; wall.has_east_west_wall(pos) {
+		if pos := position - {-4, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position - {-4, 0, 3};
+		   wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position - {-3, 0, 2}; wall.has_east_west_wall(pos) {
 			found_wall_position = pos
 			found_wall_axis = .East_West
 			return true
