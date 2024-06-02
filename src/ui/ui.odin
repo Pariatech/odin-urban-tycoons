@@ -96,8 +96,8 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 		SCROLL_BAR_TEXTURES,
 	) or_return
 
-    init_land_panel() or_return
-    init_wall_panel() or_return
+	init_land_panel() or_return
+	init_wall_panel() or_return
 
 	return true
 }
@@ -138,9 +138,9 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 menu :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 	for ic, i in Menu_Icon {
 		left_border_width: f32 = 0
-        if i > 0 {
-            left_border_width = BORDER_WIDTH
-        }
+		if i > 0 {
+			left_border_width = BORDER_WIDTH
+		}
 		if icon_button(
 			   ctx,
 			   {f32(i * 31) + pos.x, pos.y},
@@ -167,8 +167,8 @@ update :: proc(using ctx: ^Context) {
 		floor_panel(ctx)
 	}
 
-    land_panel(ctx)
-    wall_panel(ctx)
+	land_panel(ctx)
+	wall_panel(ctx)
 
 	container(
 		ctx,

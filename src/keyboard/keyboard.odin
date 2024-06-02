@@ -2,7 +2,7 @@ package keyboard
 
 import "core:c"
 import "core:fmt"
-import "core:runtime"
+import "base:runtime"
 import "vendor:glfw"
 
 import "../window"

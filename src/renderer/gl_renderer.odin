@@ -3,7 +3,7 @@ package renderer
 import "core:fmt"
 import m "core:math/linalg/glsl"
 import "core:os"
-import "core:runtime"
+import "base:runtime"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"

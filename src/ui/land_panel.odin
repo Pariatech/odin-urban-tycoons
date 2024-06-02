@@ -21,9 +21,9 @@ Land_Icon_Texture :: enum {
 	Brush_Strength,
 	Raise,
 	Lower,
-    Level,
-    Trim,
-    Smooth,
+	Level,
+	Trim,
+	Smooth,
 }
 
 land_panel_texture_array: u32
@@ -42,55 +42,55 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 		   ctx,
 		   pos = {pos.x + 4, pos.y + 4},
 		   size = {32, 32},
-		   color = DARK_BLUE if terrain_tool.mode == .Raise else ROYAL_BLUE,
+		   color = terrain_tool.mode == .Raise ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Raise),
 	   ) {
-        terrain_tool.mode = .Raise
+		terrain_tool.mode = .Raise
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 4, pos.y + size.y - 32 - 4},
 		   size = {32, 32},
-		   color = DARK_BLUE if terrain_tool.mode == .Lower else ROYAL_BLUE,
+		   color = terrain_tool.mode == .Lower ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Lower),
 	   ) {
-        terrain_tool.mode = .Lower
+		terrain_tool.mode = .Lower
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 32 + 4 + 2, pos.y + 4},
 		   size = {32, 32},
-		   color = DARK_BLUE if terrain_tool.mode == .Level else ROYAL_BLUE,
+		   color = terrain_tool.mode == .Level ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Level),
 	   ) {
-        terrain_tool.mode = .Level
+		terrain_tool.mode = .Level
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 34 + 4, pos.y + size.y - 32 - 4},
 		   size = {32, 32},
-		   color = DARK_BLUE if terrain_tool.mode == .Trim else ROYAL_BLUE,
+		   color = terrain_tool.mode == .Trim ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Trim),
 	   ) {
-        terrain_tool.mode = .Trim
+		terrain_tool.mode = .Trim
 	}
 
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 68 + 4, pos.y + 4},
 		   size = {32, 32},
-		   color = DARK_BLUE if terrain_tool.mode == .Smooth else ROYAL_BLUE,
+		   color = terrain_tool.mode == .Smooth ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Smooth),
 	   ) {
-        terrain_tool.mode = .Smooth
+		terrain_tool.mode = .Smooth
 	}
 }
 

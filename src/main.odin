@@ -3,7 +3,7 @@ package main
 import "core:fmt"
 import "core:log"
 import "core:math/linalg/glsl"
-import "core:runtime"
+import "base:runtime"
 import "core:time"
 import "vendor:glfw"
 

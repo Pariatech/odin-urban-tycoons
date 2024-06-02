@@ -1,7 +1,7 @@
 package mouse
 
 import "core:math/linalg/glsl"
-import "core:runtime"
+import "base:runtime"
 
 import "vendor:glfw"
 

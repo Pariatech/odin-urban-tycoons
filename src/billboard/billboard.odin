@@ -882,7 +882,7 @@ update_after_counter_clockwise_rotation_1x1 :: proc(
 	billboards: ^Billboard_Chunk(Billboard_1x1),
 ) {
 	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1
-	for _, billboard in &billboards.instances {
+	for _, &billboard in billboards.instances {
 		billboard.texture = rotation_table[billboard.texture]
 		billboard.depth_map = rotation_table[billboard.depth_map]
 	}
@@ -893,7 +893,7 @@ update_after_counter_clockwise_rotation_2x2 :: proc(
 	billboards: ^Billboard_Chunk(Billboard_2x2),
 ) {
 	rotation_table := BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2
-	for _, billboard in &billboards.instances {
+	for _, &billboard in billboards.instances {
 		billboard.texture = rotation_table[billboard.texture]
 		billboard.depth_map = rotation_table[billboard.depth_map]
 	}
@@ -904,7 +904,7 @@ update_after_clockwise_rotation_1x1 :: proc(
 	billboards: ^Billboard_Chunk(Billboard_1x1),
 ) {
 	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1
-	for _, billboard in &billboards.instances {
+	for _, &billboard in billboards.instances {
 		billboard.texture = rotation_table[billboard.texture]
 		billboard.depth_map = rotation_table[billboard.depth_map]
 	}
@@ -915,7 +915,7 @@ update_after_clockwise_rotation_2x2 :: proc(
 	billboards: ^Billboard_Chunk(Billboard_2x2),
 ) {
 	rotation_table := BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2
-	for _, billboard in &billboards.instances {
+	for _, &billboard in billboards.instances {
 		billboard.texture = rotation_table[billboard.texture]
 		billboard.depth_map = rotation_table[billboard.depth_map]
 	}
@@ -950,7 +950,7 @@ draw_billboards :: proc(floor: int) {
 		billboard_1x1_draw_context.depth_map_texture_array,
 	)
 
-	for floor in &chunks_1x1 {
+	for &floor in chunks_1x1 {
 		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk_billboards_draw(&floor[x][z], billboard_1x1_draw_context)
@@ -970,7 +970,7 @@ draw_billboards :: proc(floor: int) {
 		billboard_2x2_draw_context.depth_map_texture_array,
 	)
 
-	for floor in &chunks_2x2 {
+	for &floor in chunks_2x2 {
 		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk_billboards_draw(&floor[x][z], billboard_2x2_draw_context)
