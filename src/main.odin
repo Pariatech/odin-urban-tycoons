@@ -1,9 +1,9 @@
 package main
 
+import "base:runtime"
 import "core:fmt"
 import "core:log"
 import "core:math/linalg/glsl"
-import "base:runtime"
 import "core:time"
 import "vendor:glfw"
 
@@ -70,6 +70,8 @@ start :: proc() -> (ok: bool = false) {
 	glfw.MakeContextCurrent(window.handle)
 	when ODIN_DEBUG {
 		glfw.SwapInterval(0)
+	} else {
+		glfw.SwapInterval(1)
 	}
 
 	if (!renderer.init()) do return
