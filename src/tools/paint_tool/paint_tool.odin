@@ -366,9 +366,79 @@ find_north_east_wall_intersect :: proc() -> bool {
 	}
 
 	return false
-
 }
 
 find_north_west_wall_intersect :: proc() -> bool {
+	switch side {
+	case .South, .West:
+		if pos := position + {-4, 0, 4}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {-3, 0, 3}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-3, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {-2, 0, 2}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-2, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {-1, 0, 1}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-1, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		}
+	case .North, .East:
+		if pos := position + {-3, 0, 4}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-3, 0, 4}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {-2, 0, 3}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-2, 0, 3}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {-1, 0, 2}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {-1, 0, 2}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		} else if pos := position + {0, 0, 1}; wall.has_north_south_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .North_South
+			return true
+		} else if pos := position + {0, 0, 1}; wall.has_east_west_wall(pos) {
+			found_wall_position = pos
+			found_wall_axis = .East_West
+			return true
+		}
+	}
+
 	return false
 }
