@@ -926,6 +926,10 @@ get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
 }
 
 set_north_south_wall :: proc(pos: glsl.ivec3, w: Wall) {
+	if has_south_west_north_east_wall(pos) ||
+	   has_north_west_south_east_wall(pos) {
+		return
+	}
 	chunk_set_north_south_wall(get_chunk(pos), pos, w)
 }
 
@@ -947,6 +951,10 @@ remove_north_south_wall :: proc(pos: glsl.ivec3) {
 }
 
 set_east_west_wall :: proc(pos: glsl.ivec3, w: Wall) {
+	if has_south_west_north_east_wall(pos) ||
+	   has_north_west_south_east_wall(pos) {
+		return
+	}
 	chunk_set_east_west_wall(get_chunk(pos), pos, w)
 }
 
@@ -968,6 +976,9 @@ remove_east_west_wall :: proc(pos: glsl.ivec3) {
 }
 
 set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	if has_north_south_wall(pos) || has_east_west_wall(pos) {
+		return
+	}
 	chunk_set_north_west_south_east_wall(get_chunk(pos), pos, wall)
 }
 
@@ -989,6 +1000,9 @@ remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 }
 
 set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
+	if has_north_south_wall(pos) || has_east_west_wall(pos) {
+		return
+	}
 	chunk_set_south_west_north_east_wall(get_chunk(pos), pos, wall)
 }
 
@@ -1256,8 +1270,8 @@ draw_walls :: proc(floor: int) {
 
 	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
-            chunk := &chunks[floor][x][z]
-	        chunk_draw_walls(chunk, {x, i32(floor), z})
+			chunk := &chunks[floor][x][z]
+			chunk_draw_walls(chunk, {x, i32(floor), z})
 		}
 	}
 }
