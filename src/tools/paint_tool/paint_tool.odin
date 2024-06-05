@@ -45,11 +45,12 @@ update :: proc() {
 		previous_found_diagonal_wall := found_diagonal_wall
 		previous_found_diagonal_wall_axis := found_diagonal_wall_axis
 
-        found_diagonal_wall = false
+		found_diagonal_wall = false
 
-		found_wall = find_wall_intersect()
-		if previous_found_wall &&
-		   (!found_wall ||
+		find_wall_intersect()
+		if (previous_found_wall || previous_found_diagonal_wall) &&
+		   ((!found_wall && !previous_found_diagonal_wall) ||
+				   previous_found_wall == found_diagonal_wall ||
 				   previous_found_wall_position != found_wall_position ||
 				   previous_found_wall_axis != found_wall_axis ||
 				   previous_found_diagonal_wall_axis !=
@@ -69,8 +70,9 @@ update :: proc() {
 			}
 		}
 
-		if found_wall &&
-		   (!previous_found_wall ||
+		if (found_wall || found_diagonal_wall) &&
+		   ((!previous_found_wall && !previous_found_diagonal_wall) ||
+				   previous_found_wall == found_diagonal_wall ||
 				   previous_found_wall_position != found_wall_position ||
 				   previous_found_wall_axis != found_wall_axis ||
 				   previous_found_diagonal_wall_axis !=
@@ -192,22 +194,20 @@ on_intersect :: proc(intersect: glsl.vec3) {
 	}
 }
 
-find_wall_intersect :: proc() -> bool {
+find_wall_intersect :: proc() {
 	switch camera.rotation {
 	case .South_West:
-		return find_south_west_wall_intersect()
+		find_south_west_wall_intersect()
 	case .South_East:
-		return find_south_east_wall_intersect()
+		find_south_east_wall_intersect()
 	case .North_East:
-		return find_north_east_wall_intersect()
+		find_north_east_wall_intersect()
 	case .North_West:
-		return find_north_west_wall_intersect()
+		find_north_west_wall_intersect()
 	}
-
-	return false
 }
 
-find_south_west_wall_intersect :: proc() -> bool {
+find_south_west_wall_intersect :: proc() {
 	switch side {
 	case .South:
 		for i in i32(0) ..< 4 {
@@ -216,28 +216,28 @@ find_south_west_wall_intersect :: proc() -> bool {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
+				return
 			}
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .North_South
 				found_wall = true
-				return true
+				return
 			}
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
+				return
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .East_West
 				found_wall = true
-				return true
+				return
 			}
 		}
 	case .East:
@@ -247,25 +247,28 @@ find_south_west_wall_intersect :: proc() -> bool {
 				found_wall_position = pos
 				found_wall_axis = .North_South
 				found_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 4 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .East_West
 				found_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
+				return
 			}
 		}
 	case .North:
@@ -275,25 +278,28 @@ find_south_west_wall_intersect :: proc() -> bool {
 				found_wall_position = pos
 				found_wall_axis = .East_West
 				found_wall = true
-				return true
-			} else if pos := position - {4 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .North_South
 				found_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
+				return
 			}
 		}
 	case .West:
@@ -303,264 +309,144 @@ find_south_west_wall_intersect :: proc() -> bool {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
-			} else if pos := position - {4 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .East_West
 				found_wall = true
-				return true
-			} else if pos := position - {4 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				found_wall_position = pos
 				found_diagonal_wall_axis = .North_West_South_East
 				found_diagonal_wall = true
-				return true
-			} else if pos := position - {3 - i, 0, 3 - i};
+				return
+			}
+			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .North_South
 				found_wall = true
-				return true
+				return
 			}
 		}
 	}
-
-	return false
 }
 
-find_south_east_wall_intersect :: proc() -> bool {
+find_south_east_wall_intersect :: proc() {
 	switch side {
 	case .South, .West:
-		if pos := position - {-4, 0, 4}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-3, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-3, 0, 3};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-2, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-2, 0, 2};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-1, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-1, 0, 1};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if wall.has_east_west_wall(position) {
-			found_wall_position = position
-			found_wall_axis = .East_West
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position - {-4 + i, 0, 4 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			} else if pos := position - {-3 + i, 0, 3 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
 		}
 	case .North, .East:
-		if pos := position - {-4, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-4, 0, 3};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-3, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-3, 0, 2};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-2, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position - {-2, 0, 1};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position - {-1, 0, 0}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if wall.has_north_south_wall(position) {
-			found_wall_position = position
-			found_wall_axis = .North_South
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			} else if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
 		}
 	}
-
-	return false
 }
 
-find_north_east_wall_intersect :: proc() -> bool {
+find_north_east_wall_intersect :: proc() {
 	switch side {
 	case .South, .East:
-		if pos := position + {4, 0, 4}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {4, 0, 3}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {3, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {3, 0, 2}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {2, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {2, 0, 1}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {1, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {1, 0, 1}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position + {4 - i, 0, 4 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
+			if pos := position + {4 - i, 0, 3 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
 		}
 	case .North, .West:
-		if pos := position + {4, 0, 4}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {3, 0, 4}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {3, 0, 3}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {2, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {2, 0, 2}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {1, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {1, 0, 1}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {0, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position + {4 - i, 0, 4 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
+			if pos := position + {3 - i, 0, 4 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
 		}
 	}
-
-	return false
 }
 
-find_north_west_wall_intersect :: proc() -> bool {
+find_north_west_wall_intersect :: proc() {
 	switch side {
 	case .South, .West:
-		if pos := position + {-4, 0, 4}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {-3, 0, 3};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-3, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {-2, 0, 2};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-2, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {-1, 0, 1};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-1, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position + {-4 + i, 0, 4 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
+			if pos := position + {-3 + i, 0, 3 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
 		}
 	case .North, .East:
-		if pos := position + {-3, 0, 4}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-3, 0, 4}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {-2, 0, 3};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-2, 0, 3}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {-1, 0, 2};
-		   wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {-1, 0, 2}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
-		} else if pos := position + {0, 0, 1}; wall.has_north_south_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .North_South
-			return true
-		} else if pos := position + {0, 0, 1}; wall.has_east_west_wall(pos) {
-			found_wall_position = pos
-			found_wall_axis = .East_West
-			return true
+		for i in i32(0) ..< 4 {
+			if pos := position + {-3 + i, 0, 4 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
+			if pos := position + {-3 + i, 0, 4 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
 		}
 	}
-
-	return false
 }
