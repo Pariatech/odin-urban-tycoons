@@ -338,15 +338,30 @@ find_south_west_wall_intersect :: proc() {
 
 find_south_east_wall_intersect :: proc() {
 	switch side {
-	case .South, .West:
+	case .South:
 		for i in i32(0) ..< 4 {
+			if pos := position - {-4 + i, 0, 4 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
 			if pos := position - {-4 + i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .North_South
 				found_wall = true
 				return
-			} else if pos := position - {-3 + i, 0, 3 - i};
+			} 
+			if pos := position - {-3 + i, 0, 4 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+            if pos := position - {-3 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .East_West
@@ -354,7 +369,38 @@ find_south_east_wall_intersect :: proc() {
 				return
 			}
 		}
-	case .North, .East:
+	case .West:
+		for i in i32(0) ..< 4 {
+			if pos := position - {-4 + i, 0, 4 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			} 
+			if pos := position - {-3 + i, 0, 4 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+            if pos := position - {-3 + i, 0, 3 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			}
+			if pos := position - {-3 + i, 0, 3 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+		}
+	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
@@ -362,7 +408,53 @@ find_south_east_wall_intersect :: proc() {
 				found_wall_axis = .East_West
 				found_wall = true
 				return
-			} else if pos := position - {-4 + i, 0, 3 - i};
+			} 
+			if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+            if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_north_south_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .North_South
+				found_wall = true
+				return
+			}
+			if pos := position - {-3 + i, 0, 3 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+		}
+	case .East:
+		for i in i32(0) ..< 4 {
+			if pos := position - {-4 + i, 0, 4 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+			if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_east_west_wall(pos) {
+				found_wall_position = pos
+				found_wall_axis = .East_West
+				found_wall = true
+				return
+			} 
+			if pos := position - {-4 + i, 0, 3 - i};
+			   wall.has_south_west_north_east_wall(pos) {
+				found_wall_position = pos
+				found_diagonal_wall_axis = .South_West_North_East
+				found_diagonal_wall = true
+				return
+			}
+            if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
 				found_wall_position = pos
 				found_wall_axis = .North_South
