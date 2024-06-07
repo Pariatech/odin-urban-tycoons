@@ -24,6 +24,7 @@ found_diagonal_wall: bool
 found_diagonal_wall_axis: wall.Diagonal_Wall_Axis
 
 texture: wall.Wall_Texture = .Nyana
+dirty: bool
 
 init :: proc() {
 
@@ -39,7 +40,7 @@ update :: proc() {
 
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
-	if previous_position != position || previous_side != side {
+	if dirty || previous_position != position || previous_side != side {
 		previous_found_wall := found_wall
 		previous_found_wall_position := found_wall_position
 		previous_found_wall_axis := found_wall_axis
@@ -78,6 +79,13 @@ update :: proc() {
 		}
 		found_wall_texture = texture
 	}
+
+    dirty = false
+}
+
+set_texture :: proc(tex: wall.Wall_Texture) {
+    texture = tex
+    dirty = true
 }
 
 apply_flood_fill :: proc() {

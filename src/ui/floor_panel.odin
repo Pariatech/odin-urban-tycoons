@@ -10,7 +10,8 @@ Floor_Panel :: struct {
 	opened: bool,
 }
 
-FLOOR_PANEL_HEIGHT :: 74
+PANEL_WIDTH :: 280
+PANEL_HEIGHT :: 74
 FLOOR_PANEL_TILE_SIZE :: 32
 FLOOR_PANEL_PADDING :: 4
 
@@ -30,8 +31,8 @@ floor_panel_body :: proc(
 			    {
 				   2 + f32(i / 2) * (FLOOR_PANEL_TILE_SIZE + 2),
 				   window.size.y -
-				   29 -
-				   FLOOR_PANEL_HEIGHT +
+				   31 -
+				   PANEL_HEIGHT +
 				   FLOOR_PANEL_PADDING +
 				   f32(i % 2) * (FLOOR_PANEL_TILE_SIZE + 2),
 			   },
@@ -49,8 +50,8 @@ floor_panel_body :: proc(
 floor_panel :: proc(using ctx: ^Context) {
 	container(
 		ctx,
-		pos = {0, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
-		size = {249, FLOOR_PANEL_HEIGHT},
+		pos = {0, window.size.y - 31 - PANEL_HEIGHT},
+		size = {PANEL_WIDTH, PANEL_HEIGHT},
 		left_border_width = 0,
 		body = floor_panel_body,
 	)

@@ -174,16 +174,16 @@ land_panel :: proc(using ctx: ^Context) {
 	if tools.active_tool == .Terrain {
 		container(
 			ctx,
-			pos = {0, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
-			size = {56, FLOOR_PANEL_HEIGHT},
+			pos = {0, window.size.y - 31 - PANEL_HEIGHT},
+			size = {56, PANEL_HEIGHT},
 			left_border_width = 0,
 			body = land_panel_brush_body,
 		)
 
 		container(
 			ctx,
-			pos = {55, window.size.y - 31 - FLOOR_PANEL_HEIGHT},
-			size = {249 - 55, FLOOR_PANEL_HEIGHT},
+			pos = {55, window.size.y - 31 - PANEL_HEIGHT},
+			size = {PANEL_WIDTH - 55, PANEL_HEIGHT},
 			body = land_panel_body,
 		)
 	}
