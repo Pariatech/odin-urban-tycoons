@@ -31,7 +31,12 @@ init :: proc() {
 }
 
 deinit :: proc() {
-
+	clear_previous_wall(
+		found_wall_position,
+		found_wall_axis,
+		found_diagonal_wall,
+		found_diagonal_wall_axis,
+	)
 }
 
 update :: proc() {
@@ -80,12 +85,12 @@ update :: proc() {
 		found_wall_texture = texture
 	}
 
-    dirty = false
+	dirty = false
 }
 
 set_texture :: proc(tex: wall.Wall_Texture) {
-    texture = tex
-    dirty = true
+	texture = tex
+	dirty = true
 }
 
 apply_flood_fill :: proc() {
