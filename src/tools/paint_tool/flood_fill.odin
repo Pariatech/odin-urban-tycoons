@@ -80,6 +80,81 @@ NEXT_LEFT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
 	},
 }
 
+NEXT_RIGHT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
+	.E_W =  {
+		.Inside =  {
+			{type = .N_S, position = {-1, 0, 0}, side = .Inside},
+			{type = .NW_SE, position = {-1, 0, 0}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 0}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Outside},
+			{type = .N_S, position = {0, 0, -1}, side = .Outside},
+			{type = .E_W, position = {0, 0, 0}, side = .Outside},
+		},
+		.Outside =  {
+			{type = .N_S, position = {1, 0, -1}, side = .Outside},
+			{type = .NW_SE, position = {1, 0, -1}, side = .Outside},
+			{type = .E_W, position = {1, 0, 0}, side = .Outside},
+			{type = .SW_NE, position = {1, 0, 0}, side = .Inside},
+			{type = .N_S, position = {1, 0, 0}, side = .Inside},
+			{type = .E_W, position = {0, 0, 0}, side = .Inside},
+		},
+	},
+	.N_S =  {
+		.Inside =  {
+			{type = .E_W, position = {0, 0, 1}, side = .Outside},
+			{type = .SW_NE, position = {0, 0, 1}, side = .Inside},
+			{type = .N_S, position = {0, 0, 1}, side = .Inside},
+			{type = .NW_SE, position = {-1, 0, 1}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 1}, side = .Inside},
+			{type = .N_S, position = {0, 0, 0}, side = .Outside},
+		},
+		.Outside =  {
+			{type = .E_W, position = {-1, 0, 0}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Outside},
+			{type = .N_S, position = {0, 0, -1}, side = .Outside},
+			{type = .NW_SE, position = {0, 0, -1}, side = .Outside},
+			{type = .E_W, position = {0, 0, 0}, side = .Outside},
+			{type = .N_S, position = {0, 0, 0}, side = .Inside},
+		},
+	},
+	.NW_SE =  {
+		.Inside =  {
+			{type = .SW_NE, position = {0, 0, 1}, side = .Inside},
+			{type = .N_S, position = {0, 0, 1}, side = .Inside},
+			{type = .NW_SE, position = {-1, 0, 1}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 1}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, 0}, side = .Outside},
+			{type = .NW_SE, position = {0, 0, 0}, side = .Outside},
+		},
+		.Outside =  {
+			{type = .SW_NE, position = {0, 0, -1}, side = .Outside},
+			{type = .N_S, position = {1, 0, -1}, side = .Outside},
+			{type = .NW_SE, position = {1, 0, -1}, side = .Outside},
+			{type = .E_W, position = {1, 0, 0}, side = .Outside},
+			{type = .SW_NE, position = {1, 0, 0}, side = .Inside},
+			{type = .NW_SE, position = {0, 0, 0}, side = .Inside},
+		},
+	},
+	.SW_NE =  {
+		.Inside =  {
+			{type = .NW_SE, position = {1, 0, 0}, side = .Outside},
+			{type = .E_W, position = {1, 0, 1}, side = .Outside},
+			{type = .SW_NE, position = {1, 0, 1}, side = .Inside},
+			{type = .N_S, position = {1, 0, 1}, side = .Inside},
+			{type = .NW_SE, position = {0, 0, 1}, side = .Inside},
+			{type = .SW_NE, position = {0, 0, 0}, side = .Outside},
+		},
+		.Outside =  {
+			{type = .NW_SE, position = {-1, 0, 0}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 0}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Outside},
+			{type = .N_S, position = {0, 0, -1}, side = .Outside},
+			{type = .NW_SE, position = {0, 0, -1}, side = .Outside},
+			{type = .SW_NE, position = {0, 0, 0}, side = .Inside},
+		},
+	},
+}
+
 Wall_Type :: enum {
 	N_S,
 	E_W,
@@ -101,16 +176,22 @@ flood_fill :: proc(
 	previous_texture: wall.Wall_Texture,
 	texture: wall.Wall_Texture,
 ) {
-	log.info(Next_Wall{position = position, side = side, type = type})
 	next_wall, ok := get_next_left_wall(
 		{position = position, side = side, type = type},
 		previous_texture,
 	)
-	log.info("next_wall:", next_wall, "ok:", ok)
 	for ok {
-		log.info("next_wall:", next_wall)
 		paint_next_wall(next_wall, texture)
 		next_wall, ok = get_next_left_wall(next_wall, previous_texture)
+	}
+
+	next_wall, ok = get_next_right_wall(
+		{position = position, side = side, type = type},
+		previous_texture,
+	)
+	for ok {
+		paint_next_wall(next_wall, texture)
+		next_wall, ok = get_next_right_wall(next_wall, previous_texture)
 	}
 }
 
@@ -161,18 +242,34 @@ get_next_left_wall :: proc(
 	Next_Wall,
 	bool,
 ) {
-	next_left_wall_map := NEXT_LEFT_WALL_MAP
+	return get_next_wall(current, texture, NEXT_LEFT_WALL_MAP)
+}
 
-	next_wall_list := next_left_wall_map[current.type][current.side]
+get_next_right_wall :: proc(
+	current: Next_Wall,
+	texture: wall.Wall_Texture,
+) -> (
+	Next_Wall,
+	bool,
+) {
+	return get_next_wall(current, texture, NEXT_RIGHT_WALL_MAP)
+}
+
+get_next_wall :: proc(
+	current: Next_Wall,
+	texture: wall.Wall_Texture,
+	next_wall_map: [Wall_Type][wall.Wall_Side][]Next_Wall,
+) -> (
+	Next_Wall,
+	bool,
+) {
+	next_wall_list := next_wall_map[current.type][current.side]
 
 	for next_wall in next_wall_list {
-        log.info(next_wall)
 		w, ok := get_wall_by_type(
 			current.position + next_wall.position,
 			next_wall.type,
 		)
-        log.info(w)
-        log.info(texture)
 
 		if !ok {
 			continue
