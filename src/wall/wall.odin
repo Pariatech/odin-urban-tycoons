@@ -27,8 +27,8 @@ Wall_Mask_Texture :: enum (u16) {
 }
 
 Wall_Axis :: enum {
-	North_South,
-	East_West,
+	N_S,
+	E_W,
 }
 
 Wall_Type_Part :: enum {
@@ -286,13 +286,13 @@ WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
 }
 
 WALL_SIDE_MAP :: [Wall_Axis][camera.Rotation]Wall_Side {
-	.North_South =  {
+	.N_S =  {
 		.South_West = .Outside,
 		.South_East = .Inside,
 		.North_East = .Inside,
 		.North_West = .Outside,
 	},
-	.East_West =  {
+	.E_W =  {
 		.South_West = .Outside,
 		.South_East = .Outside,
 		.North_East = .Inside,
@@ -301,13 +301,13 @@ WALL_SIDE_MAP :: [Wall_Axis][camera.Rotation]Wall_Side {
 }
 
 WALL_TRANSFORM_MAP :: [Wall_Axis][camera.Rotation]glsl.mat4 {
-	.North_South =  {
+	.N_S =  {
 		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.North_East = {0, 0, -1, -1, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
 		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
 	},
-	.East_West =  {
+	.E_W =  {
 		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.South_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.North_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 1},
@@ -318,13 +318,13 @@ WALL_TRANSFORM_MAP :: [Wall_Axis][camera.Rotation]glsl.mat4 {
 
 WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	.End_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -332,13 +332,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -346,13 +346,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -360,13 +360,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -374,13 +374,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -388,13 +388,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -402,13 +402,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -416,13 +416,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -430,13 +430,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Full,
@@ -444,13 +444,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -458,13 +458,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Full,
 			.North_East = .Side,
@@ -472,13 +472,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Full,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -486,13 +486,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Full,
@@ -500,13 +500,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Side,
@@ -514,13 +514,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Full,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Full,
 			.North_East = .Side,
@@ -528,13 +528,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Full,
 			.North_East = .Side,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Side,
 			.North_East = .Full,
@@ -545,13 +545,13 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 
 WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	.End_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Full,
 			.North_East = .Full,
@@ -559,13 +559,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -573,13 +573,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
 			.North_East = .End,
 			.North_West = .End,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .End,
 			.South_East = .Extended_Side,
 			.North_East = .Extended_Side,
@@ -587,13 +587,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .End,
 			.South_East = .End,
 			.North_East = .Extended_Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .End,
 			.North_East = .End,
@@ -601,13 +601,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .End,
 			.South_East = .Full,
 			.North_East = .Extended_Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .Full,
 			.North_East = .End,
@@ -615,13 +615,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
 			.North_East = .Full,
 			.North_West = .End,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Full,
 			.South_East = .Extended_Side,
 			.North_East = .Extended_Side,
@@ -629,13 +629,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_End =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Full,
 			.South_East = .End,
 			.North_East = .Extended_Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .End,
 			.North_East = .Full,
@@ -643,13 +643,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.End_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
 			.North_East = .End,
 			.North_West = .Full,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .End,
 			.South_East = .Extended_Side,
 			.North_East = .Extended_Side,
@@ -657,13 +657,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Extended_Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Extended_Side,
 			.North_East = .Side,
@@ -671,13 +671,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Extended_Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -685,13 +685,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Side =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Extended_Side,
@@ -699,13 +699,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Side_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
@@ -713,13 +713,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Extended_Side,
 			.North_East = .Extended_Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .Extended_Side,
 			.North_East = .Side,
@@ -727,13 +727,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Extended_Side,
@@ -741,13 +741,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Left_Corner_Right_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Extended_Side,
 			.North_West = .Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Extended_Side,
 			.North_East = .Side,
@@ -755,13 +755,13 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		},
 	},
 	.Right_Corner_Left_Corner =  {
-		.North_South =  {
+		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Extended_Side,
 			.North_East = .Side,
 			.North_West = .Extended_Side,
 		},
-		.East_West =  {
+		.E_W =  {
 			.South_West = .Extended_Side,
 			.South_East = .Side,
 			.North_East = .Extended_Side,
@@ -1202,7 +1202,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			draw_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
-				.East_West,
+				.E_W,
 				&vertices,
 				&indices,
 			)
@@ -1212,7 +1212,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			draw_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
-				.North_South,
+				.N_S,
 				&vertices,
 				&indices,
 			)
@@ -1222,7 +1222,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			draw_diagonal_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
-				.South_West_North_East,
+				.SW_NE,
 				&vertices,
 				&indices,
 			)
@@ -1232,7 +1232,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			draw_diagonal_wall(
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
-				.North_West_South_East,
+				.NW_SE,
 				&vertices,
 				&indices,
 			)

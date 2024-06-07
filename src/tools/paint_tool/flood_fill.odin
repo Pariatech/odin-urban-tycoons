@@ -5,10 +5,10 @@ import "core:math/linalg/glsl"
 import "../../wall"
 
 Wall_Type :: enum {
-	North_South,
-	East_West,
-	North_West_South_East,
-	South_West_North_East,
+	N_S,
+	E_W,
+	NW_SE,
+	SW_NE,
 }
 
 flood_fill :: proc(
@@ -34,92 +34,60 @@ get_next_left_wall :: proc(
 	bool,
 ) {
 	switch current.type {
-	case .East_West:
+	case .E_W:
 		switch current.side {
 		case .Inside:
 			return get_next_left_east_west_wall(current, texture, .Inside)
 		case .Outside:
 			return get_next_left_east_west_outside_wall(current, texture)
 		}
-	case .North_South:
-	case .North_West_South_East:
-	case .South_West_North_East:
+	case .N_S:
+	case .NW_SE:
+	case .SW_NE:
 	}
 
 	return {}, false
 }
 
 NEXT_LEFT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
-	.East_West =  {
+	.E_W =  {
 		.Inside =  {
-			{type = .North_South, position = {1, 0, 0}, side = .Outside},
-			 {
-				type = .South_West_North_East,
-				position = {1, 0, 0},
-				side = .Outside,
-			},
-			{type = .East_West, position = {1, 0, 0}, side = .Inside},
-			 {
-				type = .North_West_South_East,
-				position = {1, 0, -1},
-				side = .Inside,
-			},
-			{type = .North_South, position = {1, 0, -1}, side = .Inside},
-			{type = .East_West, position = {0, 0, 0}, side = .Outside},
+			{type = .N_S, position = {1, 0, 0}, side = .Outside},
+			{type = .SW_NE, position = {1, 0, 0}, side = .Outside},
+			{type = .E_W, position = {1, 0, 0}, side = .Inside},
+			{type = .NW_SE, position = {1, 0, -1}, side = .Inside},
+			{type = .N_S, position = {1, 0, -1}, side = .Inside},
+			{type = .E_W, position = {0, 0, 0}, side = .Outside},
 		},
 		.Outside =  {
-			{type = .North_South, position = {0, 0, -1}, side = .Inside},
-			 {
-				type = .South_West_North_East,
-				position = {-1, 0, -1},
-				side = .Inside,
-			},
-			{type = .East_West, position = {-1, 0, 0}, side = .Outside},
-			 {
-				type = .North_West_South_East,
-				position = {-1, 0, 0},
-				side = .Outside,
-			},
-			{type = .North_South, position = {0, 0, 0}, side = .Outside},
-			{type = .East_West, position = {0, 0, 0}, side = .Inside},
+			{type = .N_S, position = {0, 0, -1}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 0}, side = .Outside},
+			{type = .NW_SE, position = {-1, 0, 0}, side = .Outside},
+			{type = .N_S, position = {0, 0, 0}, side = .Outside},
+			{type = .E_W, position = {0, 0, 0}, side = .Inside},
 		},
 	},
-	.North_South =  {
+	.N_S =  {
 		.Inside =  {
-			{type = .East_West, position = {0, 0, 0}, side = .Inside},
-			 {
-				type = .North_West_South_East,
-				position = {0, 0, -1},
-				side = .Inside,
-			},
-			{type = .North_South, position = {0, 0, -1}, side = .Inside},
-			 {
-				type = .South_West_North_East,
-				position = {-1, 0, -1},
-				side = .Inside,
-			},
-			{type = .East_West, position = {-1, 0, 0}, side = .Outside},
-			{type = .North_South, position = {0, 0, 0}, side = .Outside},
+			{type = .E_W, position = {0, 0, 0}, side = .Inside},
+			{type = .NW_SE, position = {0, 0, -1}, side = .Inside},
+			{type = .N_S, position = {0, 0, -1}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 0}, side = .Outside},
+			{type = .N_S, position = {0, 0, 0}, side = .Outside},
 		},
 		.Outside =  {
-			{type = .East_West, position = {0, 0, 0}, side = .Inside},
-			 {
-				type = .North_West_South_East,
-				position = {0, 0, -1},
-				side = .Inside,
-			},
-			{type = .North_South, position = {0, 0, -1}, side = .Inside},
-			 {
-				type = .South_West_North_East,
-				position = {-1, 0, -1},
-				side = .Inside,
-			},
-			{type = .East_West, position = {-1, 0, 0}, side = .Outside},
-			{type = .North_South, position = {0, 0, 0}, side = .Outside},
+			{type = .E_W, position = {0, 0, 0}, side = .Inside},
+			{type = .NW_SE, position = {0, 0, -1}, side = .Inside},
+			{type = .N_S, position = {0, 0, -1}, side = .Inside},
+			{type = .SW_NE, position = {-1, 0, -1}, side = .Inside},
+			{type = .E_W, position = {-1, 0, 0}, side = .Outside},
+			{type = .N_S, position = {0, 0, 0}, side = .Outside},
 		},
 	},
-	.North_West_South_East = {.Inside = {}, .Outside = {}},
-	.South_West_North_East = {.Inside = {}, .Outside = {}},
+	.NW_SE = {.Inside = {}, .Outside = {}},
+	.SW_NE = {.Inside = {}, .Outside = {}},
 }
 
 get_next_left_east_west_wall :: proc(
@@ -134,8 +102,7 @@ get_next_left_east_west_wall :: proc(
 	if w, ok := wall.get_north_south_wall(position); ok {
 		side: wall.Wall_Side = .Outside - side
 		if w.textures[side] == texture {
-			return {position = position, side = side, type = .North_South},
-				true
+			return {position = position, side = side, type = .N_S}, true
 		}
 		return {}, false
 	}
@@ -149,7 +116,7 @@ get_next_left_east_west_wall :: proc(
 			return  {
 					position = current.position + {-1, 0, -1},
 					side = side,
-					type = .South_West_North_East,
+					type = .SW_NE,
 				},
 				true
 		}
@@ -159,7 +126,7 @@ get_next_left_east_west_wall :: proc(
 			return  {
 					position = current.position + {-1, 0, 0},
 					side = side,
-					type = .East_West,
+					type = .E_W,
 				},
 				true
 		}
@@ -170,24 +137,20 @@ get_next_left_east_west_wall :: proc(
 			return  {
 					position = current.position + {-1, 0, 0},
 					side = side,
-					type = .North_West_South_East,
+					type = .NW_SE,
 				},
 				true
 		}
 	} else if w, ok := wall.get_north_south_wall(current.position); ok {
 		if w.textures[side] == texture {
-			return  {
-					position = current.position,
-					side = side,
-					type = .North_South,
-				},
+			return {position = current.position, side = side, type = .N_S},
 				true
 		}
 	} else {
 		return  {
 				position = current.position,
 				side = .Outside - side,
-				type = .East_West,
+				type = .E_W,
 			},
 			true
 	}
@@ -207,7 +170,7 @@ get_next_left_east_west_outside_wall :: proc(
 			return  {
 					position = current.position + {0, 0, -1},
 					side = .Inside,
-					type = .North_South,
+					type = .N_S,
 				},
 				true
 		}
@@ -218,7 +181,7 @@ get_next_left_east_west_outside_wall :: proc(
 			return  {
 					position = current.position + {1, 0, -1},
 					side = .Inside,
-					type = .South_West_North_East,
+					type = .SW_NE,
 				},
 				true
 		}
@@ -228,7 +191,7 @@ get_next_left_east_west_outside_wall :: proc(
 			return  {
 					position = current.position + {1, 0, 0},
 					side = .Outside,
-					type = .South_West_North_East,
+					type = .SW_NE,
 				},
 				true
 		}
@@ -239,26 +202,17 @@ get_next_left_east_west_outside_wall :: proc(
 			return  {
 					position = current.position + {1, 0, 0},
 					side = .Outside,
-					type = .North_West_South_East,
+					type = .NW_SE,
 				},
 				true
 		}
 	} else if w, ok := wall.get_north_south_wall(current.position); ok {
 		if w.textures[.Outside] == texture {
-			return  {
-					position = current.position,
-					side = .Outside,
-					type = .North_South,
-				},
+			return {position = current.position, side = .Outside, type = .N_S},
 				true
 		}
 	} else {
-		return  {
-				position = current.position,
-				side = .Inside,
-				type = .East_West,
-			},
-			true
+		return {position = current.position, side = .Inside, type = .E_W}, true
 	}
 
 	return {}, false

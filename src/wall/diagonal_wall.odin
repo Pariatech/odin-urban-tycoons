@@ -9,8 +9,8 @@ import "../camera"
 import "../terrain"
 
 Diagonal_Wall_Axis :: enum {
-	South_West_North_East,
-	North_West_South_East,
+	SW_NE,
+	NW_SE,
 }
 
 Diagonal_Wall_Mask :: enum {
@@ -239,7 +239,7 @@ diagonal_wall_indices := []Wall_Index{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
 	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
-		.South_West_North_East =  {
+		.SW_NE =  {
 			.South_West =  {
 				.End_End = .Cross,
 				.Side_Side = .Cross,
@@ -313,7 +313,7 @@ DIAGONAL_WALL_MASK_MAP ::
 				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 		},
-		.North_West_South_East =  {
+		.NW_SE =  {
 			.South_West =  {
 				.End_End = .Side,
 				.Side_Side = .Side,
@@ -391,7 +391,7 @@ DIAGONAL_WALL_MASK_MAP ::
 
 DIAGONAL_WALL_TOP_MASK_MAP ::
 	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
-		.South_West_North_East =  {
+		.SW_NE =  {
 			.South_West =  {
 				.End_End = .Cross,
 				.Side_Side = .Cross,
@@ -465,7 +465,7 @@ DIAGONAL_WALL_TOP_MASK_MAP ::
 				.Right_Corner_Left_Corner = .Right_Extension,
 			},
 		},
-		.North_West_South_East =  {
+		.NW_SE =  {
 			.South_West =  {
 				.End_End = .Side,
 				.Side_Side = .Side,
@@ -543,23 +543,23 @@ DIAGONAL_WALL_TOP_MASK_MAP ::
 
 DIAGONAL_WALL_ROTATION_MAP ::
 	[Diagonal_Wall_Axis][camera.Rotation]Diagonal_Wall_Axis {
-		.South_West_North_East =  {
-			.South_West = .South_West_North_East,
-			.South_East = .North_West_South_East,
-			.North_East = .South_West_North_East,
-			.North_West = .North_West_South_East,
+		.SW_NE =  {
+			.South_West = .SW_NE,
+			.South_East = .NW_SE,
+			.North_East = .SW_NE,
+			.North_West = .NW_SE,
 		},
-		.North_West_South_East =  {
-			.South_West = .North_West_South_East,
-			.South_East = .South_West_North_East,
-			.North_East = .North_West_South_East,
-			.North_West = .South_West_North_East,
+		.NW_SE =  {
+			.South_West = .NW_SE,
+			.South_East = .SW_NE,
+			.North_East = .NW_SE,
+			.North_West = .SW_NE,
 		},
 	}
 
 DIAGONAL_WALL_DRAW_MAP ::
 	[Diagonal_Wall_Axis][Wall_Type][camera.Rotation]bool {
-		.South_West_North_East =  {
+		.SW_NE =  {
 			.End_End =  {
 				.South_West = true,
 				.South_East = true,
@@ -657,7 +657,7 @@ DIAGONAL_WALL_DRAW_MAP ::
 				.North_West = true,
 			},
 		},
-		.North_West_South_East =  {
+		.NW_SE =  {
 			.End_End =  {
 				.South_West = true,
 				.South_East = true,
@@ -758,13 +758,13 @@ DIAGONAL_WALL_DRAW_MAP ::
 	}
 
 DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][camera.Rotation]Wall_Side {
-		.South_West_North_East =  {
+		.SW_NE =  {
 			.South_West = .Outside,
 			.South_East = .Inside,
 			.North_East = .Inside,
 			.North_West = .Outside,
 		},
-		.North_West_South_East =  {
+		.NW_SE =  {
 			.South_West = .Outside,
 			.South_East = .Outside,
 			.North_East = .Inside,
