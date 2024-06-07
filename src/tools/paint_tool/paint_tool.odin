@@ -7,6 +7,7 @@ import "core:math/linalg/glsl"
 import "../../camera"
 import "../../cursor"
 import "../../floor"
+import "../../keyboard"
 import "../../mouse"
 import "../../tile"
 import "../../wall"
@@ -70,9 +71,48 @@ update :: proc() {
 		} else {
 			paint_wall(found_wall_position, found_wall_axis, texture)
 		}
-	} else if found_wall && mouse.is_button_press(.Left) {
+	} else if (found_wall || found_diagonal_wall) &&
+	   mouse.is_button_press(.Left) {
+		if keyboard.is_key_down(.Key_Left_Shift) {
+			apply_flood_fill()
+		}
 		found_wall_texture = texture
 	}
+}
+
+apply_flood_fill :: proc() {
+	type: Wall_Type
+	wall_side: wall.Wall_Side
+
+	if found_diagonal_wall {
+		switch found_diagonal_wall_axis {
+		case .NW_SE:
+			type = .NW_SE
+		case .SW_NE:
+			type = .SW_NE
+		}
+
+		side_map := wall.DIAGONAL_WALL_SIDE_MAP
+		wall_side = side_map[found_diagonal_wall_axis][camera.rotation]
+	} else {
+		switch found_wall_axis {
+		case .E_W:
+			type = .E_W
+		case .N_S:
+			type = .N_S
+		}
+
+		side_map := wall.WALL_SIDE_MAP
+		wall_side = side_map[found_wall_axis][camera.rotation]
+	}
+
+	flood_fill(
+		found_wall_position,
+		type,
+		wall_side,
+		found_wall_texture,
+		texture,
+	)
 }
 
 clear_previous_wall :: proc(
