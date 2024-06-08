@@ -937,6 +937,26 @@ get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 	return chunk_get_north_south_wall(get_chunk(pos), pos)
 }
 
+set_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis, w: Wall) {
+	switch axis {
+	case .E_W:
+		set_east_west_wall(pos, w)
+	case .N_S:
+		set_north_south_wall(pos, w)
+	}
+}
+
+get_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis) -> (Wall, bool) {
+	switch axis {
+	case .E_W:
+		return get_east_west_wall(pos)
+	case .N_S:
+		return get_north_south_wall(pos)
+	}
+
+    return {}, false
+}
+
 has_north_south_wall :: proc(pos: glsl.ivec3) -> bool {
 	return(
 		(pos.x >= 0 && pos.x < constants.WORLD_WIDTH) &&

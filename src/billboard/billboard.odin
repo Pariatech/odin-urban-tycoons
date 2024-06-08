@@ -638,6 +638,11 @@ get_billboard_1x1 :: proc(key: Key) -> (^Billboard_1x1, bool) {
 	return &chunk.instances[key]
 }
 
+has_billboard_1x1 :: proc(key: Key) -> bool {
+	chunk := get_chunk_1x1(key.pos)
+	return key in chunk.instances
+}
+
 mark_chunk_1x1_dirty :: proc(key: Key) {
 	chunk := get_chunk_1x1(key.pos)
 	chunk.dirty = true
@@ -648,6 +653,16 @@ billboard_1x1_set_texture :: proc(key: Key, texture: Texture_1x1) {
 	billboard, ok := &chunk.instances[key]
 	if ok {
 		billboard.texture = texture
+		billboard.depth_map = texture
+		chunk.dirty = true
+	}
+}
+
+billboard_1x1_set_light :: proc(key: Key, light: glsl.vec3) {
+	chunk := get_chunk_1x1(key.pos)
+	billboard, ok := &chunk.instances[key]
+	if ok {
+		billboard.light = light
 		chunk.dirty = true
 	}
 }
