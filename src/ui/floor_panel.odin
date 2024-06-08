@@ -10,8 +10,6 @@ Floor_Panel :: struct {
 	opened: bool,
 }
 
-PANEL_WIDTH :: 280
-PANEL_HEIGHT :: 74
 FLOOR_PANEL_TILE_SIZE :: 32
 FLOOR_PANEL_PADDING :: 4
 

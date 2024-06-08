@@ -71,6 +71,10 @@ icon_button :: proc(
 	right_border_width: f32 = BORDER_WIDTH,
 	top_border_width: f32 = BORDER_WIDTH,
 	bottom_border_width: f32 = BORDER_WIDTH,
+	left_padding: f32 = 0,
+	right_padding: f32 = 0,
+	top_padding: f32 = 0,
+	bottom_padding: f32 = 0,
 ) -> (
 	clicked: bool = false,
 ) {
@@ -86,6 +90,10 @@ icon_button :: proc(
 			right_border_width = right_border_width,
 			top_border_width = top_border_width,
 			bottom_border_width = bottom_border_width,
+			left_padding = left_padding,
+			right_padding = right_padding,
+			top_padding = top_padding,
+			bottom_padding = bottom_padding,
 		},
 	)
 

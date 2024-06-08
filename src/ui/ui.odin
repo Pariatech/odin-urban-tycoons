@@ -30,6 +30,9 @@ DARK_BLUE :: glsl.vec4{0.0, 0.251, 0.502, 1}
 
 BORDER_WIDTH :: 1
 
+PANEL_WIDTH :: len(Menu_Icon) * 31 + 1
+PANEL_HEIGHT :: 74
+
 Menu_Icon :: enum (int) {
 	Info,
 	Floor_Up,
@@ -103,6 +106,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_land_panel() or_return
 	init_wall_panel() or_return
 	init_paint_panel() or_return
+    init_door_panel() or_return
 
 	return true
 }
@@ -181,6 +185,7 @@ update :: proc(using ctx: ^Context) {
 	land_panel(ctx)
 	wall_panel(ctx)
     paint_panel(ctx)
+    door_panel(ctx)
 
 	container(
 		ctx,

@@ -15,12 +15,50 @@ import "../../tile"
 import "../../wall"
 import "../paint_tool"
 
+Texture :: enum {
+	Wood,
+	Dark_Wood,
+}
+
 door_billboard: Maybe(billboard.Key)
 position: glsl.vec3
 side: tile.Tile_Triangle_Side
 
 bound_wall: Maybe(glsl.ivec3)
 bound_wall_axis: wall.Wall_Axis
+texture: Texture
+
+TEXTURE_BILLBOARD_TEXTURES_MAP ::
+	[Texture][wall.Wall_Axis][camera.Rotation]billboard.Texture_1x1 {
+		.Wood = #partial {
+			.E_W =  {
+				.South_West = .Door_Wood_SW,
+				.South_East = .Door_Wood_SE,
+				.North_East = .Door_Wood_NE,
+				.North_West = .Door_Wood_NW,
+			},
+			.N_S =  {
+				.South_West = .Door_Wood_SE,
+				.South_East = .Door_Wood_NE,
+				.North_East = .Door_Wood_NW,
+				.North_West = .Door_Wood_SW,
+			},
+		},
+		.Dark_Wood = #partial {
+			.E_W =  {
+				.South_West = .Door_Dark_Wood_SW,
+				.South_East = .Door_Dark_Wood_SE,
+				.North_East = .Door_Dark_Wood_NE,
+				.North_West = .Door_Dark_Wood_NW,
+			},
+			.N_S =  {
+				.South_West = .Door_Dark_Wood_SE,
+				.South_East = .Door_Dark_Wood_NE,
+				.North_East = .Door_Dark_Wood_NW,
+				.North_West = .Door_Dark_Wood_SW,
+			},
+		},
+	}
 
 init :: proc() {
 	cursor.intersect_with_tiles(on_intersect, floor.floor)
@@ -56,7 +94,8 @@ update :: proc() {
 	} else if key, ok := &door_billboard.?; ok {
 		revert_bound_wall()
 		if !bind_to_wall(key) {
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
+	        texmap := TEXTURE_BILLBOARD_TEXTURES_MAP
+			billboard.billboard_1x1_set_texture(key^, texmap[texture][.E_W][.South_West])
 			billboard.billboard_1x1_move(key, position)
 			billboard.billboard_1x1_set_light(key^, {1, .5, .5})
 			bound_wall = nil
@@ -66,9 +105,9 @@ update :: proc() {
 		}
 	} else {
 		new_key := billboard.Key {
-			pos  = position,
-			type = .Door,
-		}
+				pos  = position,
+				type = .Door,
+			}
 
 		billboard.billboard_1x1_set(
 			new_key,
@@ -192,29 +231,14 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		return false
 	}
 
+	texmap := TEXTURE_BILLBOARD_TEXTURES_MAP
+
 	switch intersect.axis {
-	case .E_W:
-		switch camera.rotation {
-		case .South_West:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
-		case .South_East:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SE)
-		case .North_East:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NE)
-		case .North_West:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NW)
-		}
-	case .N_S:
-		switch camera.rotation {
-		case .South_West:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SE)
-		case .South_East:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NE)
-		case .North_East:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NW)
-		case .North_West:
-			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
-		}
+	case .E_W, .N_S:
+		billboard.billboard_1x1_set_texture(
+			key^,
+			texmap[texture][intersect.axis][camera.rotation],
+		)
 	case .NW_SE, .SW_NE:
 		return false
 	}

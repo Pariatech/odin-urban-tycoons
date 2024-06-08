@@ -12,12 +12,12 @@ ICON_VERTEX_SHADER :: "resources/shaders/ui/icon.vert"
 ICON_FRAGMENT_SHADER :: "resources/shaders/ui/icon.frag"
 
 ICON_QUAD_VERTICES := [?]Icon_Vertex {
-	{pos = {-1, -1}, texcoord = {0, -1, 0}, color = {1, 1, 1, 1}},
-	{pos = {1, -1}, texcoord = {1, -1, 0}, color = {1, 1, 1, 1}},
-	{pos = {1, 1}, texcoord = {1, 0, 0}, color = {1, 1, 1, 1}},
-	{pos = {-1, -1}, texcoord = {0, -1, 0}, color = {1, 1, 1, 1}},
-	{pos = {1, 1}, texcoord = {1, 0, 0}, color = {1, 1, 1, 1}},
-	{pos = {-1, 1}, texcoord = {0, 0, 0}, color = {1, 1, 1, 1}},
+	{pos = {-1, -1}, texcoord = {0, 0, 0}, color = {1, 1, 1, 1}},
+	{pos = {1, -1}, texcoord = {1, 0, 0}, color = {1, 1, 1, 1}},
+	{pos = {1, 1}, texcoord = {1, 1, 0}, color = {1, 1, 1, 1}},
+	{pos = {-1, -1}, texcoord = {0, 0, 0}, color = {1, 1, 1, 1}},
+	{pos = {1, 1}, texcoord = {1, 1, 0}, color = {1, 1, 1, 1}},
+	{pos = {-1, 1}, texcoord = {0, 1, 0}, color = {1, 1, 1, 1}},
 }
 
 Icon_Vertex :: struct {
@@ -48,6 +48,10 @@ Icon :: struct {
 	right_border_width:  f32,
 	top_border_width:    f32,
 	bottom_border_width: f32,
+	left_padding:        f32,
+	right_padding:       f32,
+	top_padding:         f32,
+	bottom_padding:      f32,
 }
 
 Icon_Draw_Call :: Icon
@@ -179,11 +183,26 @@ init_icon_texture_array :: proc(
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array^)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+	gl.TexParameteri(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_WRAP_S,
+		gl.CLAMP_TO_BORDER,
+	)
+	gl.TexParameteri(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_WRAP_T,
+		gl.CLAMP_TO_BORDER,
+	)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+	border_color := []f32{0, 0, 0, 0}
+	gl.TexParameterfv(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_BORDER_COLOR,
+		raw_data(border_color),
+	)
 
 	load_texture_2D_array(textures) or_return
 
@@ -221,16 +240,27 @@ draw_icon :: proc(using ctx: ^Context, using icon: Icon) {
 	vertices[4].pos = vertices[2].pos
 	vertices[5].pos = to_screen_pos({pos.x, pos.y + size.y})
 
+	vertices[0].texcoord.x -= left_padding / size.x
+	vertices[0].texcoord.y -= top_padding / size.y
+	vertices[1].texcoord.x += right_padding / size.x
+	vertices[1].texcoord.y -= top_padding / size.y
+	vertices[2].texcoord.x += right_padding / size.x
+	vertices[2].texcoord.y += bottom_padding / size.y
+	vertices[3].texcoord = vertices[0].texcoord
+	vertices[4].texcoord = vertices[2].texcoord
+	vertices[5].texcoord.x -= left_padding / size.x
+	vertices[5].texcoord.y += bottom_padding / size.y
+
 	for &v in vertices {
 		v.start = pos
 		v.end = pos + size
 		v.color = color
 		v.texcoord.z = f32(texture)
 
-        v.left_border_width = left_border_width
-        v.right_border_width = right_border_width
-        v.top_border_width = top_border_width
-        v.bottom_border_width = bottom_border_width
+		v.left_border_width = left_border_width
+		v.right_border_width = right_border_width
+		v.top_border_width = top_border_width
+		v.bottom_border_width = bottom_border_width
 	}
 
 	gl.BufferSubData(
