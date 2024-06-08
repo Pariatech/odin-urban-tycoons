@@ -22,6 +22,7 @@ MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/floor.png",
 	"resources/icons/paint_brush.png",
 	"resources/icons/door.png",
+	"resources/icons/window.png",
 }
 
 
@@ -44,6 +45,7 @@ Menu_Icon :: enum (int) {
 	Floor,
     Paint,
     Door,
+    Window,
 }
 
 Draw_Call :: union {
@@ -107,6 +109,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_wall_panel() or_return
 	init_paint_panel() or_return
     init_door_panel() or_return
+    init_window_panel() or_return
 
 	return true
 }
@@ -147,6 +150,9 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
     case .Door:
 		floor_panel_ctx.opened = false
         tools.open_door_tool()
+    case .Window:
+		floor_panel_ctx.opened = false
+        tools.open_window_tool()
 	}
 }
 
@@ -186,6 +192,7 @@ update :: proc(using ctx: ^Context) {
 	wall_panel(ctx)
     paint_panel(ctx)
     door_panel(ctx)
+    window_panel(ctx)
 
 	container(
 		ctx,
