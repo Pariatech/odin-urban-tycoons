@@ -25,8 +25,8 @@ window_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) 
 			   int(texmap[tex][.E_W][.South_West]),
                left_padding = -7,
                right_padding = 7,
-               top_padding = -8,
-               bottom_padding = 8,
+               top_padding = 0,
+               bottom_padding = 0,
 		   ) {
 			window_tool.texture = tex
 		}
