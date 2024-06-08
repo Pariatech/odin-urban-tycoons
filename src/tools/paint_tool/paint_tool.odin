@@ -16,19 +16,28 @@ position: glsl.ivec3
 side: tile.Tile_Triangle_Side
 
 found_wall: bool
-found_wall_position: glsl.ivec3
-found_wall_axis: wall.Wall_Axis
+found_wall_intersect: Wall_Intersect
 found_wall_texture: wall.Wall_Texture
 
 texture: wall.Wall_Texture = .Nyana
 dirty: bool
+
+Wall_Intersect :: struct {
+	pos:  glsl.ivec3,
+	axis: wall.Wall_Axis,
+}
 
 init :: proc() {
 
 }
 
 deinit :: proc() {
-	clear_previous_wall(found_wall_position, found_wall_axis)
+	if found_wall {
+		clear_previous_wall(
+			found_wall_intersect.pos,
+			found_wall_intersect.axis,
+		)
+	}
 }
 
 update :: proc() {
@@ -39,13 +48,12 @@ update :: proc() {
 
 	if dirty || previous_position != position || previous_side != side {
 		previous_found_wall := found_wall
-		previous_found_wall_position := found_wall_position
-		previous_found_wall_axis := found_wall_axis
+		previous_found_wall_intersect := found_wall_intersect
 
-		find_wall_intersect()
+		found_wall_intersect, found_wall = find_wall_intersect(position, side)
 		clear_previous_wall(
-			previous_found_wall_position,
-			previous_found_wall_axis,
+			previous_found_wall_intersect.pos,
+			previous_found_wall_intersect.axis,
 		)
 
 		if mouse.is_button_down(.Left) {
@@ -54,7 +62,11 @@ update :: proc() {
 			found_wall_texture = get_found_wall_texture()
 		}
 
-		paint_wall(found_wall_position, found_wall_axis, texture)
+		paint_wall(
+			found_wall_intersect.pos,
+			found_wall_intersect.axis,
+			texture,
+		)
 	} else if found_wall && mouse.is_button_press(.Left) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
 			apply_flood_fill()
@@ -72,11 +84,11 @@ set_texture :: proc(tex: wall.Wall_Texture) {
 
 apply_flood_fill :: proc() {
 	side_map := wall.WALL_SIDE_MAP
-	wall_side := side_map[found_wall_axis][camera.rotation]
+	wall_side := side_map[found_wall_intersect.axis][camera.rotation]
 
 	flood_fill(
-		found_wall_position,
-		found_wall_axis,
+		found_wall_intersect.pos,
+		found_wall_intersect.axis,
 		wall_side,
 		found_wall_texture,
 		texture,
@@ -96,28 +108,25 @@ clear_previous_wall :: proc(
 
 get_found_wall_texture :: proc() -> wall.Wall_Texture {
 	side_map := wall.WALL_SIDE_MAP
-	switch found_wall_axis {
+    using found_wall_intersect
+	switch axis {
 	case .E_W:
-		if w, ok := wall.get_east_west_wall(found_wall_position); ok {
-			return w.textures[side_map[found_wall_axis][camera.rotation]]
+		if w, ok := wall.get_east_west_wall(pos); ok {
+			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .N_S:
-		if w, ok := wall.get_north_south_wall(found_wall_position); ok {
-			return w.textures[side_map[found_wall_axis][camera.rotation]]
+		if w, ok := wall.get_north_south_wall(pos); ok {
+			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .NW_SE:
-		if w, ok := wall.get_north_west_south_east_wall(found_wall_position);
+		if w, ok := wall.get_north_west_south_east_wall(pos);
 		   ok {
-			return(
-				w.textures[side_map[found_wall_axis][camera.rotation]] \
-			)
+			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .SW_NE:
-		if w, ok := wall.get_south_west_north_east_wall(found_wall_position);
+		if w, ok := wall.get_south_west_north_east_wall(pos);
 		   ok {
-			return(
-				w.textures[side_map[found_wall_axis][camera.rotation]] \
-			)
+			return w.textures[side_map[axis][camera.rotation]]
 		}
 	}
 	return .Brick
@@ -172,531 +181,379 @@ on_intersect :: proc(intersect: glsl.vec3) {
 	}
 }
 
-find_wall_intersect :: proc() {
+find_wall_intersect :: proc(
+	position: glsl.ivec3,
+	side: tile.Tile_Triangle_Side,
+) -> (
+	Wall_Intersect,
+	bool,
+) {
 	switch camera.rotation {
 	case .South_West:
-		find_south_west_wall_intersect()
+		return find_south_west_wall_intersect(position, side)
 	case .South_East:
-		find_south_east_wall_intersect()
+		return find_south_east_wall_intersect(position, side)
 	case .North_East:
-		find_north_east_wall_intersect()
+		return find_north_east_wall_intersect(position, side)
 	case .North_West:
-		find_north_west_wall_intersect()
+		return find_north_west_wall_intersect(position, side)
 	}
+
+    return {}, false
 }
 
-find_south_west_wall_intersect :: proc() {
+find_south_west_wall_intersect :: proc(
+	position: glsl.ivec3,
+	side: tile.Tile_Triangle_Side,
+) -> (
+	Wall_Intersect,
+	bool,
+) {
 	switch side {
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position - {4 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position - {4 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position - {3 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 		}
 	}
+
+    return {}, false
 }
 
-find_south_east_wall_intersect :: proc() {
+find_south_east_wall_intersect :: proc(
+	position: glsl.ivec3,
+	side: tile.Tile_Triangle_Side,
+) -> (
+	Wall_Intersect,
+	bool,
+) {
 	switch side {
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 		}
 	}
+
+    return {}, false
 }
 
-find_north_east_wall_intersect :: proc() {
+find_north_east_wall_intersect :: proc(
+	position: glsl.ivec3,
+	side: tile.Tile_Triangle_Side,
+) -> (
+	Wall_Intersect,
+	bool,
+) {
 	switch side {
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {3 - i, 0, 3 - i};
 			   wall.has_north_west_south_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .NW_SE
-				found_wall = true
-				return
+				return {pos, .NW_SE}, true
 			}
 		}
 	}
+
+    return {}, false
 }
 
-find_north_west_wall_intersect :: proc() {
+find_north_west_wall_intersect :: proc(
+	position: glsl.ivec3,
+	side: tile.Tile_Triangle_Side,
+) -> (
+	Wall_Intersect,
+	bool,
+) {
 	switch side {
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {-4 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-4 + i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {-4 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_north_south_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .N_S
-				found_wall = true
-				return
+				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
 			   wall.has_east_west_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .E_W
-				found_wall = true
-				return
+				return {pos, .E_W}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
 			   wall.has_south_west_north_east_wall(pos) {
-				found_wall_position = pos
-				found_wall_axis = .SW_NE
-				found_wall = true
-				return
+				return {pos, .SW_NE}, true
 			}
 		}
 	}
+
+    return {}, false
 }
