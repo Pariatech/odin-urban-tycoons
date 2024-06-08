@@ -6,12 +6,14 @@ import "floor_tool"
 import "paint_tool"
 import "terrain_tool"
 import "wall_tool"
+import "window_tool"
 
-TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_T
-WALL_TOOL_KEY :: keyboard.Key_Value.Key_G
-FLOOR_TOOL_KEY :: keyboard.Key_Value.Key_F
-PAINT_TOOL_KEY :: keyboard.Key_Value.Key_P
-DOOR_TOOL_KEY :: keyboard.Key_Value.Key_L
+TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_1
+WALL_TOOL_KEY :: keyboard.Key_Value.Key_2
+FLOOR_TOOL_KEY :: keyboard.Key_Value.Key_3
+PAINT_TOOL_KEY :: keyboard.Key_Value.Key_4
+DOOR_TOOL_KEY :: keyboard.Key_Value.Key_5
+WINDOW_TOOL_KEY :: keyboard.Key_Value.Key_6
 
 active_tool: Tool = .Terrain
 
@@ -21,6 +23,7 @@ Tool :: enum {
 	Floor,
 	Paint,
 	Door,
+	Window,
 }
 
 update :: proc(delta_time: f64) {
@@ -34,6 +37,8 @@ update :: proc(delta_time: f64) {
 		open_paint_tool()
 	} else if keyboard.is_key_press(DOOR_TOOL_KEY) {
 		open_door_tool()
+	} else if keyboard.is_key_press(WINDOW_TOOL_KEY) {
+		open_window_tool()
 	}
 
 	switch active_tool {
@@ -47,6 +52,8 @@ update :: proc(delta_time: f64) {
 		paint_tool.update()
 	case .Door:
 		door_tool.update()
+	case .Window:
+		window_tool.update()
 	}
 }
 
@@ -99,3 +106,16 @@ open_door_tool :: proc() {
 	door_tool.init()
 	active_tool = .Door
 }
+
+
+open_window_tool :: proc() {
+	floor_tool.deinit()
+	wall_tool.deinit()
+	terrain_tool.deinit()
+	paint_tool.deinit()
+	door_tool.deinit()
+
+	window_tool.init()
+	active_tool = .Window
+}
+
