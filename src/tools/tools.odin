@@ -62,6 +62,7 @@ open_wall_tool :: proc() {
 	floor_tool.deinit()
 	paint_tool.deinit()
 	door_tool.deinit()
+    window_tool.deinit()
 
 	wall_tool.init()
 	active_tool = .Wall
@@ -72,6 +73,7 @@ open_land_tool :: proc() {
 	floor_tool.deinit()
 	paint_tool.deinit()
 	door_tool.deinit()
+    window_tool.deinit()
 
 	terrain_tool.init()
 	active_tool = .Terrain
@@ -82,6 +84,7 @@ open_floor_tool :: proc() {
 	terrain_tool.deinit()
 	paint_tool.deinit()
 	door_tool.deinit()
+    window_tool.deinit()
 
 	floor_tool.init()
 	active_tool = .Floor
@@ -92,6 +95,7 @@ open_paint_tool :: proc() {
 	wall_tool.deinit()
 	terrain_tool.deinit()
 	door_tool.deinit()
+    window_tool.deinit()
 
 	paint_tool.init()
 	active_tool = .Paint
@@ -102,6 +106,7 @@ open_door_tool :: proc() {
 	wall_tool.deinit()
 	terrain_tool.deinit()
 	paint_tool.deinit()
+    window_tool.deinit()
 
 	door_tool.init()
 	active_tool = .Door
