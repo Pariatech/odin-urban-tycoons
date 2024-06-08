@@ -8,6 +8,7 @@ import "../../billboard"
 import "../../camera"
 import "../../cursor"
 import "../../floor"
+import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
 import "../../tile"
@@ -33,9 +34,26 @@ deinit :: proc() {
 }
 
 update :: proc() {
+	previous_position := position
+	previous_side := side
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
-	if key, ok := &door_billboard.?; ok {
+	removing := keyboard.is_key_down(.Key_Left_Control)
+
+	if removing {
+		revert_bound_wall()
+		bound_wall = nil
+		if key, ok := door_billboard.?; ok {
+			billboard.billboard_1x1_remove(key)
+			door_billboard = nil
+		}
+
+		if mouse.is_button_press(.Left) {
+			remove_door()
+		} else {
+			mark_door_removal(previous_position, previous_side)
+		}
+	} else if key, ok := &door_billboard.?; ok {
 		revert_bound_wall()
 		if !bind_to_wall(key) {
 			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
@@ -82,6 +100,67 @@ on_intersect :: proc(intersect: glsl.vec3) {
 	}
 }
 
+remove_door :: proc() {
+	pos := glsl.ivec3 {
+		i32(position.x + 0.5),
+		floor.floor,
+		i32(position.z + 0.5),
+	}
+
+	if intersect, ok := paint_tool.find_wall_intersect(pos, side); ok {
+		pos = intersect.pos
+		fpos := glsl.vec3 {
+			f32(pos.x),
+			terrain.get_tile_height(int(pos.x), int(pos.z)),
+			f32(pos.z),
+		}
+
+		if billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
+			billboard.billboard_1x1_remove({pos = fpos, type = .Door})
+			w, _ := wall.get_wall(intersect.pos, intersect.axis)
+			w.mask = .Full_Mask
+			wall.set_wall(intersect.pos, intersect.axis, w)
+		}
+	}
+}
+
+set_door_light :: proc(
+	position: glsl.vec3,
+	side: tile.Tile_Triangle_Side,
+	light: glsl.vec3,
+) {
+	pos := glsl.ivec3 {
+		i32(position.x + 0.5),
+		floor.floor,
+		i32(position.z + 0.5),
+	}
+
+	if intersect, ok := paint_tool.find_wall_intersect(pos, side); ok {
+		pos = intersect.pos
+		fpos := glsl.vec3 {
+			f32(pos.x),
+			terrain.get_tile_height(int(pos.x), int(pos.z)),
+			f32(pos.z),
+		}
+
+		key := billboard.Key {
+			pos  = fpos,
+			type = .Door,
+		}
+		if billboard.has_billboard_1x1(key) {
+			billboard.billboard_1x1_set_light(key, light)
+		}
+	}
+}
+
+mark_door_removal :: proc(
+	previous_position: glsl.vec3,
+	previous_side: tile.Tile_Triangle_Side,
+) {
+	set_door_light(previous_position, previous_side, {1, 1, 1})
+	set_door_light(position, side, {1, .5, .5})
+}
+
 revert_bound_wall :: proc() {
 	if pos, ok := bound_wall.?; ok {
 		w, _ := wall.get_wall(pos, bound_wall_axis)
@@ -107,23 +186,10 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		f32(pos.z),
 	}
 
-	//   if billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
-	// door_billboard = nil
-	//       return true
-	//   }
-
 	if ((bound_wall == nil || bound_wall.? != pos) &&
 		   billboard.has_billboard_1x1({pos = fpos, type = .Door})) ||
 	   billboard.has_billboard_1x1({pos = fpos, type = .Window}) {
 		return false
-	}
-
-	switch camera.rotation {
-	case .South_West:
-	case .South_East:
-	// fpos -= {1, 0, 0}
-	case .North_East:
-	case .North_West:
 	}
 
 	switch intersect.axis {
