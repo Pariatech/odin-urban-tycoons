@@ -5,7 +5,7 @@ import "core:math/linalg/glsl"
 
 import "../../wall"
 
-NEXT_LEFT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
+NEXT_LEFT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
 	.E_W =  {
 		.Inside =  {
 			{type = .N_S, position = {1, 0, 0}, side = .Outside},
@@ -80,7 +80,7 @@ NEXT_LEFT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
 	},
 }
 
-NEXT_RIGHT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
+NEXT_RIGHT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
 	.E_W =  {
 		.Inside =  {
 			{type = .N_S, position = {-1, 0, 0}, side = .Inside},
@@ -155,23 +155,16 @@ NEXT_RIGHT_WALL_MAP :: [Wall_Type][wall.Wall_Side][]Next_Wall {
 	},
 }
 
-Wall_Type :: enum {
-	N_S,
-	E_W,
-	NW_SE,
-	SW_NE,
-}
-
 Next_Wall :: struct {
 	position: glsl.ivec3,
 	side:     wall.Wall_Side,
-	type:     Wall_Type,
+	type:     wall.Wall_Axis,
 	wall:     wall.Wall,
 }
 
 flood_fill :: proc(
 	position: glsl.ivec3,
-	type: Wall_Type,
+	type: wall.Wall_Axis,
 	side: wall.Wall_Side,
 	previous_texture: wall.Wall_Texture,
 	texture: wall.Wall_Texture,
@@ -201,7 +194,7 @@ paint_next_wall :: proc(next_wall: Next_Wall, texture: wall.Wall_Texture) {
 	set_wall_by_type(next_wall.position, next_wall.type, w)
 }
 
-set_wall_by_type :: proc(position: glsl.ivec3, type: Wall_Type, w: wall.Wall) {
+set_wall_by_type :: proc(position: glsl.ivec3, type: wall.Wall_Axis, w: wall.Wall) {
 	switch type {
 	case .E_W:
 		wall.set_east_west_wall(position, w)
@@ -216,7 +209,7 @@ set_wall_by_type :: proc(position: glsl.ivec3, type: Wall_Type, w: wall.Wall) {
 
 get_wall_by_type :: proc(
 	position: glsl.ivec3,
-	type: Wall_Type,
+	type: wall.Wall_Axis,
 ) -> (
 	wall.Wall,
 	bool,
@@ -258,7 +251,7 @@ get_next_right_wall :: proc(
 get_next_wall :: proc(
 	current: Next_Wall,
 	texture: wall.Wall_Texture,
-	next_wall_map: [Wall_Type][wall.Wall_Side][]Next_Wall,
+	next_wall_map: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall,
 ) -> (
 	Next_Wall,
 	bool,

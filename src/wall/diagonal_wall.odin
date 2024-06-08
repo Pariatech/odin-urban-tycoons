@@ -4,14 +4,9 @@ import "core:fmt"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 
-import "../constants"
 import "../camera"
+import "../constants"
 import "../terrain"
-
-Diagonal_Wall_Axis :: enum {
-	SW_NE,
-	NW_SE,
-}
 
 Diagonal_Wall_Mask :: enum {
 	Full,
@@ -122,22 +117,38 @@ diagonal_wall_cross_vertices := []Wall_Vertex {
 
 diagonal_wall_top_cross_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.385},
+		pos =  {
+			-0.5,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+			-0.385,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, -0.5},
+		pos =  {
+			-0.385,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+			-0.5,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.5},
+		pos =  {
+			0.615,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+			0.5,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
 	 {
-		pos = {0.5, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET, 0.615},
+		pos =  {
+			0.5,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+			0.615,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
@@ -145,22 +156,38 @@ diagonal_wall_top_cross_vertices := []Wall_Vertex {
 
 diagonal_wall_top_full_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
+		pos =  {
+			-0.5575,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.5575,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
+		pos =  {
+			0.5575,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.5575,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
+		pos =  {
+			0.6725,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.4425,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
+		pos =  {
+			-0.4425,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.6725,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -168,7 +195,11 @@ diagonal_wall_top_full_vertices := []Wall_Vertex {
 
 diagonal_wall_top_left_extension_vertices := []Wall_Vertex {
 	 {
-		pos = {-0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.5575},
+		pos =  {
+			-0.5575,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.5575,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0.115, 0, 0},
 	},
@@ -178,12 +209,20 @@ diagonal_wall_top_left_extension_vertices := []Wall_Vertex {
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
+		pos =  {
+			0.615,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.385,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.4425, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.6725},
+		pos =  {
+			-0.4425,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.6725,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -196,17 +235,29 @@ diagonal_wall_top_right_extension_vertices := []Wall_Vertex {
 		texcoords = {0, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.5575, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.5575},
+		pos =  {
+			0.5575,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.5575,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.6725, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.4425},
+		pos =  {
+			0.6725,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.4425,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
+		pos =  {
+			-0.385,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.615,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -224,12 +275,20 @@ diagonal_wall_top_side_vertices := []Wall_Vertex {
 		texcoords = {1, 0.115, 0, 0},
 	},
 	 {
-		pos = {0.615, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, -0.385},
+		pos =  {
+			0.615,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			-0.385,
+		},
 		light = {1, 1, 1},
 		texcoords = {1, 0, 0, 0},
 	},
 	 {
-		pos = {-0.385, constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET, 0.615},
+		pos =  {
+			-0.385,
+			constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+			0.615,
+		},
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
@@ -238,7 +297,7 @@ diagonal_wall_top_side_vertices := []Wall_Vertex {
 diagonal_wall_indices := []Wall_Index{0, 1, 2, 0, 2, 3}
 
 DIAGONAL_WALL_MASK_MAP ::
-	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
+	#partial [Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.SW_NE =  {
 			.South_West =  {
 				.End_End = .Cross,
@@ -390,7 +449,7 @@ DIAGONAL_WALL_MASK_MAP ::
 	}
 
 DIAGONAL_WALL_TOP_MASK_MAP ::
-	[Diagonal_Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
+	#partial [Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
 		.SW_NE =  {
 			.South_West =  {
 				.End_End = .Cross,
@@ -542,7 +601,7 @@ DIAGONAL_WALL_TOP_MASK_MAP ::
 	}
 
 DIAGONAL_WALL_ROTATION_MAP ::
-	[Diagonal_Wall_Axis][camera.Rotation]Diagonal_Wall_Axis {
+	#partial [Wall_Axis][camera.Rotation]Wall_Axis {
 		.SW_NE =  {
 			.South_West = .SW_NE,
 			.South_East = .NW_SE,
@@ -558,7 +617,7 @@ DIAGONAL_WALL_ROTATION_MAP ::
 	}
 
 DIAGONAL_WALL_DRAW_MAP ::
-	[Diagonal_Wall_Axis][Wall_Type][camera.Rotation]bool {
+	#partial [Wall_Axis][Wall_Type][camera.Rotation]bool {
 		.SW_NE =  {
 			.End_End =  {
 				.South_West = true,
@@ -754,21 +813,6 @@ DIAGONAL_WALL_DRAW_MAP ::
 				.North_East = true,
 				.North_West = false,
 			},
-		},
-	}
-
-DIAGONAL_WALL_SIDE_MAP :: [Diagonal_Wall_Axis][camera.Rotation]Wall_Side {
-		.SW_NE =  {
-			.South_West = .Outside,
-			.South_East = .Inside,
-			.North_East = .Inside,
-			.North_West = .Outside,
-		},
-		.NW_SE =  {
-			.South_West = .Outside,
-			.South_East = .Outside,
-			.North_East = .Inside,
-			.North_West = .Inside,
 		},
 	}
 
@@ -784,7 +828,7 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [camera.Rotation]glsl.mat4 {
 draw_diagonal_wall :: proc(
 	pos: glsl.ivec3,
 	wall: Wall,
-	axis: Diagonal_Wall_Axis,
+	axis: Wall_Axis,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
@@ -792,7 +836,7 @@ draw_diagonal_wall :: proc(
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
 	draw_map := DIAGONAL_WALL_DRAW_MAP
 	top_mask_map := DIAGONAL_WALL_TOP_MASK_MAP
-	side_map := DIAGONAL_WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 	transform_map := DIAGONAL_WALL_TRANSFORM_MAP
 
 	side := side_map[axis][camera.rotation]
@@ -803,7 +847,8 @@ draw_diagonal_wall :: proc(
 	draw := draw_map[axis][wall.type][camera.rotation]
 	position := glsl.vec3 {
 		f32(pos.x),
-		f32(pos.y) * constants.WALL_HEIGHT + terrain.terrain_heights[pos.x][pos.z],
+		f32(pos.y) * constants.WALL_HEIGHT +
+		terrain.terrain_heights[pos.x][pos.z],
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
