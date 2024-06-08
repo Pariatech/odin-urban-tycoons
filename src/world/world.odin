@@ -257,7 +257,7 @@ add_house_floor_walls :: proc(
 	if floor > 0 {
 		billboard.billboard_1x1_set(
 			 {
-				type = .Window,
+				type = .Window_N_S,
 				pos =  {
 					f32(house_x + 1),
 					f32(floor * constants.WALL_HEIGHT),
@@ -314,7 +314,7 @@ add_house_floor_walls :: proc(
 		)
 		billboard.billboard_1x1_set(
 			 {
-				type = .Window,
+				type = .Window_N_S,
 				pos =  {
 					f32(house_x),
 					f32(floor * constants.WALL_HEIGHT),
@@ -361,7 +361,7 @@ add_house_floor_walls :: proc(
 
 		billboard.billboard_1x1_set(
 			 {
-				type = .Window,
+				type = .Window_E_W,
 				pos =  {
 					f32(house_x + i32(i) + 1),
 					f32(floor * constants.WALL_HEIGHT),
@@ -408,7 +408,7 @@ add_house_floor_walls :: proc(
 
 		billboard.billboard_1x1_set(
 			 {
-				type = .Window,
+				type = .Window_E_W,
 				pos =  {
 					f32(house_x + i32(i) + 1),
 					f32(floor * constants.WALL_HEIGHT),

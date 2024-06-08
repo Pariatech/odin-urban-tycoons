@@ -1,4 +1,4 @@
-package door_tool
+package window_tool
 
 import "core:log"
 import "core:math"
@@ -20,54 +20,51 @@ Texture :: enum {
 	Dark_Wood,
 }
 
-door_billboard: Maybe(billboard.Key)
-position: glsl.vec3
-side: tile.Tile_Triangle_Side
-texture: Texture
-
-bound_wall: Maybe(glsl.ivec3)
-bound_wall_axis: wall.Wall_Axis
-
 TEXTURE_BILLBOARD_TEXTURES_MAP ::
 	[Texture][wall.Wall_Axis][camera.Rotation]billboard.Texture_1x1 {
 		.Wood = #partial {
 			.E_W =  {
-				.South_West = .Door_Wood_SW,
-				.South_East = .Door_Wood_SE,
-				.North_East = .Door_Wood_NE,
-				.North_West = .Door_Wood_NW,
+				.South_West = .Window_Wood_SW,
+				.South_East = .Window_Wood_SE,
+				.North_East = .Window_Wood_NE,
+				.North_West = .Window_Wood_NW,
 			},
 			.N_S =  {
-				.South_West = .Door_Wood_SE,
-				.South_East = .Door_Wood_NE,
-				.North_East = .Door_Wood_NW,
-				.North_West = .Door_Wood_SW,
+				.South_West = .Window_Wood_SE,
+				.South_East = .Window_Wood_NE,
+				.North_East = .Window_Wood_NW,
+				.North_West = .Window_Wood_SW,
 			},
 		},
 		.Dark_Wood = #partial {
 			.E_W =  {
-				.South_West = .Door_Dark_Wood_SW,
-				.South_East = .Door_Dark_Wood_SE,
-				.North_East = .Door_Dark_Wood_NE,
-				.North_West = .Door_Dark_Wood_NW,
+				.South_West = .Window_Dark_Wood_SW,
+				.South_East = .Window_Dark_Wood_SE,
+				.North_East = .Window_Dark_Wood_NE,
+				.North_West = .Window_Dark_Wood_NW,
 			},
 			.N_S =  {
-				.South_West = .Door_Dark_Wood_SE,
-				.South_East = .Door_Dark_Wood_NE,
-				.North_East = .Door_Dark_Wood_NW,
-				.North_West = .Door_Dark_Wood_SW,
+				.South_West = .Window_Dark_Wood_SE,
+				.South_East = .Window_Dark_Wood_NE,
+				.North_East = .Window_Dark_Wood_NW,
+				.North_West = .Window_Dark_Wood_SW,
 			},
 		},
 	}
+
+cursor_billboard: Maybe(billboard.Key)
+position: glsl.vec3
+side: tile.Tile_Triangle_Side
+texture: Texture
 
 init :: proc() {
 	cursor.intersect_with_tiles(on_intersect, floor.floor)
 }
 
 deinit :: proc() {
-	if key, ok := door_billboard.?; ok {
+	if key, ok := cursor_billboard.?; ok {
 		billboard.billboard_1x1_remove(key)
-		door_billboard = nil
+		cursor_billboard = nil
 	}
 }
 
@@ -80,16 +77,15 @@ update :: proc() {
 
 	if removing {
 		revert_bound_wall()
-		bound_wall = nil
-		if key, ok := door_billboard.?; ok {
+		if key, ok := cursor_billboard.?; ok {
 			billboard.billboard_1x1_remove(key)
-			door_billboard = nil
+			cursor_billboard = nil
 		}
 
 		if mouse.is_button_press(.Left) {
-			remove_door()
+			remove_window()
 		} else {
-			mark_door_removal(previous_position, previous_side)
+			mark_window_removal(previous_position, previous_side)
 		}
 	} else if key, ok := &door_billboard.?; ok {
 		revert_bound_wall()
@@ -98,10 +94,8 @@ update :: proc() {
 			billboard.billboard_1x1_set_texture(key^, texmap[texture][.E_W][.South_West])
 			billboard.billboard_1x1_move(key, position)
 			billboard.billboard_1x1_set_light(key^, {1, .5, .5})
-			bound_wall = nil
 		} else if mouse.is_button_press(.Left) {
-			door_billboard = nil
-			bound_wall = nil
+			cursor_billboard = nil
 		}
 	} else {
 		new_key := billboard.Key {
@@ -139,7 +133,7 @@ on_intersect :: proc(intersect: glsl.vec3) {
 	}
 }
 
-remove_door :: proc() {
+remove_window :: proc() {
 	pos := glsl.ivec3 {
 		i32(position.x + 0.5),
 		floor.floor,
@@ -154,8 +148,13 @@ remove_door :: proc() {
 			f32(pos.z),
 		}
 
-		if billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
-			billboard.billboard_1x1_remove({pos = fpos, type = .Door})
+        type:  billboard.Billboard_Type
+        switch intersect.axis {
+
+        }
+
+		if billboard.has_billboard_1x1({pos = fpos, type = .Window}) {
+			billboard.billboard_1x1_remove({pos = fpos, type = .Window})
 			w, _ := wall.get_wall(intersect.pos, intersect.axis)
 			w.mask = .Full_Mask
 			wall.set_wall(intersect.pos, intersect.axis, w)
@@ -163,7 +162,7 @@ remove_door :: proc() {
 	}
 }
 
-set_door_light :: proc(
+set_window_light :: proc(
 	position: glsl.vec3,
 	side: tile.Tile_Triangle_Side,
 	light: glsl.vec3,
@@ -184,7 +183,7 @@ set_door_light :: proc(
 
 		key := billboard.Key {
 			pos  = fpos,
-			type = .Door,
+			type = .Window,
 		}
 		if billboard.has_billboard_1x1(key) {
 			billboard.billboard_1x1_set_light(key, light)
@@ -225,14 +224,9 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		f32(pos.z),
 	}
 
-    window_type: billboard.Billboard_Type = .Window_E_W
-    if intersect.axis == .N_S {
-        window_type = .Window_N_S
-    }
-
 	if ((bound_wall == nil || bound_wall.? != pos) &&
 		   billboard.has_billboard_1x1({pos = fpos, type = .Door})) ||
-	   billboard.has_billboard_1x1({pos = fpos, type = window_type}) {
+	   billboard.has_billboard_1x1({pos = fpos, type = .Window}) {
 		return false
 	}
 
