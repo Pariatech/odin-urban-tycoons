@@ -5,6 +5,7 @@ import "core:math"
 import "core:math/linalg/glsl"
 
 import "../../billboard"
+import "../../camera"
 import "../../cursor"
 import "../../floor"
 import "../../mouse"
@@ -98,7 +99,7 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 
 	intersect := paint_tool.find_wall_intersect(pos, side) or_return
 
-    pos = intersect.pos
+	pos = intersect.pos
 
 	fpos := glsl.vec3 {
 		f32(pos.x),
@@ -106,17 +107,43 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		f32(pos.z),
 	}
 
-	if (bound_wall == nil &&
+	//   if billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
+	// door_billboard = nil
+	//       return true
+	//   }
+
+	if ((bound_wall == nil || bound_wall.? != pos) &&
 		   billboard.has_billboard_1x1({pos = fpos, type = .Door})) ||
 	   billboard.has_billboard_1x1({pos = fpos, type = .Window}) {
 		return false
 	}
 
+	switch camera.rotation {
+	case .South_West:
+	case .South_East:
+	// fpos -= {1, 0, 0}
+	case .North_East:
+	case .North_West:
+	}
+
 	switch intersect.axis {
 	case .E_W:
+		// switch camera.rotation {
+		// case .South_West:
 		billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
+	// case .South_East:
+	// case .North_East:
+	// case .North_West:
+	// }
 	case .N_S:
-		billboard.billboard_1x1_set_texture(key^, .Door_Wood_SE)
+		switch camera.rotation {
+		case .South_West:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SE)
+		case .South_East:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NE)
+		case .North_East:
+		case .North_West:
+		}
 	case .NW_SE, .SW_NE:
 		return false
 	}
