@@ -109,7 +109,7 @@ update :: proc() {
 	} else {
 		new_key := billboard.Key {
 				pos  = position,
-				type = .Door,
+				type = .Window_E_W,
 			}
 
 		billboard.billboard_1x1_set(
@@ -238,18 +238,31 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		f32(pos.z),
 	}
 
-	key.type = .Window_E_W
+	window_type: billboard.Billboard_Type = .Window_E_W
 	if intersect.axis == .N_S {
-		key.type = .Window_N_S
+		window_type = .Window_N_S
 	}
 
 	if ((bound_wall == nil || bound_wall.? != pos) &&
-		   billboard.has_billboard_1x1({pos = fpos, type = .Door})) ||
-	   billboard.has_billboard_1x1({pos = fpos, type = key.type}) {
+		   billboard.has_billboard_1x1({pos = fpos, type = window_type})) ||
+	   billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
 		return false
 	}
 
 	texmap := TEXTURE_BILLBOARD_TEXTURES_MAP
+
+	if window_type != key.type {
+		billboard.billboard_1x1_remove(key^)
+		key.type = window_type
+		billboard.billboard_1x1_set(
+			key^,
+			 {
+				light = {1, 0.5, 0.5},
+				texture = texmap[texture][intersect.axis][.South_West],
+				depth_map = texmap[texture][intersect.axis][.South_West],
+			},
+		)
+	}
 
 	switch intersect.axis {
 	case .E_W, .N_S:
@@ -269,7 +282,7 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 
 	if w, ok := wall.get_wall(pos, intersect.axis); ok {
 		w := w
-		w.mask = .Door_Opening
+		w.mask = .Window_Opening
 		wall.set_wall(pos, intersect.axis, w)
 	}
 
