@@ -128,13 +128,16 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 
 	switch intersect.axis {
 	case .E_W:
-		// switch camera.rotation {
-		// case .South_West:
-		billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
-	// case .South_East:
-	// case .North_East:
-	// case .North_West:
-	// }
+		switch camera.rotation {
+		case .South_West:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
+		case .South_East:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SE)
+		case .North_East:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NE)
+		case .North_West:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NW)
+		}
 	case .N_S:
 		switch camera.rotation {
 		case .South_West:
@@ -142,7 +145,9 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 		case .South_East:
 			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NE)
 		case .North_East:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_NW)
 		case .North_West:
+			billboard.billboard_1x1_set_texture(key^, .Door_Wood_SW)
 		}
 	case .NW_SE, .SW_NE:
 		return false
