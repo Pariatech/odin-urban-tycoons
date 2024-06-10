@@ -978,7 +978,7 @@ update_after_clockwise_rotation_2x2 :: proc(
 	billboards.dirty = true
 }
 
-draw_billboards :: proc(floor: int) {
+draw_billboards :: proc(floor: i32) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
 
@@ -1006,7 +1006,7 @@ draw_billboards :: proc(floor: int) {
 		billboard_1x1_draw_context.depth_map_texture_array,
 	)
 
-	for &floor in chunks_1x1 {
+	for &floor in chunks_1x1[:floor + 1] {
 		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk_billboards_draw(&floor[x][z], billboard_1x1_draw_context)

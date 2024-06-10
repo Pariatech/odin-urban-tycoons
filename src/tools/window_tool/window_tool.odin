@@ -62,6 +62,7 @@ bound_wall_axis: wall.Wall_Axis
 
 init :: proc() {
 	cursor.intersect_with_tiles(on_intersect, floor.floor)
+    floor.show_markers = true
 }
 
 deinit :: proc() {

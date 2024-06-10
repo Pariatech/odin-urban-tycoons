@@ -12,22 +12,24 @@ FLOOR_OFFSET :: 0.0004
 
 previous_floor: i32
 floor: i32
+show_markers: bool
+previous_show_markers: bool
 
 move_up :: proc() {
 	previous_floor = floor
 	floor = min(floor + 1, constants.WORLD_HEIGHT - 1)
-    update_markers()
+	update_markers()
 }
 
 move_down :: proc() {
 	previous_floor = floor
 	floor = max(floor - 1, 0)
-    update_markers()
+	update_markers()
 }
 
 update_markers :: proc() {
-	if previous_floor != floor {
-		if previous_floor > 0 {
+	if previous_floor != floor || previous_show_markers != show_markers {
+		if previous_floor > 0 && previous_show_markers {
 			for x in 0 ..< constants.WORLD_CHUNK_WIDTH {
 				for z in 0 ..< constants.WORLD_CHUNK_DEPTH {
 					chunk := &tile.chunks[previous_floor][x][z]
@@ -42,7 +44,7 @@ update_markers :: proc() {
 			}
 		}
 
-		if floor > 0 {
+		if floor > 0 && show_markers {
 			for cx in 0 ..< constants.WORLD_CHUNK_WIDTH {
 				for cz in 0 ..< constants.WORLD_CHUNK_DEPTH {
 					chunk := &tile.chunks[floor][cx][cz]
@@ -73,10 +75,11 @@ update_markers :: proc() {
 update :: proc() {
 	previous_floor = floor
 	if keyboard.is_key_press(.Key_Page_Up) {
-        move_up()
+		move_up()
 	} else if keyboard.is_key_press(.Key_Page_Down) {
-        move_down()
+		move_down()
 	}
-    
-    update_markers()
+
+	update_markers()
+	previous_show_markers = show_markers
 }

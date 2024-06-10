@@ -42,6 +42,7 @@ init :: proc() {
 	)
 	cursor.intersect_with_tiles(on_tile_intersect, floor.floor)
 	move_cursor()
+    floor.show_markers = true
 }
 
 deinit :: proc() {

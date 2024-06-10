@@ -71,6 +71,11 @@ Wall_Mask :: enum {
 	End,
 }
 
+Cutaway :: enum {
+    None,
+    Full,
+}
+
 Wall_Top_Mesh :: enum {
 	Full,
 	Side,
@@ -123,6 +128,93 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 	.Full_Mask      = "resources/textures/wall-masks/full.png",
 	.Door_Opening   = "resources/textures/wall-masks/door-opening.png",
 	.Window_Opening = "resources/textures/wall-masks/window-opening.png",
+}
+
+WALL_VERTICES :: [Wall_Mask][]Wall_Vertex {
+	.Full = []Wall_Vertex {
+		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
+		 {
+			pos = {0.615, 0.0, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1.115, 1, 0, 0},
+		},
+		 {
+			pos = {0.615, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1.115, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {0, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, 0, -0.385},
+			light = {1, 1, 1},
+			texcoords = {0.115, 1, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+			light = {1, 1, 1},
+			texcoords = {0.115, 0, 0, 0},
+		},
+	},
+	.Extended_Side = []Wall_Vertex {
+		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
+		 {
+			pos = {0.615, 0.0, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1.115, 1, 0, 0},
+		},
+		 {
+			pos = {0.615, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1.115, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {0, 0, 0, 0},
+		},
+	},
+	.Side = []Wall_Vertex {
+		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
+		{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
+		 {
+			pos = {0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {0, 0, 0, 0},
+		},
+	},
+	.End = []Wall_Vertex {
+		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
+		{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
+		 {
+			pos = {0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {1, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+			light = {1, 1, 1},
+			texcoords = {0, 0, 0, 0},
+		},
+		 {
+			pos = {-0.5, 0, -0.385},
+			light = {1, 1, 1},
+			texcoords = {0.115, 1, 0, 0},
+		},
+		 {
+			pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+			light = {1, 1, 1},
+			texcoords = {0.115, 0, 0, 0},
+		},
+	},
 }
 
 wall_full_vertices := []Wall_Vertex {
@@ -1304,7 +1396,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 }
 
 
-draw_walls :: proc(floor: int) {
+draw_walls :: proc(floor: i32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)

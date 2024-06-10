@@ -29,6 +29,7 @@ init :: proc() {
 		revert_tiles(position)
 	}
 	triangle_mode = false
+    floor.show_markers = true
 }
 
 deinit :: proc() {

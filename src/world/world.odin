@@ -11,6 +11,7 @@ import "../tile"
 import "../tools/wall_tool"
 import "../wall"
 import "../renderer"
+import "../floor"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -491,11 +492,11 @@ draw :: proc() {
 	)
 
 
-	for floor in 0 ..< constants.CHUNK_HEIGHT {
-		gl.UseProgram(renderer.shader_program)
-		tile.draw_tiles(floor)
-		wall.draw_walls(floor)
-		billboard.draw_billboards(floor)
+	for flr in 0 ..= floor.floor {
+	    gl.UseProgram(renderer.shader_program)
+		tile.draw_tiles(flr)
+		wall.draw_walls(flr)
+		billboard.draw_billboards(flr)
 	}
 }
 

@@ -188,7 +188,7 @@ draw_tile_triangle :: proc(
 	append(indices, index_offset + 0, index_offset + 1, index_offset + 2)
 }
 
-draw_tiles :: proc(floor: int) {
+draw_tiles :: proc(floor: i32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)

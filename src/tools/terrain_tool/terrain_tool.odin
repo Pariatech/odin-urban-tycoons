@@ -47,7 +47,7 @@ TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
 
 init :: proc() {
-	cursor.intersect_with_tiles(on_intersect, floor.floor)
+	cursor.intersect_with_tiles(on_intersect, 0)
 	terrain_tool_cursor_pos = cursor.ray.origin
 
 	position := terrain_tool_intersect
@@ -67,6 +67,8 @@ init :: proc() {
 
 	terrain_tool_drag_start = nil
 	terrain_tool_drag_end = nil
+
+    floor.show_markers = false
 }
 
 deinit :: proc() {
@@ -111,7 +113,7 @@ update :: proc(delta_time: f64) {
 		)
 	}
 
-	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
+	cursor.on_tile_intersect(on_intersect, 0, 0)
 
 	position := terrain_tool_intersect
 	position.x = math.ceil(position.x) - 0.5
