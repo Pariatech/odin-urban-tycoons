@@ -91,6 +91,7 @@ start :: proc() -> (ok: bool = false) {
 
 	floor_tool.init()
 	terrain_tool.init()
+    wall.init_cutaways()
 
 	should_close := false
 	current_time_ns := time.now()
@@ -130,6 +131,7 @@ start :: proc() -> (ok: bool = false) {
 		camera.update(delta_time)
 
 		world.update()
+        wall.update_cutaways()
 
 		tools.update(delta_time)
 

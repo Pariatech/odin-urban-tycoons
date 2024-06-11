@@ -90,6 +90,7 @@ Wall :: struct {
 	type:     Wall_Type,
 	textures: [Wall_Side]Wall_Texture,
 	mask:     Wall_Mask_Texture,
+	state:    State,
 }
 
 
@@ -451,18 +452,18 @@ DOWN_TOP_VERTICES :: []Wall_Vertex {
 }
 
 TOP_VERTICES_MAP :: [State][Wall_Mask][]Wall_Vertex {
-    .Up = {
-        .Full = FULL_TOP_VERTICES,
-        .Extended_Side = FULL_TOP_VERTICES,
-        .Side = TOP_VERTICES,
-        .End = FULL_TOP_VERTICES,
-    },
-    .Down = {
-        .Full = DOWN_FULL_TOP_VERTICES,
-        .Extended_Side = DOWN_FULL_TOP_VERTICES,
-        .Side = DOWN_TOP_VERTICES,
-        .End = DOWN_FULL_TOP_VERTICES,
-    },
+	.Up =  {
+		.Full = FULL_TOP_VERTICES,
+		.Extended_Side = FULL_TOP_VERTICES,
+		.Side = TOP_VERTICES,
+		.End = FULL_TOP_VERTICES,
+	},
+	.Down =  {
+		.Full = DOWN_FULL_TOP_VERTICES,
+		.Extended_Side = DOWN_FULL_TOP_VERTICES,
+		.Side = DOWN_TOP_VERTICES,
+		.End = DOWN_FULL_TOP_VERTICES,
+	},
 }
 
 wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
@@ -1101,7 +1102,7 @@ draw_wall :: proc(
 	transform *= transform_map[axis][camera.rotation]
 
 	vertices_map := WALL_VERTICES
-	vertices: []Wall_Vertex = vertices_map[.Down][mask]
+	vertices: []Wall_Vertex = vertices_map[wall.state][mask]
 	indices: []Wall_Index
 
 	switch mask {
@@ -1124,8 +1125,8 @@ draw_wall :: proc(
 		index_buffer,
 	)
 
-    top_vertices_map := TOP_VERTICES_MAP
-	top_vertices := top_vertices_map[.Down][top_mesh]
+	top_vertices_map := TOP_VERTICES_MAP
+	top_vertices := top_vertices_map[wall.state][top_mesh]
 	transform *= glsl.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
 	draw_wall_mesh(

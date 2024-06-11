@@ -1199,7 +1199,7 @@ draw_diagonal_wall :: proc(
 
 	if draw {
 		diagonal_wall_vertices_map := DIAGONAL_WALL_VERTICES_MAP
-		wall_vertices := diagonal_wall_vertices_map[.Down][mask]
+		wall_vertices := diagonal_wall_vertices_map[wall.state][mask]
 
 		draw_wall_mesh(
 			wall_vertices,
@@ -1213,7 +1213,7 @@ draw_diagonal_wall :: proc(
 	}
 
 	top_vertices_map := DIAGONAL_WALL_TOP_VERTICES_MAP
-	top_vertices := top_vertices_map[.Down][mask]
+	top_vertices := top_vertices_map[wall.state][mask]
 
 	draw_wall_mesh(
 		top_vertices,
