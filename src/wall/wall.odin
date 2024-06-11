@@ -71,9 +71,9 @@ Wall_Mask :: enum {
 	End,
 }
 
-Cutaway :: enum {
-    None,
-    Full,
+State :: enum {
+	Up,
+	Down,
 }
 
 Wall_Top_Mesh :: enum {
@@ -130,179 +130,235 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 	.Window_Opening = "resources/textures/wall-masks/window-opening.png",
 }
 
-WALL_VERTICES :: [Wall_Mask][]Wall_Vertex {
-	.Full = []Wall_Vertex {
-		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-		 {
-			pos = {0.615, 0.0, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1.115, 1, 0, 0},
+WALL_VERTICES :: [State][Wall_Mask][]Wall_Vertex {
+	.Up =  {
+		.Full = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, 0, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 1, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 0, 0, 0},
+			},
 		},
-		 {
-			pos = {0.615, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1.115, 0, 0, 0},
+		.Extended_Side = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 0, 0, 0},
+			},
 		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {0, 0, 0, 0},
+		.Side = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 0, 0, 0},
+			},
 		},
-		 {
-			pos = {-0.5, 0, -0.385},
-			light = {1, 1, 1},
-			texcoords = {0.115, 1, 0, 0},
-		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-			light = {1, 1, 1},
-			texcoords = {0.115, 0, 0, 0},
+		.End = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 0, 0, 0},
+			},
+			 {
+				pos = {-0.5, 0, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 1, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 0, 0, 0},
+			},
 		},
 	},
-	.Extended_Side = []Wall_Vertex {
-		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-		 {
-			pos = {0.615, 0.0, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1.115, 1, 0, 0},
+	.Down =  {
+		.Full = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, 0, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 1, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
 		},
-		 {
-			pos = {0.615, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1.115, 0, 0, 0},
+		.Extended_Side = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, 1, 0, 0},
+			},
+			 {
+				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
 		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {0, 0, 0, 0},
+		.Side = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
 		},
-	},
-	.Side = []Wall_Vertex {
-		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-		{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
-		 {
-			pos = {0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1, 0, 0, 0},
+		.End = []Wall_Vertex {
+			 {
+				pos = {-0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, 0.0, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, 1, 0, 0},
+			},
+			 {
+				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+				light = {1, 1, 1},
+				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
+			 {
+				pos = {-0.5, 0, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, 1, 0, 0},
+			},
+			 {
+				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+				light = {1, 1, 1},
+				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
+			},
 		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {0, 0, 0, 0},
-		},
-	},
-	.End = []Wall_Vertex {
-		{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-		{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
-		 {
-			pos = {0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {1, 0, 0, 0},
-		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-			light = {1, 1, 1},
-			texcoords = {0, 0, 0, 0},
-		},
-		 {
-			pos = {-0.5, 0, -0.385},
-			light = {1, 1, 1},
-			texcoords = {0.115, 1, 0, 0},
-		},
-		 {
-			pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-			light = {1, 1, 1},
-			texcoords = {0.115, 0, 0, 0},
-		},
-	},
-}
-
-wall_full_vertices := []Wall_Vertex {
-	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-	 {
-		pos = {0.615, 0.0, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1.115, 1, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1.115, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-	{pos = {-0.5, 0, -0.385}, light = {1, 1, 1}, texcoords = {0.115, 1, 0, 0}},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0.115, 0, 0, 0},
 	},
 }
 wall_full_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
-
-wall_extended_side_vertices := []Wall_Vertex {
-	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-	 {
-		pos = {0.615, 0.0, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1.115, 1, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1.115, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-}
 wall_extended_side_indices := []u32{0, 1, 2, 0, 2, 3}
-
-wall_side_vertices := []Wall_Vertex {
-	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
-	 {
-		pos = {0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-}
 wall_side_indices := []u32{0, 1, 2, 0, 2, 3}
-
-wall_end_vertices := []Wall_Vertex {
-	{pos = {-0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {0, 1, 0, 0}},
-	{pos = {0.5, 0.0, -0.5}, light = {1, 1, 1}, texcoords = {1, 1, 0, 0}},
-	 {
-		pos = {0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-	{pos = {-0.5, 0, -0.385}, light = {1, 1, 1}, texcoords = {0.115, 1, 0, 0}},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0.115, 0, 0, 0},
-	},
-}
-
 wall_end_indices := []u32{0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4}
 
-wall_full_top_vertices := []Wall_Vertex {
+
+FULL_TOP_VERTICES :: []Wall_Vertex {
 	 {
 		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -325,7 +381,7 @@ wall_full_top_vertices := []Wall_Vertex {
 	},
 }
 
-wall_top_vertices := []Wall_Vertex {
+TOP_VERTICES :: []Wall_Vertex {
 	 {
 		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
@@ -346,6 +402,67 @@ wall_top_vertices := []Wall_Vertex {
 		light = {1, 1, 1},
 		texcoords = {0, 0, 0, 0},
 	},
+}
+
+DOWN_FULL_TOP_VERTICES :: []Wall_Vertex {
+	 {
+		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+DOWN_TOP_VERTICES :: []Wall_Vertex {
+	 {
+		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {0, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+		light = {1, 1, 1},
+		texcoords = {1, 0.115, 0, 0},
+	},
+	 {
+		pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {1, 0, 0, 0},
+	},
+	 {
+		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+		light = {1, 1, 1},
+		texcoords = {0, 0, 0, 0},
+	},
+}
+
+TOP_VERTICES_MAP :: [State][Wall_Mask][]Wall_Vertex {
+    .Up = {
+        .Full = FULL_TOP_VERTICES,
+        .Extended_Side = FULL_TOP_VERTICES,
+        .Side = TOP_VERTICES,
+        .End = FULL_TOP_VERTICES,
+    },
+    .Down = {
+        .Full = DOWN_FULL_TOP_VERTICES,
+        .Extended_Side = DOWN_FULL_TOP_VERTICES,
+        .Side = DOWN_TOP_VERTICES,
+        .End = DOWN_FULL_TOP_VERTICES,
+    },
 }
 
 wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
@@ -983,21 +1100,18 @@ draw_wall :: proc(
 	transform := glsl.mat4Translate(position)
 	transform *= transform_map[axis][camera.rotation]
 
-	vertices: []Wall_Vertex
+	vertices_map := WALL_VERTICES
+	vertices: []Wall_Vertex = vertices_map[.Down][mask]
 	indices: []Wall_Index
 
 	switch mask {
 	case .Full:
-		vertices = wall_full_vertices
 		indices = wall_full_indices
 	case .Extended_Side:
-		vertices = wall_extended_side_vertices
 		indices = wall_extended_side_indices
 	case .Side:
-		vertices = wall_side_vertices
 		indices = wall_side_indices
 	case .End:
-		vertices = wall_end_vertices
 		indices = wall_end_indices
 	}
 	draw_wall_mesh(
@@ -1010,8 +1124,8 @@ draw_wall :: proc(
 		index_buffer,
 	)
 
-	top_vertices := wall_full_top_vertices
-	if top_mesh == .Side do top_vertices = wall_top_vertices
+    top_vertices_map := TOP_VERTICES_MAP
+	top_vertices := top_vertices_map[.Down][top_mesh]
 	transform *= glsl.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
 	draw_wall_mesh(
