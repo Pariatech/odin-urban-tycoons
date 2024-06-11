@@ -174,6 +174,14 @@ get_tile_height :: proc(x, z: int) -> f32 {
 	return total / 4
 }
 
+is_tile_flat :: proc(xz: glsl.ivec2) -> bool {
+	return(
+		terrain_heights[xz.x][xz.y] == terrain_heights[xz.x + 1][xz.y] &&
+		terrain_heights[xz.x][xz.y] == terrain_heights[xz.x][xz.y + 1] &&
+		terrain_heights[xz.x][xz.y] == terrain_heights[xz.x + 1][xz.y + 1]
+	)
+}
+
 set_terrain_height :: proc(x, z: int, height: f32) {
 	if terrain_heights[x][z] == height {return}
 	terrain_heights[x][z] = height

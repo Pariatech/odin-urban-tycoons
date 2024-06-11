@@ -6,6 +6,7 @@ import "core:testing"
 
 import "../constants"
 import "../keyboard"
+import "../terrain"
 import "../tile"
 
 FLOOR_OFFSET :: 0.0004
@@ -58,9 +59,11 @@ update_markers :: proc() {
 									side = side,
 								}
 								if !(key in chunk.triangles) {
-									chunk.triangles[key] = {
-										texture      = .Floor_Marker,
-										mask_texture = .Full_Mask,
+									if terrain.is_tile_flat({i32(key.x), i32(key.z)}) {
+										chunk.triangles[key] = {
+											texture      = .Floor_Marker,
+											mask_texture = .Full_Mask,
+										}
 									}
 								}
 							}

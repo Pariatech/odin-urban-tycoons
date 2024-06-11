@@ -10,6 +10,7 @@ import "../../floor"
 import "../../keyboard"
 import "../../mouse"
 import "../../tile"
+import "../../terrain"
 
 previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
 	tile.Tile_Triangle,
@@ -172,6 +173,10 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 			tile_triangle = nil
 		}
 	}
+
+    if floor.floor > 0 && !terrain.is_tile_flat(position.xz) {
+        return
+    }
 
 	if triangle_mode {
 		tile.set_tile_triangle(position, side, tile_triangle)
