@@ -413,12 +413,12 @@ DOWN_FULL_TOP_VERTICES :: []Wall_Vertex {
 	 {
 		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
 		light = {1, 1, 1},
-		texcoords = {1, 1, 0, 0},
+		texcoords = {1.115, 1, 0, 0},
 	},
 	 {
 		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.385},
 		light = {1, 1, 1},
-		texcoords = {1, 0.885, 0, 0},
+		texcoords = {1.115, 0.885, 0, 0},
 	},
 	 {
 		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
