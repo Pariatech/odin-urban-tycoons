@@ -42,7 +42,7 @@ init :: proc() {
 	)
 	cursor.intersect_with_tiles(on_tile_intersect, floor.floor)
 	move_cursor()
-    floor.show_markers = true
+	floor.show_markers = true
 }
 
 deinit :: proc() {
@@ -889,7 +889,9 @@ removing_rectangle :: proc() {
 }
 
 update_rectangle :: proc() {
-	if mode == .Demolish_Rectangle || keyboard.is_key_down(.Key_Left_Control) {
+	if mode == .Demolish_Rectangle ||
+	   keyboard.is_key_down(.Key_Left_Control) ||
+	   (mode == .Demolish && keyboard.is_key_down(.Key_Left_Shift)) {
 		removing_rectangle()
 	} else {
 		adding_rectangle()

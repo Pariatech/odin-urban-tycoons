@@ -18,33 +18,41 @@ previous_visible_chunks_end: glsl.ivec2
 
 set_walls_down :: proc() {
 	cutaway_state = .Down
+    set_cutaway(.Down)
+}
 
+set_walls_up :: proc() {
+	cutaway_state = .Up
+    set_cutaway(.Up)
+}
+
+set_cutaway :: proc(state: State) {
 	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 			chunk := &chunks[floor.floor][x][z]
 			chunk.dirty = true
 
 			for wall_pos, &w in chunk.east_west {
-				w.state = .Down
+				w.state = state
 			}
 
 			for wall_pos, &w in chunk.north_south {
-				w.state = .Down
+				w.state = state
 			}
 
 			for wall_pos, &w in chunk.south_west_north_east {
-				w.state = .Down
+				w.state = state
 			}
 
 			for wall_pos, &w in chunk.north_west_south_east {
-				w.state = .Down
+				w.state = state
 			}
 		}
 	}
 }
 
 init_cutaways :: proc() {
-	set_walls_down()
+	// set_walls_down()
 }
 
 apply_cutaway :: proc() -> bool {
