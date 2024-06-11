@@ -131,9 +131,9 @@ start :: proc() -> (ok: bool = false) {
 		camera.update(delta_time)
 
 		world.update()
-        wall.update_cutaways()
 
 		tools.update(delta_time)
+        wall.update_cutaways()
 
 		world.draw()
 

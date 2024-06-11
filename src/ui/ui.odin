@@ -8,6 +8,7 @@ import gl "vendor:OpenGL"
 import "../camera"
 import "../floor"
 import "../tools"
+import "../wall"
 import "../window"
 import "../world"
 
@@ -17,6 +18,8 @@ MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/floor_down.png",
 	"resources/icons/camera_rotate_left.png",
 	"resources/icons/camera_rotate_right.png",
+	"resources/icons/walls_up.png",
+	"resources/icons/walls_down.png",
 	"resources/icons/landscape.png",
 	"resources/icons/wall.png",
 	"resources/icons/floor.png",
@@ -40,12 +43,14 @@ Menu_Icon :: enum (int) {
 	Floor_Down,
 	Camera_Rotate_Left,
 	Camera_Rotate_Right,
+	Walls_Up,
+	Walls_Down,
 	Landscape,
 	Wall,
 	Floor,
-    Paint,
-    Door,
-    Window,
+	Paint,
+	Door,
+	Window,
 }
 
 Draw_Call :: union {
@@ -108,8 +113,8 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_land_panel() or_return
 	init_wall_panel() or_return
 	init_paint_panel() or_return
-    init_door_panel() or_return
-    init_window_panel() or_return
+	init_door_panel() or_return
+	init_window_panel() or_return
 
 	return true
 }
@@ -135,6 +140,10 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Camera_Rotate_Right:
 		camera.rotate_counter_clockwise()
 		world.update_after_rotation(.Counter_Clockwise)
+	case .Walls_Up:
+		wall.set_walls_up()
+	case .Walls_Down:
+		wall.set_walls_down()
 	case .Landscape:
 		floor_panel_ctx.opened = false
 		tools.open_land_tool()
@@ -144,15 +153,15 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Floor:
 		floor_panel_ctx.opened = true
 		tools.open_floor_tool()
-    case .Paint:
+	case .Paint:
 		floor_panel_ctx.opened = false
-        tools.open_paint_tool()
-    case .Door:
+		tools.open_paint_tool()
+	case .Door:
 		floor_panel_ctx.opened = false
-        tools.open_door_tool()
-    case .Window:
+		tools.open_door_tool()
+	case .Window:
 		floor_panel_ctx.opened = false
-        tools.open_window_tool()
+		tools.open_window_tool()
 	}
 }
 
@@ -190,9 +199,9 @@ update :: proc(using ctx: ^Context) {
 
 	land_panel(ctx)
 	wall_panel(ctx)
-    paint_panel(ctx)
-    door_panel(ctx)
-    window_panel(ctx)
+	paint_panel(ctx)
+	door_panel(ctx)
+	window_panel(ctx)
 
 	container(
 		ctx,

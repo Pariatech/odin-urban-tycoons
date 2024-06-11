@@ -273,18 +273,18 @@ update_east_west_neighbors :: proc(pos: glsl.ivec3) {
 	update_east_west_wall(pos + {-1, 0, 0})
 	update_east_west_wall(pos + {1, 0, 0})
 	update_north_south_wall(pos + {0, 0, -1})
-	update_north_south_wall(pos + {0, 0, 1})
+	update_north_south_wall(pos + {0, 0, 0})
 	update_north_south_wall(pos + {1, 0, -1})
-	update_north_south_wall(pos + {1, 0, 1})
+	update_north_south_wall(pos + {1, 0, 0})
 }
 
 update_north_south_neighbors :: proc(pos: glsl.ivec3) {
 	update_north_south_wall(pos + {0, 0, -1})
 	update_north_south_wall(pos + {0, 0, 1})
 	update_east_west_wall(pos + {-1, 0, 0})
-	update_east_west_wall(pos + {1, 0, 0})
+	update_east_west_wall(pos + {0, 0, 0})
 	update_east_west_wall(pos + {-1, 0, 1})
-	update_east_west_wall(pos + {1, 0, 1})
+	update_east_west_wall(pos + {0, 0, 1})
 }
 
 update_south_west_north_east_wall_and_neighbors :: proc(pos: glsl.ivec3) {
