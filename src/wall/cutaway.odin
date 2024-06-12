@@ -55,7 +55,7 @@ init_cutaways :: proc() {
 	// set_walls_down()
 }
 
-apply_cutaway :: proc(chunk: ^Chunk) -> bool {
+apply_cutaway :: proc() -> bool {
 	if cutaway_state != .Down {
 		return false
 	}
@@ -72,9 +72,9 @@ apply_cutaway :: proc(chunk: ^Chunk) -> bool {
 		return true
 	}
 
-	if chunk.dirty {
-		return true
-	}
+	// if chunk.dirty {
+	// 	return true
+	// }
 
 	return false
 }
@@ -83,13 +83,14 @@ wall_is_frame :: proc(w: Wall) -> bool {
 	return w.textures == {.Inside = .Frame, .Outside = .Frame}
 }
 
-update_cutaways :: proc() {
+update_cutaways :: proc(force: bool = false) {
+	if !force && !apply_cutaway() {
+		return
+	}
+
 	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 			chunk := &chunks[floor.previous_floor][x][z]
-			if !apply_cutaway(chunk) {
-				continue
-			}
 
 			chunk.dirty = true
 

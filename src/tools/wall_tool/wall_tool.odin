@@ -411,8 +411,8 @@ update_east_west_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	type_map := wall.WALL_SIDE_TYPE_MAP
-	type := type_map[left_type_part][right_type_part]
-	wall.set_east_west_wall(pos, {type = type, textures = w.textures})
+	w.type = type_map[left_type_part][right_type_part]
+	wall.set_east_west_wall(pos, w)
 }
 
 update_north_south_wall :: proc(pos: glsl.ivec3) {
@@ -459,8 +459,8 @@ update_north_south_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	type_map := wall.WALL_SIDE_TYPE_MAP
-	type := type_map[left_type_part][right_type_part]
-	wall.set_north_south_wall(pos, {type = type, textures = w.textures})
+	w.type = type_map[left_type_part][right_type_part]
+	wall.set_north_south_wall(pos, w)
 }
 
 update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
@@ -506,11 +506,8 @@ update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	type_map := wall.WALL_SIDE_TYPE_MAP
-	type := type_map[left_type_part][right_type_part]
-	wall.set_north_west_south_east_wall(
-		pos,
-		{type = type, textures = w.textures},
-	)
+	w.type = type_map[left_type_part][right_type_part]
+	wall.set_north_west_south_east_wall(pos, w)
 }
 
 update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
@@ -556,11 +553,8 @@ update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	type_map := wall.WALL_SIDE_TYPE_MAP
-	type := type_map[left_type_part][right_type_part]
-	wall.set_south_west_north_east_wall(
-		pos,
-		{type = type, textures = w.textures},
-	)
+	w.type = type_map[left_type_part][right_type_part]
+	wall.set_south_west_north_east_wall(pos, w)
 }
 
 set_south_west_north_east_wall_frame :: proc(pos: glsl.ivec3) {
@@ -800,6 +794,7 @@ adding_line :: proc() {
 			set_east_west_wall_drywall,
 			set_north_south_wall_drywall,
 		)
+        wall.update_cutaways(true)
 	} else {
 		wall_tool_drag_start = wall_tool_position
 	}
