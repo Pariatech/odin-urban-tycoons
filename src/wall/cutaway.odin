@@ -150,7 +150,68 @@ update_cutaways :: proc(force: bool = false) {
 }
 
 set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
-	w, _ := get_wall(pos, axis)
+	w, ok := get_wall(pos, axis)
+	if !ok {
+		return
+	}
+
 	w.state = .Up
 	set_wall(pos, axis, w)
+
+	switch axis {
+	case .E_W:
+		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, 0}, .E_W, w)
+		}
+		if w, ok := get_wall(pos + {1, 0, 0}, .E_W); ok {
+	        w.state = .Right
+	        set_wall(pos + {1, 0, 0}, .E_W, w)
+		}
+
+		if w, ok := get_wall(pos + {0, 0, 0}, .N_S); ok {
+	        w.state = .Right
+	        set_wall(pos + {0, 0, 0}, .N_S, w)
+		}
+		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
+	        w.state = .Left
+	        set_wall(pos + {0, 0, -1}, .N_S, w)
+		}
+		if w, ok := get_wall(pos + {1, 0, 0}, .N_S); ok {
+	        w.state = .Right
+	        set_wall(pos + {1, 0, 0}, .N_S, w)
+		}
+		if w, ok := get_wall(pos + {1, 0, -1}, .N_S); ok {
+	        w.state = .Left
+	        set_wall(pos + {1, 0, -1}, .N_S, w)
+		}
+	case .N_S:
+		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
+	        w.state = .Left
+	        set_wall(pos + {0, 0, -1}, .N_S, w)
+		}
+		if w, ok := get_wall(pos + {0, 0, 1}, .N_S); ok {
+	        w.state = .Right
+	        set_wall(pos + {0, 0, 1}, .N_S, w)
+		}
+
+		if w, ok := get_wall(pos + {0, 0, 0}, .E_W); ok {
+	        w.state = .Right
+	        set_wall(pos + {0, 0, 0}, .E_W, w)
+		}
+		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, 0}, .E_W, w)
+		}
+		if w, ok := get_wall(pos + {0, 0, 1}, .E_W); ok {
+	        w.state = .Right
+	        set_wall(pos + {0, 0, 1}, .E_W, w)
+		}
+		if w, ok := get_wall(pos + {-1, 0, 1}, .E_W); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, 1}, .E_W, w)
+		}
+	case .SW_NE:
+	case .NW_SE:
+	}
 }
