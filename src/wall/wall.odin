@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:log"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
+import "core:strings"
 
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
@@ -138,456 +139,8 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 
 wall_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
 wall_indices := [State][Wall_Mask][dynamic]Wall_Index{}
-
-WALL_VERTICES :: [State][Wall_Mask][]Wall_Vertex {
-	.Up =  {
-		.Full = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 0, 0, 0},
-			},
-		},
-		.Extended_Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.End = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 0, 0, 0},
-			},
-		},
-	},
-	.Down =  {
-		.Full = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Extended_Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.End = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-	},
-	.Left =  {
-		.Full = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Extended_Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.End = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-	},
-	.Right =  {
-		.Full = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Extended_Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, 1, 0, 0},
-			},
-			 {
-				pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Side = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.End = []Wall_Vertex {
-			 {
-				pos = {-0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, 0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-	},
-}
-
-WALL_INDICES :: [Wall_Mask][]Wall_Index {
-	.Full = {0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4},
-	.Extended_Side = {0, 1, 2, 0, 2, 3},
-	.Side = {0, 1, 2, 0, 2, 3},
-	.End = {0, 1, 2, 0, 2, 3, 0, 3, 5, 0, 5, 4},
-}
+wall_top_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
+wall_top_indices := [State][Wall_Mask][dynamic]Wall_Index{}
 
 FULL_TOP_VERTICES :: []Wall_Vertex {
 	 {
@@ -708,7 +261,7 @@ TOP_VERTICES_MAP :: [State][Wall_Mask][]Wall_Vertex {
 	},
 }
 
-wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
+// wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
 
 chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
@@ -1289,7 +842,7 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 init_wall_renderer :: proc() -> (ok: bool) {
 	load_wall_texture_array() or_return
 	load_wall_mask_array() or_return
-	load_walls() or_return
+	load_models() or_return
 
 	return true
 }
@@ -1306,7 +859,7 @@ draw_wall_mesh :: proc(
 	index_offset := u32(len(vertex_buffer))
 	for i in 0 ..< len(vertices) {
 		vertex := vertices[i]
-        vertex.light = {1, 1, 1}
+		vertex.light = {1, 1, 1}
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
@@ -1363,13 +916,12 @@ draw_wall :: proc(
 		index_buffer,
 	)
 
-	top_vertices_map := TOP_VERTICES_MAP
-	top_vertices := top_vertices_map[wall.state][top_mesh]
+	top_vertices := wall_top_vertices[wall.state][top_mesh][:]
 	transform *= glsl.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
 
 	draw_wall_mesh(
 		top_vertices,
-		wall_top_indices,
+		wall_top_indices[wall.state][top_mesh][:],
 		transform,
 		.Wall_Top,
 		wall.mask,
@@ -1773,7 +1325,148 @@ update_after_rotation :: proc() {
 	}
 }
 
-load_walls :: proc() -> (ok: bool = false) {
+load_wall_model :: proc(parts: []string, node: ^cgltf.node) {
+	state: State
+	mask: Wall_Mask
+
+	switch parts[0] {
+	case "Left":
+		state = .Left
+	case "Right":
+		state = .Right
+	case "Up":
+		state = .Up
+	case "Down":
+		state = .Down
+	}
+	switch parts[1] {
+	case "End":
+		mask = .End
+	case "Extended_Side":
+		mask = .Extended_Side
+	case "Full":
+		mask = .Full
+	case "Side":
+		mask = .Side
+	}
+
+	log.info(state, mask)
+
+    mesh := node.mesh
+	primitive := mesh.primitives[0]
+	if primitive.indices != nil {
+		accessor := primitive.indices
+		for i in 0 ..< accessor.count {
+			index := cgltf.accessor_read_index(accessor, i)
+			append(&wall_indices[state][mask], Wall_Index(index))
+		}
+	}
+
+	for attribute in primitive.attributes {
+		if attribute.type == .position {
+			accessor := attribute.data
+			for i in 0 ..< accessor.count {
+				if i >= len(wall_vertices[state][mask]) {
+					append(&wall_vertices[state][mask], Wall_Vertex{})
+				}
+				_ = cgltf.accessor_read_float(
+					accessor,
+					i,
+					raw_data(&wall_vertices[state][mask][i].pos),
+					3,
+				)
+				wall_vertices[state][mask][i].pos.x *= -1
+			}
+		}
+		if attribute.type == .texcoord {
+			accessor := attribute.data
+			for i in 0 ..< accessor.count {
+				if i >= len(wall_vertices[state][mask]) {
+					append(&wall_vertices[state][mask], Wall_Vertex{})
+				}
+				_ = cgltf.accessor_read_float(
+					accessor,
+					i,
+					raw_data(&wall_vertices[state][mask][i].texcoords),
+					2,
+				)
+			}
+		}
+	}
+}
+
+load_wall_top_model :: proc(parts: []string, node: ^cgltf.node) {
+	state: State
+	mask: Wall_Mask
+
+	switch parts[0] {
+	case "Left":
+		state = .Left
+	case "Right":
+		state = .Right
+	case "Up":
+		state = .Up
+	case "Down":
+		state = .Down
+	}
+	switch parts[1] {
+	case "End":
+		mask = .End
+	case "Extended_Side":
+		mask = .Extended_Side
+	case "Full":
+		mask = .Full
+	case "Side":
+		mask = .Side
+	}
+
+	log.info(state, mask)
+
+    mesh := node.mesh
+	primitive := mesh.primitives[0]
+	if primitive.indices != nil {
+		accessor := primitive.indices
+		for i in 0 ..< accessor.count {
+			index := cgltf.accessor_read_index(accessor, i)
+			append(&wall_top_indices[state][mask], Wall_Index(index))
+		}
+	}
+
+	for attribute in primitive.attributes {
+		if attribute.type == .position {
+			accessor := attribute.data
+			for i in 0 ..< accessor.count {
+				if i >= len(wall_top_vertices[state][mask]) {
+					append(&wall_top_vertices[state][mask], Wall_Vertex{})
+				}
+				_ = cgltf.accessor_read_float(
+					accessor,
+					i,
+					raw_data(&wall_top_vertices[state][mask][i].pos),
+					3,
+				)
+				wall_top_vertices[state][mask][i].pos.x *= -1
+			}
+		}
+		if attribute.type == .texcoord {
+			accessor := attribute.data
+			for i in 0 ..< accessor.count {
+				if i >= len(wall_top_vertices[state][mask]) {
+					append(&wall_top_vertices[state][mask], Wall_Vertex{})
+				}
+				_ = cgltf.accessor_read_float(
+					accessor,
+					i,
+					raw_data(&wall_top_vertices[state][mask][i].texcoords),
+					2,
+				)
+			}
+		}
+	}
+
+}
+
+load_models :: proc() -> (ok: bool = false) {
 	path: cstring = "resources/models/walls.glb"
 	options: cgltf.options
 	data, result := cgltf.parse_file(options, path)
@@ -1788,103 +1481,18 @@ load_walls :: proc() -> (ok: bool = false) {
 	}
 	defer cgltf.free(data)
 
-	for mesh in data.meshes {
+	log.info(data.scene.name)
+	for node in data.scene.nodes {
+		log.info(node.name)
 
-		state: State
-		mask: Wall_Mask
+		parts := strings.split(string(node.name), ".")
+		defer delete(parts)
 
-		switch mesh.name {
-		case "Left.End":
-			state = .Left
-			mask = .End
-		case "Left.Extended_Side":
-			state = .Left
-			mask = .Extended_Side
-		case "Left.Full":
-			state = .Left
-			mask = .Full
-		case "Left.Side":
-			state = .Left
-			mask = .Side
-		case "Right.End":
-			state = .Right
-			mask = .End
-		case "Right.Extended_Side":
-			state = .Right
-			mask = .Extended_Side
-		case "Right.Full":
-			state = .Right
-			mask = .Full
-		case "Right.Side":
-			state = .Right
-			mask = .Side
-		case "Up.End":
-			state = .Up
-			mask = .End
-		case "Up.Extended_Side":
-			state = .Up
-			mask = .Extended_Side
-		case "Up.Full":
-			state = .Up
-			mask = .Full
-		case "Up.Side":
-			state = .Up
-			mask = .Side
-		case "Down.End":
-			state = .Down
-			mask = .End
-		case "Down.Extended_Side":
-			state = .Down
-			mask = .Extended_Side
-		case "Down.Full":
-			state = .Down
-			mask = .Full
-		case "Down.Side":
-			state = .Down
-			mask = .Side
-		}
-
-		log.info(mesh.name, state, mask)
-
-		primitive := mesh.primitives[0]
-		if primitive.indices != nil {
-			accessor := primitive.indices
-			for i in 0 ..< accessor.count {
-				index := cgltf.accessor_read_index(accessor, i)
-				append(&wall_indices[state][mask], Wall_Index(index))
-			}
-		}
-
-		for attribute in primitive.attributes {
-			if attribute.type == .position {
-				accessor := attribute.data
-				for i in 0 ..< accessor.count {
-					if i >= len(wall_vertices[state][mask]) {
-						append(&wall_vertices[state][mask], Wall_Vertex{})
-					}
-					_ = cgltf.accessor_read_float(
-						accessor,
-						i,
-						raw_data(&wall_vertices[state][mask][i].pos),
-						3,
-					)
-					wall_vertices[state][mask][i].pos.x *= -1
-				}
-			}
-			if attribute.type == .texcoord {
-				accessor := attribute.data
-				for i in 0 ..< accessor.count {
-					if i >= len(wall_vertices[state][mask]) {
-						append(&wall_vertices[state][mask], Wall_Vertex{})
-					}
-					_ = cgltf.accessor_read_float(
-						accessor,
-						i,
-						raw_data(&wall_vertices[state][mask][i].texcoords),
-						2,
-					)
-				}
-			}
+		switch parts[0] {
+		case "Wall":
+			load_wall_model(parts[1:], node)
+		case "Wall_Top":
+			load_wall_top_model(parts[1:], node)
 		}
 	}
 
