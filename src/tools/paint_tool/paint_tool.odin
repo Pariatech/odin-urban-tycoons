@@ -67,11 +67,15 @@ update :: proc() {
 			found_wall_intersect.axis,
 			texture,
 		)
+
+        wall.update_cutaways(true)
+        wall.set_wall_up(found_wall_intersect.pos, found_wall_intersect.axis)
 	} else if found_wall && mouse.is_button_press(.Left) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
 			apply_flood_fill()
 		}
 		found_wall_texture = texture
+        wall.update_cutaways(true)
 	}
 
 	dirty = false

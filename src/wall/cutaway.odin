@@ -148,3 +148,9 @@ update_cutaways :: proc(force: bool = false) {
 	previous_visible_chunks_start = camera.visible_chunks_start
 	previous_visible_chunks_end = camera.visible_chunks_end
 }
+
+set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
+	w, _ := get_wall(pos, axis)
+	w.state = .Up
+	set_wall(pos, axis, w)
+}
