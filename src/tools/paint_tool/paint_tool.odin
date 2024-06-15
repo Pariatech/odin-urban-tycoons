@@ -12,6 +12,8 @@ import "../../mouse"
 import "../../tile"
 import "../../wall"
 
+WALL_SELECTION_DISTANCE :: 4
+
 position: glsl.ivec3
 side: tile.Tile_Triangle_Side
 
@@ -28,7 +30,7 @@ Wall_Intersect :: struct {
 }
 
 init :: proc() {
-    floor.show_markers = true
+	floor.show_markers = true
 }
 
 deinit :: proc() {
@@ -68,16 +70,19 @@ update :: proc() {
 			texture,
 		)
 
-        wall.update_cutaways(true)
-        if found_wall {
-            wall.set_wall_up(found_wall_intersect.pos, found_wall_intersect.axis)
-        }
+		wall.update_cutaways(true)
+		if found_wall {
+			wall.set_wall_up(
+				found_wall_intersect.pos,
+				found_wall_intersect.axis,
+			)
+		}
 	} else if found_wall && mouse.is_button_press(.Left) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
 			apply_flood_fill()
 		}
 		found_wall_texture = texture
-        wall.update_cutaways(true)
+		wall.update_cutaways(true)
 	}
 
 	dirty = false
@@ -114,7 +119,7 @@ clear_previous_wall :: proc(
 
 get_found_wall_texture :: proc() -> wall.Wall_Texture {
 	side_map := wall.WALL_SIDE_MAP
-    using found_wall_intersect
+	using found_wall_intersect
 	switch axis {
 	case .E_W:
 		if w, ok := wall.get_east_west_wall(pos); ok {
@@ -125,13 +130,11 @@ get_found_wall_texture :: proc() -> wall.Wall_Texture {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .NW_SE:
-		if w, ok := wall.get_north_west_south_east_wall(pos);
-		   ok {
+		if w, ok := wall.get_north_west_south_east_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .SW_NE:
-		if w, ok := wall.get_south_west_north_east_wall(pos);
-		   ok {
+		if w, ok := wall.get_south_west_north_east_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	}
@@ -205,7 +208,7 @@ find_wall_intersect :: proc(
 		return find_north_west_wall_intersect(position, side)
 	}
 
-    return {}, false
+	return {}, false
 }
 
 find_south_west_wall_intersect :: proc(
@@ -215,86 +218,165 @@ find_south_west_wall_intersect :: proc(
 	Wall_Intersect,
 	bool,
 ) {
+    wall_selection_distance := i32(WALL_SELECTION_DISTANCE)
+    if wall.cutaway_state == .Down {
+        wall_selection_distance = 1
+    }
 	switch side {
 	case .South:
-		for i in i32(0) ..< 4 {
-			if pos := position - {4 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+		for i in i32(0) ..< wall_selection_distance {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - i,
+						   0,
+						   wall_selection_distance - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {3 - i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - i,
+					   }; wall.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
-			if pos := position - {3 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 		}
 	case .East:
-		for i in i32(0) ..< 4 {
-			if pos := position - {3 - i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+		for i in i32(0) ..< wall_selection_distance {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - i,
+					   }; wall.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
-			if pos := position - {3 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
 	case .North:
-		for i in i32(0) ..< 4 {
-			if pos := position - {4 - i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+		for i in i32(0) ..< wall_selection_distance {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
-			if pos := position - {4 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
 	case .West:
-		for i in i32(0) ..< 4 {
-			if pos := position - {4 - i, 0, 4 - i};
+		for i in i32(0) ..< wall_selection_distance {
+			if pos := position - {wall_selection_distance - i, 0, 4 - i};
 			   wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {4 - i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
-			if pos := position - {4 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
-			if pos := position - {3 - i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			if pos :=
+				   position -
+				    {
+						   wall_selection_distance - 1 - i,
+						   0,
+						   wall_selection_distance - 1 - i,
+					   }; wall.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 		}
 	}
 
-    return {}, false
+	return {}, false
 }
 
 find_south_east_wall_intersect :: proc(
@@ -383,7 +465,7 @@ find_south_east_wall_intersect :: proc(
 		}
 	}
 
-    return {}, false
+	return {}, false
 }
 
 find_north_east_wall_intersect :: proc(
@@ -472,7 +554,7 @@ find_north_east_wall_intersect :: proc(
 		}
 	}
 
-    return {}, false
+	return {}, false
 }
 
 find_north_west_wall_intersect :: proc(
@@ -561,5 +643,5 @@ find_north_west_wall_intersect :: proc(
 		}
 	}
 
-    return {}, false
+	return {}, false
 }
