@@ -18,7 +18,7 @@ paint_panel_body :: proc(
 ) {
 	i: int = 0
 	for tex in wall.Wall_Texture {
-		if tex == .Wall_Top || tex == .Frame {
+		if tex == .Wall_Top || tex == .Frame || tex == .Drywall {
 			continue
 		}
 

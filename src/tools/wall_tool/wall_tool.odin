@@ -562,7 +562,7 @@ set_south_west_north_east_wall_frame :: proc(pos: glsl.ivec3) {
 }
 
 set_south_west_north_east_wall_drywall :: proc(pos: glsl.ivec3) {
-	set_south_west_north_east_wall(pos, .Brick)
+	set_south_west_north_east_wall(pos, .Drywall)
 }
 
 set_south_west_north_east_wall :: proc(
@@ -594,7 +594,7 @@ set_north_west_south_east_wall_frame :: proc(pos: glsl.ivec3) {
 }
 
 set_north_west_south_east_wall_drywall :: proc(pos: glsl.ivec3) {
-	set_north_west_south_east_wall(pos, .Brick)
+	set_north_west_south_east_wall(pos, .Drywall)
 }
 
 set_north_west_south_east_wall :: proc(
@@ -627,7 +627,7 @@ set_east_west_wall_frame :: proc(pos: glsl.ivec3) {
 }
 
 set_east_west_wall_drywall :: proc(pos: glsl.ivec3) {
-	set_east_west_wall(pos, .Brick)
+	set_east_west_wall(pos, .Drywall)
 }
 
 set_east_west_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
@@ -656,7 +656,7 @@ set_north_south_wall_frame :: proc(pos: glsl.ivec3) {
 }
 
 set_north_south_wall_drywall :: proc(pos: glsl.ivec3) {
-	set_north_south_wall(pos, .Brick)
+	set_north_south_wall(pos, .Drywall)
 }
 
 set_north_south_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {

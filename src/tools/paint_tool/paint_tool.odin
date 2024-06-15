@@ -48,7 +48,18 @@ update :: proc() {
 
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
-	if dirty || previous_position != position || previous_side != side {
+	texture := texture
+	if keyboard.is_key_down(.Key_Left_Control) {
+		texture = .Drywall
+	}
+	delete_state_changed :=
+		keyboard.is_key_press(.Key_Left_Control) ||
+		keyboard.is_key_release(.Key_Left_Control)
+
+	if dirty ||
+	   previous_position != position ||
+	   previous_side != side ||
+	   delete_state_changed {
 		previous_found_wall := found_wall
 		previous_found_wall_intersect := found_wall_intersect
 
@@ -79,7 +90,7 @@ update :: proc() {
 		}
 	} else if found_wall && mouse.is_button_press(.Left) {
 		if keyboard.is_key_down(.Key_Left_Shift) {
-			apply_flood_fill()
+			apply_flood_fill(texture)
 		}
 		found_wall_texture = texture
 		wall.update_cutaways(true)
@@ -93,7 +104,7 @@ set_texture :: proc(tex: wall.Wall_Texture) {
 	dirty = true
 }
 
-apply_flood_fill :: proc() {
+apply_flood_fill :: proc(texture: wall.Wall_Texture) {
 	side_map := wall.WALL_SIDE_MAP
 	wall_side := side_map[found_wall_intersect.axis][camera.rotation]
 
@@ -138,7 +149,7 @@ get_found_wall_texture :: proc() -> wall.Wall_Texture {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	}
-	return .Brick
+	return .Drywall
 }
 
 paint_wall :: proc(
@@ -218,10 +229,10 @@ find_south_west_wall_intersect :: proc(
 	Wall_Intersect,
 	bool,
 ) {
-    wall_selection_distance := i32(WALL_SELECTION_DISTANCE)
-    if wall.cutaway_state == .Down {
-        wall_selection_distance = 1
-    }
+	wall_selection_distance := i32(WALL_SELECTION_DISTANCE)
+	if wall.cutaway_state == .Down {
+		wall_selection_distance = 1
+	}
 	switch side {
 	case .South:
 		for i in i32(0) ..< wall_selection_distance {

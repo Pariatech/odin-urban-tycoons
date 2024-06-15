@@ -18,6 +18,7 @@ import "../utils"
 
 Wall_Texture :: enum (u16) {
 	Wall_Top,
+    Drywall,
 	Brick,
 	Varg,
 	Nyana,
@@ -125,6 +126,7 @@ WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
 	.Wall_Top = "resources/textures/walls/wall-top.png",
+	.Drywall    = "resources/textures/walls/drywall.png",
 	.Brick    = "resources/textures/walls/brick-wall.png",
 	.Varg     = "resources/textures/walls/varg-wall.png",
 	.Nyana    = "resources/textures/walls/nyana-wall.png",
