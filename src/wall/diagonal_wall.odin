@@ -597,8 +597,8 @@ draw_diagonal_wall :: proc(
 		)
 	}
 
-	top_vertices := diagonal_wall_top_vertices[wall.state][mask][:]
-	top_indices := diagonal_wall_top_indices[wall.state][mask][:]
+	top_vertices := diagonal_wall_top_vertices[wall.state][top_mask][:]
+	top_indices := diagonal_wall_top_indices[wall.state][top_mask][:]
 
 	draw_wall_mesh(
 		top_vertices,
