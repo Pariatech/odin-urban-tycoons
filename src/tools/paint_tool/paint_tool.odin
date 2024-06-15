@@ -56,10 +56,12 @@ update :: proc() {
 		keyboard.is_key_press(.Key_Left_Control) ||
 		keyboard.is_key_release(.Key_Left_Control)
 
-	if dirty ||
-	   previous_position != position ||
-	   previous_side != side ||
-	   delete_state_changed {
+	changed :=
+		dirty ||
+		previous_position != position ||
+		previous_side != side ||
+		delete_state_changed
+	if changed {
 		previous_found_wall := found_wall
 		previous_found_wall_intersect := found_wall_intersect
 
