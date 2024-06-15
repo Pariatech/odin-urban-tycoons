@@ -212,6 +212,31 @@ set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
 	        set_wall(pos + {-1, 0, 1}, .E_W, w)
 		}
 	case .SW_NE:
+		if w, ok := get_wall(pos + {-1, 0, -1}, .SW_NE); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, -1}, .SW_NE, w)
+		}
+		if w, ok := get_wall(pos + {1, 0, 1}, .SW_NE); ok {
+	        w.state = .Right
+	        set_wall(pos + {1, 0, 1}, .SW_NE, w)
+		}
 	case .NW_SE:
+		if w, ok := get_wall(pos + {-1, 0, 1}, .NW_SE); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, 1}, .NW_SE, w)
+		}
+		if w, ok := get_wall(pos + {1, 0, -1}, .NW_SE); ok {
+	        w.state = .Right
+	        set_wall(pos + {1, 0, -1}, .NW_SE, w)
+		}
+
+		if w, ok := get_wall(pos + {-1, 0, 0}, .SW_NE); ok {
+	        w.state = .Left
+	        set_wall(pos + {-1, 0, 0}, .SW_NE, w)
+		}
+		if w, ok := get_wall(pos + {0, 0, 1}, .SW_NE); ok {
+	        w.state = .Right
+	        set_wall(pos + {0, 0, 1}, .SW_NE, w)
+		}
 	}
 }

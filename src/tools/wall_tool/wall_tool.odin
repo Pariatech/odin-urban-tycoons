@@ -480,8 +480,8 @@ update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 	if wall.has_north_west_south_east_wall(pos + {-1, 0, 1}) {
 		left_type_part = .Side
 	} else {
-		has_left := wall.has_south_west_north_east_wall(pos + {0, 0, 1})
-		has_right := wall.has_south_west_north_east_wall(pos + {-1, 0, 0})
+		has_left := wall.has_south_west_north_east_wall(pos + {-1, 0, 0})
+		has_right := wall.has_south_west_north_east_wall(pos + {0, 0, 1})
 		if has_left && has_right {
 			left_type_part = .Side
 		} else if has_left {
