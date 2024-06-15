@@ -19,1234 +19,1238 @@ Diagonal_Wall_Mask :: enum {
 DIAGONAL_WALL_TOP_CROSS_OFFSET :: 0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
-DIAGONAL_WALL_VERTICES_MAP :: [State][Diagonal_Wall_Mask][]Wall_Vertex {
-	.Up =  {
-		.Full =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Cross =  {
-			 {
-				pos = {-0.5, 0.0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-	.Down =  {
-		.Full =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.DOWN_WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.DOWN_WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.DOWN_WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.DOWN_WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-		.Cross =  {
-			 {
-				pos = {-0.5, 0.0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, constants.DOWN_WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
-			},
-		},
-	},
-	.Left =  {
-		.Full =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Cross =  {
-			 {
-				pos = {-0.5, 0.0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-	.Right =  {
-		.Full =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, 0.0, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos = {-0.5575, 0.0, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos = {-0.5, 0.0, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 1, 0, 0},
-			},
-			 {
-				pos = {0.5, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Cross =  {
-			 {
-				pos = {-0.5, 0.0, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, 0.0, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 1, 0, 0},
-			},
-			 {
-				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
-				light = {1, 1, 1},
-				texcoords = {0.115, 0, 0, 0},
-			},
-			 {
-				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-}
+diagonal_wall_vertices := [State][Diagonal_Wall_Mask][dynamic]Wall_Vertex{}
+diagonal_wall_indices := [State][Diagonal_Wall_Mask][dynamic]Wall_Index{}
 
+diagonal_wall_top_vertices := [State][Diagonal_Wall_Mask][dynamic]Wall_Vertex{}
+diagonal_wall_top_indices := [State][Diagonal_Wall_Mask][dynamic]Wall_Index{}
 
-DIAGONAL_WALL_TOP_VERTICES_MAP :: [State][Diagonal_Wall_Mask][]Wall_Vertex {
-	.Up =  {
-		.Cross =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-		},
-		.Full =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-	.Down =  {
-		.Cross =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.DOWN_WALL_HEIGHT +
-					DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.DOWN_WALL_HEIGHT +
-					DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.DOWN_WALL_HEIGHT +
-					DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.DOWN_WALL_HEIGHT +
-					DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-		},
-		.Full =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-	.Left =  {
-		.Cross =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-		},
-		.Full =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-	.Right =  {
-		.Cross =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-		},
-		.Full =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Left_Extension =  {
-			 {
-				pos =  {
-					-0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.4425,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.6725,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Right_Extension =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5575,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5575,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.6725,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.4425,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-		.Side =  {
-			 {
-				pos =  {
-					-0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.5,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.5,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0.115, 0, 0},
-			},
-			 {
-				pos =  {
-					0.615,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					-0.385,
-				},
-				light = {1, 1, 1},
-				texcoords = {1, 0, 0, 0},
-			},
-			 {
-				pos =  {
-					-0.385,
-					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
-					0.615,
-				},
-				light = {1, 1, 1},
-				texcoords = {0, 0, 0, 0},
-			},
-		},
-	},
-}
+// DIAGONAL_WALL_VERTICES_MAP :: [State][Diagonal_Wall_Mask][]Wall_Vertex {
+// 	.Up =  {
+// 		.Full =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Cross =  {
+// 			 {
+// 				pos = {-0.5, 0.0, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Down =  {
+// 		.Full =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.DOWN_WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.DOWN_WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.DOWN_WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.DOWN_WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.DOWN_WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.DOWN_WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 		},
+// 		.Cross =  {
+// 			 {
+// 				pos = {-0.5, 0.0, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, constants.DOWN_WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, constants.DOWN_WALL_TEXTURE, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Left =  {
+// 		.Full =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Cross =  {
+// 			 {
+// 				pos = {-0.5, 0.0, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Right =  {
+// 		.Full =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, 0.0, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5575, constants.WALL_HEIGHT, -0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos = {-0.5575, 0.0, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5575, constants.WALL_HEIGHT, 0.5575},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos = {-0.5, 0.0, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {0.5, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, 0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Cross =  {
+// 			 {
+// 				pos = {-0.5, 0.0, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, 0.0, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 1, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.385, constants.WALL_HEIGHT, -0.5},
+// 				light = {1, 1, 1},
+// 				texcoords = {0.115, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos = {-0.5, constants.WALL_HEIGHT, -0.385},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// }
 
-diagonal_wall_indices := []Wall_Index{0, 1, 2, 0, 2, 3}
+// DIAGONAL_WALL_TOP_VERTICES_MAP :: [State][Diagonal_Wall_Mask][]Wall_Vertex {
+// 	.Up =  {
+// 		.Cross =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 		},
+// 		.Full =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Down =  {
+// 		.Cross =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.DOWN_WALL_HEIGHT +
+// 					DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.DOWN_WALL_HEIGHT +
+// 					DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.DOWN_WALL_HEIGHT +
+// 					DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.DOWN_WALL_HEIGHT +
+// 					DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 		},
+// 		.Full =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.DOWN_WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Left =  {
+// 		.Cross =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 		},
+// 		.Full =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// 	.Right =  {
+// 		.Cross =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_CROSS_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 		},
+// 		.Full =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Left_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.4425,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.6725,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Right_Extension =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5575,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5575,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.6725,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.4425,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 		.Side =  {
+// 			 {
+// 				pos =  {
+// 					-0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.5,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.5,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0.115, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					0.615,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					-0.385,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {1, 0, 0, 0},
+// 			},
+// 			 {
+// 				pos =  {
+// 					-0.385,
+// 					constants.WALL_HEIGHT + DIAGONAL_WALL_TOP_OFFSET,
+// 					0.615,
+// 				},
+// 				light = {1, 1, 1},
+// 				texcoords = {0, 0, 0, 0},
+// 			},
+// 		},
+// 	},
+// }
+
 
 DIAGONAL_WALL_MASK_MAP ::
 	#partial [Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
@@ -1806,12 +1810,12 @@ draw_diagonal_wall :: proc(
 	transform *= transform_map[camera.rotation]
 
 	if draw {
-		diagonal_wall_vertices_map := DIAGONAL_WALL_VERTICES_MAP
-		wall_vertices := diagonal_wall_vertices_map[wall.state][mask]
+		wall_vertices := diagonal_wall_vertices[wall.state][mask][:]
+        wall_indices := diagonal_wall_indices[wall.state][mask][:]
 
 		draw_wall_mesh(
 			wall_vertices,
-			diagonal_wall_indices,
+			wall_indices,
 			transform,
 			texture,
 			wall.mask,
@@ -1820,12 +1824,12 @@ draw_diagonal_wall :: proc(
 		)
 	}
 
-	top_vertices_map := DIAGONAL_WALL_TOP_VERTICES_MAP
-	top_vertices := top_vertices_map[wall.state][mask]
+	top_vertices := diagonal_wall_top_vertices[wall.state][mask][:]
+	top_indices := diagonal_wall_top_indices[wall.state][mask][:]
 
 	draw_wall_mesh(
 		top_vertices,
-		diagonal_wall_indices,
+		top_indices,
 		transform,
 		.Wall_Top,
 		wall.mask,

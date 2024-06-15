@@ -1325,7 +1325,12 @@ update_after_rotation :: proc() {
 	}
 }
 
-load_wall_model :: proc(parts: []string, node: ^cgltf.node) {
+load_wall_model :: proc(
+	parts: []string,
+	node: ^cgltf.node,
+	vertices: ^[State][Wall_Mask][dynamic]Wall_Vertex,
+	indices: ^[State][Wall_Mask][dynamic]Wall_Index,
+) {
 	state: State
 	mask: Wall_Mask
 
@@ -1352,13 +1357,13 @@ load_wall_model :: proc(parts: []string, node: ^cgltf.node) {
 
 	log.info(state, mask)
 
-    mesh := node.mesh
+	mesh := node.mesh
 	primitive := mesh.primitives[0]
 	if primitive.indices != nil {
 		accessor := primitive.indices
 		for i in 0 ..< accessor.count {
 			index := cgltf.accessor_read_index(accessor, i)
-			append(&wall_indices[state][mask], Wall_Index(index))
+			append(&indices[state][mask], Wall_Index(index))
 		}
 	}
 
@@ -1366,28 +1371,28 @@ load_wall_model :: proc(parts: []string, node: ^cgltf.node) {
 		if attribute.type == .position {
 			accessor := attribute.data
 			for i in 0 ..< accessor.count {
-				if i >= len(wall_vertices[state][mask]) {
-					append(&wall_vertices[state][mask], Wall_Vertex{})
+				if i >= len(vertices[state][mask]) {
+					append(&vertices[state][mask], Wall_Vertex{})
 				}
 				_ = cgltf.accessor_read_float(
 					accessor,
 					i,
-					raw_data(&wall_vertices[state][mask][i].pos),
+					raw_data(&vertices[state][mask][i].pos),
 					3,
 				)
-				wall_vertices[state][mask][i].pos.x *= -1
+				vertices[state][mask][i].pos.x *= -1
 			}
 		}
 		if attribute.type == .texcoord {
 			accessor := attribute.data
 			for i in 0 ..< accessor.count {
-				if i >= len(wall_vertices[state][mask]) {
-					append(&wall_vertices[state][mask], Wall_Vertex{})
+				if i >= len(vertices[state][mask]) {
+					append(&vertices[state][mask], Wall_Vertex{})
 				}
 				_ = cgltf.accessor_read_float(
 					accessor,
 					i,
-					raw_data(&wall_vertices[state][mask][i].texcoords),
+					raw_data(&vertices[state][mask][i].texcoords),
 					2,
 				)
 			}
@@ -1395,9 +1400,14 @@ load_wall_model :: proc(parts: []string, node: ^cgltf.node) {
 	}
 }
 
-load_wall_top_model :: proc(parts: []string, node: ^cgltf.node) {
+load_diagonal_wall_model :: proc(
+	parts: []string,
+	node: ^cgltf.node,
+	vertices: ^[State][Diagonal_Wall_Mask][dynamic]Wall_Vertex,
+	indices: ^[State][Diagonal_Wall_Mask][dynamic]Wall_Index,
+) {
 	state: State
-	mask: Wall_Mask
+	mask: Diagonal_Wall_Mask
 
 	switch parts[0] {
 	case "Left":
@@ -1410,10 +1420,12 @@ load_wall_top_model :: proc(parts: []string, node: ^cgltf.node) {
 		state = .Down
 	}
 	switch parts[1] {
-	case "End":
-		mask = .End
-	case "Extended_Side":
-		mask = .Extended_Side
+	case "Cross":
+		mask = .Cross
+	case "Left_Extension":
+		mask = .Left_Extension
+	case "Right_Extension":
+		mask = .Right_Extension
 	case "Full":
 		mask = .Full
 	case "Side":
@@ -1422,13 +1434,13 @@ load_wall_top_model :: proc(parts: []string, node: ^cgltf.node) {
 
 	log.info(state, mask)
 
-    mesh := node.mesh
+	mesh := node.mesh
 	primitive := mesh.primitives[0]
 	if primitive.indices != nil {
 		accessor := primitive.indices
 		for i in 0 ..< accessor.count {
 			index := cgltf.accessor_read_index(accessor, i)
-			append(&wall_top_indices[state][mask], Wall_Index(index))
+			append(&indices[state][mask], Wall_Index(index))
 		}
 	}
 
@@ -1436,28 +1448,28 @@ load_wall_top_model :: proc(parts: []string, node: ^cgltf.node) {
 		if attribute.type == .position {
 			accessor := attribute.data
 			for i in 0 ..< accessor.count {
-				if i >= len(wall_top_vertices[state][mask]) {
-					append(&wall_top_vertices[state][mask], Wall_Vertex{})
+				if i >= len(vertices[state][mask]) {
+					append(&vertices[state][mask], Wall_Vertex{})
 				}
 				_ = cgltf.accessor_read_float(
 					accessor,
 					i,
-					raw_data(&wall_top_vertices[state][mask][i].pos),
+					raw_data(&vertices[state][mask][i].pos),
 					3,
 				)
-				wall_top_vertices[state][mask][i].pos.x *= -1
+				vertices[state][mask][i].pos.x *= -1
 			}
 		}
 		if attribute.type == .texcoord {
 			accessor := attribute.data
 			for i in 0 ..< accessor.count {
-				if i >= len(wall_top_vertices[state][mask]) {
-					append(&wall_top_vertices[state][mask], Wall_Vertex{})
+				if i >= len(vertices[state][mask]) {
+					append(&vertices[state][mask], Wall_Vertex{})
 				}
 				_ = cgltf.accessor_read_float(
 					accessor,
 					i,
-					raw_data(&wall_top_vertices[state][mask][i].texcoords),
+					raw_data(&vertices[state][mask][i].texcoords),
 					2,
 				)
 			}
@@ -1490,9 +1502,28 @@ load_models :: proc() -> (ok: bool = false) {
 
 		switch parts[0] {
 		case "Wall":
-			load_wall_model(parts[1:], node)
+			load_wall_model(parts[1:], node, &wall_vertices, &wall_indices)
 		case "Wall_Top":
-			load_wall_top_model(parts[1:], node)
+			load_wall_model(
+				parts[1:],
+				node,
+				&wall_top_vertices,
+				&wall_top_indices,
+			)
+		case "Diagonal_Wall":
+			load_diagonal_wall_model(
+				parts[1:],
+				node,
+				&diagonal_wall_vertices,
+				&diagonal_wall_indices,
+			)
+		case "Diagonal_Wall_Top":
+			load_diagonal_wall_model(
+				parts[1:],
+				node,
+				&diagonal_wall_top_vertices,
+				&diagonal_wall_top_indices,
+			)
 		}
 	}
 
