@@ -17,6 +17,8 @@ pos: glsl.vec2
 moved: bool
 ray: Ray
 
+intersect_pos: glsl.vec3
+
 Ray :: struct {
 	origin:    glsl.vec3,
 	direction: glsl.vec3,
@@ -147,6 +149,7 @@ intersect_with_tile_triangle :: proc(
 
 	intersect, ok := ray_intersect_triangle(triangle).?
 	if ok {
+        intersect_pos = intersect
 		on_intersect(intersect)
 	}
 
@@ -414,5 +417,7 @@ on_tile_intersect :: proc(
 ) {
 	if moved || previous_floor != floor {
 		intersect_with_tiles(on_intersect, floor)
-	}
+	} else {
+        on_intersect(intersect_pos)
+    }
 }
