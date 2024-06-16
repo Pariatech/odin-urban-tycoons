@@ -1251,8 +1251,6 @@ load_wall_model :: proc(
 		mask = .Side
 	}
 
-	log.info(state, mask)
-
 	mesh := node.mesh
 	primitive := mesh.primitives[0]
 	if primitive.indices != nil {
@@ -1328,8 +1326,6 @@ load_diagonal_wall_model :: proc(
 		mask = .Side
 	}
 
-	log.info(state, mask)
-
 	mesh := node.mesh
 	primitive := mesh.primitives[0]
 	if primitive.indices != nil {
@@ -1389,9 +1385,7 @@ load_models :: proc() -> (ok: bool = false) {
 	}
 	defer cgltf.free(data)
 
-	log.info(data.scene.name)
 	for node in data.scene.nodes {
-		log.info(node.name)
 
 		parts := strings.split(string(node.name), ".")
 		defer delete(parts)
