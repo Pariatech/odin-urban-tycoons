@@ -13,7 +13,7 @@ W,A,S,D:      Move camera
 Q,E:          Rotate camera
 Mouse Scroll: Zoom
 
----- Land Tool [T] ----
+---- Land Tool [1] ----
 Only work on grass tiles
 
 Left Click:              Raise land
@@ -26,20 +26,35 @@ Ctrl Click:              Smooth land
 Shift Click & Drag:      Level land
 Ctrl Shift Click & Drag: Flatten land
 
----- Wall Tool [G] ----
+---- Wall Tool [2] ----
 Left Click & Drag:              Place Wall
 Shift Left Click & Drag:        Place Wall Rectangle
 Ctrl Left Click & Drag:         Remove Wall
 Ctrl Shift Left Click & Drag:   Remove Wall Rectangle
 
----- Floor Tool [F] ----
+---- Floor Tool [3] ----
 Left Click & Drag:          Place
 Ctrl Left Click & Drag:     Remove
 Shift Left Click:           Fill Place
 Ctrl Shift Left Click:      Fill Remove
 
 ---- Triangle Floor Tool [Ctrl F] ----
-Left Click: Place
+Left Click:         Place
+Ctrl Left Click:    Remove
+
+---- Paint Tool [4] ----
+Left Click:             Paint Wall
+Ctrl Left Click:        Remove Paint
+Shift Left Click:       Paint Fill
+Ctrl Shift Left Click:  Fill Remove
+
+---- Door Tool [5] ----
+Left Click:         Place
+Ctrl Left Click:    Remove
+
+---- Window Tool [6] ----
+Left Click:         Place
+Ctrl Left Click:    Remove
 `
 
 HELP_WINDOW_BODY_WIDTH :: 500
