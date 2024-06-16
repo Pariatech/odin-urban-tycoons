@@ -9,8 +9,9 @@ import "../../cursor"
 import "../../floor"
 import "../../keyboard"
 import "../../mouse"
-import "../../tile"
 import "../../terrain"
+import "../../tile"
+import "../../wall"
 
 previous_tiles: map[glsl.ivec3][tile.Tile_Triangle_Side]Maybe(
 	tile.Tile_Triangle,
@@ -30,7 +31,7 @@ init :: proc() {
 		revert_tiles(position)
 	}
 	triangle_mode = false
-    floor.show_markers = true
+	floor.show_markers = true
 }
 
 deinit :: proc() {
@@ -44,24 +45,16 @@ update :: proc() {
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
 	reset :=
-		previous_position != position || floor.previous_floor != floor.floor
-	if keyboard.is_key_press(.Key_1) {
-		active_texture = .Wood
-		reset = true
-	} else if keyboard.is_key_press(.Key_2) {
-		active_texture = .Gravel
-		reset = true
-	}
+		previous_position != position ||
+		floor.previous_floor != floor.floor ||
+		previous_side != side
 
 	previous_triangle_mode := triangle_mode
 	if keyboard.is_key_down(.Key_Left_Control) &&
 	   keyboard.is_key_press(.Key_F) {
-		triangle_mode = true
+		triangle_mode = !triangle_mode
 	}
 	if triangle_mode != previous_triangle_mode {
-		reset = true
-	}
-	if triangle_mode && previous_side != side {
 		reset = true
 	}
 
@@ -174,14 +167,44 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 		}
 	}
 
-    if floor.floor > 0 && !terrain.is_tile_flat(position.xz) {
-        return
-    }
+	if floor.floor > 0 && !terrain.is_tile_flat(position.xz) {
+		return
+	}
 
 	if triangle_mode {
 		tile.set_tile_triangle(position, side, tile_triangle)
 	} else {
-		tile.set_tile(position, tile.tile(tile_triangle))
+		if wall.has_north_west_south_east_wall(position) {
+			tile.set_tile_triangle(position, side, tile_triangle)
+			next_side := side
+			switch side {
+			case .West:
+				next_side = .South
+			case .South:
+				next_side = .West
+			case .East:
+				next_side = .North
+			case .North:
+				next_side = .East
+			}
+			tile.set_tile_triangle(position, next_side, tile_triangle)
+		} else if wall.has_south_west_north_east_wall(position) {
+			tile.set_tile_triangle(position, side, tile_triangle)
+			next_side := side
+			switch side {
+			case .West:
+				next_side = .North
+			case .South:
+				next_side = .East
+			case .East:
+				next_side = .South
+			case .North:
+				next_side = .West
+			}
+			tile.set_tile_triangle(position, next_side, tile_triangle)
+		} else {
+			tile.set_tile(position, tile.tile(tile_triangle))
+		}
 	}
 }
 
