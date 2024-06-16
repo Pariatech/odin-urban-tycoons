@@ -113,25 +113,27 @@ help_window_body :: proc(
 		size = 18,
 	)
 
-	scroll_bar_percent = 400 / (max.y - min.y)
+	scroll_bar_percent = HELP_WINDOW_BODY_HEIGHT / (max.y - min.y)
+	height := max.y - min.y
 	if cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x + HELP_WINDOW_SCROLL_BAR_WIDTH &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
-		scroll_bar_offset -= (mouse.vertical_scroll() / scroll_bar_percent) * 4
+		scroll_bar_offset -= (mouse.vertical_scroll() * scroll_bar_percent / 8)
 		scroll_bar_offset = clamp(
 			scroll_bar_offset,
 			0,
-			size.y * (1 - scroll_bar_percent),
+			(1 - scroll_bar_percent),
 		)
 		mouse.capture_vertical_scroll()
 	}
 
+	text_offset: f32 = height * scroll_bar_offset
 	text(
 		ctx,
 		 {
 			pos.x + HELP_WINDOW_PADDING,
-			pos.y + HELP_WINDOW_PADDING - scroll_bar_offset,
+			pos.y + HELP_WINDOW_PADDING - text_offset,
 		},
 		HELP_TEXT,
 		ah = .LEFT,

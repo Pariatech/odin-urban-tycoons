@@ -162,8 +162,8 @@ scroll_bar :: proc(
 	if mouse.is_button_press(.Left) &&
 	   cursor.pos.x >= pos.x &&
 	   cursor.pos.x < pos.x + size.x &&
-	   cursor.pos.y >= pos.y + offset^ &&
-	   cursor.pos.y < pos.y + offset^ + size.y * percent {
+	   cursor.pos.y >= pos.y + offset^ * size.y &&
+	   cursor.pos.y < pos.y + offset^ * size.y + size.y * percent {
 		dragging^ = true
 		mouse.capture(.Left)
 	} else if dragging^ && mouse.is_button_release(.Left) {
@@ -174,24 +174,15 @@ scroll_bar :: proc(
 	   cursor.pos.x < pos.x + size.x &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
-		offset^ = cursor.pos.y - pos.y
-		offset^ = clamp(offset^, 0, size.y * (1 - percent))
+		offset^ = (cursor.pos.y - pos.y) / size.y
+		offset^ = clamp(offset^, 0, (1 - percent))
 		dragging^ = true
 		mouse.capture(.Left)
 	}
-	//    else if cursor.pos.x >= pos.x &&
-	//    cursor.pos.x < pos.x + size.x &&
-	//    cursor.pos.y >= pos.y &&
-	//    cursor.pos.y < pos.y + size.y {
-	// 	offset^ -= (camera.scroll.y / percent) * 4
-	// 	offset^ = clamp(offset^, 0, size.y * (1 - percent))
-	//        camera.scroll.y = 0
-	// }
-	//
+
 	if dragging^ && cursor.previous_pos != cursor.pos {
-		offset^ += cursor.pos.y - cursor.previous_pos.y
-		offset^ = clamp(offset^, 0, size.y * (1 - percent))
-		log.info(offset^)
+		offset^ += (cursor.pos.y - cursor.previous_pos.y) / size.y
+		offset^ = clamp(offset^, 0, (1 - percent))
 	}
 
 	append(
@@ -200,7 +191,7 @@ scroll_bar :: proc(
 			pos = pos,
 			size = size,
 			color = color,
-			offset = offset^,
+			offset = offset^ * size.y,
 			percent = percent,
 		},
 	)

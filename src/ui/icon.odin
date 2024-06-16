@@ -176,6 +176,7 @@ init_icon_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 init_icon_texture_array :: proc(
 	texture_array: ^u32,
 	textures: []cstring,
+    wrap: i32 = gl.REPEAT
 ) -> (
 	ok: bool = true,
 ) {
@@ -186,12 +187,12 @@ init_icon_texture_array :: proc(
 	gl.TexParameteri(
 		gl.TEXTURE_2D_ARRAY,
 		gl.TEXTURE_WRAP_S,
-		gl.CLAMP_TO_BORDER,
+        wrap,
 	)
 	gl.TexParameteri(
 		gl.TEXTURE_2D_ARRAY,
 		gl.TEXTURE_WRAP_T,
-		gl.CLAMP_TO_BORDER,
+        wrap,
 	)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
