@@ -19,13 +19,11 @@ import "../utils"
 Wall_Texture :: enum (u16) {
 	Wall_Top,
 	Frame,
-    Drywall,
-
+	Drywall,
 	Brick,
-
-    White,
-    Royal_Blue,
-    Dark_Blue,
+	White,
+	Royal_Blue,
+	Dark_Blue,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -128,16 +126,13 @@ WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
-	.Wall_Top = "resources/textures/walls/wall-top.png",
-
-	.Frame    = "resources/textures/walls/frame.png",
+	.Wall_Top   = "resources/textures/walls/wall-top.png",
+	.Frame      = "resources/textures/walls/frame.png",
 	.Drywall    = "resources/textures/walls/drywall.png",
-
-	.Brick    = "resources/textures/walls/brick-wall.png",
-
-	.White    = "resources/textures/walls/white.png",
-	.Royal_Blue    = "resources/textures/walls/royal_blue.png",
-	.Dark_Blue    = "resources/textures/walls/dark_blue.png",
+	.Brick      = "resources/textures/walls/brick-wall.png",
+	.White      = "resources/textures/walls/white.png",
+	.Royal_Blue = "resources/textures/walls/royal_blue.png",
+	.Dark_Blue  = "resources/textures/walls/dark_blue.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
@@ -741,7 +736,7 @@ draw_wall_mesh :: proc(
 	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
-    light: glsl.vec3,
+	light: glsl.vec3,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
@@ -795,10 +790,10 @@ draw_wall :: proc(
 	indices_map := wall_indices
 	indices: []Wall_Index = indices_map[wall.state][mask][:]
 
-    light:= glsl.vec3{1, 1, 1}
-    if axis == .N_S {
-        light = glsl.vec3{0.9, 0.9, 0.9}
-    }
+	light := glsl.vec3{1, 1, 1}
+	if axis == .N_S {
+		light = glsl.vec3{0.9, 0.9, 0.9}
+	}
 
 	draw_wall_mesh(
 		vertices,
@@ -806,7 +801,7 @@ draw_wall :: proc(
 		transform,
 		texture,
 		wall.mask,
-        light,
+		light,
 		vertex_buffer,
 		index_buffer,
 	)
@@ -820,7 +815,7 @@ draw_wall :: proc(
 		transform,
 		.Wall_Top,
 		wall.mask,
-        light,
+		light,
 		vertex_buffer,
 		index_buffer,
 	)
@@ -834,8 +829,9 @@ get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
 
 set_north_south_wall :: proc(pos: glsl.ivec3, w: Wall) {
 	if has_south_west_north_east_wall(pos) ||
-	   has_north_west_south_east_wall(pos) {
-		return
+	   has_north_west_south_east_wall(pos) ||
+	   has_south_west_north_east_wall(pos + {-1, 0, 0}) ||
+	   has_north_west_south_east_wall(pos + {-1, 0, 0}) {return
 	}
 	chunk_set_north_south_wall(get_chunk(pos), pos, w)
 }
@@ -887,7 +883,9 @@ remove_north_south_wall :: proc(pos: glsl.ivec3) {
 
 set_east_west_wall :: proc(pos: glsl.ivec3, w: Wall) {
 	if has_south_west_north_east_wall(pos) ||
-	   has_north_west_south_east_wall(pos) {
+	   has_north_west_south_east_wall(pos) ||
+	   has_south_west_north_east_wall(pos + {0, 0, -1}) ||
+	   has_north_west_south_east_wall(pos + {0, 0, -1}) {
 		return
 	}
 	chunk_set_east_west_wall(get_chunk(pos), pos, w)
@@ -911,7 +909,10 @@ remove_east_west_wall :: proc(pos: glsl.ivec3) {
 }
 
 set_north_west_south_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
-	if has_north_south_wall(pos) || has_east_west_wall(pos) {
+	if has_north_south_wall(pos) ||
+	   has_north_south_wall(pos + {1, 0, 0}) ||
+	   has_east_west_wall(pos) ||
+	   has_east_west_wall(pos + {0, 0, 1}) {
 		return
 	}
 	chunk_set_north_west_south_east_wall(get_chunk(pos), pos, wall)
@@ -935,7 +936,10 @@ remove_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 }
 
 set_south_west_north_east_wall :: proc(pos: glsl.ivec3, wall: Wall) {
-	if has_north_south_wall(pos) || has_east_west_wall(pos) {
+	if has_north_south_wall(pos) ||
+	   has_north_south_wall(pos + {1, 0, 0}) ||
+	   has_east_west_wall(pos) ||
+	   has_east_west_wall(pos + {0, 0, 1}) {
 		return
 	}
 	chunk_set_south_west_north_east_wall(get_chunk(pos), pos, wall)

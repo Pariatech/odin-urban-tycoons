@@ -59,6 +59,12 @@ update :: proc() {
 				depth_map = .Wall_Cursor,
 			},
 		)
+
+		if keyboard.is_key_down(.Key_Left_Shift) {
+			revert_removing_rectangle()
+		} else {
+			revert_removing_line()
+        }
 	} else if keyboard.is_key_press(.Key_Left_Control) {
 		billboard.billboard_1x1_set(
 			wall_tool_billboard,
@@ -68,6 +74,12 @@ update :: proc() {
 				depth_map = .Wall_Cursor,
 			},
 		)
+
+		if keyboard.is_key_down(.Key_Left_Shift) {
+			revert_walls_rectangle()
+		} else {
+		    revert_walls_line()
+	    }
 	}
 
 	if keyboard.is_key_release(.Key_Left_Shift) {
@@ -712,7 +724,7 @@ removing_north_south_wall :: proc(pos: glsl.ivec3) {
 	}
 }
 
-removing_line :: proc() {
+revert_removing_line :: proc() {
 	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		update_walls_line(
 			undo_removing_south_west_north_east_wall,
@@ -721,6 +733,10 @@ removing_line :: proc() {
 			undo_removing_north_south_wall,
 		)
 	}
+}
+
+removing_line :: proc() {
+	revert_removing_line()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
@@ -794,7 +810,7 @@ adding_line :: proc() {
 			set_east_west_wall_drywall,
 			set_north_south_wall_drywall,
 		)
-        wall.update_cutaways(true)
+		wall.update_cutaways(true)
 	} else {
 		wall_tool_drag_start = wall_tool_position
 	}
@@ -843,13 +859,17 @@ adding_rectangle :: proc() {
 	}
 }
 
-removing_rectangle :: proc() {
+revert_removing_rectangle :: proc() {
 	if mouse.is_button_down(.Left) || mouse.is_button_release(.Left) {
 		update_walls_rectangle(
 			undo_removing_east_west_wall,
 			undo_removing_north_south_wall,
 		)
 	}
+}
+
+removing_rectangle :: proc() {
+    revert_removing_rectangle()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
