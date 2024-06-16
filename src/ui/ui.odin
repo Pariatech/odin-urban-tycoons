@@ -111,7 +111,6 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	) or_return
 
 	init_land_panel() or_return
-	init_wall_panel() or_return
 	init_paint_panel() or_return
 	init_door_panel() or_return
 	init_window_panel() or_return
@@ -198,7 +197,6 @@ update :: proc(using ctx: ^Context) {
 	}
 
 	land_panel(ctx)
-	wall_panel(ctx)
 	paint_panel(ctx)
 	door_panel(ctx)
 	window_panel(ctx)
