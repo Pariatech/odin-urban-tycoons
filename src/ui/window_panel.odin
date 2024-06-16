@@ -14,6 +14,12 @@ init_window_panel :: proc() -> (ok: bool = true) {
 window_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 	for tex, i in window_tool.Texture {
 		texmap := window_tool.TEXTURE_BILLBOARD_TEXTURES_MAP
+
+        border_width:= f32(BORDER_WIDTH)
+        if window_tool.texture == tex {
+            border_width *= 2
+        }
+
 		if icon_button(
 			   ctx,
 			    {
@@ -27,6 +33,10 @@ window_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) 
                right_padding = 7,
                top_padding = 0,
                bottom_padding = 0,
+               left_border_width = border_width,
+               right_border_width = border_width,
+               top_border_width = border_width,
+               bottom_border_width = border_width,
 		   ) {
 			window_tool.texture = tex
 		}

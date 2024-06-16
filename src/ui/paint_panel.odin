@@ -22,6 +22,11 @@ paint_panel_body :: proc(
 			continue
 		}
 
+        border_width:= f32(BORDER_WIDTH)
+        if paint_tool.texture == tex {
+            border_width *= 2
+        }
+
 		if icon_button(
 			   ctx,
 			    {
@@ -35,6 +40,10 @@ paint_panel_body :: proc(
 			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE},
 			   wall.wall_texture_array,
 			   int(tex),
+               left_border_width = border_width,
+               right_border_width = border_width,
+               top_border_width = border_width,
+               bottom_border_width = border_width,
 		   ) {
 			paint_tool.set_texture(tex)
 		}

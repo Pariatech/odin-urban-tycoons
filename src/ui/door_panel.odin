@@ -14,6 +14,12 @@ init_door_panel :: proc() -> (ok: bool = true) {
 door_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 	for tex, i in door_tool.Texture {
 		texmap := door_tool.TEXTURE_BILLBOARD_TEXTURES_MAP
+
+        border_width:= f32(BORDER_WIDTH)
+        if door_tool.texture == tex {
+            border_width *= 2
+        }
+
 		if icon_button(
 			   ctx,
 			    {
@@ -27,6 +33,10 @@ door_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
                right_padding = 7,
                top_padding = -8,
                bottom_padding = 8,
+               left_border_width = border_width,
+               right_border_width = border_width,
+               top_border_width = border_width,
+               bottom_border_width = border_width,
 		   ) {
 			door_tool.texture = tex
 		}

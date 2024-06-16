@@ -24,6 +24,12 @@ floor_panel_body :: proc(
 			continue
 		}
 
+        border_width:= f32(BORDER_WIDTH)
+        if floor_tool.active_texture == tex {
+            border_width *= 2
+        }
+
+
 		if icon_button(
 			   ctx,
 			    {
@@ -37,6 +43,10 @@ floor_panel_body :: proc(
 			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE},
 			   tile.texture_array,
 			   int(tex),
+               left_border_width = border_width,
+               right_border_width = border_width,
+               top_border_width = border_width,
+               bottom_border_width = border_width,
 		   ) {
 			floor_tool.active_texture = tex
 		}
