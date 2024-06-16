@@ -582,6 +582,8 @@ draw_diagonal_wall :: proc(
 	transform := glsl.mat4Translate(position)
 	transform *= transform_map[camera.rotation]
 
+    light:= glsl.vec3{0.95, 0.95, 0.95}
+
 	if draw {
 		wall_vertices := diagonal_wall_vertices[wall.state][mask][:]
         wall_indices := diagonal_wall_indices[wall.state][mask][:]
@@ -592,6 +594,7 @@ draw_diagonal_wall :: proc(
 			transform,
 			texture,
 			wall.mask,
+            light,
 			vertex_buffer,
 			index_buffer,
 		)
@@ -606,6 +609,7 @@ draw_diagonal_wall :: proc(
 		transform,
 		.Wall_Top,
 		wall.mask,
+        light,
 		vertex_buffer,
 		index_buffer,
 	)

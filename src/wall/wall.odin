@@ -23,6 +23,9 @@ Wall_Texture :: enum (u16) {
 	Varg,
 	Nyana,
 	Frame,
+    White,
+    Royal_Blue,
+    Dark_Blue,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -126,11 +129,17 @@ WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
 	.Wall_Top = "resources/textures/walls/wall-top.png",
+
+	.Frame    = "resources/textures/walls/frame.png",
 	.Drywall    = "resources/textures/walls/drywall.png",
+
 	.Brick    = "resources/textures/walls/brick-wall.png",
 	.Varg     = "resources/textures/walls/varg-wall.png",
 	.Nyana    = "resources/textures/walls/nyana-wall.png",
-	.Frame    = "resources/textures/walls/frame.png",
+
+	.White    = "resources/textures/walls/white.png",
+	.Royal_Blue    = "resources/textures/walls/royal_blue.png",
+	.Dark_Blue    = "resources/textures/walls/dark_blue.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
@@ -143,127 +152,6 @@ wall_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
 wall_indices := [State][Wall_Mask][dynamic]Wall_Index{}
 wall_top_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
 wall_top_indices := [State][Wall_Mask][dynamic]Wall_Index{}
-
-FULL_TOP_VERTICES :: []Wall_Vertex {
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0.115, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 0.115, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {1, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-}
-
-TOP_VERTICES :: []Wall_Vertex {
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 0.115, 0, 0},
-	},
-	 {
-		pos = {0.5, constants.WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 0.115, 0, 0},
-	},
-	 {
-		pos = {0.5, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {1, 0, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0, 0, 0, 0},
-	},
-}
-
-DOWN_FULL_TOP_VERTICES :: []Wall_Vertex {
-	 {
-		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 1, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1.115, 1, 0, 0},
-	},
-	 {
-		pos = {0.615, constants.DOWN_WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {1.115, 0.885, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0, 0.885, 0, 0},
-	},
-}
-
-DOWN_TOP_VERTICES :: []Wall_Vertex {
-	 {
-		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {0, 1, 0, 0},
-	},
-	 {
-		pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.5},
-		light = {1, 1, 1},
-		texcoords = {1, 1, 0, 0},
-	},
-	 {
-		pos = {0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {1, 0.885, 0, 0},
-	},
-	 {
-		pos = {-0.5, constants.DOWN_WALL_HEIGHT, -0.385},
-		light = {1, 1, 1},
-		texcoords = {0, 0.885, 0, 0},
-	},
-}
-
-TOP_VERTICES_MAP :: [State][Wall_Mask][]Wall_Vertex {
-	.Up =  {
-		.Full = FULL_TOP_VERTICES,
-		.Extended_Side = FULL_TOP_VERTICES,
-		.Side = TOP_VERTICES,
-		.End = FULL_TOP_VERTICES,
-	},
-	.Down =  {
-		.Full = DOWN_FULL_TOP_VERTICES,
-		.Extended_Side = DOWN_FULL_TOP_VERTICES,
-		.Side = DOWN_TOP_VERTICES,
-		.End = DOWN_FULL_TOP_VERTICES,
-	},
-	.Left =  {
-		.Full = FULL_TOP_VERTICES,
-		.Extended_Side = FULL_TOP_VERTICES,
-		.Side = TOP_VERTICES,
-		.End = FULL_TOP_VERTICES,
-	},
-	.Right =  {
-		.Full = DOWN_FULL_TOP_VERTICES,
-		.Extended_Side = DOWN_FULL_TOP_VERTICES,
-		.Side = DOWN_TOP_VERTICES,
-		.End = DOWN_FULL_TOP_VERTICES,
-	},
-}
-
-// wall_top_indices := []u32{0, 1, 2, 0, 2, 3}
 
 chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
@@ -855,13 +743,14 @@ draw_wall_mesh :: proc(
 	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
+    light: glsl.vec3,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
 	index_offset := u32(len(vertex_buffer))
 	for i in 0 ..< len(vertices) {
 		vertex := vertices[i]
-		vertex.light = {1, 1, 1}
+		vertex.light = light
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
@@ -908,12 +797,18 @@ draw_wall :: proc(
 	indices_map := wall_indices
 	indices: []Wall_Index = indices_map[wall.state][mask][:]
 
+    light:= glsl.vec3{1, 1, 1}
+    if axis == .N_S {
+        light = glsl.vec3{0.9, 0.9, 0.9}
+    }
+
 	draw_wall_mesh(
 		vertices,
 		indices,
 		transform,
 		texture,
 		wall.mask,
+        light,
 		vertex_buffer,
 		index_buffer,
 	)
@@ -927,6 +822,7 @@ draw_wall :: proc(
 		transform,
 		.Wall_Top,
 		wall.mask,
+        light,
 		vertex_buffer,
 		index_buffer,
 	)
