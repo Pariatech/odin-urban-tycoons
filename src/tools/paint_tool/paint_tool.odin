@@ -21,7 +21,7 @@ found_wall: bool
 found_wall_intersect: Wall_Intersect
 found_wall_texture: wall.Wall_Texture
 
-texture: wall.Wall_Texture = .Nyana
+texture: wall.Wall_Texture = .White
 dirty: bool
 
 Wall_Intersect :: struct {

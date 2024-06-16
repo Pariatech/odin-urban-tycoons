@@ -39,8 +39,8 @@ init :: proc() {
 	tile.chunk_init()
 
 	// The house
-	add_house_floor_walls(0, .Varg, .Varg)
-	add_house_floor_walls(1, .Nyana, .Nyana)
+	add_house_floor_walls(0, .Royal_Blue, .Brick)
+	add_house_floor_walls(1, .Dark_Blue, .Brick)
 	add_house_floor_triangles(2, .Wood)
 
 	for x in 0 ..< constants.WORLD_WIDTH {

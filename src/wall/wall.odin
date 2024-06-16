@@ -18,11 +18,11 @@ import "../utils"
 
 Wall_Texture :: enum (u16) {
 	Wall_Top,
-    Drywall,
-	Brick,
-	Varg,
-	Nyana,
 	Frame,
+    Drywall,
+
+	Brick,
+
     White,
     Royal_Blue,
     Dark_Blue,
@@ -134,8 +134,6 @@ WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
 	.Drywall    = "resources/textures/walls/drywall.png",
 
 	.Brick    = "resources/textures/walls/brick-wall.png",
-	.Varg     = "resources/textures/walls/varg-wall.png",
-	.Nyana    = "resources/textures/walls/nyana-wall.png",
 
 	.White    = "resources/textures/walls/white.png",
 	.Royal_Blue    = "resources/textures/walls/royal_blue.png",
