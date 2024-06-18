@@ -42,6 +42,7 @@ Billboard_Chunk :: struct($T: typeid) {
 }
 
 Billboard_Type :: enum {
+    Chair,
 	Door,
 	Window_E_W,
 	Window_N_S,
@@ -91,10 +92,10 @@ Billboard_Uniform_Object :: struct {
 }
 
 Texture_1x1 :: enum u8 {
-	// Chair_Wood_SW,
-	// Chair_Wood_SE,
-	// Chair_Wood_NE,
-	// Chair_Wood_NW,
+	Chair_Wood_SW,
+	Chair_Wood_SE,
+	Chair_Wood_NE,
+	Chair_Wood_NW,
 	Door_Wood_SW,
 	Door_Wood_SE,
 	Door_Wood_NE,
@@ -125,6 +126,10 @@ Texture_1x1 :: enum u8 {
 }
 
 BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
+	.Chair_Wood_SW       = .Chair_Wood_SE,
+	.Chair_Wood_SE       = .Chair_Wood_NE,
+	.Chair_Wood_NE       = .Chair_Wood_NW,
+	.Chair_Wood_NW       = .Chair_Wood_SW,
 	.Door_Wood_SW        = .Door_Wood_SE,
 	.Door_Wood_SE        = .Door_Wood_NE,
 	.Door_Wood_NE        = .Door_Wood_NW,
@@ -155,6 +160,10 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 }
 
 BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
+	.Chair_Wood_SW       = .Chair_Wood_NW,
+	.Chair_Wood_SE       = .Chair_Wood_SW,
+	.Chair_Wood_NE       = .Chair_Wood_SE,
+	.Chair_Wood_NW       = .Chair_Wood_NE,
 	.Door_Wood_SW        = .Door_Wood_NW,
 	.Door_Wood_SE        = .Door_Wood_SW,
 	.Door_Wood_NE        = .Door_Wood_SE,
@@ -218,10 +227,10 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2 :: [Texture_2x2]Texture_2x2 {
 }
 
 BILLBOARD_TEXTURE_PATHS :: [Texture_1x1]cstring {
-	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-diffuse.png",
-	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-diffuse.png",
-	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-diffuse.png",
-	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-diffuse.png",
+	.Chair_Wood_SW       = "resources/textures/billboards/chair-wood/sw-diffuse.png",
+	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-diffuse.png",
+	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-diffuse.png",
+	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-diffuse.png",
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-diffuse.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-diffuse.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-diffuse.png",
@@ -263,10 +272,10 @@ FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Texture_2x2]cstring {
 }
 
 BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_1x1]cstring {
-	// .Chair_Wood_SW = "resources/textures/billboards/chair-wood/sw-depth-map.png",
-	// .Chair_Wood_SE = "resources/textures/billboards/chair-wood/se-depth-map.png",
-	// .Chair_Wood_NE = "resources/textures/billboards/chair-wood/ne-depth-map.png",
-	// .Chair_Wood_NW = "resources/textures/billboards/chair-wood/nw-depth-map.png",
+	.Chair_Wood_SW       = "resources/textures/billboards/chair-wood/sw-depth-map.png",
+	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-depth-map.png",
+	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-depth-map.png",
+	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-depth-map.png",
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-depth-map.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-depth-map.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-depth-map.png",

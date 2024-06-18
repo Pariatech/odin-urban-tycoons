@@ -12,6 +12,7 @@ import "../tools/wall_tool"
 import "../wall"
 import "../renderer"
 import "../floor"
+import "../furniture"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -37,6 +38,11 @@ update :: proc() {
 
 init :: proc() {
 	tile.chunk_init()
+
+    furniture.add({1, 0, 1}, {.Chair, .South})
+    furniture.add({2, 0, 1}, {.Chair, .East})
+    furniture.add({2, 0, 2}, {.Chair, .North})
+    furniture.add({1, 0, 2}, {.Chair, .West})
 
 	// The house
 	add_house_floor_walls(0, .Royal_Blue, .Brick)
