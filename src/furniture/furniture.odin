@@ -104,3 +104,9 @@ has :: proc(pos: glsl.vec3) -> bool {
 
 	return pos in chunk.furnitures
 }
+
+get :: proc(pos: glsl.vec3) -> (Furniture, bool) {
+	chunk := get_chunk(pos)
+
+	return chunk.furnitures[pos]
+}

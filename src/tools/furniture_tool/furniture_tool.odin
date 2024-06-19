@@ -6,8 +6,8 @@ import "core:math/linalg/glsl"
 import "../../cursor"
 import "../../floor"
 import "../../furniture"
-import "../../mouse"
 import "../../keyboard"
+import "../../mouse"
 import "../../terrain"
 
 state: State
@@ -15,6 +15,7 @@ previous_state: State
 type: furniture.Type
 pos: glsl.vec3
 origin_pos: glsl.vec3
+original: furniture.Furniture
 
 State :: enum {
 	Idle,
@@ -35,24 +36,43 @@ update :: proc() {
 	previous_pos := pos
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
 
-    if keyboard.is_key_press(.Key_Escape) {
-        if state == .Placing {
-	        furniture.remove(previous_pos)
-        } else if previous_state == .Placing && state == .Rotating {
-	        furniture.remove(tile_pos(origin_pos))
-        }
-        state = .Idle
-    }
+	if keyboard.is_key_press(.Key_Escape) {
+		if state == .Placing {
+			furniture.remove(previous_pos)
+		} else if previous_state == .Placing && state == .Rotating {
+			furniture.remove(tile_pos(origin_pos))
+		} else if previous_state == .Idle && state == .Rotating {
+			furniture.add(
+				tile_pos(origin_pos),
+				original.type,
+				original.rotation,
+				original.light,
+			)
+		}
+		state = .Idle
+	}
 
 	switch state {
 	case .Idle:
-		return
+		idle()
 	case .Placing:
 		placing_furniture(previous_pos)
 	case .Moving:
 		move_furniture(previous_pos)
 	case .Rotating:
 		rotating_furniture()
+	}
+}
+
+idle :: proc() {
+	tile_pos := tile_pos(pos)
+	if mouse.is_button_press(.Left) {
+		if furn, ok := furniture.get(tile_pos); ok {
+			previous_state = state
+			state = .Rotating
+			origin_pos = pos
+			original = furn
+		}
 	}
 }
 
@@ -63,14 +83,14 @@ placing_furniture :: proc(previous_pos: glsl.vec3) {
 
 	furniture.remove(previous_pos)
 
-    tile_pos := tile_pos(pos)
+	tile_pos := tile_pos(pos)
 	if furniture.has(tile_pos) {
 		pos.y += 0.1
 		furniture.add(pos, type, .South, {1, 0.5, 0.5})
 	} else {
 		furniture.add(tile_pos, type, .South)
 		if mouse.is_button_press(.Left) {
-			previous_state = .Placing
+			previous_state = state
 			state = .Rotating
 			origin_pos = pos
 		} else {
@@ -100,7 +120,7 @@ rotating_furniture :: proc() {
 	dx := pos.x - origin_pos.x
 	dz := pos.z - origin_pos.z
 
-    tile_pos := tile_pos(origin_pos)
+	tile_pos := tile_pos(origin_pos)
 
 	if math.abs(dx) > math.abs(dz) {
 		if dx > 0 {
