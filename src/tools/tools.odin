@@ -7,6 +7,7 @@ import "paint_tool"
 import "terrain_tool"
 import "wall_tool"
 import "window_tool"
+import "furniture_tool"
 
 TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_1
 WALL_TOOL_KEY :: keyboard.Key_Value.Key_2
@@ -14,6 +15,7 @@ FLOOR_TOOL_KEY :: keyboard.Key_Value.Key_3
 PAINT_TOOL_KEY :: keyboard.Key_Value.Key_4
 DOOR_TOOL_KEY :: keyboard.Key_Value.Key_5
 WINDOW_TOOL_KEY :: keyboard.Key_Value.Key_6
+FURNITURE_TOOL_KEY :: keyboard.Key_Value.Key_7
 
 active_tool: Tool = .Terrain
 
@@ -24,6 +26,7 @@ Tool :: enum {
 	Paint,
 	Door,
 	Window,
+    Furniture,
 }
 
 update :: proc(delta_time: f64) {
@@ -39,7 +42,9 @@ update :: proc(delta_time: f64) {
 		open_door_tool()
 	} else if keyboard.is_key_press(WINDOW_TOOL_KEY) {
 		open_window_tool()
-	}
+	} else if keyboard.is_key_press(FURNITURE_TOOL_KEY) {
+        open_furniture_tool()
+    }
 
 	switch active_tool {
 	case .Terrain:
@@ -54,6 +59,8 @@ update :: proc(delta_time: f64) {
 		door_tool.update()
 	case .Window:
 		window_tool.update()
+    case .Furniture:
+        furniture_tool.update()
 	}
 }
 
@@ -63,6 +70,7 @@ open_wall_tool :: proc() {
 	paint_tool.deinit()
 	door_tool.deinit()
     window_tool.deinit()
+    furniture_tool.deinit()
 
 	wall_tool.init()
 	active_tool = .Wall
@@ -74,6 +82,7 @@ open_land_tool :: proc() {
 	paint_tool.deinit()
 	door_tool.deinit()
     window_tool.deinit()
+    furniture_tool.deinit()
 
 	terrain_tool.init()
 	active_tool = .Terrain
@@ -85,6 +94,7 @@ open_floor_tool :: proc() {
 	paint_tool.deinit()
 	door_tool.deinit()
     window_tool.deinit()
+    furniture_tool.deinit()
 
 	floor_tool.init()
 	active_tool = .Floor
@@ -96,6 +106,7 @@ open_paint_tool :: proc() {
 	terrain_tool.deinit()
 	door_tool.deinit()
     window_tool.deinit()
+    furniture_tool.deinit()
 
 	paint_tool.init()
 	active_tool = .Paint
@@ -107,6 +118,7 @@ open_door_tool :: proc() {
 	terrain_tool.deinit()
 	paint_tool.deinit()
     window_tool.deinit()
+    furniture_tool.deinit()
 
 	door_tool.init()
 	active_tool = .Door
@@ -119,8 +131,21 @@ open_window_tool :: proc() {
 	terrain_tool.deinit()
 	paint_tool.deinit()
 	door_tool.deinit()
+    furniture_tool.deinit()
 
 	window_tool.init()
 	active_tool = .Window
+}
+
+open_furniture_tool :: proc() {
+	floor_tool.deinit()
+	wall_tool.deinit()
+	terrain_tool.deinit()
+	paint_tool.deinit()
+	door_tool.deinit()
+	window_tool.deinit()
+
+    furniture_tool.init()
+	active_tool = .Furniture
 }
 

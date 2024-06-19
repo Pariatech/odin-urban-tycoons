@@ -17,6 +17,7 @@ Chunk :: struct {
 Furniture :: struct {
 	type:     Type,
 	rotation: Rotation,
+	light:    glsl.vec3,
 }
 
 Type :: enum {
@@ -55,7 +56,7 @@ TEXTURE_MAP :: [Type][Rotation][camera.Rotation]billboard.Texture_1x1 {
 }
 
 BILLBOARD_TYPE_MAP :: [Type]billboard.Billboard_Type {
-    .Chair = .Chair
+	.Chair = .Chair,
 }
 
 get_chunk :: proc(pos: glsl.vec3) -> ^Chunk {
@@ -66,20 +67,25 @@ get_chunk :: proc(pos: glsl.vec3) -> ^Chunk {
 	return &chunks[int(y)][int(x)][int(z)]
 }
 
-add :: proc(pos: glsl.vec3, furniture: Furniture) {
+add :: proc(
+	pos: glsl.vec3,
+	type: Type,
+	rotation: Rotation,
+	light: glsl.vec3 = {1, 1, 1},
+) {
 	chunk := get_chunk(pos)
-	chunk.furnitures[pos] = furniture
+	chunk.furnitures[pos] = {type, rotation, light}
 
 	texture_map := TEXTURE_MAP
 
-    billboard_type_map := BILLBOARD_TYPE_MAP
+	billboard_type_map := BILLBOARD_TYPE_MAP
 
 	billboard.billboard_1x1_set(
-		{pos = pos, type = billboard_type_map[furniture.type]},
+		{pos = pos, type = billboard_type_map[type]},
 		 {
-			light = {1, 1, 1},
-			texture = texture_map[furniture.type][furniture.rotation][camera.rotation],
-			depth_map = texture_map[furniture.type][furniture.rotation][camera.rotation],
+			light = light,
+			texture = texture_map[type][rotation][camera.rotation],
+			depth_map = texture_map[type][rotation][camera.rotation],
 		},
 	)
 }
@@ -89,6 +95,12 @@ remove :: proc(pos: glsl.vec3) {
 	furniture := chunk.furnitures[pos]
 	delete_key(&chunk.furnitures, pos)
 
-    billboard_type_map := BILLBOARD_TYPE_MAP
-    billboard.billboard_1x1_remove({pos, billboard_type_map[furniture.type]})
+	billboard_type_map := BILLBOARD_TYPE_MAP
+	billboard.billboard_1x1_remove({pos, billboard_type_map[furniture.type]})
+}
+
+has :: proc(pos: glsl.vec3) -> bool {
+	chunk := get_chunk(pos)
+
+	return pos in chunk.furnitures
 }

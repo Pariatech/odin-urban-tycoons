@@ -7,12 +7,12 @@ import gl "vendor:OpenGL"
 import "../billboard"
 import "../camera"
 import "../constants"
+import "../floor"
+import "../furniture"
+import "../renderer"
 import "../tile"
 import "../tools/wall_tool"
 import "../wall"
-import "../renderer"
-import "../floor"
-import "../furniture"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -39,10 +39,10 @@ update :: proc() {
 init :: proc() {
 	tile.chunk_init()
 
-    furniture.add({1, 0, 1}, {.Chair, .South})
-    furniture.add({2, 0, 1}, {.Chair, .East})
-    furniture.add({2, 0, 2}, {.Chair, .North})
-    furniture.add({1, 0, 2}, {.Chair, .West})
+	furniture.add({1, 0, 1}, .Chair, .South)
+	furniture.add({2, 0, 1}, .Chair, .East)
+	furniture.add({2, 0, 2}, .Chair, .North)
+	furniture.add({1, 0, 2}, .Chair, .West)
 
 	// The house
 	add_house_floor_walls(0, .Royal_Blue, .Brick)
@@ -499,7 +499,7 @@ draw :: proc() {
 
 
 	for flr in 0 ..= floor.floor {
-	    gl.UseProgram(renderer.shader_program)
+		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(flr)
 		wall.draw_walls(flr)
 		billboard.draw_billboards(flr)
