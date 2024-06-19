@@ -2,20 +2,24 @@ package ui
 
 import "core:math/linalg/glsl"
 
-import "../window"
+import "../billboard"
+import "../furniture"
 import "../tools"
 import "../tools/furniture_tool"
-import "../furniture"
-import "../billboard"
+import "../window"
 
 
-furniture_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
-    texture_map := furniture.TEXTURE_MAP
+furniture_panel_body :: proc(
+	using ctx: ^Context,
+	pos: glsl.vec2,
+	size: glsl.vec2,
+) {
+	texture_map := furniture.TEXTURE_MAP
 	for texmap, i in texture_map {
-        border_width:= f32(BORDER_WIDTH)
-        if furniture_tool.type == i {
-            border_width *= 2
-        }
+		border_width := f32(BORDER_WIDTH)
+		if furniture_tool.type == i && furniture_tool.state == .Placing {
+			border_width *= 2
+		}
 
 		if icon_button(
 			   ctx,
@@ -26,15 +30,15 @@ furniture_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec
 			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE * 2},
 			   billboard.billboard_1x1_draw_context.texture_array,
 			   int(texmap[.South][.South_West]),
-               top_padding = -8,
-               bottom_padding = 8,
-               left_border_width = border_width,
-               right_border_width = border_width,
-               top_border_width = border_width,
-               bottom_border_width = border_width,
+			   top_padding = -8,
+			   bottom_padding = 8,
+			   left_border_width = border_width,
+			   right_border_width = border_width,
+			   top_border_width = border_width,
+			   bottom_border_width = border_width,
 		   ) {
 			furniture_tool.type = i
-            furniture_tool.state = .Moving
+			furniture_tool.state = .Placing
 		}
 	}
 }

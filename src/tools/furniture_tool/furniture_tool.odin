@@ -6,14 +6,18 @@ import "core:math/linalg/glsl"
 import "../../cursor"
 import "../../floor"
 import "../../furniture"
+import "../../mouse"
 import "../../terrain"
 
 state: State
+previous_state: State
 type: furniture.Type
 pos: glsl.vec3
+origin_pos: glsl.vec3
 
 State :: enum {
 	Idle,
+	Placing,
 	Moving,
 	Rotating,
 }
@@ -33,6 +37,8 @@ update :: proc() {
 	switch state {
 	case .Idle:
 		return
+	case .Placing:
+		placing_furniture(previous_pos)
 	case .Moving:
 		move_furniture(previous_pos)
 	case .Rotating:
@@ -40,38 +46,75 @@ update :: proc() {
 	}
 }
 
-move_furniture :: proc(previous_pos: glsl.vec3) {
+placing_furniture :: proc(previous_pos: glsl.vec3) {
 	if pos == previous_pos {
 		return
 	}
 
-	// previous_pos := glsl.vec3 {
-	// 	math.floor(previous_pos.x + 0.5),
-	// 	terrain.get_tile_height(
-	// 		int(previous_pos.x + 0.5),
-	// 		int(previous_pos.z + 0.5),
-	// 	),
-	// 	math.floor(previous_pos.z + 0.5),
-	// }
 	furniture.remove(previous_pos)
 
-	new_pos := glsl.vec3 {
-		math.floor(pos.x + 0.5),
-		terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5)),
-		math.floor(pos.z + 0.5),
+    tile_pos := tile_pos(pos)
+	if furniture.has(tile_pos) {
+		pos.y += 0.1
+		furniture.add(pos, type, .South, {1, 0.5, 0.5})
+	} else {
+		furniture.add(tile_pos, type, .South)
+		if mouse.is_button_press(.Left) {
+			previous_state = .Placing
+			state = .Rotating
+			origin_pos = pos
+		} else {
+			pos = tile_pos
+		}
 	}
+}
 
-    if furniture.has(new_pos) {
-        pos.y += 0.1
-	    furniture.add(pos, type, .South, {1, 0.5, 0.5})
-    } else {
-	    furniture.add(new_pos, type, .South)
-        pos = new_pos
-    }
+move_furniture :: proc(previous_pos: glsl.vec3) {
+	if pos == previous_pos {
+		return
+	}
 }
 
 rotating_furniture :: proc() {
+	if mouse.is_button_release(.Left) {
+		if previous_state == .Placing {
+			pos.y += 0.1
+			furniture.add(pos, type, .South, {1, 0.5, 0.5})
+			state = .Placing
+		} else {
+			state = .Idle
+		}
+		return
+	}
 
+	dx := pos.x - origin_pos.x
+	dz := pos.z - origin_pos.z
+
+    tile_pos := tile_pos(origin_pos)
+
+	if math.abs(dx) > math.abs(dz) {
+		if dx > 0 {
+			furniture.add(tile_pos, type, .East)
+		} else {
+			furniture.add(tile_pos, type, .West)
+		}
+	} else {
+		if dz > 0 {
+			furniture.add(tile_pos, type, .North)
+		} else {
+			furniture.add(tile_pos, type, .South)
+		}
+	}
+}
+
+tile_pos :: proc(pos: glsl.vec3) -> glsl.vec3 {
+	return(
+		 {
+			math.floor(pos.x + 0.5),
+			terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5)),
+			math.floor(pos.z + 0.5),
+		} \
+	)
 }
 
 on_intersect :: proc(intersect: glsl.vec3) {
