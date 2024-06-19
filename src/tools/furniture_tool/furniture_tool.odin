@@ -7,6 +7,7 @@ import "../../cursor"
 import "../../floor"
 import "../../furniture"
 import "../../mouse"
+import "../../keyboard"
 import "../../terrain"
 
 state: State
@@ -33,6 +34,15 @@ deinit :: proc() {
 update :: proc() {
 	previous_pos := pos
 	cursor.on_tile_intersect(on_intersect, floor.previous_floor, floor.floor)
+
+    if keyboard.is_key_press(.Key_Escape) {
+        if state == .Placing {
+	        furniture.remove(previous_pos)
+        } else if previous_state == .Placing && state == .Rotating {
+	        furniture.remove(tile_pos(origin_pos))
+        }
+        state = .Idle
+    }
 
 	switch state {
 	case .Idle:

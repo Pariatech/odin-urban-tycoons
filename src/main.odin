@@ -91,7 +91,7 @@ start :: proc() -> (ok: bool = false) {
 
 	floor_tool.init()
 	terrain_tool.init()
-    wall.init_cutaways()
+	wall.init_cutaways()
 
 	should_close := false
 	current_time_ns := time.now()
@@ -132,7 +132,7 @@ start :: proc() -> (ok: bool = false) {
 
 		world.update()
 
-        wall.update_cutaways()
+		wall.update_cutaways()
 		tools.update(delta_time)
 
 		world.draw()
@@ -142,10 +142,7 @@ start :: proc() -> (ok: bool = false) {
 		renderer.end_draw()
 
 
-		should_close =
-			bool(glfw.WindowShouldClose(window.handle)) ||
-			keyboard.is_key_down(.Key_Escape)
-
+		should_close = bool(glfw.WindowShouldClose(window.handle))
 		keyboard.update()
 		mouse.update()
 		cursor.update()
