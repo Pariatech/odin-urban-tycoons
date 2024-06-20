@@ -13,7 +13,7 @@ import "../mouse"
 SPEED :: 8.0
 ZOOM_SPEED :: 0.05
 ZOOM_MAX :: 2
-ZOOM_MIN :: 1
+ZOOM_MIN :: 0.5
 
 ANGLE :: (math.RAD_PER_DEG * 30)
 
