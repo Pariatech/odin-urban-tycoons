@@ -42,12 +42,14 @@ Billboard_Chunk :: struct($T: typeid) {
 }
 
 Billboard_Type :: enum {
-    Chair,
 	Door,
 	Window_E_W,
 	Window_N_S,
 	Shovel_Cursor,
 	Wall_Cursor,
+
+    Chair,
+    Table,
 }
 
 Key :: struct {
@@ -96,6 +98,16 @@ Texture_1x1 :: enum u8 {
 	Chair_Wood_SE,
 	Chair_Wood_NE,
 	Chair_Wood_NW,
+
+	Table6_001_Wood_SW,
+	Table6_001_Wood_SE,
+	Table6_001_Wood_NE,
+	Table6_001_Wood_NW,
+	Table6_002_Wood_SW,
+	Table6_002_Wood_SE,
+	Table6_002_Wood_NE,
+	Table6_002_Wood_NW,
+
 	Door_Wood_SW,
 	Door_Wood_SE,
 	Door_Wood_NE,
@@ -130,6 +142,16 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 	.Chair_Wood_SE       = .Chair_Wood_NE,
 	.Chair_Wood_NE       = .Chair_Wood_NW,
 	.Chair_Wood_NW       = .Chair_Wood_SW,
+
+	.Table6_001_Wood_SW       = .Table6_001_Wood_SE,
+	.Table6_001_Wood_SE       = .Table6_001_Wood_NE,
+	.Table6_001_Wood_NE       = .Table6_001_Wood_NW,
+	.Table6_001_Wood_NW       = .Table6_001_Wood_SW,
+	.Table6_002_Wood_SW       = .Table6_002_Wood_SE,
+	.Table6_002_Wood_SE       = .Table6_002_Wood_NE,
+	.Table6_002_Wood_NE       = .Table6_002_Wood_NW,
+	.Table6_002_Wood_NW       = .Table6_002_Wood_SW,
+
 	.Door_Wood_SW        = .Door_Wood_SE,
 	.Door_Wood_SE        = .Door_Wood_NE,
 	.Door_Wood_NE        = .Door_Wood_NW,
@@ -164,6 +186,16 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 	.Chair_Wood_SE       = .Chair_Wood_SW,
 	.Chair_Wood_NE       = .Chair_Wood_SE,
 	.Chair_Wood_NW       = .Chair_Wood_NE,
+
+	.Table6_001_Wood_SW       = .Table6_001_Wood_NW,
+	.Table6_001_Wood_SE       = .Table6_001_Wood_SW,
+	.Table6_001_Wood_NE       = .Table6_001_Wood_SE,
+	.Table6_001_Wood_NW       = .Table6_001_Wood_NE,
+	.Table6_002_Wood_SE       = .Table6_002_Wood_SW,
+    .Table6_002_Wood_SW       = .Table6_002_Wood_NW,
+	.Table6_002_Wood_NE       = .Table6_002_Wood_SE,
+	.Table6_002_Wood_NW       = .Table6_002_Wood_NE,
+
 	.Door_Wood_SW        = .Door_Wood_NW,
 	.Door_Wood_SE        = .Door_Wood_SW,
 	.Door_Wood_NE        = .Door_Wood_SE,
@@ -194,10 +226,6 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 }
 
 Texture_2x2 :: enum u8 {
-	Table_Wood_SW,
-	Table_Wood_SE,
-	Table_Wood_NE,
-	Table_Wood_NW,
 	Table_8_Places_Wood_SW,
 	Table_8_Places_Wood_SE,
 	Table_8_Places_Wood_NE,
@@ -205,10 +233,6 @@ Texture_2x2 :: enum u8 {
 }
 
 BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2 :: [Texture_2x2]Texture_2x2 {
-	.Table_Wood_SW          = .Table_Wood_SE,
-	.Table_Wood_SE          = .Table_Wood_NE,
-	.Table_Wood_NE          = .Table_Wood_NW,
-	.Table_Wood_NW          = .Table_Wood_SW,
 	.Table_8_Places_Wood_SW = .Table_8_Places_Wood_SE,
 	.Table_8_Places_Wood_SE = .Table_8_Places_Wood_NE,
 	.Table_8_Places_Wood_NE = .Table_8_Places_Wood_NW,
@@ -216,10 +240,6 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_2X2 :: [Texture_2x2]Texture_2x2 {
 }
 
 BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_2X2 :: [Texture_2x2]Texture_2x2 {
-	.Table_Wood_SW          = .Table_Wood_NW,
-	.Table_Wood_SE          = .Table_Wood_SW,
-	.Table_Wood_NE          = .Table_Wood_SE,
-	.Table_Wood_NW          = .Table_Wood_NE,
 	.Table_8_Places_Wood_SW = .Table_8_Places_Wood_NW,
 	.Table_8_Places_Wood_SE = .Table_8_Places_Wood_SW,
 	.Table_8_Places_Wood_NE = .Table_8_Places_Wood_SE,
@@ -231,6 +251,16 @@ BILLBOARD_TEXTURE_PATHS :: [Texture_1x1]cstring {
 	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-diffuse.png",
 	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-diffuse.png",
 	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-diffuse.png",
+
+	.Table6_001_Wood_SE       = "resources/textures/billboards/table-6places-wood/001-se-diffuse.png",
+    .Table6_001_Wood_SW       = "resources/textures/billboards/table-6places-wood/001-sw-diffuse.png",
+	.Table6_001_Wood_NE       = "resources/textures/billboards/table-6places-wood/001-ne-diffuse.png",
+	.Table6_001_Wood_NW       = "resources/textures/billboards/table-6places-wood/001-nw-diffuse.png",
+	.Table6_002_Wood_SE       = "resources/textures/billboards/table-6places-wood/002-se-diffuse.png",
+    .Table6_002_Wood_SW       = "resources/textures/billboards/table-6places-wood/002-sw-diffuse.png",
+	.Table6_002_Wood_NE       = "resources/textures/billboards/table-6places-wood/002-ne-diffuse.png",
+	.Table6_002_Wood_NW       = "resources/textures/billboards/table-6places-wood/002-nw-diffuse.png",
+
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-diffuse.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-diffuse.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-diffuse.png",
@@ -261,10 +291,6 @@ BILLBOARD_TEXTURE_PATHS :: [Texture_1x1]cstring {
 }
 
 FOUR_TILES_BILLBOARD_TEXTURE_PATHS :: [Texture_2x2]cstring {
-	.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-diffuse.png",
-	.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-diffuse.png",
-	.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-diffuse.png",
-	.Table_Wood_NW          = "resources/textures/billboards/table-6places-wood/nw-diffuse.png",
 	.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-diffuse.png",
 	.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-diffuse.png",
 	.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-diffuse.png",
@@ -276,6 +302,16 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_1x1]cstring {
 	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-depth-map.png",
 	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-depth-map.png",
 	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-depth-map.png",
+
+	.Table6_001_Wood_SE       = "resources/textures/billboards/table-6places-wood/001-se-depth-map.png",
+    .Table6_001_Wood_SW       = "resources/textures/billboards/table-6places-wood/001-sw-depth-map.png",
+	.Table6_001_Wood_NE       = "resources/textures/billboards/table-6places-wood/001-ne-depth-map.png",
+	.Table6_001_Wood_NW       = "resources/textures/billboards/table-6places-wood/001-nw-depth-map.png",
+	.Table6_002_Wood_SE       = "resources/textures/billboards/table-6places-wood/002-se-depth-map.png",
+    .Table6_002_Wood_SW       = "resources/textures/billboards/table-6places-wood/002-sw-depth-map.png",
+	.Table6_002_Wood_NE       = "resources/textures/billboards/table-6places-wood/002-ne-depth-map.png",
+	.Table6_002_Wood_NW       = "resources/textures/billboards/table-6places-wood/002-nw-depth-map.png",
+
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-depth-map.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-depth-map.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-depth-map.png",
@@ -306,10 +342,6 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_1x1]cstring {
 }
 
 FOUR_TILES_BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_2x2]cstring {
-	.Table_Wood_SW          = "resources/textures/billboards/table-6places-wood/sw-depth-map.png",
-	.Table_Wood_SE          = "resources/textures/billboards/table-6places-wood/se-depth-map.png",
-	.Table_Wood_NE          = "resources/textures/billboards/table-6places-wood/ne-depth-map.png",
-	.Table_Wood_NW          = "resources/textures/billboards/table-6places-wood/nw-depth-map.png",
 	.Table_8_Places_Wood_SW = "resources/textures/billboards/table-8places-wood/sw-depth-map.png",
 	.Table_8_Places_Wood_SE = "resources/textures/billboards/table-8places-wood/se-depth-map.png",
 	.Table_8_Places_Wood_NE = "resources/textures/billboards/table-8places-wood/ne-depth-map.png",
@@ -573,12 +605,14 @@ load_billboard_texture_array :: proc(
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
-	gl.TexParameteri(
-		gl.TEXTURE_2D_ARRAY,
-		gl.TEXTURE_MIN_FILTER,
-		gl.LINEAR_MIPMAP_LINEAR,
-	)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// gl.TexParameteri(
+	// 	gl.TEXTURE_2D_ARRAY,
+	// 	gl.TEXTURE_MIN_FILTER,
+	// 	gl.LINEAR_MIPMAP_LINEAR,
+	// )
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	textures :: len(paths)
 

@@ -29,7 +29,7 @@ furniture_panel_body :: proc(
 			   },
 			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE * 2},
 			   billboard.billboard_1x1_draw_context.texture_array,
-			   int(texmap[.South][.South_West]),
+			   int(texmap[.South][.South_West][0][0]),
 			   top_padding = -8,
 			   bottom_padding = 8,
 			   left_border_width = border_width,

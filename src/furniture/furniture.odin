@@ -22,41 +22,69 @@ Furniture :: struct {
 
 Type :: enum {
 	Chair,
+	Table,
 }
 
 Rotation :: tile.Tile_Triangle_Side
 
-TEXTURE_MAP :: [Type][Rotation][camera.Rotation]billboard.Texture_1x1 {
+TEXTURE_MAP :: [Type][Rotation][camera.Rotation][][]billboard.Texture_1x1 {
 	.Chair =  {
 		.South =  {
-			.South_West = .Chair_Wood_SW,
-			.South_East = .Chair_Wood_SE,
-			.North_East = .Chair_Wood_NE,
-			.North_West = .Chair_Wood_NW,
+			.South_West = {{.Chair_Wood_SW}},
+			.South_East = {{.Chair_Wood_SE}},
+			.North_East = {{.Chair_Wood_NE}},
+			.North_West = {{.Chair_Wood_NW}},
 		},
 		.East =  {
-			.South_West = .Chair_Wood_NW,
-			.South_East = .Chair_Wood_SW,
-			.North_East = .Chair_Wood_SE,
-			.North_West = .Chair_Wood_NE,
+			.South_West = {{.Chair_Wood_NW}},
+			.South_East = {{.Chair_Wood_SW}},
+			.North_East = {{.Chair_Wood_SE}},
+			.North_West = {{.Chair_Wood_NE}},
 		},
 		.North =  {
-			.South_West = .Chair_Wood_NE,
-			.South_East = .Chair_Wood_NW,
-			.North_East = .Chair_Wood_SW,
-			.North_West = .Chair_Wood_SE,
+			.South_West = {{.Chair_Wood_NE}},
+			.South_East = {{.Chair_Wood_NW}},
+			.North_East = {{.Chair_Wood_SW}},
+			.North_West = {{.Chair_Wood_SE}},
 		},
 		.West =  {
-			.South_West = .Chair_Wood_SE,
-			.South_East = .Chair_Wood_NE,
-			.North_East = .Chair_Wood_NW,
-			.North_West = .Chair_Wood_SW,
+			.South_West = {{.Chair_Wood_SE}},
+			.South_East = {{.Chair_Wood_NE}},
+			.North_East = {{.Chair_Wood_NW}},
+			.North_West = {{.Chair_Wood_SW}},
+		},
+	},
+	.Table =  {
+		.South =  {
+			.South_West = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
+			.South_East = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+			.North_East = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+			.North_West = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+		},
+		.East =  {
+			.South_West = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+			.South_East = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
+			.North_East = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+			.North_West = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+		},
+		.North =  {
+			.South_West = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+			.South_East = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+			.North_East = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
+			.North_West = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+		},
+		.West =  {
+			.South_West = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+			.South_East = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+			.North_East = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+			.North_West = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
 		},
 	},
 }
 
 BILLBOARD_TYPE_MAP :: [Type]billboard.Billboard_Type {
 	.Chair = .Chair,
+	.Table = .Table,
 }
 
 get_chunk :: proc(pos: glsl.vec3) -> ^Chunk {
@@ -80,14 +108,18 @@ add :: proc(
 
 	billboard_type_map := BILLBOARD_TYPE_MAP
 
-	billboard.billboard_1x1_set(
-		{pos = pos, type = billboard_type_map[type]},
-		 {
-			light = light,
-			texture = texture_map[type][rotation][camera.rotation],
-			depth_map = texture_map[type][rotation][camera.rotation],
-		},
-	)
+	textures := texture_map[type][rotation][camera.rotation]
+	for col, x in textures {
+		for texture, z in col {
+			billboard.billboard_1x1_set(
+				 {
+					pos = pos + {f32(x), 0, f32(z)},
+					type = billboard_type_map[type],
+				},
+				{light = light, texture = texture, depth_map = texture},
+			)
+		}
+	}
 }
 
 remove :: proc(pos: glsl.vec3) {
@@ -96,7 +128,19 @@ remove :: proc(pos: glsl.vec3) {
 	delete_key(&chunk.furnitures, pos)
 
 	billboard_type_map := BILLBOARD_TYPE_MAP
-	billboard.billboard_1x1_remove({pos, billboard_type_map[furniture.type]})
+	texture_map := TEXTURE_MAP
+	textures :=
+		texture_map[furniture.type][furniture.rotation][camera.rotation]
+	for col, x in textures {
+		for texture, z in col {
+			billboard.billboard_1x1_remove(
+				 {
+					pos + {f32(x), 0, f32(z)},
+					billboard_type_map[furniture.type],
+				},
+			)
+		}
+	}
 }
 
 has :: proc(pos: glsl.vec3) -> bool {
