@@ -42,6 +42,7 @@ framebuffer_size_callback :: proc "c" (
 
 start :: proc() -> (ok: bool = false) {
 	context.logger = log.create_console_logger()
+    defer log.destroy_console_logger(context.logger)
 
 	if !bool(glfw.Init()) {
 		fmt.eprintln("GLFW has failed to load.")
