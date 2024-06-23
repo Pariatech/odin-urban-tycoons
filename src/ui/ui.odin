@@ -120,6 +120,12 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	return true
 }
 
+deinit :: proc(using ctx: ^Context) {
+    gl.DeleteBuffers(1, &ubo)
+    delete(draw_calls)
+    deinit_text_renderer(ctx)
+}
+
 to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
 	return {pos.x / window.size.x * 2 - 1, -(pos.y / window.size.y * 2 - 1)}
 }

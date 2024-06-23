@@ -45,11 +45,9 @@ Billboard_Type :: enum {
 	Door,
 	Window_E_W,
 	Window_N_S,
-	Shovel_Cursor,
-	Wall_Cursor,
-
-    Chair,
-    Table,
+	Cursor,
+	Chair,
+	Table,
 }
 
 Key :: struct {
@@ -98,7 +96,6 @@ Texture_1x1 :: enum u8 {
 	Chair_Wood_SE,
 	Chair_Wood_NE,
 	Chair_Wood_NW,
-
 	Table6_001_Wood_SW,
 	Table6_001_Wood_SE,
 	Table6_001_Wood_NE,
@@ -107,7 +104,6 @@ Texture_1x1 :: enum u8 {
 	Table6_002_Wood_SE,
 	Table6_002_Wood_NE,
 	Table6_002_Wood_NW,
-
 	Door_Wood_SW,
 	Door_Wood_SE,
 	Door_Wood_NE,
@@ -142,16 +138,14 @@ BILLBOARD_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 	.Chair_Wood_SE       = .Chair_Wood_NE,
 	.Chair_Wood_NE       = .Chair_Wood_NW,
 	.Chair_Wood_NW       = .Chair_Wood_SW,
-
-	.Table6_001_Wood_SW       = .Table6_001_Wood_SE,
-	.Table6_001_Wood_SE       = .Table6_001_Wood_NE,
-	.Table6_001_Wood_NE       = .Table6_001_Wood_NW,
-	.Table6_001_Wood_NW       = .Table6_001_Wood_SW,
-	.Table6_002_Wood_SW       = .Table6_002_Wood_SE,
-	.Table6_002_Wood_SE       = .Table6_002_Wood_NE,
-	.Table6_002_Wood_NE       = .Table6_002_Wood_NW,
-	.Table6_002_Wood_NW       = .Table6_002_Wood_SW,
-
+	.Table6_001_Wood_SW  = .Table6_001_Wood_SE,
+	.Table6_001_Wood_SE  = .Table6_001_Wood_NE,
+	.Table6_001_Wood_NE  = .Table6_001_Wood_NW,
+	.Table6_001_Wood_NW  = .Table6_001_Wood_SW,
+	.Table6_002_Wood_SW  = .Table6_002_Wood_SE,
+	.Table6_002_Wood_SE  = .Table6_002_Wood_NE,
+	.Table6_002_Wood_NE  = .Table6_002_Wood_NW,
+	.Table6_002_Wood_NW  = .Table6_002_Wood_SW,
 	.Door_Wood_SW        = .Door_Wood_SE,
 	.Door_Wood_SE        = .Door_Wood_NE,
 	.Door_Wood_NE        = .Door_Wood_NW,
@@ -186,16 +180,14 @@ BILLBOARD_COUNTER_CLOCKWISE_ROTATION_TABLE_1X1 :: [Texture_1x1]Texture_1x1 {
 	.Chair_Wood_SE       = .Chair_Wood_SW,
 	.Chair_Wood_NE       = .Chair_Wood_SE,
 	.Chair_Wood_NW       = .Chair_Wood_NE,
-
-	.Table6_001_Wood_SW       = .Table6_001_Wood_NW,
-	.Table6_001_Wood_SE       = .Table6_001_Wood_SW,
-	.Table6_001_Wood_NE       = .Table6_001_Wood_SE,
-	.Table6_001_Wood_NW       = .Table6_001_Wood_NE,
-	.Table6_002_Wood_SE       = .Table6_002_Wood_SW,
-    .Table6_002_Wood_SW       = .Table6_002_Wood_NW,
-	.Table6_002_Wood_NE       = .Table6_002_Wood_SE,
-	.Table6_002_Wood_NW       = .Table6_002_Wood_NE,
-
+	.Table6_001_Wood_SW  = .Table6_001_Wood_NW,
+	.Table6_001_Wood_SE  = .Table6_001_Wood_SW,
+	.Table6_001_Wood_NE  = .Table6_001_Wood_SE,
+	.Table6_001_Wood_NW  = .Table6_001_Wood_NE,
+	.Table6_002_Wood_SE  = .Table6_002_Wood_SW,
+	.Table6_002_Wood_SW  = .Table6_002_Wood_NW,
+	.Table6_002_Wood_NE  = .Table6_002_Wood_SE,
+	.Table6_002_Wood_NW  = .Table6_002_Wood_NE,
 	.Door_Wood_SW        = .Door_Wood_NW,
 	.Door_Wood_SE        = .Door_Wood_SW,
 	.Door_Wood_NE        = .Door_Wood_SE,
@@ -251,16 +243,14 @@ BILLBOARD_TEXTURE_PATHS :: [Texture_1x1]cstring {
 	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-diffuse.png",
 	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-diffuse.png",
 	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-diffuse.png",
-
-	.Table6_001_Wood_SE       = "resources/textures/billboards/table-6places-wood/001-se-diffuse.png",
-    .Table6_001_Wood_SW       = "resources/textures/billboards/table-6places-wood/001-sw-diffuse.png",
-	.Table6_001_Wood_NE       = "resources/textures/billboards/table-6places-wood/001-ne-diffuse.png",
-	.Table6_001_Wood_NW       = "resources/textures/billboards/table-6places-wood/001-nw-diffuse.png",
-	.Table6_002_Wood_SE       = "resources/textures/billboards/table-6places-wood/002-se-diffuse.png",
-    .Table6_002_Wood_SW       = "resources/textures/billboards/table-6places-wood/002-sw-diffuse.png",
-	.Table6_002_Wood_NE       = "resources/textures/billboards/table-6places-wood/002-ne-diffuse.png",
-	.Table6_002_Wood_NW       = "resources/textures/billboards/table-6places-wood/002-nw-diffuse.png",
-
+	.Table6_001_Wood_SE  = "resources/textures/billboards/table-6places-wood/001-se-diffuse.png",
+	.Table6_001_Wood_SW  = "resources/textures/billboards/table-6places-wood/001-sw-diffuse.png",
+	.Table6_001_Wood_NE  = "resources/textures/billboards/table-6places-wood/001-ne-diffuse.png",
+	.Table6_001_Wood_NW  = "resources/textures/billboards/table-6places-wood/001-nw-diffuse.png",
+	.Table6_002_Wood_SE  = "resources/textures/billboards/table-6places-wood/002-se-diffuse.png",
+	.Table6_002_Wood_SW  = "resources/textures/billboards/table-6places-wood/002-sw-diffuse.png",
+	.Table6_002_Wood_NE  = "resources/textures/billboards/table-6places-wood/002-ne-diffuse.png",
+	.Table6_002_Wood_NW  = "resources/textures/billboards/table-6places-wood/002-nw-diffuse.png",
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-diffuse.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-diffuse.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-diffuse.png",
@@ -302,16 +292,14 @@ BILLBOARD_DEPTH_MAP_TEXTURE_PATHS :: [Texture_1x1]cstring {
 	.Chair_Wood_SE       = "resources/textures/billboards/chair-wood/se-depth-map.png",
 	.Chair_Wood_NE       = "resources/textures/billboards/chair-wood/ne-depth-map.png",
 	.Chair_Wood_NW       = "resources/textures/billboards/chair-wood/nw-depth-map.png",
-
-	.Table6_001_Wood_SE       = "resources/textures/billboards/table-6places-wood/001-se-depth-map.png",
-    .Table6_001_Wood_SW       = "resources/textures/billboards/table-6places-wood/001-sw-depth-map.png",
-	.Table6_001_Wood_NE       = "resources/textures/billboards/table-6places-wood/001-ne-depth-map.png",
-	.Table6_001_Wood_NW       = "resources/textures/billboards/table-6places-wood/001-nw-depth-map.png",
-	.Table6_002_Wood_SE       = "resources/textures/billboards/table-6places-wood/002-se-depth-map.png",
-    .Table6_002_Wood_SW       = "resources/textures/billboards/table-6places-wood/002-sw-depth-map.png",
-	.Table6_002_Wood_NE       = "resources/textures/billboards/table-6places-wood/002-ne-depth-map.png",
-	.Table6_002_Wood_NW       = "resources/textures/billboards/table-6places-wood/002-nw-depth-map.png",
-
+	.Table6_001_Wood_SE  = "resources/textures/billboards/table-6places-wood/001-se-depth-map.png",
+	.Table6_001_Wood_SW  = "resources/textures/billboards/table-6places-wood/001-sw-depth-map.png",
+	.Table6_001_Wood_NE  = "resources/textures/billboards/table-6places-wood/001-ne-depth-map.png",
+	.Table6_001_Wood_NW  = "resources/textures/billboards/table-6places-wood/001-nw-depth-map.png",
+	.Table6_002_Wood_SE  = "resources/textures/billboards/table-6places-wood/002-se-depth-map.png",
+	.Table6_002_Wood_SW  = "resources/textures/billboards/table-6places-wood/002-sw-depth-map.png",
+	.Table6_002_Wood_NE  = "resources/textures/billboards/table-6places-wood/002-ne-depth-map.png",
+	.Table6_002_Wood_NW  = "resources/textures/billboards/table-6places-wood/002-nw-depth-map.png",
 	.Door_Wood_SW        = "resources/textures/billboards/door-wood/sw-depth-map.png",
 	.Door_Wood_SE        = "resources/textures/billboards/door-wood/se-depth-map.png",
 	.Door_Wood_NE        = "resources/textures/billboards/door-wood/ne-depth-map.png",
@@ -712,8 +700,16 @@ init_draw_contexts :: proc() -> bool {
 
 get_chunk_1x1 :: proc(pos: glsl.vec3) -> ^Billboard_Chunk(Billboard_1x1) {
 	floor := get_floor_from_vec3(pos)
-	x := int(pos.x / constants.CHUNK_WIDTH)
-	z := int(pos.z / constants.CHUNK_DEPTH)
+	x := clamp(
+		int(pos.x / constants.CHUNK_WIDTH),
+		0,
+		constants.WORLD_CHUNK_WIDTH - 1,
+	)
+	z := clamp(
+		int(pos.z / constants.CHUNK_DEPTH),
+		0,
+		constants.WORLD_CHUNK_DEPTH - 1,
+	)
 	return &chunks_1x1[floor][x][z]
 }
 

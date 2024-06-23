@@ -34,7 +34,7 @@ Mode :: enum {
 
 init :: proc() {
 	wall_tool_billboard = {
-		type = .Wall_Cursor,
+		type = .Cursor,
 	}
 	billboard.billboard_1x1_set(
 		wall_tool_billboard,

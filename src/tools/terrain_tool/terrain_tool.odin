@@ -57,7 +57,7 @@ init :: proc() {
 		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 
 	terrain_tool_billboard = {
-		type = .Shovel_Cursor,
+		type = .Cursor,
 		pos  = position,
 	}
 	billboard.billboard_1x1_set(
@@ -68,7 +68,7 @@ init :: proc() {
 	terrain_tool_drag_start = nil
 	terrain_tool_drag_end = nil
 
-    floor.show_markers = false
+	floor.show_markers = false
 }
 
 deinit :: proc() {

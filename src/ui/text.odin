@@ -179,6 +179,12 @@ init_text_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	return true
 }
 
+deinit_text_renderer :: proc(using ctx: ^Context) {
+	using text_renderer
+
+    fontstash.Destroy(&fs)
+}
+
 text_bounds :: proc(
 	using ctx: ^Context,
 	position: glsl.vec2,

@@ -199,6 +199,10 @@ init :: proc() {
 	key_map = make(map[Key_Value]Key_State)
 }
 
+deinit :: proc() {
+    delete(key_map)
+}
+
 update :: proc() {
 	for key in key_map {
 		switch state := &key_map[key]; state^ {

@@ -14,8 +14,7 @@ furniture_panel_body :: proc(
 	pos: glsl.vec2,
 	size: glsl.vec2,
 ) {
-	texture_map := furniture.TEXTURE_MAP
-	for texmap, i in texture_map {
+	for texmap, i in furniture.texture_map {
 		border_width := f32(BORDER_WIDTH)
 		if furniture_tool.type == i && furniture_tool.state == .Placing {
 			border_width *= 2

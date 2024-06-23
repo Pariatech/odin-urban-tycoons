@@ -730,6 +730,10 @@ init_wall_renderer :: proc() -> (ok: bool) {
 	return true
 }
 
+deinit_wall_renderer :: proc() {
+
+}
+
 draw_wall_mesh :: proc(
 	vertices: []Wall_Vertex,
 	indices: []Wall_Index,

@@ -80,6 +80,7 @@ start :: proc() -> (ok: bool = false) {
 	wall.init_wall_renderer() or_return
 
 	keyboard.init()
+    defer keyboard.deinit()
 	mouse.init()
 	cursor.init()
 
@@ -88,6 +89,7 @@ start :: proc() -> (ok: bool = false) {
 	world.init()
 
 	ui.init(&ui_ctx) or_return
+    defer ui.deinit(&ui_ctx)
 
 	floor_tool.init()
 	terrain_tool.init()

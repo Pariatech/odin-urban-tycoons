@@ -2,7 +2,9 @@ package furniture_tool
 
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:log"
 
+import "../../billboard"
 import "../../cursor"
 import "../../floor"
 import "../../furniture"
@@ -16,6 +18,9 @@ type: furniture.Type
 pos: glsl.vec3
 origin_pos: glsl.vec3
 original: furniture.Furniture
+orientation: furniture.Rotation = .North
+
+DEFAULT_ORIENTATION :: furniture.Rotation.North
 
 State :: enum {
 	Idle,
@@ -81,22 +86,49 @@ placing_furniture :: proc(previous_pos: glsl.vec3) {
 		return
 	}
 
-	furniture.remove(previous_pos)
-
+	previous_tile_pos := tile_pos(previous_pos)
 	tile_pos := tile_pos(pos)
-	if furniture.has(tile_pos) {
-		pos.y += 0.1
-		furniture.add(pos, type, .South, {1, 0.5, 0.5})
-	} else {
-		furniture.add(tile_pos, type, .South)
-		if mouse.is_button_press(.Left) {
-			previous_state = state
-			state = .Rotating
-			origin_pos = pos
-		} else {
-			pos = tile_pos
-		}
+
+	it := furniture.make_child_iterator(type, orientation)
+	for child in furniture.next_child(&it) {
+		translate := furniture.get_translate(orientation, child.x, child.z)
+        log.info(previous_tile_pos + translate)
+		billboard.billboard_1x1_remove(
+			{pos = previous_tile_pos + translate, type = .Cursor},
+		)
 	}
+
+    update_orientation()
+
+	it = furniture.make_child_iterator(type, orientation)
+	for child in furniture.next_child(&it) {
+		translate := furniture.get_translate(orientation, child.x, child.z)
+		billboard.billboard_1x1_set(
+			{pos = tile_pos + translate, type = .Cursor},
+			 {
+				light = {1, 1, 1},
+				texture = child.texture,
+				depth_map = child.texture,
+			},
+		)
+	}
+
+	// furniture.remove(previous_pos)
+
+	// if furniture.can_place(tile_pos, type, DEFAULT_ORIENTATION) {
+	// 	furniture.add(tile_pos, type, DEFAULT_ORIENTATION)
+	// 	if mouse.is_button_press(.Left) {
+	// 		previous_state = state
+	// 		state = .Rotating
+	// 		origin_pos = pos
+	// 	} else {
+	// 		pos = tile_pos
+	// 	}
+	//
+	// } else {
+	// 	pos.y += 0.1
+	// 	furniture.add(pos, type, DEFAULT_ORIENTATION, {1, 0.5, 0.5})
+	// }
 }
 
 move_furniture :: proc(previous_pos: glsl.vec3) {
@@ -105,11 +137,39 @@ move_furniture :: proc(previous_pos: glsl.vec3) {
 	}
 }
 
+update_orientation :: proc() {
+	if mouse.is_button_up(.Left) {
+		return
+	}
+
+	if mouse.is_button_press(.Left) {
+		origin_pos = pos
+		return
+	}
+
+	dx := pos.x - origin_pos.x
+	dz := pos.z - origin_pos.z
+
+	if math.abs(dx) > math.abs(dz) {
+		if dx >= 0 {
+			orientation = .East
+		} else {
+			orientation = .West
+		}
+	} else {
+		if dz >= 0 {
+			orientation = .North
+		} else {
+			orientation = .South
+		}
+	}
+}
+
 rotating_furniture :: proc() {
 	if mouse.is_button_release(.Left) {
 		if previous_state == .Placing {
 			pos.y += 0.1
-			furniture.add(pos, type, .South, {1, 0.5, 0.5})
+			furniture.add(pos, type, DEFAULT_ORIENTATION, {1, 0.5, 0.5})
 			state = .Placing
 		} else {
 			state = .Idle
@@ -122,17 +182,34 @@ rotating_furniture :: proc() {
 
 	tile_pos := tile_pos(origin_pos)
 
+	furniture.remove(pos)
 	if math.abs(dx) > math.abs(dz) {
-		if dx > 0 {
-			furniture.add(tile_pos, type, .East)
+		if dx >= 0 {
+			if furniture.can_place(tile_pos, type, .East) {
+				furniture.add(tile_pos, type, .East)
+			} else {
+				furniture.add(tile_pos, type, .East, {1, 0.5, 0.5})
+			}
 		} else {
-			furniture.add(tile_pos, type, .West)
+			if furniture.can_place(tile_pos, type, .West) {
+				furniture.add(tile_pos, type, .West)
+			} else {
+				furniture.add(tile_pos, type, .West, {1, 0.5, 0.5})
+			}
 		}
 	} else {
-		if dz > 0 {
-			furniture.add(tile_pos, type, .North)
+		if dz >= 0 {
+			if furniture.can_place(tile_pos, type, .North) {
+				furniture.add(tile_pos, type, .North)
+			} else {
+				furniture.add(tile_pos, type, .North, {1, 0.5, 0.5})
+			}
 		} else {
-			furniture.add(tile_pos, type, .South)
+			if furniture.can_place(tile_pos, type, .South) {
+				furniture.add(tile_pos, type, .South)
+			} else {
+				furniture.add(tile_pos, type, .South, {1, 0.5, 0.5})
+			}
 		}
 	}
 }
