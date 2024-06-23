@@ -5,6 +5,7 @@ import "core:math"
 import "core:math/linalg/glsl"
 
 import "../../billboard"
+import "../../constants"
 import "../../cursor"
 import "../../floor"
 import "../../furniture"
@@ -32,10 +33,13 @@ State :: enum {
 
 init :: proc() {
 	cursor.intersect_with_tiles(on_intersect, floor.floor)
+
+	floor.show_markers = true
 }
 
 deinit :: proc() {
-
+    remove_cursor(orientation)
+    state = .Idle
 }
 
 update :: proc() {
@@ -186,12 +190,12 @@ update_orientation :: proc() {
 
 start_rotating_furniture :: proc(furn: furniture.Furniture) {
 	state = .Rotating
-    if parent, ok := furn.parent.?; ok {
-        log.info(parent)
-	    origin_pos = parent
-    } else {
-	    origin_pos = pos
-    }
+	if parent, ok := furn.parent.?; ok {
+		log.info(parent)
+		origin_pos = parent
+	} else {
+		origin_pos = pos
+	}
 	tile_pos := get_tile_pos(origin_pos)
 	original = furn
 	// furniture.remove(tile_pos)
@@ -225,7 +229,7 @@ get_tile_pos :: proc(pos: glsl.vec3) -> glsl.vec3 {
 	return(
 		 {
 			math.floor(pos.x + 0.5),
-			terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5)),
+            floor.height_at(pos),
 			math.floor(pos.z + 0.5),
 		} \
 	)

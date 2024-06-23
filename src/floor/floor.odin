@@ -1,7 +1,8 @@
 package floor
 
 import "core:fmt"
-import m "core:math/linalg/glsl"
+import "core:math"
+import "core:math/linalg/glsl"
 import "core:testing"
 
 import "../constants"
@@ -59,7 +60,9 @@ update_markers :: proc() {
 									side = side,
 								}
 								if !(key in chunk.triangles) {
-									if terrain.is_tile_flat({i32(key.x), i32(key.z)}) {
+									if terrain.is_tile_flat(
+										   {i32(key.x), i32(key.z)},
+									   ) {
 										chunk.triangles[key] = {
 											texture      = .Floor_Marker,
 											mask_texture = .Full_Mask,
@@ -85,4 +88,15 @@ update :: proc() {
 
 	update_markers()
 	previous_show_markers = show_markers
+}
+
+at :: proc(pos: glsl.vec3) -> i32 {
+	tile_height := terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5))
+	return i32(math.ceil((pos.y - tile_height) / constants.WALL_HEIGHT))
+}
+
+height_at :: proc(pos: glsl.vec3) -> f32 {
+	floor := at(pos)
+	tile_height := terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5))
+	return tile_height + f32(floor) * constants.WALL_HEIGHT
 }
