@@ -113,12 +113,13 @@ is_button_down :: proc(button: Button) -> bool {
 }
 
 is_button_release :: proc(button: Button) -> bool {
-	return buttons[button] == .Release
+	return !buttons_captured[button] && buttons[button] == .Release
 }
 
 is_button_up :: proc(button: Button) -> bool {
-	return buttons[button] == .Release || buttons[button] == .Up
+	return buttons[button] == .Up
 }
+
 
 capture :: proc(button: Button) {
 	buttons_captured[button] = true

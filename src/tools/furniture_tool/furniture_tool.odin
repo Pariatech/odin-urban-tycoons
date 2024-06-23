@@ -52,7 +52,7 @@ update :: proc() {
 	case .Placing:
 		placing_furniture(previous_pos)
 	case .Moving:
-		move_furniture(previous_pos)
+		moving_furniture(previous_pos)
 	case .Rotating:
 		rotating_furniture()
 	}
@@ -76,7 +76,7 @@ idle :: proc() {
 	tile_pos := get_tile_pos(pos)
 	if mouse.is_button_press(.Left) {
 		if furn, ok := furniture.get(tile_pos); ok {
-			start_rotating_furniture(furn)
+			// start_moving_furniture(furn)
 		}
 	}
 }
@@ -156,12 +156,6 @@ placing_furniture :: proc(previous_pos: glsl.vec3) {
 	}
 }
 
-move_furniture :: proc(previous_pos: glsl.vec3) {
-	if pos == previous_pos {
-		return
-	}
-}
-
 update_orientation :: proc() {
 	if mouse.is_button_up(.Left) {
 		return
@@ -188,6 +182,84 @@ update_orientation :: proc() {
 	}
 }
 
+start_moving_furniture :: proc(furn: furniture.Furniture) {
+	state = .Moving
+	if parent, ok := furn.parent.?; ok {
+		origin_pos = parent
+	} else {
+		origin_pos = pos
+	}
+	tile_pos := get_tile_pos(origin_pos)
+	original = furn
+}
+
+moving_furniture :: proc(previous_pos: glsl.vec3) {
+	tile_pos := get_tile_pos(pos)
+	previous_tile_pos := get_tile_pos(previous_pos)
+
+	if mouse.is_button_down(.Left) {
+		previous_tile_pos = get_tile_pos(origin_pos)
+	}
+
+	if keyboard.is_key_press(.Key_Escape) {
+		state = .Idle
+	    tile_pos := get_tile_pos(origin_pos)
+		furniture.add(tile_pos, original.type, original.rotation)
+		return
+	}
+
+	if mouse.is_button_press(.Left) {
+		origin_pos = pos
+	}
+
+	if mouse.is_button_release(.Left) {
+		tile_pos := get_tile_pos(origin_pos)
+		if furniture.can_place(tile_pos, type, orientation) {
+			furniture.remove(tile_pos)
+			furniture.add(tile_pos, type, orientation)
+			return
+		}
+	}
+
+	previous_orientation := orientation
+	update_orientation()
+
+	if previous_orientation == orientation && previous_pos == pos {
+		return
+	}
+
+	remove_cursor(previous_orientation)
+
+	if mouse.is_button_down(.Left) {
+		tile_pos = get_tile_pos(origin_pos)
+	}
+
+	light := glsl.vec3{1, 1, 1}
+	if !furniture.can_place(tile_pos, type, orientation) {
+		if mouse.is_button_down(.Left) {
+			tile_pos += {0, 0.1, 0}
+		} else {
+			tile_pos = pos + {0, 0.1, 0}
+		}
+		light = {1, 0.5, 0.5}
+	}
+
+	cursor_pos = tile_pos
+
+	it := furniture.make_child_iterator(type, orientation)
+	for child in furniture.next_child(&it) {
+		translate := furniture.get_translate(orientation, child.x, child.z)
+		billboard.billboard_1x1_set(
+			{pos = tile_pos + translate, type = .Cursor},
+			 {
+				light = light,
+				texture = child.texture,
+				depth_map = child.texture,
+			},
+		)
+	}
+}
+
 start_rotating_furniture :: proc(furn: furniture.Furniture) {
 	state = .Rotating
 	if parent, ok := furn.parent.?; ok {
@@ -198,7 +270,6 @@ start_rotating_furniture :: proc(furn: furniture.Furniture) {
 	}
 	tile_pos := get_tile_pos(origin_pos)
 	original = furn
-	// furniture.remove(tile_pos)
 }
 
 rotating_furniture :: proc() {
@@ -212,7 +283,7 @@ rotating_furniture :: proc() {
 			furniture.add(tile_pos, type, orientation)
 			return
 		}
-		furniture.add(tile_pos, type, original.rotation)
+		furniture.add(tile_pos, original.type, original.rotation)
 		return
 	}
 

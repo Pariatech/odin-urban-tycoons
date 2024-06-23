@@ -11,6 +11,7 @@ import "../tools"
 import "../wall"
 import "../window"
 import "../world"
+import "../mouse"
 
 MENU_ICON_TEXTURES :: []cstring {
 	"resources/icons/info.png",
@@ -52,7 +53,7 @@ Menu_Icon :: enum (int) {
 	Paint,
 	Door,
 	Window,
-    Furniture,
+	Furniture,
 }
 
 Draw_Call :: union {
@@ -74,6 +75,7 @@ Context :: struct {
 	scroll_bar_texture_array: u32,
 	help_window_ctx:          Help_Window,
 	floor_panel_ctx:          Floor_Panel,
+	focus:                    bool,
 }
 
 Uniform_Object :: struct {
@@ -121,9 +123,9 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 }
 
 deinit :: proc(using ctx: ^Context) {
-    gl.DeleteBuffers(1, &ubo)
-    delete(draw_calls)
-    deinit_text_renderer(ctx)
+	gl.DeleteBuffers(1, &ubo)
+	delete(draw_calls)
+	deinit_text_renderer(ctx)
 }
 
 to_screen_pos :: proc(pos: glsl.vec2) -> glsl.vec2 {
@@ -169,9 +171,9 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Window:
 		floor_panel_ctx.opened = false
 		tools.open_window_tool()
-    case .Furniture:
-        floor_panel_ctx.opened = false
-        tools.open_furniture_tool()
+	case .Furniture:
+		floor_panel_ctx.opened = false
+		tools.open_furniture_tool()
 	}
 }
 
@@ -196,6 +198,10 @@ menu :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 }
 
 update :: proc(using ctx: ^Context) {
+    if mouse.is_button_up(.Left) {
+        focus = false
+    }
+
 	update_text_draws(&text_renderer)
 	clear(&draw_calls)
 
@@ -211,7 +217,7 @@ update :: proc(using ctx: ^Context) {
 	paint_panel(ctx)
 	door_panel(ctx)
 	window_panel(ctx)
-    furniture_panel(ctx)
+	furniture_panel(ctx)
 
 	container(
 		ctx,

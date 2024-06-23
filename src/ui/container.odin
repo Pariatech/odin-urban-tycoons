@@ -42,10 +42,22 @@ container :: proc(
 		},
 	)
 	body(ctx, pos, size)
-	if cursor.pos.x >= pos.x &&
-	   cursor.pos.x < pos.x + size.x &&
-	   cursor.pos.y >= pos.y &&
-	   cursor.pos.y < pos.y + size.y {
-		mouse.capture_all()
+
+	if cursor_in(pos, size) {
+		if mouse.is_button_press(.Left) || mouse.is_button_up(.Left) {
+			focus = true
+		}
+		if focus {
+			mouse.capture_all()
+		}
 	}
+}
+
+cursor_in :: proc(pos: glsl.vec2, size: glsl.vec2) -> bool {
+	return(
+		cursor.pos.x >= pos.x &&
+		cursor.pos.x < pos.x + size.x &&
+		cursor.pos.y >= pos.y &&
+		cursor.pos.y < pos.y + size.y \
+	)
 }
