@@ -16,7 +16,7 @@ Diagonal_Wall_Mask :: enum {
 	Cross,
 }
 
-DIAGONAL_WALL_TOP_CROSS_OFFSET :: 0.0002
+DIAGONAL_WALL_TOP_CROSS_OFFSET :: -0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
 diagonal_wall_vertices := [State][Diagonal_Wall_Mask][dynamic]Wall_Vertex{}
@@ -602,6 +602,10 @@ draw_diagonal_wall :: proc(
 
 	top_vertices := diagonal_wall_top_vertices[wall.state][top_mask][:]
 	top_indices := diagonal_wall_top_indices[wall.state][top_mask][:]
+
+	transform *= glsl.mat4Translate(
+		{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
+	)
 
 	draw_wall_mesh(
 		top_vertices,

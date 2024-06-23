@@ -267,7 +267,9 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			heights := get_terrain_tile_triangle_heights(side, x, z, 1)
 
 			for i in 0 ..< 3 {
-				heights[i] += f32(floor * constants.WALL_HEIGHT)
+				heights[i] +=
+					f32(floor * constants.WALL_HEIGHT) +
+					constants.FLOOR_TILE_OFFSET
 			}
 
 			draw_tile_triangle(

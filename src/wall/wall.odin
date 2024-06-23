@@ -121,7 +121,6 @@ Chunk :: struct {
 
 Wall_Index :: u32
 
-WALL_TOP_OFFSET :: 0.0001
 WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
@@ -811,7 +810,9 @@ draw_wall :: proc(
 	)
 
 	top_vertices := wall_top_vertices[wall.state][top_mesh][:]
-	transform *= glsl.mat4Translate({0, WALL_TOP_OFFSET * f32(axis), 0})
+	transform *= glsl.mat4Translate(
+		{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
+	)
 
 	draw_wall_mesh(
 		top_vertices,
