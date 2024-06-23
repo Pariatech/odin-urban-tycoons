@@ -102,6 +102,7 @@ get_chunk :: proc(pos: glsl.vec3) -> ^Chunk {
 }
 
 add_child :: proc(
+	parent: glsl.vec3,
 	pos: glsl.vec3,
 	type: Type,
 	rotation: Rotation,
@@ -110,7 +111,7 @@ add_child :: proc(
 ) {
 	chunk := get_chunk(pos)
 
-	chunk.furnitures[pos] = {type, rotation, light, pos}
+	chunk.furnitures[pos] = {type, rotation, light, parent}
 
 	billboard_type_map := BILLBOARD_TYPE_MAP
 	billboard.billboard_1x1_set(
@@ -208,7 +209,7 @@ add :: proc(
 	for col, x in textures {
 		for texture, z in col {
 			translate := get_translate(rotation, x, z)
-			add_child(pos + translate, type, rotation, light, texture)
+			add_child(pos, pos + translate, type, rotation, light, texture)
 		}
 	}
 

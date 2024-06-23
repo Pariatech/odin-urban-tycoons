@@ -72,10 +72,7 @@ idle :: proc() {
 	tile_pos := get_tile_pos(pos)
 	if mouse.is_button_press(.Left) {
 		if furn, ok := furniture.get(tile_pos); ok {
-			previous_state = state
-			state = .Rotating
-			origin_pos = pos
-			original = furn
+			start_rotating_furniture(furn)
 		}
 	}
 }
@@ -187,52 +184,40 @@ update_orientation :: proc() {
 	}
 }
 
+start_rotating_furniture :: proc(furn: furniture.Furniture) {
+	state = .Rotating
+    if parent, ok := furn.parent.?; ok {
+        log.info(parent)
+	    origin_pos = parent
+    } else {
+	    origin_pos = pos
+    }
+	tile_pos := get_tile_pos(origin_pos)
+	original = furn
+	// furniture.remove(tile_pos)
+}
+
 rotating_furniture :: proc() {
+	tile_pos := get_tile_pos(origin_pos)
+
 	if mouse.is_button_release(.Left) {
-		if previous_state == .Placing {
-			pos.y += 0.1
-			furniture.add(pos, type, DEFAULT_ORIENTATION, {1, 0.5, 0.5})
-			state = .Placing
-		} else {
-			state = .Idle
+		state = .Idle
+
+		furniture.remove(tile_pos)
+		if furniture.can_place(tile_pos, type, orientation) {
+			furniture.add(tile_pos, type, orientation)
+			return
 		}
+		furniture.add(tile_pos, type, original.rotation)
 		return
 	}
 
-	dx := pos.x - origin_pos.x
-	dz := pos.z - origin_pos.z
+	previous_orientation := orientation
+	update_orientation()
 
-	tile_pos := get_tile_pos(origin_pos)
-
-	furniture.remove(pos)
-	if math.abs(dx) > math.abs(dz) {
-		if dx >= 0 {
-			if furniture.can_place(tile_pos, type, .East) {
-				furniture.add(tile_pos, type, .East)
-			} else {
-				furniture.add(tile_pos, type, .East, {1, 0.5, 0.5})
-			}
-		} else {
-			if furniture.can_place(tile_pos, type, .West) {
-				furniture.add(tile_pos, type, .West)
-			} else {
-				furniture.add(tile_pos, type, .West, {1, 0.5, 0.5})
-			}
-		}
-	} else {
-		if dz >= 0 {
-			if furniture.can_place(tile_pos, type, .North) {
-				furniture.add(tile_pos, type, .North)
-			} else {
-				furniture.add(tile_pos, type, .North, {1, 0.5, 0.5})
-			}
-		} else {
-			if furniture.can_place(tile_pos, type, .South) {
-				furniture.add(tile_pos, type, .South)
-			} else {
-				furniture.add(tile_pos, type, .South, {1, 0.5, 0.5})
-			}
-		}
+	if previous_orientation != orientation {
+		furniture.remove(tile_pos)
+		furniture.add(tile_pos, type, orientation)
 	}
 }
 
