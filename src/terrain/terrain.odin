@@ -3,6 +3,7 @@ package terrain
 import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:math/noise"
+import "core:math"
 
 import "../constants"
 import "../utils"
@@ -166,6 +167,8 @@ calculate_terrain_light :: proc(x, z: int) {
 }
 
 get_tile_height :: proc(x, z: int) -> f32 {
+    x := math.clamp(x, 0, constants.WORLD_WIDTH + 1)
+    z := math.clamp(z, 0, constants.WORLD_DEPTH + 1)
 	total :=
 		terrain_heights[x][z] +
 		terrain_heights[x + 1][z] +

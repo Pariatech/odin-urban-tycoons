@@ -36,8 +36,7 @@ furniture_panel_body :: proc(
 			   top_border_width = border_width,
 			   bottom_border_width = border_width,
 		   ) {
-			furniture_tool.type = i
-			furniture_tool.state = .Placing
+            furniture_tool.place_furniture(i)
 		}
 	}
 }
