@@ -16,7 +16,7 @@ furniture_panel_body :: proc(
 ) {
 	for texmap, i in furniture.texture_map {
 		border_width := f32(BORDER_WIDTH)
-		if furniture_tool.type == i && furniture_tool.state == .Placing {
+		if furniture_tool.type == i && furniture_tool.state == .Moving {
 			border_width *= 2
 		}
 
