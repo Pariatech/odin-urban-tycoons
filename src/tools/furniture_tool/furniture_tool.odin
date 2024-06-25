@@ -126,7 +126,11 @@ rotate :: proc() {
 			tile_pos := get_tile_pos(rotate_pos)
 			if furniture.can_place(tile_pos, type, orientation) {
 				furniture.add(tile_pos, type, orientation)
-				change_state(.Idle)
+                if keyboard.is_key_down(.Key_Left_Shift) {
+				    change_state(.Moving)
+                } else {
+				    change_state(.Idle)
+                }
 			} else {
 				change_state(.Moving)
 			}
