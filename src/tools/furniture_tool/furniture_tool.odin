@@ -148,13 +148,17 @@ rotate :: proc() {
 }
 
 move_from_rotate :: proc() -> bool {
-    return glsl.length(pos - rotate_pos) <= 0.1
+	return glsl.length(pos - rotate_pos) <= 0.1
 }
 
 move :: proc() {
 	remove_cursor()
 
-	if keyboard.is_key_press(.Key_Escape) {
+	if keyboard.is_key_press(.Key_Delete) {
+		change_state(.Idle)
+        return
+	} 
+    if keyboard.is_key_press(.Key_Escape) {
 		add_back_original()
 
 		change_state(.Idle)
