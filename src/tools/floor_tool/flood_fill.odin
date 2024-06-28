@@ -7,6 +7,7 @@ import "../../constants"
 import "../../floor"
 import "../../tile"
 import "../../wall"
+import "../../terrain"
 
 Visited_Tile_Triangle :: struct {
 	position: glsl.ivec2,
@@ -184,7 +185,8 @@ can_texture :: proc(
 	if to.position.x < 0 ||
 	   to.position.y < 0 ||
 	   to.position.x >= constants.WORLD_WIDTH ||
-	   to.position.y >= constants.WORLD_DEPTH {
+	   to.position.y >= constants.WORLD_DEPTH ||
+       (floor.floor > 0 && !terrain.is_tile_flat(to.position)) {
 		return false
 	}
 

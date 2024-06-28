@@ -8,13 +8,6 @@ import "../camera"
 import "../constants"
 import "../terrain"
 
-Vertex :: struct {
-	pos:       glsl.vec3,
-	light:     glsl.vec3,
-	texcoords: glsl.vec4,
-	depth_map: f32,
-}
-
 Texture :: enum (u16) {
 	Floor_Marker,
 	Grass,
@@ -286,7 +279,7 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
-			len(vertices) * size_of(Vertex),
+			len(vertices) * size_of(Tile_Triangle_Vertex),
 			raw_data(vertices),
 			gl.STATIC_DRAW,
 		)

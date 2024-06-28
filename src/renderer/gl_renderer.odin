@@ -1,7 +1,7 @@
 package renderer
 
 import "core:fmt"
-import m "core:math/linalg/glsl"
+import "core:math/linalg/glsl"
 import "core:os"
 import "base:runtime"
 import gl "vendor:OpenGL"
@@ -18,13 +18,20 @@ FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
 vbo, vao, ubo: u32
 shader_program: u32
-world_vertices: [dynamic]tile.Vertex
+world_vertices: [dynamic]Vertex
 world_indices: [dynamic]u32
 uniform_object: Uniform_Object
 framebuffer_resized: bool
 
+Vertex :: struct {
+	pos:       glsl.vec3,
+	light:     glsl.vec3,
+	texcoords: glsl.vec4,
+	depth_map: f32,
+}
+
 Uniform_Object :: struct {
-	proj, view: m.mat4,
+	proj, view: glsl.mat4,
 }
 
 gl_debug_callback :: proc "c" (
@@ -129,8 +136,8 @@ init :: proc() -> (ok: bool = true) {
 		3,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(tile.Vertex),
-		offset_of(tile.Vertex, pos),
+		size_of(Vertex),
+		offset_of(Vertex, pos),
 	)
 	gl.EnableVertexAttribArray(0)
 
@@ -139,8 +146,8 @@ init :: proc() -> (ok: bool = true) {
 		3,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(tile.Vertex),
-		offset_of(tile.Vertex, light),
+		size_of(Vertex),
+		offset_of(Vertex, light),
 	)
 	gl.EnableVertexAttribArray(1)
 
@@ -149,8 +156,8 @@ init :: proc() -> (ok: bool = true) {
 		4,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(tile.Vertex),
-		offset_of(tile.Vertex, texcoords),
+		size_of(Vertex),
+		offset_of(Vertex, texcoords),
 	)
 	gl.EnableVertexAttribArray(2)
 
@@ -159,8 +166,8 @@ init :: proc() -> (ok: bool = true) {
 		1,
 		gl.FLOAT,
 		gl.FALSE,
-		size_of(tile.Vertex),
-		offset_of(tile.Vertex, depth_map),
+		size_of(Vertex),
+		offset_of(Vertex, depth_map),
 	)
 	gl.EnableVertexAttribArray(3)
 
@@ -218,7 +225,7 @@ end_draw :: proc() {
 	}
 }
 
-draw_triangle :: proc(v0, v1, v2: tile.Vertex) {
+draw_triangle :: proc(v0, v1, v2: Vertex) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, v0, v1, v2)
 	append(
@@ -229,7 +236,7 @@ draw_triangle :: proc(v0, v1, v2: tile.Vertex) {
 	)
 }
 
-draw_quad :: proc(v0, v1, v2, v3: tile.Vertex) {
+draw_quad :: proc(v0, v1, v2, v3: Vertex) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, v0, v1, v2, v3)
 	append(
@@ -243,7 +250,7 @@ draw_quad :: proc(v0, v1, v2, v3: tile.Vertex) {
 	)
 }
 
-draw_mesh :: proc(verts: []tile.Vertex, idxs: []u32) {
+draw_mesh :: proc(verts: []Vertex, idxs: []u32) {
 	index_offset := u32(len(world_vertices))
 	append(&world_vertices, ..verts)
 	for idx in idxs {

@@ -71,7 +71,7 @@ update :: proc() {
 		if delete_mode {
 			if floor.floor == 0 {
 				flood_fill(pos, side, .Grass)
-			} else {
+			} else if terrain.is_tile_flat(pos.xz) {
 				flood_fill(pos, side, .Floor_Marker)
 			}
 		} else {
@@ -131,7 +131,8 @@ revert_tile :: proc(position: glsl.ivec3) {
 		for side in tile.Tile_Triangle_Side {
 			if tri, ok := previous_tile[side].?; ok {
 				tile.set_tile_triangle(position, side, tri)
-			} else if floor.floor == position.y {
+			} else if floor.floor == position.y &&
+			   terrain.is_tile_flat(position.xz) {
 				tile.set_tile_triangle(
 					position,
 					side,
@@ -157,7 +158,8 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 			if tile_triangle, ok := &tile_triangle.?; ok {
 				tile_triangle.texture = .Grass
 			}
-		} else if position.y == floor.floor {
+		} else if position.y == floor.floor &&
+		   terrain.is_tile_flat(position.xz) {
 			if tile_triangle, ok := &tile_triangle.?; ok {
 				tile_triangle.texture = .Floor_Marker
 				tile_triangle.mask_texture = .Full_Mask

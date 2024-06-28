@@ -586,8 +586,7 @@ set_south_west_north_east_wall :: proc(
 		return
 	}
 
-	if terrain.get_terrain_height({pos.x, pos.z}) !=
-	   terrain.get_terrain_height({pos.x + 1, pos.z + 1}) {
+    if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
@@ -618,8 +617,7 @@ set_north_west_south_east_wall :: proc(
 		return
 	}
 
-	if terrain.get_terrain_height({pos.x, pos.z + 1}) !=
-	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
+    if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
@@ -648,8 +646,7 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 		return
 	}
 
-	if terrain.get_terrain_height({pos.x, pos.z}) !=
-	   terrain.get_terrain_height({pos.x + 1, pos.z}) {
+    if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
@@ -677,8 +674,7 @@ set_north_south_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 		return
 	}
 
-	if terrain.get_terrain_height({pos.x, pos.z}) !=
-	   terrain.get_terrain_height({pos.x, pos.z + 1}) {
+    if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
