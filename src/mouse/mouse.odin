@@ -54,10 +54,10 @@ CURSOR_PATHS :: [Cursor]cstring {
 }
 
 CURSOR_HOTSPOTS :: [Cursor]glsl.ivec2 {
-	.Arrow = {0, 0},
-	.Hand  = {32, 32},
-	.Hand_Closed  = {32, 32},
-	.Rotate  = {32, 32},
+	.Arrow = {1, 1},
+	.Hand  = {24, 24},
+	.Hand_Closed  = {24, 24},
+	.Rotate  = {24, 24},
 }
 
 get_scroll :: proc() -> glsl.vec2 {
