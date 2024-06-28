@@ -188,6 +188,18 @@ set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
 		ns_right = .Left
 	}
 
+	diagonal_left: State
+	diagonal_right: State
+
+	switch camera.rotation {
+	case .South_West, .South_East:
+		diagonal_left = .Left
+		diagonal_right = .Right
+	case .North_East, .North_West:
+		diagonal_left = .Right
+		diagonal_right = .Left
+	}
+
 	switch axis {
 	case .E_W:
 		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
@@ -279,92 +291,92 @@ set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
 		}
 	case .SW_NE:
 		if w, ok := get_wall(pos + {-1, 0, -1}, .SW_NE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {-1, 0, -1}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 1}, .SW_NE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {1, 0, 1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, -1}, .NW_SE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {0, 0, -1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 0}, .NW_SE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {-1, 0, 0}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, 1}, .NW_SE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {0, 0, 1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .NW_SE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {1, 0, 0}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {0, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 1}, .N_S); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {1, 0, 1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, 1}, .E_W); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {1, 0, 1}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {-1, 0, 0}, .E_W, w)
 		}
 	case .NW_SE:
 		if w, ok := get_wall(pos + {-1, 0, 1}, .NW_SE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {-1, 0, 1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, -1}, .NW_SE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {1, 0, -1}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 0}, .SW_NE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {-1, 0, 0}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .SW_NE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {0, 0, 1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, 0}, .SW_NE); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {1, 0, 0}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, -1}, .SW_NE); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {0, 0, -1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, -1}, .N_S); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {1, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .N_S); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {0, 0, 1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 1}, .E_W); ok {
-			w.state = .Left
+			w.state = diagonal_left
 			set_wall(pos + {-1, 0, 1}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .E_W); ok {
-			w.state = .Right
+			w.state = diagonal_right
 			set_wall(pos + {1, 0, 0}, .E_W, w)
 		}
 	}
