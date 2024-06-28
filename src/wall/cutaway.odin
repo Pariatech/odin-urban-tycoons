@@ -16,6 +16,8 @@ cutaway_state: Cutaway_State
 previous_visible_chunks_start: glsl.ivec2
 previous_visible_chunks_end: glsl.ivec2
 
+CUTAWAY_WALL_MASK_MAP :: [State][Wall_Axis][camera.Rotation]Wall_Mask{}
+
 set_walls_down :: proc() {
 	cutaway_state = .Down
 	set_cutaway(.Down)
@@ -150,9 +152,9 @@ update_cutaways :: proc(force: bool = false) {
 }
 
 set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
-    if cutaway_state == .Up {
-        return
-    }
+	if cutaway_state == .Up {
+		return
+	}
 
 	w, ok := get_wall(pos, axis)
 	if !ok {
@@ -162,184 +164,208 @@ set_wall_up :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
 	w.state = .Up
 	set_wall(pos, axis, w)
 
+	ew_left: State
+	ew_right: State
+
+	switch camera.rotation {
+	case .South_West, .North_West:
+		ew_left = .Left
+		ew_right = .Right
+	case .South_East, .North_East:
+		ew_left = .Right
+		ew_right = .Left
+	}
+
+	ns_left: State
+	ns_right: State
+
+	switch camera.rotation {
+	case .South_West, .South_East:
+		ns_left = .Left
+		ns_right = .Right
+	case .North_West, .North_East:
+		ns_left = .Right
+		ns_right = .Left
+	}
+
 	switch axis {
 	case .E_W:
 		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 0}, .E_W, w)
+            w.state = ew_left
+			set_wall(pos + {-1, 0, 0}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .E_W); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 0}, .E_W, w)
+			w.state = ew_right
+			set_wall(pos + {1, 0, 0}, .E_W, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, 0}, .N_S); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 0}, .N_S, w)
+			w.state = ns_right
+			set_wall(pos + {0, 0, 0}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
-	        w.state = .Left
-	        set_wall(pos + {0, 0, -1}, .N_S, w)
+            w.state = ns_left
+			set_wall(pos + {0, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .N_S); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 0}, .N_S, w)
+			w.state = ns_right
+			set_wall(pos + {1, 0, 0}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, -1}, .N_S); ok {
-	        w.state = .Left
-	        set_wall(pos + {1, 0, -1}, .N_S, w)
+            w.state = ns_left
+			set_wall(pos + {1, 0, -1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 0}, .NW_SE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 0}, .NW_SE, w)
+            w.state = ew_left
+			set_wall(pos + {-1, 0, 0}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, -1}, .NW_SE); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, -1}, .NW_SE, w)
+			w.state = ew_right
+			set_wall(pos + {1, 0, -1}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, -1}, .SW_NE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, -1}, .SW_NE, w)
+            w.state = ew_left
+			set_wall(pos + {-1, 0, -1}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .SW_NE); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 0}, .SW_NE, w)
+			w.state = ew_right
+			set_wall(pos + {1, 0, 0}, .SW_NE, w)
 		}
 	case .N_S:
 		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
-	        w.state = .Left
-	        set_wall(pos + {0, 0, -1}, .N_S, w)
+            w.state = ns_left
+			set_wall(pos + {0, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .N_S); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .N_S, w)
+            w.state = ns_right
+			set_wall(pos + {0, 0, 1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, 0}, .E_W); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 0}, .E_W, w)
+            w.state = ew_right
+			set_wall(pos + {0, 0, 0}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 0}, .E_W, w)
+            w.state = ew_left
+			set_wall(pos + {-1, 0, 0}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .E_W); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .E_W, w)
+            w.state = ew_right
+			set_wall(pos + {0, 0, 1}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 1}, .E_W); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 1}, .E_W, w)
+            w.state = ew_left
+			set_wall(pos + {-1, 0, 1}, .E_W, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 1}, .NW_SE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 1}, .NW_SE, w)
+            w.state = ns_left
+			set_wall(pos + {-1, 0, 1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, -1}, .NW_SE); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, -1}, .NW_SE, w)
+            w.state = ns_right
+			set_wall(pos + {0, 0, -1}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, -1}, .SW_NE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, -1}, .SW_NE, w)
+            w.state = ns_left
+			set_wall(pos + {-1, 0, -1}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .SW_NE); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .SW_NE, w)
+            w.state = ns_right
+			set_wall(pos + {0, 0, 1}, .SW_NE, w)
 		}
 	case .SW_NE:
 		if w, ok := get_wall(pos + {-1, 0, -1}, .SW_NE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, -1}, .SW_NE, w)
+			w.state = .Left
+			set_wall(pos + {-1, 0, -1}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 1}, .SW_NE); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 1}, .SW_NE, w)
+			w.state = .Right
+			set_wall(pos + {1, 0, 1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, -1}, .NW_SE); ok {
-	        w.state = .Left
-	        set_wall(pos + {0, 0, -1}, .NW_SE, w)
+			w.state = .Left
+			set_wall(pos + {0, 0, -1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 0}, .NW_SE); ok {
-	        w.state = .Right
-	        set_wall(pos + {-1, 0, 0}, .NW_SE, w)
+			w.state = .Right
+			set_wall(pos + {-1, 0, 0}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, 1}, .NW_SE); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .NW_SE, w)
+			w.state = .Right
+			set_wall(pos + {0, 0, 1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .NW_SE); ok {
-	        w.state = .Left
-	        set_wall(pos + {1, 0, 0}, .NW_SE, w)
+			w.state = .Left
+			set_wall(pos + {1, 0, 0}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {0, 0, -1}, .N_S); ok {
-	        w.state = .Left
-	        set_wall(pos + {0, 0, -1}, .N_S, w)
+			w.state = .Left
+			set_wall(pos + {0, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 1}, .N_S); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 1}, .N_S, w)
+			w.state = .Right
+			set_wall(pos + {1, 0, 1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, 1}, .E_W); ok {
-	        w.state = .Left
-	        set_wall(pos + {1, 0, 1}, .E_W, w)
+			w.state = .Left
+			set_wall(pos + {1, 0, 1}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {-1, 0, 0}, .E_W); ok {
-	        w.state = .Right
-	        set_wall(pos + {-1, 0, 0}, .E_W, w)
+			w.state = .Right
+			set_wall(pos + {-1, 0, 0}, .E_W, w)
 		}
 	case .NW_SE:
 		if w, ok := get_wall(pos + {-1, 0, 1}, .NW_SE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 1}, .NW_SE, w)
+			w.state = .Left
+			set_wall(pos + {-1, 0, 1}, .NW_SE, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, -1}, .NW_SE); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, -1}, .NW_SE, w)
+			w.state = .Right
+			set_wall(pos + {1, 0, -1}, .NW_SE, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 0}, .SW_NE); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 0}, .SW_NE, w)
+			w.state = .Left
+			set_wall(pos + {-1, 0, 0}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .SW_NE); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .SW_NE, w)
+			w.state = .Right
+			set_wall(pos + {0, 0, 1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, 0}, .SW_NE); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 0}, .SW_NE, w)
+			w.state = .Right
+			set_wall(pos + {1, 0, 0}, .SW_NE, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, -1}, .SW_NE); ok {
-	        w.state = .Left
-	        set_wall(pos + {0, 0, -1}, .SW_NE, w)
+			w.state = .Left
+			set_wall(pos + {0, 0, -1}, .SW_NE, w)
 		}
 
 		if w, ok := get_wall(pos + {1, 0, -1}, .N_S); ok {
-	        w.state = .Left
-	        set_wall(pos + {1, 0, -1}, .N_S, w)
+			w.state = .Left
+			set_wall(pos + {1, 0, -1}, .N_S, w)
 		}
 		if w, ok := get_wall(pos + {0, 0, 1}, .N_S); ok {
-	        w.state = .Right
-	        set_wall(pos + {0, 0, 1}, .N_S, w)
+			w.state = .Right
+			set_wall(pos + {0, 0, 1}, .N_S, w)
 		}
 
 		if w, ok := get_wall(pos + {-1, 0, 1}, .E_W); ok {
-	        w.state = .Left
-	        set_wall(pos + {-1, 0, 1}, .E_W, w)
+			w.state = .Left
+			set_wall(pos + {-1, 0, 1}, .E_W, w)
 		}
 		if w, ok := get_wall(pos + {1, 0, 0}, .E_W); ok {
-	        w.state = .Right
-	        set_wall(pos + {1, 0, 0}, .E_W, w)
+			w.state = .Right
+			set_wall(pos + {1, 0, 0}, .E_W, w)
 		}
 	}
 }

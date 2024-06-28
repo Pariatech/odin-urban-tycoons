@@ -444,6 +444,8 @@ WALL_TOP_MESH_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	},
 }
 
+// UP_WALL_MASK_MAP :: [State]
+
 WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	.End_End = #partial {
 		.N_S =  {
