@@ -49,6 +49,7 @@ init :: proc() {
 deinit :: proc() {
 	// remove_cursor(pos, orientation)
 	state = .Idle
+	mouse.set_cursor(.Arrow)
 }
 
 update :: proc() {
@@ -67,6 +68,13 @@ update :: proc() {
 
 idle :: proc() {
 	tile_pos := get_tile_pos(pos)
+
+	if furn, ok := furniture.get(tile_pos); ok {
+		mouse.set_cursor(.Hand)
+	} else {
+	    mouse.set_cursor(.Arrow)
+    }
+
 	if mouse.is_button_press(.Left) {
 		if furn, ok := furniture.get(tile_pos); ok {
 			original = Original {
@@ -74,6 +82,8 @@ idle :: proc() {
 				furniture = furn,
 			}
 			rotate_pos = pos
+			type = furn.type
+			orientation = furn.rotation
 			furniture.remove(tile_pos)
 			change_state(.Rotating)
 		}
@@ -93,6 +103,7 @@ add_back_original :: proc() {
 
 rotate :: proc() {
 	remove_cursor()
+	mouse.set_cursor(.Rotate)
 
 	dx := pos.x - rotate_pos.x
 	dz := pos.z - rotate_pos.z
@@ -126,11 +137,11 @@ rotate :: proc() {
 			tile_pos := get_tile_pos(rotate_pos)
 			if furniture.can_place(tile_pos, type, orientation) {
 				furniture.add(tile_pos, type, orientation)
-                if keyboard.is_key_down(.Key_Left_Shift) {
-				    change_state(.Moving)
-                } else {
-				    change_state(.Idle)
-                }
+				if keyboard.is_key_down(.Key_Left_Shift) {
+					change_state(.Moving)
+				} else {
+					change_state(.Idle)
+				}
 			} else {
 				change_state(.Moving)
 			}
@@ -156,13 +167,14 @@ move_from_rotate :: proc() -> bool {
 }
 
 move :: proc() {
+	mouse.set_cursor(.Hand_Closed)
 	remove_cursor()
 
 	if keyboard.is_key_press(.Key_Delete) {
 		change_state(.Idle)
-        return
-	} 
-    if keyboard.is_key_press(.Key_Escape) {
+		return
+	}
+	if keyboard.is_key_press(.Key_Escape) {
 		add_back_original()
 
 		change_state(.Idle)

@@ -1,9 +1,10 @@
 package mouse
 
-import "core:math/linalg/glsl"
 import "base:runtime"
+import "core:math/linalg/glsl"
 
 import "vendor:glfw"
+import stbi "vendor:stb/image"
 
 import "../window"
 
@@ -26,6 +27,13 @@ Button :: enum {
 	Eight,
 }
 
+Cursor :: enum {
+	Arrow,
+	Hand,
+	Hand_Closed,
+    Rotate,
+}
+
 @(private)
 buttons: [Button]Button_State
 
@@ -34,6 +42,23 @@ buttons_captured: [Button]bool
 
 @(private)
 scroll: glsl.vec2
+
+@(private)
+cursors: [Cursor]glfw.CursorHandle
+
+CURSOR_PATHS :: [Cursor]cstring {
+	.Arrow = "resources/cursors/arrow.png",
+	.Hand  = "resources/cursors/hand.png",
+	.Hand_Closed  = "resources/cursors/hand-closed.png",
+	.Rotate  = "resources/cursors/rotate.png",
+}
+
+CURSOR_HOTSPOTS :: [Cursor]glsl.ivec2 {
+	.Arrow = {0, 0},
+	.Hand  = {32, 32},
+	.Hand_Closed  = {32, 32},
+	.Rotate  = {32, 32},
+}
 
 get_scroll :: proc() -> glsl.vec2 {
 	return scroll
@@ -80,6 +105,35 @@ on_button :: proc "c" (
 init :: proc() {
 	glfw.SetMouseButtonCallback(window.handle, on_button)
 	glfw.SetScrollCallback(window.handle, scroll_callback)
+
+	cursor_paths := CURSOR_PATHS
+    cursor_hotspots := CURSOR_HOTSPOTS
+	for path, i in cursor_paths {
+		width, height, channels: i32
+		pixels := stbi.load(path, &width, &height, &channels, 4)
+		defer stbi.image_free(pixels)
+
+		image := glfw.Image {
+			width  = width,
+			height = height,
+			pixels = pixels,
+		}
+
+        hotspot := cursor_hotspots[i]
+
+		cursors[i] = glfw.CreateCursor(&image, hotspot.x, hotspot.y)
+	}
+	glfw.SetCursor(window.handle, cursors[.Arrow])
+}
+
+deinit :: proc() {
+	for cursor, i in cursors {
+		glfw.DestroyCursor(cursor)
+	}
+}
+
+set_cursor :: proc(cursor: Cursor) {
+	glfw.SetCursor(window.handle, cursors[cursor])
 }
 
 update :: proc() {
@@ -123,7 +177,7 @@ is_button_up :: proc(button: Button) -> bool {
 
 capture :: proc(button: Button) {
 	buttons_captured[button] = true
-    // buttons[button] = .Up
+	// buttons[button] = .Up
 }
 
 capture_all :: proc() {
@@ -131,5 +185,5 @@ capture_all :: proc() {
 		capture = true
 	}
 
-    capture_scroll()
+	capture_scroll()
 }

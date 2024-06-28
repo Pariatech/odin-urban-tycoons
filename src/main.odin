@@ -83,6 +83,7 @@ start :: proc() -> (ok: bool = false) {
 	keyboard.init()
     defer keyboard.deinit()
 	mouse.init()
+    defer mouse.deinit()
 	cursor.init()
 
 	billboard.init_draw_contexts() or_return
