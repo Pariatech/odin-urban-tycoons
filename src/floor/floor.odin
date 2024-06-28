@@ -1,6 +1,6 @@
 package floor
 
-import "core:fmt"
+import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
 import "core:testing"
@@ -92,7 +92,7 @@ update :: proc() {
 
 at :: proc(pos: glsl.vec3) -> i32 {
 	tile_height := terrain.get_tile_height(int(pos.x + 0.5), int(pos.z + 0.5))
-	return i32(math.ceil((pos.y - tile_height) / constants.WALL_HEIGHT))
+	return i32((pos.y - tile_height) / constants.WALL_HEIGHT)
 }
 
 height_at :: proc(pos: glsl.vec3) -> f32 {

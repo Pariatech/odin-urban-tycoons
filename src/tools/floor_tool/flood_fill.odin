@@ -24,6 +24,7 @@ flood_fill :: proc(
 	if original_texture == texture {return}
 
 	visited_queue: [dynamic]Visited_Tile_Triangle
+    defer delete(visited_queue)
 
 	visited := Visited_Tile_Triangle{position.xz, side}
 
