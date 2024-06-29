@@ -42,7 +42,7 @@ TERRAIN_TOOL_TICK_SPEED :: 0.125
 TERRAIN_TOOL_LOW :: 0
 TERRAIN_TOOL_HIGH :: 6
 TERRAIN_TOOL_BRUSH_MIN_STRENGTH :: 0.1
-TERRAIN_TOOL_BRUSH_MAX_STRENGTH :: 1.1
+TERRAIN_TOOL_BRUSH_MAX_STRENGTH :: 1.0
 TERRAIN_TOOL_MIN_SLOPE :: 0.1
 TERRAIN_TOOL_MAX_SLOPE :: 1.0
 TERRAIN_TOOL_RANDOM_RADIUS :: 3
@@ -61,9 +61,12 @@ init :: proc() {
 		type = .Cursor,
 		pos  = position,
 	}
+
+	t := int(terrain_tool_brush_strength * 10 - 1)
+	tex := billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t)
 	billboard.billboard_1x1_set(
 		terrain_tool_billboard,
-		{light = {1, 1, 1}, texture = .Shovel_1_SW, depth_map = .Shovel_1_SW},
+		{light = {1, 1, 1}, texture = tex, depth_map = tex},
 	)
 
 	terrain_tool_drag_start = nil
@@ -148,7 +151,6 @@ update :: proc(delta_time: f64) {
 
 	position.y =
 		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
-    // log.info(position)
 	billboard.billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
@@ -664,10 +666,8 @@ increase_brush_strength :: proc() {
 	)
 
 	t := int(terrain_tool_brush_strength * 10 - 1)
-	billboard.billboard_1x1_set_texture(
-		terrain_tool_billboard,
-		billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t),
-	)
+	tex := billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t)
+	billboard.billboard_1x1_set_texture(terrain_tool_billboard, tex)
 }
 
 decrease_brush_strength :: proc() {
@@ -678,8 +678,6 @@ decrease_brush_strength :: proc() {
 	)
 
 	t := int(terrain_tool_brush_strength * 10 - 1)
-	billboard.billboard_1x1_set_texture(
-		terrain_tool_billboard,
-		billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t),
-	)
+	tex := billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t)
+	billboard.billboard_1x1_set_texture(terrain_tool_billboard, tex)
 }
