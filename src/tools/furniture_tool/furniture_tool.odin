@@ -28,10 +28,10 @@ Original :: struct {
 	furniture: furniture.Furniture,
 }
 
-orientation: furniture.Rotation = .North
+orientation: furniture.Rotation = DEFAULT_ORIENTATION
 cursor_pos: glsl.vec3
 
-DEFAULT_ORIENTATION :: furniture.Rotation.North
+DEFAULT_ORIENTATION :: furniture.Rotation.South
 ERROR_LIGHT :: glsl.vec3{1, 0.5, 0.5}
 
 State :: enum {

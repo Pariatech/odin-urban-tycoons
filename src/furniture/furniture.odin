@@ -24,11 +24,16 @@ Furniture :: struct {
 Category :: enum {
 	Chair,
 	Table,
+    Letter,
 }
 
 Type :: enum {
 	Chair,
 	Table6,
+    Letter_A,
+    Letter_G,
+    Letter_D,
+    Letter_E,
 }
 
 Rotation :: tile.Tile_Triangle_Side
@@ -86,11 +91,119 @@ texture_map := [Type][Rotation][camera.Rotation][][]billboard.Texture_1x1 {
 			.North_West = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
 		},
 	},
+    .Letter_A = {
+		.South =  {
+			.South_West = {{.Letter_A_SW}},
+			.South_East = {{.Letter_A_SE}},
+			.North_East = {{.Letter_A_NE}},
+			.North_West = {{.Letter_A_NW}},
+		},
+		.East =  {
+			.South_West = {{.Letter_A_NW}},
+			.South_East = {{.Letter_A_SW}},
+			.North_East = {{.Letter_A_SE}},
+			.North_West = {{.Letter_A_NE}},
+		},
+		.North =  {
+			.South_West = {{.Letter_A_NE}},
+			.South_East = {{.Letter_A_NW}},
+			.North_East = {{.Letter_A_SW}},
+			.North_West = {{.Letter_A_SE}},
+		},
+		.West =  {
+			.South_West = {{.Letter_A_SE}},
+			.South_East = {{.Letter_A_NE}},
+			.North_East = {{.Letter_A_NW}},
+			.North_West = {{.Letter_A_SW}},
+		},
+    },
+    .Letter_G = {
+		.South =  {
+			.South_West = {{.Letter_G_SW}},
+			.South_East = {{.Letter_G_SE}},
+			.North_East = {{.Letter_G_NE}},
+			.North_West = {{.Letter_G_NW}},
+		},
+		.East =  {
+			.South_West = {{.Letter_G_NW}},
+			.South_East = {{.Letter_G_SW}},
+			.North_East = {{.Letter_G_SE}},
+			.North_West = {{.Letter_G_NE}},
+		},
+		.North =  {
+			.South_West = {{.Letter_G_NE}},
+			.South_East = {{.Letter_G_NW}},
+			.North_East = {{.Letter_G_SW}},
+			.North_West = {{.Letter_G_SE}},
+		},
+		.West =  {
+			.South_West = {{.Letter_G_SE}},
+			.South_East = {{.Letter_G_NE}},
+			.North_East = {{.Letter_G_NW}},
+			.North_West = {{.Letter_G_SW}},
+		},
+    },
+    .Letter_D = {
+		.South =  {
+			.South_West = {{.Letter_D_SW}},
+			.South_East = {{.Letter_D_SE}},
+			.North_East = {{.Letter_D_NE}},
+			.North_West = {{.Letter_D_NW}},
+		},
+		.East =  {
+			.South_West = {{.Letter_D_NW}},
+			.South_East = {{.Letter_D_SW}},
+			.North_East = {{.Letter_D_SE}},
+			.North_West = {{.Letter_D_NE}},
+		},
+		.North =  {
+			.South_West = {{.Letter_D_NE}},
+			.South_East = {{.Letter_D_NW}},
+			.North_East = {{.Letter_D_SW}},
+			.North_West = {{.Letter_D_SE}},
+		},
+		.West =  {
+			.South_West = {{.Letter_D_SE}},
+			.South_East = {{.Letter_D_NE}},
+			.North_East = {{.Letter_D_NW}},
+			.North_West = {{.Letter_D_SW}},
+		},
+    },
+    .Letter_E = {
+		.South =  {
+			.South_West = {{.Letter_E_SW}},
+			.South_East = {{.Letter_E_SE}},
+			.North_East = {{.Letter_E_NE}},
+			.North_West = {{.Letter_E_NW}},
+		},
+		.East =  {
+			.South_West = {{.Letter_E_NW}},
+			.South_East = {{.Letter_E_SW}},
+			.North_East = {{.Letter_E_SE}},
+			.North_West = {{.Letter_E_NE}},
+		},
+		.North =  {
+			.South_West = {{.Letter_E_NE}},
+			.South_East = {{.Letter_E_NW}},
+			.North_East = {{.Letter_E_SW}},
+			.North_West = {{.Letter_E_SE}},
+		},
+		.West =  {
+			.South_West = {{.Letter_E_SE}},
+			.South_East = {{.Letter_E_NE}},
+			.North_East = {{.Letter_E_NW}},
+			.North_West = {{.Letter_E_SW}},
+		},
+    },
 }
 
 BILLBOARD_TYPE_MAP :: [Type]billboard.Billboard_Type {
 	.Chair  = .Chair,
 	.Table6 = .Table,
+    .Letter_A = .Object,
+    .Letter_G = .Object,
+    .Letter_D = .Object,
+    .Letter_E = .Object,
 }
 
 get_chunk :: proc(pos: glsl.vec3) -> ^Chunk {
