@@ -68,10 +68,10 @@ texture_map := [Type][Rotation][camera.Rotation][][]billboard.Texture_1x1 {
 			.North_West = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
 		},
 		.East =  {
-			.South_West = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
-			.South_East = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
-			.North_East = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
-			.North_West = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+			.South_West = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+			.South_East = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
+			.North_East = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+			.North_West = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
 		},
 		.North =  {
 			.South_West = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
@@ -80,10 +80,10 @@ texture_map := [Type][Rotation][camera.Rotation][][]billboard.Texture_1x1 {
 			.North_West = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
 		},
 		.West =  {
-			.South_West = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
-			.South_East = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
-			.North_East = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
-			.North_West = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
+			.South_West = {{.Table6_001_Wood_NW, .Table6_002_Wood_NW}},
+			.South_East = {{.Table6_001_Wood_SW, .Table6_002_Wood_SW}},
+			.North_East = {{.Table6_001_Wood_SE, .Table6_002_Wood_SE}},
+			.North_West = {{.Table6_001_Wood_NE, .Table6_002_Wood_NE}},
 		},
 	},
 }

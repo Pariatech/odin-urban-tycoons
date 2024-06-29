@@ -8,6 +8,7 @@ import "../tools"
 import "../tools/furniture_tool"
 import "../window"
 
+FURNITURE_PANEL_TILE_SIZE :: 64
 
 furniture_panel_body :: proc(
 	using ctx: ^Context,
@@ -23,10 +24,10 @@ furniture_panel_body :: proc(
 		if icon_button(
 			   ctx,
 			    {
-				   2 + f32(i) * (FLOOR_PANEL_TILE_SIZE + 2),
+				   2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),
 				   window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
 			   },
-			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE * 2},
+			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
 			   billboard.billboard_1x1_draw_context.texture_array,
 			   int(texmap[.South][.South_West][0][0]),
 			   top_padding = -8,
