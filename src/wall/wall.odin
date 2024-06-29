@@ -24,6 +24,7 @@ Wall_Texture :: enum (u16) {
 	White,
 	Royal_Blue,
 	Dark_Blue,
+    White_Cladding,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -132,6 +133,7 @@ WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
 	.White      = "resources/textures/walls/white.png",
 	.Royal_Blue = "resources/textures/walls/royal_blue.png",
 	.Dark_Blue  = "resources/textures/walls/dark_blue.png",
+	.White_Cladding  = "resources/textures/walls/white_cladding.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
