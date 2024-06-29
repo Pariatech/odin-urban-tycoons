@@ -1,6 +1,6 @@
 package billboard
 
-import "core:fmt"
+import "core:log"
 import "core:math"
 import "core:math/linalg"
 import "core:math/linalg/glsl"
@@ -432,8 +432,6 @@ billboard_init_draw_context :: proc(
 		&draw_context.vertices,
 		&draw_context.indices,
 	) or_return
-	fmt.println("billboard vertices:", draw_context.vertices)
-	fmt.println("billboard indices:", draw_context.indices)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -515,12 +513,12 @@ load_billboard_model :: proc(
 	options: cgltf.options
 	data, result := cgltf.parse_file(options, path)
 	if result != .success {
-		fmt.println("failed to parse file")
+		log.error("failed to parse file")
 		return
 	}
 	result = cgltf.load_buffers(options, data, path)
 	if result != .success {
-		fmt.println("failed to load buffers")
+		log.error("failed to load buffers")
 		return
 	}
 	defer cgltf.free(data)
@@ -581,14 +579,12 @@ load_billboard_depth_map_texture_array :: proc(
 	textures :: len(paths)
 
 	if (textures == 0) {
-		fmt.println("No textures to load.")
 		return true
 	}
 
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	fmt.println("depth map TexStorage3D")
 	gl.TexStorage3D(
 		gl.TEXTURE_2D_ARRAY,
 		1,
@@ -603,17 +599,15 @@ load_billboard_depth_map_texture_array :: proc(
 		height: i32
 		channels: i32
 		pixels := stbi.load_16(path, &width, &height, &channels, 1)
-		fmt.println("channels", channels)
-		fmt.println("dimensions:", width, ",", height)
 		defer stbi.image_free(pixels)
 
 		if pixels == nil {
-			fmt.eprintln("Failed to load texture: ", path)
+			log.error("Failed to load texture: ", path)
 			return false
 		}
 
 		if width != expected_width {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
@@ -625,7 +619,7 @@ load_billboard_depth_map_texture_array :: proc(
 		}
 
 		if height != expected_height {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
@@ -636,7 +630,6 @@ load_billboard_depth_map_texture_array :: proc(
 			return false
 		}
 
-		fmt.println("TexSubImage3D")
 		gl.TexSubImage3D(
 			gl.TEXTURE_2D_ARRAY,
 			0,
@@ -654,7 +647,7 @@ load_billboard_depth_map_texture_array :: proc(
 
 	gl_error := gl.GetError()
 	if (gl_error != gl.NO_ERROR) {
-		fmt.println(
+		log.error(
 			"Error loading billboard depth map texture array: ",
 			gl_error,
 		)
@@ -686,7 +679,6 @@ load_billboard_texture_array :: proc(
 	textures :: len(paths)
 
 	if (textures == 0) {
-		fmt.println("No textures to load.")
 		return true
 	}
 
@@ -709,12 +701,12 @@ load_billboard_texture_array :: proc(
 		defer stbi.image_free(pixels)
 
 		if pixels == nil {
-			fmt.eprintln("Failed to load texture: ", path)
+			log.error("Failed to load texture: ", path)
 			return false
 		}
 
 		if width != expected_width {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
@@ -726,7 +718,7 @@ load_billboard_texture_array :: proc(
 		}
 
 		if height != expected_height {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
@@ -835,7 +827,7 @@ billboard_1x1_remove :: proc(key: Key) {
 }
 
 get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
-	terrain_height := terrain.get_terrain_height({i32(pos.x), i32(pos.z)})
+	terrain_height := terrain.get_terrain_height({i32(pos.x + 0.5), i32(pos.z + 0.5)})
 	return clamp(
 		int((pos.y - terrain_height) / constants.WALL_HEIGHT),
 		0,

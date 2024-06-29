@@ -1,6 +1,6 @@
 package terrain_tool
 
-import "core:fmt"
+import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
 import "core:math/rand"
@@ -35,6 +35,7 @@ Mode :: enum {
 	Level,
 	Trim,
 	Smooth,
+	Slope,
 }
 
 TERRAIN_TOOL_TICK_SPEED :: 0.125
@@ -147,12 +148,14 @@ update :: proc(delta_time: f64) {
 
 	position.y =
 		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
+    // log.info(position)
 	billboard.billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
 
 	if shift_down ||
 	   mode == .Level ||
 	   mode == .Trim ||
+	   mode == .Slope ||
 	   terrain_tool_drag_start != nil {
 		move_points(position)
 	} else if keyboard.is_key_down(.Key_Left_Control) || mode == .Smooth {
@@ -218,6 +221,24 @@ mark_array_dirty :: proc(start: glsl.ivec2, end: glsl.ivec2) {
 	}
 }
 
+slope_move_point :: proc(x, z: i32) {
+	start := terrain_tool_drag_start.?
+	end := terrain_tool_position
+	start_height := terrain.terrain_heights[start.x][start.y]
+	end_height := terrain.terrain_heights[end.x][end.y]
+	len := abs(end.x - start.x)
+	i := abs(x - start.x)
+	if abs(end.y - start.y) > abs(end.x - start.x) {
+		len = abs(end.y - start.y)
+		i = abs(z - start.y)
+	}
+	min := start_height
+	dh := (end_height - start_height) / f32(len)
+	height := min + f32(i) * dh
+
+	set_terrain_height(x, z, height)
+}
+
 move_points :: proc(position: glsl.vec3) {
 	if drag_start, ok := terrain_tool_drag_start.?; ok {
 		start_x := min(drag_start.x, terrain_tool_position.x)
@@ -225,26 +246,32 @@ move_points :: proc(position: glsl.vec3) {
 		end_x := max(drag_start.x, terrain_tool_position.x)
 		end_z := max(drag_start.y, terrain_tool_position.y)
 
-		if mouse.is_button_up(.Left) && mouse.is_button_up(.Right) {
-			height := terrain.terrain_heights[drag_start.x][drag_start.y]
-			for x in start_x ..= end_x {
-				for z in start_z ..= end_z {
-					if terrain_tool_drag_clip {
-						point_height := terrain.terrain_heights[x][z]
-						if point_height > height {
+		if mouse.is_button_up(.Left) {
+			if start_x != end_x || start_z != end_z {
+				height := terrain.terrain_heights[drag_start.x][drag_start.y]
+
+				for x in start_x ..= end_x {
+					for z in start_z ..= end_z {
+						if mode == .Trim {
+							point_height := terrain.terrain_heights[x][z]
+							if point_height > height {
+								set_terrain_height(x, z, height)
+							}
+						} else if mode == .Slope {
+							slope_move_point(x, z)
+						} else {
 							set_terrain_height(x, z, height)
 						}
-					} else {
-						set_terrain_height(x, z, height)
+					}
+				}
+
+				for x in start_x ..= end_x {
+					for z in start_z ..= end_z {
+						terrain.calculate_terrain_light(int(x), int(z))
 					}
 				}
 			}
 
-			for x in start_x ..= end_x {
-				for z in start_z ..= end_z {
-					terrain.calculate_terrain_light(int(x), int(z))
-				}
-			}
 			terrain_tool_drag_start = nil
 
 			mark_array_dirty(
@@ -262,10 +289,7 @@ move_points :: proc(position: glsl.vec3) {
 		}
 
 		mark_array_dirty({start_x, start_z}, {end_x, end_z})
-	} else if mouse.is_button_down(.Left) || mouse.is_button_down(.Right) {
-		terrain_tool_drag_clip =
-			mouse.is_button_down(.Right) ||
-			(mode == .Trim && mouse.is_button_down(.Left))
+	} else if mouse.is_button_down(.Left) {
 		terrain_tool_drag_start = terrain_tool_position
 	}
 }

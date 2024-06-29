@@ -13,6 +13,7 @@ LAND_ICON_TEXTURES :: []cstring {
 	"resources/icons/land_lower.png",
 	"resources/icons/land_level.png",
 	"resources/icons/land_trim.png",
+	"resources/icons/land_slope.png",
 	"resources/icons/land_smooth.png",
 }
 
@@ -23,6 +24,7 @@ Land_Icon_Texture :: enum {
 	Lower,
 	Level,
 	Trim,
+    Slope,
 	Smooth,
 }
 
@@ -85,6 +87,17 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 68 + 4, pos.y + 4},
+		   size = {32, 32},
+		   color = terrain_tool.mode == .Slope ? DARK_BLUE : ROYAL_BLUE,
+		   texture_array = land_panel_texture_array,
+		   texture = int(Land_Icon_Texture.Slope),
+	   ) {
+		terrain_tool.mode = .Slope
+	}
+
+	if icon_button(
+		   ctx,
+		   pos = {pos.x + 68 + 4, pos.y + size.y - 32 - 4},
 		   size = {32, 32},
 		   color = terrain_tool.mode == .Smooth ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
