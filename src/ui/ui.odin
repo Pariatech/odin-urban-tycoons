@@ -118,6 +118,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_paint_panel() or_return
 	init_door_panel() or_return
 	init_window_panel() or_return
+    init_furniture_panel() or_return
 
 	return true
 }
