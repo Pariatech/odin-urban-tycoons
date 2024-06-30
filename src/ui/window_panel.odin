@@ -37,6 +37,7 @@ window_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) 
                right_border_width = border_width,
                top_border_width = border_width,
                bottom_border_width = border_width,
+			   color = DAY_SKY_BLUE,
 		   ) {
 			window_tool.texture = tex
 		}

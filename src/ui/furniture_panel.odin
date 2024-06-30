@@ -49,6 +49,7 @@ furniture_panel_body :: proc(
 			   right_border_width = border_width,
 			   top_border_width = border_width,
 			   bottom_border_width = border_width,
+			   color = DAY_SKY_BLUE,
 		   ) {
 			furniture_tool.place_furniture(i)
 		}

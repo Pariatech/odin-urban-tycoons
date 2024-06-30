@@ -33,6 +33,8 @@ MENU_ICON_TEXTURES :: []cstring {
 
 ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
 DARK_BLUE :: glsl.vec4{0.0, 0.251, 0.502, 1}
+DAY_SKY_BLUE :: glsl.vec4{0.510, 0.792, 1, 1}
+WHITE :: glsl.vec4{1, 1, 1, 1}
 
 BORDER_WIDTH :: 1
 
@@ -233,7 +235,7 @@ draw :: proc(using ctx: ^Context) {
 
 	uniform_object = Uniform_Object {
 		border_width = 1,
-		border_inner_color = {0.529, 0.808, 0.922, 1},
+		border_inner_color = DAY_SKY_BLUE,
 		border_outer_color = {0, 0, 0.502, 1},
 	}
 
