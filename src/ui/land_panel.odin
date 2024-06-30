@@ -24,7 +24,7 @@ Land_Icon_Texture :: enum {
 	Lower,
 	Level,
 	Trim,
-    Slope,
+	Slope,
 	Smooth,
 }
 
@@ -39,11 +39,14 @@ init_land_panel :: proc() -> (ok: bool = true) {
 	return
 }
 
+LAND_PANEL_TILE_SIZE :: 47
+LAND_PANEL_BRUSH_TILE_SIZE :: 23
+
 land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 	if icon_button(
 		   ctx,
 		   pos = {pos.x + 4, pos.y + 4},
-		   size = {32, 32},
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Raise ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Raise),
@@ -53,8 +56,8 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 
 	if icon_button(
 		   ctx,
-		   pos = {pos.x + 4, pos.y + size.y - 32 - 4},
-		   size = {32, 32},
+		   pos = {pos.x + 4, pos.y + size.y - LAND_PANEL_TILE_SIZE - 4},
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Lower ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Lower),
@@ -64,8 +67,8 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 
 	if icon_button(
 		   ctx,
-		   pos = {pos.x + 32 + 4 + 2, pos.y + 4},
-		   size = {32, 32},
+		   pos = {pos.x + LAND_PANEL_TILE_SIZE + 4 + 2, pos.y + 4},
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Level ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Level),
@@ -75,8 +78,11 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 
 	if icon_button(
 		   ctx,
-		   pos = {pos.x + 34 + 4, pos.y + size.y - 32 - 4},
-		   size = {32, 32},
+		   pos =  {
+			   pos.x + LAND_PANEL_TILE_SIZE + 4 + 2,
+			   pos.y + size.y - LAND_PANEL_TILE_SIZE - 4,
+		   },
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Trim ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Trim),
@@ -86,8 +92,8 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 
 	if icon_button(
 		   ctx,
-		   pos = {pos.x + 68 + 4, pos.y + 4},
-		   size = {32, 32},
+		   pos = {pos.x + (LAND_PANEL_TILE_SIZE + 2) * 2 + 4, pos.y + 4},
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Slope ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Slope),
@@ -97,8 +103,11 @@ land_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 
 	if icon_button(
 		   ctx,
-		   pos = {pos.x + 68 + 4, pos.y + size.y - 32 - 4},
-		   size = {32, 32},
+		   pos =  {
+			   pos.x + (LAND_PANEL_TILE_SIZE + 2) * 2 + 4,
+			   pos.y + size.y - LAND_PANEL_TILE_SIZE - 4,
+		   },
+		   size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 		   color = terrain_tool.mode == .Smooth ? DARK_BLUE : ROYAL_BLUE,
 		   texture_array = land_panel_texture_array,
 		   texture = int(Land_Icon_Texture.Smooth),
@@ -115,7 +124,7 @@ land_panel_brush_body :: proc(
 	if button(
 		   ctx,
 		   {pos.x + 2, pos.y + 4},
-		   {16, 16},
+		   {LAND_PANEL_BRUSH_TILE_SIZE, LAND_PANEL_BRUSH_TILE_SIZE},
 		   "+",
 		   txt_size = 32,
 		   padding_top = 4,
@@ -123,8 +132,8 @@ land_panel_brush_body :: proc(
 		terrain_tool.increase_brush_size()
 	} else if button(
 		   ctx,
-		   {pos.x + 2, pos.y + 20},
-		   {16, 16},
+		   {pos.x + 2, pos.y + LAND_PANEL_BRUSH_TILE_SIZE + 4},
+		   {LAND_PANEL_BRUSH_TILE_SIZE, LAND_PANEL_BRUSH_TILE_SIZE},
 		   "-",
 		   txt_size = 32,
 		   padding_top = 1,
@@ -135,8 +144,8 @@ land_panel_brush_body :: proc(
 	icon(
 		ctx,
 		 {
-			pos = {pos.x + 2 + 16 + 2, pos.y + 4},
-			size = {32, 32},
+			pos = {pos.x + 2 + LAND_PANEL_BRUSH_TILE_SIZE + 2, pos.y + 4},
+			size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 			color = ROYAL_BLUE,
 			texture_array = land_panel_texture_array,
 			texture = int(Land_Icon_Texture.Brush_Size),
@@ -149,8 +158,8 @@ land_panel_brush_body :: proc(
 
 	if button(
 		   ctx,
-		   {pos.x + 2, pos.y + size.y - 32 - 4},
-		   {16, 16},
+		   {pos.x + 2, pos.y + size.y - LAND_PANEL_TILE_SIZE - 4},
+		   {LAND_PANEL_BRUSH_TILE_SIZE, LAND_PANEL_BRUSH_TILE_SIZE},
 		   "+",
 		   txt_size = 32,
 		   padding_top = 4,
@@ -158,8 +167,8 @@ land_panel_brush_body :: proc(
 		terrain_tool.increase_brush_strength()
 	} else if button(
 		   ctx,
-		   {pos.x + 2, pos.y + size.y - 16 - 4},
-		   {16, 16},
+		   {pos.x + 2, pos.y + size.y - LAND_PANEL_BRUSH_TILE_SIZE - 4},
+		   {LAND_PANEL_BRUSH_TILE_SIZE, LAND_PANEL_BRUSH_TILE_SIZE},
 		   "-",
 		   txt_size = 32,
 		   padding_top = 1,
@@ -170,8 +179,11 @@ land_panel_brush_body :: proc(
 	icon(
 		ctx,
 		 {
-			pos = {pos.x + 2 + 16 + 2, pos.y + size.y - 32 - 4},
-			size = {32, 32},
+			pos =  {
+				pos.x + 2 + LAND_PANEL_BRUSH_TILE_SIZE + 2,
+				pos.y + size.y - LAND_PANEL_TILE_SIZE - 4,
+			},
+			size = {LAND_PANEL_TILE_SIZE, LAND_PANEL_TILE_SIZE},
 			color = ROYAL_BLUE,
 			texture_array = land_panel_texture_array,
 			texture = int(Land_Icon_Texture.Brush_Strength),
@@ -188,15 +200,21 @@ land_panel :: proc(using ctx: ^Context) {
 		container(
 			ctx,
 			pos = {0, window.size.y - 31 - PANEL_HEIGHT},
-			size = {56, PANEL_HEIGHT},
+			size =  {
+				LAND_PANEL_BRUSH_TILE_SIZE + LAND_PANEL_TILE_SIZE + 8,
+				PANEL_HEIGHT,
+			},
 			left_border_width = 0,
 			body = land_panel_brush_body,
 		)
 
 		container(
 			ctx,
-			pos = {55, window.size.y - 31 - PANEL_HEIGHT},
-			size = {PANEL_WIDTH - 55, PANEL_HEIGHT},
+			pos =  {
+				LAND_PANEL_BRUSH_TILE_SIZE + LAND_PANEL_TILE_SIZE + 8,
+				window.size.y - 31 - PANEL_HEIGHT,
+			},
+			size = {(LAND_PANEL_TILE_SIZE + 2) * 3 + 6, PANEL_HEIGHT},
 			body = land_panel_body,
 		)
 	}

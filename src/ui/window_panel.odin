@@ -29,8 +29,8 @@ window_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) 
 			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE * 2},
 			   billboard.billboard_1x1_draw_context.texture_array,
 			   int(texmap[tex][.E_W][.South_West]),
-               left_padding = -7,
-               right_padding = 7,
+               left_padding = -10,
+               right_padding = 10,
                top_padding = 0,
                bottom_padding = 0,
                left_border_width = border_width,
@@ -48,7 +48,7 @@ window_panel :: proc(using ctx: ^Context) {
 		container(
 			ctx,
 			pos = {0, window.size.y - 31 - PANEL_HEIGHT},
-			size = {PANEL_WIDTH, PANEL_HEIGHT},
+			size = {window.size.x, PANEL_HEIGHT},
 			left_border_width = 0,
 			body = window_panel_body,
 		)

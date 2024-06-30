@@ -24,7 +24,8 @@ Wall_Texture :: enum (u16) {
 	White,
 	Royal_Blue,
 	Dark_Blue,
-    White_Cladding,
+	White_Cladding,
+	Light_Gray_Stone,
 }
 
 Wall_Mask_Texture :: enum (u16) {
@@ -126,14 +127,15 @@ WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
-	.Wall_Top   = "resources/textures/walls/wall-top.png",
-	.Frame      = "resources/textures/walls/frame.png",
-	.Drywall    = "resources/textures/walls/drywall.png",
-	.Brick      = "resources/textures/walls/brick-wall.png",
-	.White      = "resources/textures/walls/white.png",
-	.Royal_Blue = "resources/textures/walls/royal_blue.png",
-	.Dark_Blue  = "resources/textures/walls/dark_blue.png",
-	.White_Cladding  = "resources/textures/walls/white_cladding.png",
+	.Wall_Top         = "resources/textures/walls/wall-top.png",
+	.Frame            = "resources/textures/walls/frame.png",
+	.Drywall          = "resources/textures/walls/drywall.png",
+	.Brick            = "resources/textures/walls/brick-wall.png",
+	.White            = "resources/textures/walls/white.png",
+	.Royal_Blue       = "resources/textures/walls/royal_blue.png",
+	.Dark_Blue        = "resources/textures/walls/dark_blue.png",
+	.White_Cladding   = "resources/textures/walls/white_cladding.png",
+	.Light_Gray_Stone = "resources/textures/walls/light_gray_stone.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {

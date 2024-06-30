@@ -30,7 +30,7 @@ Wall_Intersect :: struct {
 }
 
 init :: proc() {
-	floor.show_markers = true
+	floor.show_markers = false
 }
 
 deinit :: proc() {

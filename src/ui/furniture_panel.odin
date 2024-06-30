@@ -8,7 +8,7 @@ import "../tools"
 import "../tools/furniture_tool"
 import "../window"
 
-FURNITURE_PANEL_TILE_SIZE :: 64
+FURNITURE_PANEL_TILE_SIZE :: 96
 
 FURNITURE_PANEL_ICONS :: [furniture.Type]cstring {
 	.Chair    = "resources/textures/object_icons/Chair.png",
@@ -60,7 +60,7 @@ furniture_panel :: proc(using ctx: ^Context) {
 		container(
 			ctx,
 			pos = {0, window.size.y - 31 - PANEL_HEIGHT},
-			size = {PANEL_WIDTH, PANEL_HEIGHT},
+			size = {window.size.x, PANEL_HEIGHT},
 			left_border_width = 0,
 			body = furniture_panel_body,
 		)

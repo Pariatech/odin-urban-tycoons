@@ -36,8 +36,7 @@ DARK_BLUE :: glsl.vec4{0.0, 0.251, 0.502, 1}
 
 BORDER_WIDTH :: 1
 
-PANEL_WIDTH :: len(Menu_Icon) * 31 + 1
-PANEL_HEIGHT :: 74
+PANEL_HEIGHT :: FLOOR_PANEL_PADDING * 2 + PAINT_PANEL_TILE_HEIGHT
 
 Menu_Icon :: enum (int) {
 	Info,

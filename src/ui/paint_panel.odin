@@ -11,6 +11,9 @@ init_paint_panel :: proc() -> (ok: bool = true) {
 	return
 }
 
+PAINT_PANEL_TILE_WIDTH :: 32
+PAINT_PANEL_TILE_HEIGHT :: 96
+
 paint_panel_body :: proc(
 	using ctx: ^Context,
 	pos: glsl.vec2,
@@ -22,28 +25,24 @@ paint_panel_body :: proc(
 			continue
 		}
 
-        border_width:= f32(BORDER_WIDTH)
-        if paint_tool.texture == tex {
-            border_width *= 2
-        }
+		border_width := f32(BORDER_WIDTH)
+		if paint_tool.texture == tex {
+			border_width *= 2
+		}
 
 		if icon_button(
 			   ctx,
 			    {
-				   2 + f32(i / 2) * (FLOOR_PANEL_TILE_SIZE + 2),
-				   window.size.y -
-				   31 -
-				   PANEL_HEIGHT +
-				   FLOOR_PANEL_PADDING +
-				   f32(i % 2) * (FLOOR_PANEL_TILE_SIZE + 2),
+				   pos.x + 2 + f32(i) * (PAINT_PANEL_TILE_WIDTH + 2),
+                   pos.y + FLOOR_PANEL_PADDING,
 			   },
-			   {FLOOR_PANEL_TILE_SIZE, FLOOR_PANEL_TILE_SIZE},
+			   {PAINT_PANEL_TILE_WIDTH, PAINT_PANEL_TILE_HEIGHT},
 			   wall.wall_texture_array,
 			   int(tex),
-               left_border_width = border_width,
-               right_border_width = border_width,
-               top_border_width = border_width,
-               bottom_border_width = border_width,
+			   left_border_width = border_width,
+			   right_border_width = border_width,
+			   top_border_width = border_width,
+			   bottom_border_width = border_width,
 		   ) {
 			paint_tool.set_texture(tex)
 		}
@@ -57,7 +56,7 @@ paint_panel :: proc(using ctx: ^Context) {
 		container(
 			ctx,
 			pos = {0, window.size.y - 31 - PANEL_HEIGHT},
-			size = {PANEL_WIDTH, PANEL_HEIGHT},
+			size = {window.size.x, PANEL_HEIGHT},
 			left_border_width = 0,
 			body = paint_panel_body,
 		)
