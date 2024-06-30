@@ -169,6 +169,9 @@ flood_fill :: proc(
 	previous_texture: wall.Wall_Texture,
 	texture: wall.Wall_Texture,
 ) {
+    if previous_texture == texture {
+        return
+    }
 	next_wall, ok := get_next_left_wall(
 		{position = position, side = side, type = type},
 		previous_texture,
@@ -188,13 +191,24 @@ flood_fill :: proc(
 	}
 }
 
+save_old_wall :: proc(axis: wall.Wall_Axis, pos: glsl.ivec3, w: wall.Wall) {
+	if !(pos in previous_walls[axis]) {
+		previous_walls[axis][pos] = w.textures
+	}
+}
+
 paint_next_wall :: proc(next_wall: Next_Wall, texture: wall.Wall_Texture) {
 	w := next_wall.wall
+    save_old_wall(next_wall.type, next_wall.position, w)
 	w.textures[next_wall.side] = texture
 	set_wall_by_type(next_wall.position, next_wall.type, w)
 }
 
-set_wall_by_type :: proc(position: glsl.ivec3, type: wall.Wall_Axis, w: wall.Wall) {
+set_wall_by_type :: proc(
+	position: glsl.ivec3,
+	type: wall.Wall_Axis,
+	w: wall.Wall,
+) {
 	switch type {
 	case .E_W:
 		wall.set_east_west_wall(position, w)

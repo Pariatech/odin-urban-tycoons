@@ -24,6 +24,8 @@ found_wall_texture: wall.Wall_Texture
 texture: wall.Wall_Texture = .White
 dirty: bool
 
+previous_walls: [wall.Wall_Axis]map[glsl.ivec3][wall.Wall_Side]wall.Wall_Texture
+
 Wall_Intersect :: struct {
 	pos:  glsl.ivec3,
 	axis: wall.Wall_Axis,
@@ -34,12 +36,7 @@ init :: proc() {
 }
 
 deinit :: proc() {
-	if found_wall {
-		clear_previous_wall(
-			found_wall_intersect.pos,
-			found_wall_intersect.axis,
-		)
-	}
+	clear_previous_walls()
 }
 
 update :: proc() {
@@ -60,21 +57,24 @@ update :: proc() {
 		dirty ||
 		previous_position != position ||
 		previous_side != side ||
-		delete_state_changed
+		delete_state_changed ||
+		keyboard.is_key_press(.Key_Left_Shift) ||
+		keyboard.is_key_release(.Key_Left_Shift)
 	if changed {
 		previous_found_wall := found_wall
 		previous_found_wall_intersect := found_wall_intersect
 
 		found_wall_intersect, found_wall = find_wall_intersect(position, side)
-		clear_previous_wall(
-			previous_found_wall_intersect.pos,
-			previous_found_wall_intersect.axis,
-		)
+		clear_previous_walls()
 
 		if mouse.is_button_down(.Left) {
 			found_wall_texture = texture
 		} else {
 			found_wall_texture = get_found_wall_texture()
+		}
+
+		if keyboard.is_key_down(.Key_Left_Shift) {
+			apply_flood_fill(texture)
 		}
 
 		paint_wall(
@@ -91,8 +91,8 @@ update :: proc() {
 			)
 		}
 	} else if found_wall && mouse.is_button_press(.Left) {
-		if keyboard.is_key_down(.Key_Left_Shift) {
-			apply_flood_fill(texture)
+		for &axis_walls in previous_walls {
+			clear(&axis_walls)
 		}
 		found_wall_texture = texture
 		wall.update_cutaways(true)
@@ -119,15 +119,17 @@ apply_flood_fill :: proc(texture: wall.Wall_Texture) {
 	)
 }
 
-clear_previous_wall :: proc(
-	previous_found_wall_position: glsl.ivec3,
-	previous_found_wall_axis: wall.Wall_Axis,
-) {
-	paint_wall(
-		previous_found_wall_position,
-		previous_found_wall_axis,
-		found_wall_texture,
-	)
+clear_previous_walls :: proc() {
+	side_map := wall.WALL_SIDE_MAP
+	for &axis_walls, axis in previous_walls {
+		for pos, textures in axis_walls {
+			if w, ok := wall.get_wall(pos, axis); ok {
+				w.textures = textures
+				wall.set_wall(pos, axis, w)
+			}
+		}
+		clear(&axis_walls)
+	}
 }
 
 get_found_wall_texture :: proc() -> wall.Wall_Texture {
@@ -163,21 +165,25 @@ paint_wall :: proc(
 	switch axis {
 	case .E_W:
 		if w, ok := wall.get_east_west_wall(position); ok {
+			save_old_wall(axis, position, w)
 			w.textures[side_map[axis][camera.rotation]] = texture
 			wall.set_east_west_wall(position, w)
 		}
 	case .N_S:
 		if w, ok := wall.get_north_south_wall(position); ok {
+			save_old_wall(axis, position, w)
 			w.textures[side_map[axis][camera.rotation]] = texture
 			wall.set_north_south_wall(position, w)
 		}
 	case .NW_SE:
 		if w, ok := wall.get_north_west_south_east_wall(position); ok {
+			save_old_wall(axis, position, w)
 			w.textures[side_map[axis][camera.rotation]] = texture
 			wall.set_north_west_south_east_wall(position, w)
 		}
 	case .SW_NE:
 		if w, ok := wall.get_south_west_north_east_wall(position); ok {
+			save_old_wall(axis, position, w)
 			w.textures[side_map[axis][camera.rotation]] = texture
 			wall.set_south_west_north_east_wall(position, w)
 		}
