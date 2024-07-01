@@ -20,6 +20,7 @@ flood_fill :: proc(
 	texture: tile.Texture,
 	start: glsl.ivec3 = {0, 0, 0},
 	end: glsl.ivec3 = {constants.WORLD_WIDTH, 0, constants.WORLD_DEPTH},
+	ignore_texture_check: bool = false,
 ) {
 	tile_triangle, ok := tile.get_tile_triangle(position, side)
 	if !ok {return}
@@ -50,6 +51,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .West
 			process_next_visited(
@@ -60,6 +62,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .North
 			next_visited.position -= {0, 0, 1}
@@ -71,6 +74,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 		case .East:
 			next_visited := visited
@@ -83,6 +87,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .South
 			process_next_visited(
@@ -93,6 +98,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .West
 			next_visited.position += {1, 0, 0}
@@ -104,6 +110,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 		case .North:
 			next_visited := visited
@@ -116,6 +123,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .West
 			process_next_visited(
@@ -126,6 +134,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .South
 			next_visited.position += {0, 0, 1}
@@ -137,6 +146,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 		case .West:
 			next_visited := visited
@@ -149,6 +159,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .North
 			process_next_visited(
@@ -159,6 +170,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 			next_visited.side = .East
 			next_visited.position -= {1, 0, 0}
@@ -170,6 +182,7 @@ flood_fill :: proc(
 				&visited_queue,
 				start,
 				end,
+				ignore_texture_check,
 			)
 		}
 	}
@@ -183,8 +196,21 @@ process_next_visited :: proc(
 	visited_queue: ^[dynamic]Visited_Tile_Triangle,
 	start: glsl.ivec3,
 	end: glsl.ivec3,
+	ignore_texture_check: bool,
 ) {
-	if can_texture(from, to, original_texture, start, end) {
+	for key in previous_floor_tiles {
+		if key.pos == to.position && key.side == to.side {
+			return
+		}
+	}
+	if can_texture(
+		   from,
+		   to,
+		   original_texture,
+		   start,
+		   end,
+		   ignore_texture_check,
+	   ) {
 		set_texture(to, texture)
 		append(visited_queue, to)
 	}
@@ -211,6 +237,7 @@ can_texture :: proc(
 	texture: tile.Texture,
 	start: glsl.ivec3,
 	end: glsl.ivec3,
+	ignore_texture_check: bool,
 ) -> bool {
 	if to.position.x < 0 ||
 	   to.position.z < 0 ||
@@ -305,5 +332,6 @@ can_texture :: proc(
 
 	tile_triangle, ok := tile.get_tile_triangle(to.position, to.side)
 
-	return !ok || tile_triangle.texture == texture
+	return !ok || ignore_texture_check || tile_triangle.texture == texture
+	// return !ok || (!ignore_texture_check && tile_triangle.texture == texture)
 }

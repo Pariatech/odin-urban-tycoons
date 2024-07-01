@@ -229,12 +229,12 @@ set_tiles :: proc(delete_mode: bool) {
 		pos.y = floor
 		if delete_mode {
 			if floor == 0 {
-				flood_fill(pos, side, .Grass, start, end)
+				flood_fill(pos, side, .Grass, start, end, true)
 			} else if terrain.is_tile_flat(start.xz) {
-				flood_fill(pos, side, .Floor_Marker, start, end)
+				flood_fill(pos, side, .Floor_Marker, start, end, true)
 			}
 		} else {
-			flood_fill(pos, side, active_texture, start, end)
+			flood_fill(pos, side, active_texture, start, end, true)
 		}
 	}
 }
