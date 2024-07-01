@@ -16,19 +16,6 @@ import "../terrain"
 import "../utils"
 
 
-Wall_Texture :: enum (u16) {
-	Wall_Top,
-	Frame,
-	Drywall,
-	Brick,
-	White,
-	Royal_Blue,
-	Dark_Blue,
-	White_Cladding,
-	Light_Gray_Stone,
-    Wood_Panel_Wallpaper,
-}
-
 Wall_Mask_Texture :: enum (u16) {
 	Full_Mask,
 	Door_Opening,
@@ -122,22 +109,41 @@ Chunk :: struct {
 	num_indices:           i32,
 }
 
+Wall_Texture :: enum (u16) {
+	Wall_Top,
+	Frame,
+	Drywall,
+	Brick,
+	White,
+	Royal_Blue,
+	Dark_Blue,
+	White_Cladding,
+	Light_Gray_Stone,
+	Wood_Panel_Wallpaper,
+	Red_Strip_Wallpaper,
+	Green_Plaster_Brown_Marble,
+	White_Marble,
+}
+
 Wall_Index :: u32
 
 WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
-	.Wall_Top         = "resources/textures/walls/wall-top.png",
-	.Frame            = "resources/textures/walls/frame.png",
-	.Drywall          = "resources/textures/walls/drywall.png",
-	.Brick            = "resources/textures/walls/brick-wall.png",
-	.White            = "resources/textures/walls/white.png",
-	.Royal_Blue       = "resources/textures/walls/royal_blue.png",
-	.Dark_Blue        = "resources/textures/walls/dark_blue.png",
-	.White_Cladding   = "resources/textures/walls/white_cladding.png",
-	.Light_Gray_Stone   = "resources/textures/walls/light_gray_stone.png",
-    .Wood_Panel_Wallpaper = "resources/textures/walls/wood_panel_wallpaper.png"
+	.Wall_Top                   = "resources/textures/walls/wall-top.png",
+	.Frame                      = "resources/textures/walls/frame.png",
+	.Drywall                    = "resources/textures/walls/drywall.png",
+	.Brick                      = "resources/textures/walls/brick-wall.png",
+	.White                      = "resources/textures/walls/white.png",
+	.Royal_Blue                 = "resources/textures/walls/royal_blue.png",
+	.Dark_Blue                  = "resources/textures/walls/dark_blue.png",
+	.White_Cladding             = "resources/textures/walls/white_cladding.png",
+	.Light_Gray_Stone           = "resources/textures/walls/light_gray_stone.png",
+	.Wood_Panel_Wallpaper       = "resources/textures/walls/wood_panel_wallpaper.png",
+	.Red_Strip_Wallpaper        = "resources/textures/walls/red_strip_wallpaper.png",
+	.Green_Plaster_Brown_Marble = "resources/textures/walls/green_plaster_brown_marble.png",
+	.White_Marble               = "resources/textures/walls/white_marble.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {

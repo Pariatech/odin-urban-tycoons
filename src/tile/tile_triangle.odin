@@ -18,6 +18,7 @@ Texture :: enum (u16) {
 	Asphalt_Horizontal_Line,
 	Concrete,
 	Sidewalk,
+	White_Marble,
 }
 
 Mask :: enum (u16) {
@@ -143,6 +144,7 @@ TEXTURE_PATHS :: [Texture]cstring {
 		.Asphalt_Horizontal_Line = "resources/textures/tiles/asphalt-horizontal-line.png",
 		.Concrete                = "resources/textures/tiles/concrete.png",
 		.Sidewalk                = "resources/textures/tiles/sidewalk.png",
+		.White_Marble            = "resources/textures/tiles/white_marble.png",
 	}
 
 MASK_PATHS :: [Mask]cstring {
