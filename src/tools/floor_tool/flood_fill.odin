@@ -170,7 +170,7 @@ set_texture :: proc(
     if texture == .Floor_Marker {
         mask_texture = .Full_Mask
     }
-	tile.set_tile_triangle(
+	set_tile_triangle(
 		{position.x, floor.floor, position.y},
 		side,
 		tile.Tile_Triangle{texture = texture, mask_texture = mask_texture},
