@@ -261,14 +261,18 @@ set_tiles :: proc(delete_mode: bool) {
 	start.z = min(drag_start.z, position.y)
 	end.z = max(drag_start.z, position.y)
 
-
-	if delete_mode {
-		if floor.floor == 0 {
-			flood_fill(start, side, .Grass, start, end)
-		} else if terrain.is_tile_flat(start.xz) {
-			flood_fill(start, side, .Floor_Marker, start, end)
+    log.info(drag_start)
+	for floor in start.y ..= end.y {
+        pos := drag_start
+		pos.y = floor
+		if delete_mode {
+			if floor == 0 {
+				flood_fill(pos, side, .Grass, start, end)
+			} else if terrain.is_tile_flat(start.xz) {
+				flood_fill(pos, side, .Floor_Marker, start, end)
+			}
+		} else {
+			flood_fill(pos, side, active_texture, start, end)
 		}
-	} else {
-		flood_fill(start, side, active_texture, start, end)
 	}
 }
