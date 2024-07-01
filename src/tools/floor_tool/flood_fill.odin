@@ -5,9 +5,9 @@ import "core:math/linalg/glsl"
 
 import "../../constants"
 import "../../floor"
+import "../../terrain"
 import "../../tile"
 import "../../wall"
-import "../../terrain"
 
 Visited_Tile_Triangle :: struct {
 	position: glsl.ivec2,
@@ -18,6 +18,8 @@ flood_fill :: proc(
 	position: glsl.ivec3,
 	side: tile.Tile_Triangle_Side,
 	texture: tile.Texture,
+	start: glsl.ivec3 = {0, 0, 0},
+	end: glsl.ivec3 = {constants.WORLD_WIDTH, 0, constants.WORLD_DEPTH},
 ) {
 	tile_triangle, ok := tile.get_tile_triangle(position, side)
 	if !ok {return}
@@ -25,7 +27,7 @@ flood_fill :: proc(
 	if original_texture == texture {return}
 
 	visited_queue: [dynamic]Visited_Tile_Triangle
-    defer delete(visited_queue)
+	defer delete(visited_queue)
 
 	visited := Visited_Tile_Triangle{position.xz, side}
 
@@ -46,6 +48,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .West
 			process_next_visited(
@@ -54,6 +58,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+                start, 
+                end,
 			)
 			next_visited.side = .North
 			next_visited.position -= {0, 1}
@@ -63,6 +69,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 		case .East:
 			next_visited := visited
@@ -73,6 +81,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .South
 			process_next_visited(
@@ -81,6 +91,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .West
 			next_visited.position += {1, 0}
@@ -90,6 +102,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 		case .North:
 			next_visited := visited
@@ -100,6 +114,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .West
 			process_next_visited(
@@ -108,6 +124,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .South
 			next_visited.position += {0, 1}
@@ -117,6 +135,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 		case .West:
 			next_visited := visited
@@ -127,6 +147,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .North
 			process_next_visited(
@@ -135,6 +157,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 			next_visited.side = .East
 			next_visited.position -= {1, 0}
@@ -144,6 +168,8 @@ flood_fill :: proc(
 				original_texture,
 				texture,
 				&visited_queue,
+				start,
+				end,
 			)
 		}
 	}
@@ -155,8 +181,10 @@ process_next_visited :: proc(
 	original_texture: tile.Texture,
 	texture: tile.Texture,
 	visited_queue: ^[dynamic]Visited_Tile_Triangle,
+	start: glsl.ivec3,
+	end: glsl.ivec3,
 ) {
-	if can_texture(from, to, original_texture) {
+	if can_texture(from, to, original_texture, start, end) {
 		set_texture(to, texture)
 		append(visited_queue, to)
 	}
@@ -166,10 +194,10 @@ set_texture :: proc(
 	using visited: Visited_Tile_Triangle,
 	texture: tile.Texture,
 ) {
-    mask_texture: tile.Mask = .Grid_Mask
-    if texture == .Floor_Marker {
-        mask_texture = .Full_Mask
-    }
+	mask_texture: tile.Mask = .Grid_Mask
+	if texture == .Floor_Marker {
+		mask_texture = .Full_Mask
+	}
 	set_tile_triangle(
 		{position.x, floor.floor, position.y},
 		side,
@@ -181,12 +209,18 @@ can_texture :: proc(
 	from: Visited_Tile_Triangle,
 	to: Visited_Tile_Triangle,
 	texture: tile.Texture,
+	start: glsl.ivec3,
+	end: glsl.ivec3,
 ) -> bool {
 	if to.position.x < 0 ||
 	   to.position.y < 0 ||
 	   to.position.x >= constants.WORLD_WIDTH ||
 	   to.position.y >= constants.WORLD_DEPTH ||
-       (floor.floor > 0 && !terrain.is_tile_flat(to.position)) {
+	   (floor.floor > 0 && !terrain.is_tile_flat(to.position)) ||
+	   to.position.x < start.x ||
+	   to.position.y < start.z ||
+	   to.position.x > end.x ||
+	   to.position.y > end.z {
 		return false
 	}
 

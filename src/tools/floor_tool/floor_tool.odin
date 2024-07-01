@@ -81,12 +81,12 @@ update :: proc() {
 			flood_fill(pos, side, active_texture)
 		}
 
-        if mouse.is_button_press(.Left) {
-            clear(&previous_floor_tiles)
-        }
+		if mouse.is_button_press(.Left) {
+			clear(&previous_floor_tiles)
+		}
 		// set_tile(pos, delete_mode)
-	// } else if keyboard.is_key_release(.Key_Left_Shift) {
- //        placing = false
+		// } else if keyboard.is_key_release(.Key_Left_Shift) {
+		//        placing = false
 	} else if mouse.is_button_press(.Left) {
 		placing = true
 		drag_start = {position.x, floor.floor, position.y}
@@ -101,7 +101,7 @@ update :: proc() {
 		}
 	} else if placing && mouse.is_button_release(.Left) {
 		placing = false
-        clear(&previous_floor_tiles)
+		clear(&previous_floor_tiles)
 	} else {
 		drag_start = {position.x, floor.floor, position.y}
 		if reset {
@@ -252,18 +252,23 @@ set_diagonal_tiles :: proc() {
 }
 
 set_tiles :: proc(delete_mode: bool) {
-	start_x := min(drag_start.x, position.x)
-	end_x := max(drag_start.x, position.x)
-	start_y := min(drag_start.y, floor.floor)
-	end_y := max(drag_start.y, floor.floor)
-	start_z := min(drag_start.z, position.y)
-	end_z := max(drag_start.z, position.y)
+	start := glsl.ivec3{}
+	end := glsl.ivec3{}
+	start.x = min(drag_start.x, position.x)
+	end.x = max(drag_start.x, position.x)
+	start.y = min(drag_start.y, floor.floor)
+	end.y = max(drag_start.y, floor.floor)
+	start.z = min(drag_start.z, position.y)
+	end.z = max(drag_start.z, position.y)
 
-	for x in start_x ..= end_x {
-		for y in start_y ..= end_y {
-			for z in start_z ..= end_z {
-				set_tile({x, y, z}, delete_mode)
-			}
+
+	if delete_mode {
+		if floor.floor == 0 {
+			flood_fill(start, side, .Grass, start, end)
+		} else if terrain.is_tile_flat(start.xz) {
+			flood_fill(start, side, .Floor_Marker, start, end)
 		}
+	} else {
+		flood_fill(start, side, active_texture, start, end)
 	}
 }
