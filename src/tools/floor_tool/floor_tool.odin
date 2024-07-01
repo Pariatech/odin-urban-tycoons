@@ -33,7 +33,6 @@ init :: proc() {
 
 deinit :: proc() {
 	revert_tiles()
-	// clear(&previous_tiles)
 }
 
 update :: proc() {
@@ -108,39 +107,6 @@ update :: proc() {
 			set_tile({position.x, floor.floor, position.y}, delete_mode)
 		}
 	}
-}
-
-revert_tile :: proc(position: glsl.ivec3) {
-	// previous_tile := previous_tiles[position]
-	// if floor.previous_floor != floor.floor {
-	// 	for side in tile.Tile_Triangle_Side {
-	// 		if tri, ok := previous_tile[side].?; ok {
-	// 			if tri.texture == .Floor_Marker {
-	// 				tile.set_tile_triangle(position, side, nil)
-	// 			} else {
-	// 				tile.set_tile_triangle(position, side, tri)
-	// 			}
-	// 		} else {
-	// 			tile.set_tile_triangle(position, side, nil)
-	// 		}
-	// 	}
-	// } else {
-	// 	tile.set_tile(position, previous_tile)
-	// 	for side in tile.Tile_Triangle_Side {
-	// 		if tri, ok := previous_tile[side].?; ok {
-	// 			tile.set_tile_triangle(position, side, tri)
-	// 		} else if floor.floor == position.y &&
-	// 		   terrain.is_tile_flat(position.xz) {
-	// 			tile.set_tile_triangle(
-	// 				position,
-	// 				side,
-	// 				tile.Tile_Triangle{texture = .Floor_Marker},
-	// 			)
-	// 		} else {
-	// 			tile.set_tile_triangle(position, side, nil)
-	// 		}
-	// 	}
-	// }
 }
 
 set_tile_triangle :: proc(
@@ -245,10 +211,6 @@ revert_tiles :: proc() {
 	}
 
 	clear(&previous_floor_tiles)
-}
-
-set_diagonal_tiles :: proc() {
-
 }
 
 set_tiles :: proc(delete_mode: bool) {
