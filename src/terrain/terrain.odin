@@ -8,7 +8,9 @@ import "core:math/noise"
 import "../constants"
 import "../utils"
 
-sun := glsl.vec3{1, -3, 1}
+MIN_LIGHT :: 0.6
+
+sun := glsl.vec3{1, -2, 1}
 terrain_heights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]f32
 terrain_lights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]glsl.vec3
 
@@ -161,7 +163,7 @@ calculate_terrain_light :: proc(x, z: int) {
 	}
 
 	normal = glsl.normalize(normal)
-	light := clamp(glsl.dot(glsl.normalize(sun), normal), 0.2, 1)
+	light := clamp(glsl.dot(glsl.normalize(sun), normal), MIN_LIGHT, 1)
 	// light :f32 = 1.0
 	terrain_lights[x][z] = {light, light, light}
 }
