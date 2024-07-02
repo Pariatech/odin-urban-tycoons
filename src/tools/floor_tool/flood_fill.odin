@@ -198,9 +198,11 @@ process_next_visited :: proc(
 	end: glsl.ivec3,
 	ignore_texture_check: bool,
 ) {
-	for key in previous_floor_tiles {
-		if key.pos == to.position && key.side == to.side {
-			return
+	if ignore_texture_check {
+		for key in previous_floor_tiles {
+			if key.pos == to.position && key.side == to.side {
+				return
+			}
 		}
 	}
 	if can_texture(
