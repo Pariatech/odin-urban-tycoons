@@ -10,31 +10,44 @@ import "../terrain"
 
 Texture :: enum (u16) {
 	Floor_Marker,
-	Grass,
-	Wood,
-	Gravel,
+	Grass_004,
+	Gravel_015,
+	Wood_082A,
+    Wood_Floor_008,
+    Wood_Floor_020,
+    Wood_Floor_052,
+    Tiles_081,
+    Tiles_014,
+    Tiles_015,
+    Tiles_050,
+    Tiles_111,
+    Tiles_131,
 	Asphalt,
 	Asphalt_Vertical_Line,
 	Asphalt_Horizontal_Line,
 	Concrete,
 	Sidewalk,
-	White_Marble,
-	Rustic_Green_Red_Terracotta_Tile_118,
-	Smooth_Pinkish_Terracotta_Tile_122,
-	Spanish_Terracotta_Rustic_Tile_127,
-	Spanish_Terracotta_Rustic_Tile_129,
-	Geometric_Patterns_Tile_147,
-	Geometric_Patterns_Tile_159,
-	Ancient_Rome_Floor_Tile_39,
-	Ancient_Rome_Floor_Tile_44,
-	Agata_Tiles,
-	Basalt_Tiles,
-	Concrete_Hexagonal_Tile,
-	Geometric_Patterns_Tile,
-	Sandstone_Tiles,
-	Versailles_Gezoet_Stone_Tile,
-	White_Ceramic_Hexagon_Tile,
-	Wood_Ceramic_Tile,
+}
+
+TEXTURE_PATHS :: [Texture]cstring {
+	.Floor_Marker                         = "resources/textures/floors/floor-marker.png",
+	.Wood_082A                             = "resources/textures/tiles/Wood082A.png",
+	.Wood_Floor_008                             = "resources/textures/tiles/WoodFloor008.png",
+	.Wood_Floor_020                             = "resources/textures/tiles/WoodFloor020.png",
+	.Wood_Floor_052                             = "resources/textures/tiles/WoodFloor052.png",
+	.Tiles_081                             = "resources/textures/tiles/Tiles081.png",
+	.Tiles_014                             = "resources/textures/tiles/Tiles014.png",
+	.Tiles_015                             = "resources/textures/tiles/Tiles015.png",
+	.Tiles_050                             = "resources/textures/tiles/Tiles050.png",
+	.Tiles_111                             = "resources/textures/tiles/Tiles111.png",
+	.Tiles_131                             = "resources/textures/tiles/Tiles131.png",
+	.Grass_004                             = "resources/textures/tiles/Grass004.png",
+	.Gravel_015                            = "resources/textures/tiles/Gravel015.png",
+	.Asphalt                              = "resources/textures/tiles/asphalt.png",
+	.Asphalt_Vertical_Line                = "resources/textures/tiles/asphalt-vertical-line.png",
+	.Asphalt_Horizontal_Line              = "resources/textures/tiles/asphalt-horizontal-line.png",
+	.Concrete                             = "resources/textures/tiles/concrete.png",
+	.Sidewalk                             = "resources/textures/tiles/sidewalk.png",
 }
 
 Mask :: enum (u16) {
@@ -148,35 +161,6 @@ tile_triangle_side_vertices_map :=
 				texcoords = {0.5, 0.5, 0.0, 0.0},
 			},
 		},
-	}
-
-TEXTURE_PATHS :: [Texture]cstring {
-		.Floor_Marker                         = "resources/textures/floors/floor-marker.png",
-		.Wood                                 = "resources/textures/floors/wood.png",
-		.Grass                                = "resources/textures/tiles/lawn.png",
-		.Gravel                               = "resources/textures/tiles/gravel.png",
-		.Asphalt                              = "resources/textures/tiles/asphalt.png",
-		.Asphalt_Vertical_Line                = "resources/textures/tiles/asphalt-vertical-line.png",
-		.Asphalt_Horizontal_Line              = "resources/textures/tiles/asphalt-horizontal-line.png",
-		.Concrete                             = "resources/textures/tiles/concrete.png",
-		.Sidewalk                             = "resources/textures/tiles/sidewalk.png",
-		.White_Marble                         = "resources/textures/tiles/white_marble.png",
-		.Rustic_Green_Red_Terracotta_Tile_118 = "resources/textures/tiles/118_rustic_green_red_terracotta_tile.png",
-		.Smooth_Pinkish_Terracotta_Tile_122   = "resources/textures/tiles/122_smooth_pinkish_terracotta_tile.png",
-		.Spanish_Terracotta_Rustic_Tile_127   = "resources/textures/tiles/127_Spanish_terracotta_rustic_tile.png",
-		.Spanish_Terracotta_Rustic_Tile_129   = "resources/textures/tiles/129_Spanish_terracotta_rustic_tile.png",
-		.Geometric_Patterns_Tile_147          = "resources/textures/tiles/147_geometric_patterns_tile.png",
-		.Geometric_Patterns_Tile_159          = "resources/textures/tiles/159_geometric_patterns_tile.png",
-		.Ancient_Rome_Floor_Tile_39           = "resources/textures/tiles/39_ancient_Rome_floor_tile.png",
-		.Ancient_Rome_Floor_Tile_44           = "resources/textures/tiles/44_ancient_Rome_floor_tile.png",
-		.Agata_Tiles                          = "resources/textures/tiles/agata_tiles.png",
-		.Basalt_Tiles                         = "resources/textures/tiles/basalt_tiles.png",
-		.Concrete_Hexagonal_Tile              = "resources/textures/tiles/concrete_hexagonal_tile.png",
-		.Geometric_Patterns_Tile              = "resources/textures/tiles/geometric_patterns_tile.png",
-		.Sandstone_Tiles                      = "resources/textures/tiles/sandstone_tiles.png",
-		.Versailles_Gezoet_Stone_Tile         = "resources/textures/tiles/versailles_gezoet_stone_tile.png",
-		.White_Ceramic_Hexagon_Tile           = "resources/textures/tiles/white_ceramic_hexagon_tile.png",
-		.Wood_Ceramic_Tile                    = "resources/textures/tiles/wood_ceramic_tile.png",
 	}
 
 MASK_PATHS :: [Mask]cstring {
@@ -442,7 +426,7 @@ chunk_init :: proc() {
 					for side in Tile_Triangle_Side {
 						chunk.triangles[{x = cx * constants.CHUNK_WIDTH + x, z = cz * constants.CHUNK_DEPTH + z, side = side}] =
 							Tile_Triangle {
-								texture      = .Grass,
+								texture      = .Grass_004,
 								mask_texture = .Grid_Mask,
 							}
 					}

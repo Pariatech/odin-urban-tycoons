@@ -17,7 +17,7 @@ position: glsl.ivec2
 side: tile.Tile_Triangle_Side
 drag_start: glsl.ivec3
 drag_start_side: tile.Tile_Triangle_Side
-active_texture: tile.Texture = .Wood
+active_texture: tile.Texture = .Wood_Floor_008
 triangle_mode: bool = false
 placing: bool = false
 
@@ -72,7 +72,7 @@ update :: proc() {
 		pos := glsl.ivec3{position.x, floor.floor, position.y}
 		if delete_mode {
 			if floor.floor == 0 {
-				flood_fill(pos, side, .Grass)
+				flood_fill(pos, side, .Grass_004)
 			} else if terrain.is_tile_flat(pos.xz) {
 				flood_fill(pos, side, .Floor_Marker)
 			}
@@ -131,7 +131,7 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 	if delete_mode {
 		if position.y == 0 {
 			if tile_triangle, ok := &tile_triangle.?; ok {
-				tile_triangle.texture = .Grass
+				tile_triangle.texture = .Grass_004
 			}
 		} else if position.y == floor.floor &&
 		   terrain.is_tile_flat(position.xz) {
@@ -229,7 +229,7 @@ set_tiles :: proc(delete_mode: bool) {
 		pos.y = floor
 		if delete_mode {
 			if floor == 0 {
-				flood_fill(pos, side, .Grass, start, end, true)
+				flood_fill(pos, side, .Grass_004, start, end, true)
 			} else if terrain.is_tile_flat(start.xz) {
 				flood_fill(pos, side, .Floor_Marker, start, end, true)
 			}

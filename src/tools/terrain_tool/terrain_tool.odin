@@ -438,7 +438,7 @@ intersect_with_floor :: proc(x, z: i32) -> bool {
 				triangles := tile.get_tile({x, i32(y), z})
 				for side in tile.Tile_Triangle_Side {
 					if triangle, ok := triangles[side].?; ok {
-						if triangle.texture != .Grass {
+						if triangle.texture != .Grass_004 {
 							return true
 						}
 					}

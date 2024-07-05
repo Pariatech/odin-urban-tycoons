@@ -47,7 +47,7 @@ init :: proc() {
 	// The house
 	add_house_floor_walls(0, .Royal_Blue, .Brick)
 	add_house_floor_walls(1, .Dark_Blue, .Brick)
-	add_house_floor_triangles(2, .Wood)
+	add_house_floor_triangles(2, .Wood_Floor_008)
 
 	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {

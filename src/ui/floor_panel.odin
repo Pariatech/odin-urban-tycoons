@@ -20,7 +20,7 @@ floor_panel_body :: proc(
 ) {
 	i: int = 0
 	for tex in tile.Texture {
-		if tex == .Floor_Marker || tex == .Grass {
+		if tex == .Floor_Marker || tex == .Grass_004 {
 			continue
 		}
 
