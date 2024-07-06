@@ -1,7 +1,6 @@
 package keyboard
 
 import "core:c"
-import "core:fmt"
 import "base:runtime"
 import "vendor:glfw"
 
@@ -183,7 +182,6 @@ on_key :: proc "c" (
 	mods: c.int,
 ) {
 	context = runtime.default_context()
-	fmt.println("Key: ", glfw.GetKeyName(key, scancode), " ", action)
 	switch action {
 	case glfw.RELEASE:
 		key_map[cast(Key_Value)key] = .Release

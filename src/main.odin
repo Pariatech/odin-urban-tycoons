@@ -1,10 +1,10 @@
 package main
 
 import "base:runtime"
-import "core:fmt"
 import "core:log"
 import "core:math/linalg/glsl"
 import "core:time"
+import "core:os"
 import "vendor:glfw"
 
 import "billboard"
@@ -41,11 +41,19 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
-	context.logger = log.create_console_logger()
-    defer log.destroy_console_logger(context.logger)
+    when ODIN_DEBUG {
+	    context.logger = log.create_console_logger()
+        defer log.destroy_console_logger(context.logger)
+    } else {
+        if h, ok := os.open("logs"); ok == os.ERROR_NONE {
+	        context.logger = log.create_file_logger(h)
+            defer log.destroy_file_logger(context.logger)
+            defer os.close(h)
+        }
+    }
 
 	if !bool(glfw.Init()) {
-		fmt.eprintln("GLFW has failed to load.")
+		log.fatal("GLFW has failed to load.")
 		return
 	}
 
@@ -62,7 +70,7 @@ start :: proc() -> (ok: bool = false) {
 	defer glfw.Terminate()
 
 	if window.handle == nil {
-		fmt.eprintln("GLFW has failed to load the window.")
+		log.fatal("GLFW has failed to load the window.")
 		return
 	}
 
@@ -111,7 +119,7 @@ start :: proc() -> (ok: bool = false) {
 		diff := time.diff(previous_time_ns, current_time_ns)
 		delta_time = time.duration_seconds(diff)
 		if time.stopwatch_duration(fps_stopwatch) >= time.Second {
-			fmt.println("FPS:", frames)
+			log.debug("FPS:", frames)
 			frames = 0
 			time.stopwatch_reset(&fps_stopwatch)
 			time.stopwatch_start(&fps_stopwatch)

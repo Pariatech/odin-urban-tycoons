@@ -1,8 +1,8 @@
 package renderer
 
-import "core:fmt"
 import "core:math/linalg/glsl"
 import "core:os"
+import "core:log"
 import "base:runtime"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
@@ -44,7 +44,7 @@ gl_debug_callback :: proc "c" (
 	userParam: rawptr,
 ) {
 	context = runtime.default_context()
-	fmt.println("OpenGL Debug: ", message)
+	log.debug("OpenGL Debug: ", message)
 }
 
 
@@ -78,7 +78,6 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	max_anisotropy: f32
 	gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
-	fmt.println("max_anisotropy:", max_anisotropy)
 	gl.TexParameterf(
 		gl.TEXTURE_2D_ARRAY,
 		gl.TEXTURE_MAX_ANISOTROPY,
@@ -221,7 +220,7 @@ end_draw :: proc() {
 
 	gl_error := gl.GetError()
 	if (gl_error != gl.NO_ERROR) {
-		fmt.println("error?: ", gl_error)
+		log.error("error?: ", gl_error)
 	}
 }
 
