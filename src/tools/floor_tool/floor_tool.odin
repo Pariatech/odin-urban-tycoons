@@ -20,11 +20,20 @@ drag_start_side: tile.Tile_Triangle_Side
 active_texture: tile.Texture = .Wood_Floor_008
 triangle_mode: bool = false
 placing: bool = false
+add_command: proc(_: Command)
 
-previous_floor_tiles: map[struct {
+Tile_Triangle_Key :: struct {
 	pos:  glsl.ivec3,
 	side: tile.Tile_Triangle_Side,
-}]Maybe(tile.Tile_Triangle)
+}
+
+previous_floor_tiles: map[Tile_Triangle_Key]Maybe(tile.Tile_Triangle)
+new_floor_tiles: map[Tile_Triangle_Key]Maybe(tile.Tile_Triangle)
+
+Command :: struct {
+	before: map[Tile_Triangle_Key]Maybe(tile.Tile_Triangle),
+	after:  map[Tile_Triangle_Key]Maybe(tile.Tile_Triangle),
+}
 
 init :: proc() {
 	triangle_mode = false
@@ -65,6 +74,7 @@ update :: proc() {
 	do_revert_tiles := reset
 	if do_revert_tiles {
 		revert_tiles()
+		clear(&new_floor_tiles)
 	}
 
 	if keyboard.is_key_down(.Key_Left_Shift) {
@@ -81,11 +91,9 @@ update :: proc() {
 		}
 
 		if mouse.is_button_press(.Left) {
+            save_command()
 			clear(&previous_floor_tiles)
 		}
-		// set_tile(pos, delete_mode)
-		// } else if keyboard.is_key_release(.Key_Left_Shift) {
-		//        placing = false
 	} else if mouse.is_button_press(.Left) {
 		placing = true
 		drag_start = {position.x, floor.floor, position.y}
@@ -100,6 +108,7 @@ update :: proc() {
 		}
 	} else if placing && mouse.is_button_release(.Left) {
 		placing = false
+        save_command()
 		clear(&previous_floor_tiles)
 	} else {
 		drag_start = {position.x, floor.floor, position.y}
@@ -107,6 +116,17 @@ update :: proc() {
 			set_tile({position.x, floor.floor, position.y}, delete_mode)
 		}
 	}
+}
+
+save_command :: proc() {
+	command: Command
+	for k, v in previous_floor_tiles {
+		command.before[k] = v
+	}
+	for k, v in new_floor_tiles {
+		command.after[k] = v
+	}
+	add_command(command)
 }
 
 set_tile_triangle :: proc(
@@ -119,6 +139,8 @@ set_tile_triangle :: proc(
 	} else {
 		previous_floor_tiles[{position, side}] = nil
 	}
+
+	new_floor_tiles[{position, side}] = tile_triangle
 	tile.set_tile_triangle(position, side, tile_triangle)
 }
 
@@ -211,6 +233,7 @@ revert_tiles :: proc() {
 	}
 
 	clear(&previous_floor_tiles)
+	clear(&new_floor_tiles)
 }
 
 set_tiles :: proc(delete_mode: bool) {
@@ -223,9 +246,9 @@ set_tiles :: proc(delete_mode: bool) {
 	start.z = min(drag_start.z, position.y)
 	end.z = max(drag_start.z, position.y)
 
-    log.info(drag_start)
+	log.info(drag_start)
 	for floor in start.y ..= end.y {
-        pos := drag_start
+		pos := drag_start
 		pos.y = floor
 		if delete_mode {
 			if floor == 0 {
@@ -236,5 +259,17 @@ set_tiles :: proc(delete_mode: bool) {
 		} else {
 			flood_fill(pos, side, active_texture, start, end, true)
 		}
+	}
+}
+
+undo :: proc(command: Command) {
+	for k, v in command.before {
+		tile.set_tile_triangle(k.pos, k.side, v)
+	}
+}
+
+redo :: proc(command: Command) {
+	for k, v in command.after {
+		tile.set_tile_triangle(k.pos, k.side, v)
 	}
 }

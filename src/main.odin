@@ -103,6 +103,10 @@ start :: proc() -> (ok: bool = false) {
 
 	floor_tool.init()
 	terrain_tool.init()
+
+    tools.init()
+    defer tools.deinit()
+
 	wall.init_cutaways()
 
 	should_close := false

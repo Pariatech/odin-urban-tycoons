@@ -13,21 +13,23 @@ import "../window"
 import "../world"
 import "../mouse"
 
-MENU_ICON_TEXTURES :: []cstring {
-	"resources/icons/info.png",
-	"resources/icons/floor_up.png",
-	"resources/icons/floor_down.png",
-	"resources/icons/camera_rotate_left.png",
-	"resources/icons/camera_rotate_right.png",
-	"resources/icons/walls_up.png",
-	"resources/icons/walls_down.png",
-	"resources/icons/landscape.png",
-	"resources/icons/wall.png",
-	"resources/icons/floor.png",
-	"resources/icons/paint_brush.png",
-	"resources/icons/door.png",
-	"resources/icons/window.png",
-	"resources/icons/furniture.png",
+MENU_ICON_TEXTURES :: [Menu_Icon]cstring {
+	.Info = "resources/icons/info.png",
+	.Floor_Up = "resources/icons/floor_up.png",
+	.Floor_Down = "resources/icons/floor_down.png",
+	.Camera_Rotate_Left = "resources/icons/camera_rotate_left.png",
+	.Camera_Rotate_Right = "resources/icons/camera_rotate_right.png",
+	.Walls_Up = "resources/icons/walls_up.png",
+	.Walls_Down = "resources/icons/walls_down.png",
+	.Landscape = "resources/icons/landscape.png",
+	.Wall = "resources/icons/wall.png",
+	.Floor = "resources/icons/floor.png",
+	.Paint = "resources/icons/paint_brush.png",
+	.Door = "resources/icons/door.png",
+	.Window = "resources/icons/window.png",
+	.Furniture = "resources/icons/furniture.png",
+    .Undo = "resources/icons/undo.png",
+    .Redo = "resources/icons/redo.png",
 }
 
 
@@ -48,6 +50,8 @@ Menu_Icon :: enum (int) {
 	Camera_Rotate_Right,
 	Walls_Up,
 	Walls_Down,
+    Undo,
+    Redo,
 	Landscape,
 	Wall,
 	Floor,
@@ -105,9 +109,10 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_icon_renderer(ctx) or_return
 	init_scroll_bar_renderer(ctx) or_return
 
+    textures := MENU_ICON_TEXTURES
 	init_icon_texture_array(
 		&menu_icon_texture_array,
-		MENU_ICON_TEXTURES,
+        raw_data(&textures)[0:len(textures)],
 	) or_return
 
 	init_icon_texture_array(
@@ -176,6 +181,10 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Furniture:
 		floor_panel_ctx.opened = false
 		tools.open_furniture_tool()
+    case .Undo:
+        tools.undo()
+    case .Redo:
+        tools.redo()
 	}
 }
 

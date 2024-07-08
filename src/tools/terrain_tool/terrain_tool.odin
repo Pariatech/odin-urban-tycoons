@@ -28,6 +28,12 @@ terrain_tool_previous_brush_size: i32 = 1
 terrain_tool_brush_size: i32 = 1
 terrain_tool_brush_strength: f32 = 0.1
 mode: Mode = .Raise
+add_command: proc(Command)
+
+Command :: struct {
+    before: map[glsl.ivec2]f32,
+    after: map[glsl.ivec2]f32,
+}
 
 Mode :: enum {
 	Raise,
@@ -680,4 +686,11 @@ decrease_brush_strength :: proc() {
 	t := int(terrain_tool_brush_strength * 10 - 1)
 	tex := billboard.Texture_1x1(int(billboard.Texture_1x1.Shovel_1_SW) + t)
 	billboard.billboard_1x1_set_texture(terrain_tool_billboard, tex)
+}
+
+undo :: proc(command: Command) {
+}
+
+redo :: proc(command: Command) {
+
 }
