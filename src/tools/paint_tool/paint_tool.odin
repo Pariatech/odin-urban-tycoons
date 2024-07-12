@@ -26,6 +26,20 @@ dirty: bool
 
 previous_walls: [wall.Wall_Axis]map[glsl.ivec3][wall.Wall_Side]wall.Wall_Texture
 
+add_command: proc(_: Command)
+current_command: Command
+
+Wall_Key :: struct {
+	axis: wall.Wall_Axis,
+	pos:  glsl.ivec3,
+	side: wall.Wall_Side,
+}
+
+Command :: struct {
+	before: map[Wall_Key]wall.Wall_Texture,
+	after:  map[Wall_Key]wall.Wall_Texture,
+}
+
 Wall_Intersect :: struct {
 	pos:  glsl.ivec3,
 	axis: wall.Wall_Axis,
@@ -53,6 +67,11 @@ update :: proc() {
 		keyboard.is_key_press(.Key_Left_Control) ||
 		keyboard.is_key_release(.Key_Left_Control)
 
+	if mouse.is_button_release(.Left) {
+		add_command(current_command)
+		current_command = {}
+	}
+
 	changed :=
 		dirty ||
 		previous_position != position ||
@@ -71,6 +90,8 @@ update :: proc() {
 			found_wall_texture = texture
 		} else {
 			found_wall_texture = get_found_wall_texture()
+			clear(&current_command.before)
+			clear(&current_command.after)
 		}
 
 		if keyboard.is_key_down(.Key_Left_Shift) {
@@ -90,7 +111,7 @@ update :: proc() {
 				found_wall_intersect.axis,
 			)
 		}
-	} else if found_wall && mouse.is_button_press(.Left) {
+	} else if found_wall && mouse.is_button_down(.Left) {
 		for &axis_walls in previous_walls {
 			clear(&axis_walls)
 		}
@@ -156,6 +177,25 @@ get_found_wall_texture :: proc() -> wall.Wall_Texture {
 	return .Drywall
 }
 
+update_current_command :: proc(
+	position: glsl.ivec3,
+	axis: wall.Wall_Axis,
+	side: wall.Wall_Side,
+	texture: wall.Wall_Texture,
+	w: wall.Wall,
+) {
+	key := Wall_Key {
+		axis = axis,
+		pos  = position,
+		side = side,
+	}
+
+	if !(key in current_command.before) {
+		current_command.before[key] = w.textures[side]
+		current_command.after[key] = texture
+	}
+}
+
 paint_wall :: proc(
 	position: glsl.ivec3,
 	axis: wall.Wall_Axis,
@@ -166,25 +206,33 @@ paint_wall :: proc(
 	case .E_W:
 		if w, ok := wall.get_east_west_wall(position); ok {
 			save_old_wall(axis, position, w)
-			w.textures[side_map[axis][camera.rotation]] = texture
+			side := side_map[axis][camera.rotation]
+			update_current_command(position, axis, side, texture, w)
+			w.textures[side] = texture
 			wall.set_east_west_wall(position, w)
 		}
 	case .N_S:
 		if w, ok := wall.get_north_south_wall(position); ok {
 			save_old_wall(axis, position, w)
-			w.textures[side_map[axis][camera.rotation]] = texture
+			side := side_map[axis][camera.rotation]
+			update_current_command(position, axis, side, texture, w)
+			w.textures[side] = texture
 			wall.set_north_south_wall(position, w)
 		}
 	case .NW_SE:
 		if w, ok := wall.get_north_west_south_east_wall(position); ok {
 			save_old_wall(axis, position, w)
-			w.textures[side_map[axis][camera.rotation]] = texture
+			side := side_map[axis][camera.rotation]
+			update_current_command(position, axis, side, texture, w)
+			w.textures[side] = texture
 			wall.set_north_west_south_east_wall(position, w)
 		}
 	case .SW_NE:
 		if w, ok := wall.get_south_west_north_east_wall(position); ok {
 			save_old_wall(axis, position, w)
-			w.textures[side_map[axis][camera.rotation]] = texture
+			side := side_map[axis][camera.rotation]
+			update_current_command(position, axis, side, texture, w)
+			w.textures[side] = texture
 			wall.set_south_west_north_east_wall(position, w)
 		}
 	}
@@ -663,4 +711,22 @@ find_north_west_wall_intersect :: proc(
 	}
 
 	return {}, false
+}
+
+undo :: proc(command: Command) {
+	for k, v in command.before {
+		if w, ok := wall.get_wall(k.pos, k.axis); ok {
+			w.textures[k.side] = v
+			wall.set_wall(k.pos, k.axis, w)
+		}
+	}
+}
+
+redo :: proc(command: Command) {
+	for k, v in command.after {
+		if w, ok := wall.get_wall(k.pos, k.axis); ok {
+			w.textures[k.side] = v
+			wall.set_wall(k.pos, k.axis, w)
+		}
+	}
 }

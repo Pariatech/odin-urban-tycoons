@@ -3,6 +3,7 @@ package tools
 import "core:log"
 
 import "floor_tool"
+import "paint_tool"
 import "terrain_tool"
 
 MAX_UNDOS :: 10
@@ -13,6 +14,7 @@ redos: [dynamic]Command
 Command :: union {
 	terrain_tool.Command,
 	floor_tool.Command,
+	paint_tool.Command,
 }
 
 undo :: proc() {
@@ -28,6 +30,8 @@ undo :: proc() {
 		terrain_tool.undo(v)
 	case floor_tool.Command:
 		floor_tool.undo(v)
+	case paint_tool.Command:
+		paint_tool.undo(v)
 	}
 }
 
@@ -44,12 +48,15 @@ redo :: proc() {
 		terrain_tool.redo(v)
 	case floor_tool.Command:
 		floor_tool.redo(v)
+	case paint_tool.Command:
+		paint_tool.redo(v)
 	}
 }
 
 init :: proc() {
 	set_add_command(&terrain_tool.add_command)
 	set_add_command(&floor_tool.add_command)
+	set_add_command(&paint_tool.add_command)
 }
 
 deinit :: proc() {
@@ -74,6 +81,9 @@ delete_undo :: proc(undo: Command) {
 	case floor_tool.Command:
 		delete(v.before)
 		delete(v.after)
+	case paint_tool.Command:
+		delete(v.before)
+		delete(v.after)
 	}
 }
 
@@ -96,6 +106,9 @@ delete_redos :: proc() {
 			delete(v.before)
 			delete(v.after)
 		case floor_tool.Command:
+			delete(v.before)
+			delete(v.after)
+		case paint_tool.Command:
 			delete(v.before)
 			delete(v.after)
 		}
