@@ -28,11 +28,12 @@ terrain_tool_previous_brush_size: i32 = 1
 terrain_tool_brush_size: i32 = 1
 terrain_tool_brush_strength: f32 = 0.1
 mode: Mode = .Raise
-add_command: proc(Command)
+add_command: proc(_: Command)
+current_command: Command
 
 Command :: struct {
-    before: map[glsl.ivec2]f32,
-    after: map[glsl.ivec2]f32,
+	before: map[glsl.ivec2]f32,
+	after:  map[glsl.ivec2]f32,
 }
 
 Mode :: enum {
@@ -159,6 +160,11 @@ update :: proc(delta_time: f64) {
 		terrain.terrain_heights[terrain_tool_position.x][terrain_tool_position.y]
 	billboard.billboard_1x1_move(&terrain_tool_billboard, position)
 	shift_down := keyboard.is_key_down(.Key_Left_Shift)
+
+	if mouse.is_button_release(.Left) {
+		add_command(current_command)
+		current_command = {}
+	}
 
 	if shift_down ||
 	   mode == .Level ||
@@ -459,6 +465,11 @@ set_terrain_height :: proc(x, z: i32, height: f32) {
 	if intersect_with_wall(x, z) {return}
 	if intersect_with_floor(x, z) {return}
 
+	if !({x, z} in current_command.before) {
+		current_command.before[{x, z}] = terrain.terrain_heights[x][z]
+	}
+	current_command.after[{x, z}] = height
+
 	terrain.terrain_heights[x][z] = height
 }
 
@@ -688,9 +699,38 @@ decrease_brush_strength :: proc() {
 	billboard.billboard_1x1_set_texture(terrain_tool_billboard, tex)
 }
 
+apply_state :: proc(state: map[glsl.ivec2]f32) {
+	start, end: glsl.ivec2
+	for k, v in state {
+		x, z := k.x, k.y
+		terrain.terrain_heights[x][z] = v
+
+		start.x = min(start.x, k.x)
+		start.y = min(start.y, k.y)
+		end.x = max(end.x, k.x)
+		end.y = max(end.y, k.y)
+	}
+
+	start.x = max(start.x - 1, 0)
+	start.y = max(start.y - 1, 0)
+	end.x = min(end.x + 1, constants.WORLD_WIDTH)
+	end.y = min(end.y + 1, constants.WORLD_DEPTH)
+	for x in start.x ..= end.x {
+		for z in start.y ..= end.y {
+			terrain.calculate_terrain_light(int(x), int(z))
+			if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
+				i := x / constants.CHUNK_WIDTH
+				j := z / constants.CHUNK_DEPTH
+				tile.chunks[0][i][j].dirty = true
+			}
+		}
+	}
+}
+
 undo :: proc(command: Command) {
+    apply_state(command.before)
 }
 
 redo :: proc(command: Command) {
-
+    apply_state(command.after)
 }

@@ -22,7 +22,6 @@ undo :: proc() {
 	}
 
 	command := pop(&undos)
-	log.debug("undo", command)
 	append(&redos, command)
 	switch v in command {
 	case terrain_tool.Command:
@@ -70,6 +69,8 @@ delete_undos :: proc() {
 delete_undo :: proc(undo: Command) {
 	switch &v in undo {
 	case terrain_tool.Command:
+		delete(v.before)
+		delete(v.after)
 	case floor_tool.Command:
 		delete(v.before)
 		delete(v.after)
@@ -92,6 +93,8 @@ delete_redos :: proc() {
 	for redo in redos {
 		switch &v in redo {
 		case terrain_tool.Command:
+			delete(v.before)
+			delete(v.after)
 		case floor_tool.Command:
 			delete(v.before)
 			delete(v.after)
