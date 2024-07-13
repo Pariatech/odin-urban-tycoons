@@ -4,6 +4,7 @@ import "core:log"
 import "core:math/linalg/glsl"
 
 import "vendor:glfw"
+import gl "vendor:OpenGL"
 
 WIDTH :: 1280
 HEIGHT :: 720
@@ -19,6 +20,12 @@ init :: proc(title: cstring) -> (ok: bool = true) {
 	}
 
 	glfw.WindowHint(glfw.SAMPLES, 4)
+
+    glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, 3);
+    glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 2);
+    glfw.WindowHint(glfw.OPENGL_PROFILE,glfw.OPENGL_CORE_PROFILE)
+    glfw.WindowHint(glfw.OPENGL_FORWARD_COMPAT, gl.TRUE)
+
 	handle = glfw.CreateWindow(WIDTH, HEIGHT, title, nil, nil)
 
 	scale.x, scale.y = glfw.GetWindowContentScale(handle)

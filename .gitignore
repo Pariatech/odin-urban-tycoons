@@ -6,3 +6,4 @@ urban-tycoons-windows.zip
 *.blend1
 output.mp4
 *.log
+*.dSYM/

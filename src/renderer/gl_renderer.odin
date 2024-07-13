@@ -95,7 +95,9 @@ init :: proc() -> (ok: bool = true) {
 
 	gl.Enable(gl.MULTISAMPLE)
 
-	gl.Enable(gl.DEBUG_OUTPUT)
+    when ODIN_OS != .Darwin {
+	    gl.Enable(gl.DEBUG_OUTPUT)
+    }
 	// gl.DebugMessageCallback(gl_debug_callback, nil)
 
 	gl.Enable(gl.DEPTH_TEST)
@@ -113,6 +115,8 @@ init :: proc() -> (ok: bool = true) {
 
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 	// gl.ActiveTexture(gl.TEXTURE1)
+
+    log.debug(gl.GetString(gl.VERSION))
 
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)

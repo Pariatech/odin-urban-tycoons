@@ -64,7 +64,7 @@ load_shader_program :: proc(
 	gl.GetProgramiv(shader_program^, gl.LINK_STATUS, &success)
 	if success == 0 {
 		gl.GetProgramInfoLog(shader_program^, 512, nil, raw_data(&info_log))
-		fmt.println("ERROR::LINKING::SHADER::PROGRAM\n", string(info_log[:]))
+		fmt.println("ERROR::LINKING::SHADER::PROGRAM\n", vertex_shader_pathname, fragment_shader_pathname, string(info_log[:]))
 		return false
 	}
 
