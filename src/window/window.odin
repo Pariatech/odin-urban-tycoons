@@ -1,5 +1,6 @@
 package window
 
+import "base:runtime"
 import "core:log"
 import "core:math/linalg/glsl"
 
@@ -28,6 +29,8 @@ init :: proc(title: cstring) -> (ok: bool = true) {
 
 	handle = glfw.CreateWindow(WIDTH, HEIGHT, title, nil, nil)
 
+    glfw.SetWindowSizeCallback(handle, window_size_callback)
+
 	scale.x, scale.y = glfw.GetWindowContentScale(handle)
 	dpi: glsl.vec2
 	dpi.x, dpi.y = glfw.GetMonitorContentScale(glfw.GetPrimaryMonitor())
@@ -42,4 +45,14 @@ init :: proc(title: cstring) -> (ok: bool = true) {
 deinit :: proc() {
 	defer glfw.DestroyWindow(handle)
 	defer glfw.Terminate()
+}
+
+window_size_callback :: proc "c" (
+	_: glfw.WindowHandle,
+	width, height: i32,
+) {
+	context = runtime.default_context()
+
+	size.x = f32(width)
+	size.y = f32(height)
 }

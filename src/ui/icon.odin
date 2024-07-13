@@ -7,6 +7,7 @@ import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
 import "../renderer"
+import "../window"
 
 ICON_VERTEX_SHADER :: "resources/shaders/ui/icon.vert"
 ICON_FRAGMENT_SHADER :: "resources/shaders/ui/icon.frag"
@@ -245,15 +246,15 @@ draw_icon :: proc(using ctx: ^Context, using icon: Icon) {
 	vertices[5].texcoord.y += bottom_padding / size.y
 
 	for &v in vertices {
-		v.start = pos
-		v.end = pos + size
+		v.start = pos * window.scale
+		v.end = (pos + size) * window.scale
 		v.color = color
 		v.texcoord.z = f32(texture)
 
-		v.left_border_width = left_border_width
-		v.right_border_width = right_border_width
-		v.top_border_width = top_border_width
-		v.bottom_border_width = bottom_border_width
+		v.left_border_width = left_border_width * window.scale.x
+		v.right_border_width = right_border_width * window.scale.x
+		v.top_border_width = top_border_width * window.scale.y
+		v.bottom_border_width = bottom_border_width * window.scale.y
 	}
 
 	gl.BufferSubData(

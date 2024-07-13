@@ -39,8 +39,8 @@ framebuffer_size_callback :: proc "c" (
 	// log.debug(glfw.GetWindowSize(handle))
 
 	renderer.framebuffer_resized = true
-	window.size.x = f32(width)
-	window.size.y = f32(height)
+	// window.size.x = f32(width)
+	// window.size.y = f32(height)
 }
 
 start :: proc() -> (ok: bool = false) {

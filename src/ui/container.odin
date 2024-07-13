@@ -1,5 +1,6 @@
 package ui
 
+import "core:log"
 import "core:math/linalg/glsl"
 
 import "../cursor"
@@ -45,6 +46,7 @@ container :: proc(
 
 	if cursor_in(pos, size) {
 		if mouse.is_button_press(.Left) || mouse.is_button_up(.Left) {
+            log.debug("Focus!", pos)
 			focus = true
 		}
 		if focus {

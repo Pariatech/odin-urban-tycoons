@@ -9,6 +9,7 @@ import "../camera"
 import "../cursor"
 import "../mouse"
 import "../renderer"
+import "../window"
 
 SCROLL_BAR_TEXTURES :: []cstring{"resources/icons/scrollbar_bg.png"}
 
@@ -185,6 +186,17 @@ scroll_bar :: proc(
 		offset^ = clamp(offset^, 0, (1 - percent))
 	}
 
+	if cursor_in(pos, size) && mouse.is_button_press(.Left) {
+        dragging^ = true
+	} else if dragging^ && mouse.is_button_release(.Left) {
+        dragging^ = false
+    }
+
+    if dragging^ {
+	    focus = true
+		mouse.capture_all()
+    }
+
 	append(
 		&draw_calls,
 		Scroll_Bar {
@@ -228,15 +240,15 @@ draw_scroll_bar :: proc(using ctx: ^Context, using scroll_bar: Scroll_Bar) {
 	scale := size.y / 32
 
 	for &v in vertices {
-		v.start = pos
-		v.end = pos + size
+		v.start = pos * window.scale
+		v.end = (pos + size) * window.scale
 		v.color = color
 		v.texcoord.z = f32(Scroll_Bar_Texture.Background)
 		v.texcoord.y *= scale
-		v.left_border_width = BORDER_WIDTH
-		v.right_border_width = BORDER_WIDTH
-		v.top_border_width = BORDER_WIDTH
-		v.bottom_border_width = BORDER_WIDTH
+		v.left_border_width = BORDER_WIDTH * window.scale.x
+		v.right_border_width = BORDER_WIDTH * window.scale.x
+		v.top_border_width = BORDER_WIDTH * window.scale.y
+		v.bottom_border_width = BORDER_WIDTH * window.scale.y
 	}
 
 	gl.BufferSubData(

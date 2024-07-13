@@ -375,8 +375,8 @@ text :: proc(
 		av         = av,
 		size       = size,
 		color      = color,
-		clip_start = clip_start,
-		clip_end   = clip_end,
+		clip_start = clip_start * window.scale,
+		clip_end   = clip_end * window.scale,
 	}
 
 	append(&draw_calls, text)

@@ -33,120 +33,120 @@ void main() {
     float top_border_width = frag_top_border_width;
     float bottom_border_width = frag_bottom_border_width;
 
-//    // discard corners
-//    if (coord.x < start.x + left_border_width &&
-//        coord.y < start.y + top_border_width) {
-//        discard;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width &&
-//        coord.y < start.y + top_border_width) {
-//        discard;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width &&
-//        coord.y > end.y - bottom_border_width) {
-//        discard;
-//        return;
-//    }
-//    
-//    if (coord.x < start.x + left_border_width &&
-//        coord.y > end.y - bottom_border_width) {
-//        discard;
-//        return;
-//    }
-//
-//    // outer border
-//    if (coord.x < start.x + left_border_width) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//
-//    if (coord.x > end.x - right_border_width) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//
-//    if (coord.y < start.y + top_border_width) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//
-//    if (coord.y > end.y - bottom_border_width) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//
-//    if (coord.x < start.x + left_border_width * 2 &&
-//        coord.y < start.y + top_border_width * 2) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width * 2 &&
-//        coord.y < start.y + top_border_width * 2) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width * 2 &&
-//        coord.y > end.y - bottom_border_width * 2) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//    
-//    if (coord.x < start.x + left_border_width * 2 &&
-//        coord.y > end.y - bottom_border_width * 2) {
-//        out_color = ubo.border_outer_color;
-//        return;
-//    }
-//
-//    // inner border 
-//    if (coord.x < start.x + left_border_width * 2) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//
-//    if (coord.x > end.x - right_border_width * 2) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//
-//    if (coord.y < start.y + top_border_width * 2) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//
-//    if (coord.y > end.y - bottom_border_width * 2) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//
-//    if (coord.x < start.x + left_border_width * 3 &&
-//        coord.y < start.y + top_border_width * 3) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width * 3 &&
-//        coord.y < start.y + top_border_width * 3) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//    
-//    if (coord.x > end.x - right_border_width * 3 &&
-//        coord.y > end.y - bottom_border_width * 3) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
-//    
-//    if (coord.x < start.x + left_border_width * 3 &&
-//        coord.y > end.y - bottom_border_width * 3) {
-//        out_color = ubo.border_inner_color;
-//        return;
-//    }
+    // discard corners
+    if (coord.x < start.x + left_border_width &&
+        coord.y < start.y + top_border_width) {
+        discard;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width &&
+        coord.y < start.y + top_border_width) {
+        discard;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width &&
+        coord.y > end.y - bottom_border_width) {
+        discard;
+        return;
+    }
+    
+    if (coord.x < start.x + left_border_width &&
+        coord.y > end.y - bottom_border_width) {
+        discard;
+        return;
+    }
+
+    // outer border
+    if (coord.x < start.x + left_border_width) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+
+    if (coord.x > end.x - right_border_width) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+
+    if (coord.y < start.y + top_border_width) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+
+    if (coord.y > end.y - bottom_border_width) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+
+    if (coord.x < start.x + left_border_width * 2 &&
+        coord.y < start.y + top_border_width * 2) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width * 2 &&
+        coord.y < start.y + top_border_width * 2) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width * 2 &&
+        coord.y > end.y - bottom_border_width * 2) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+    
+    if (coord.x < start.x + left_border_width * 2 &&
+        coord.y > end.y - bottom_border_width * 2) {
+        out_color = ubo.border_outer_color;
+        return;
+    }
+
+    // inner border 
+    if (coord.x < start.x + left_border_width * 2) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+
+    if (coord.x > end.x - right_border_width * 2) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+
+    if (coord.y < start.y + top_border_width * 2) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+
+    if (coord.y > end.y - bottom_border_width * 2) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+
+    if (coord.x < start.x + left_border_width * 3 &&
+        coord.y < start.y + top_border_width * 3) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width * 3 &&
+        coord.y < start.y + top_border_width * 3) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+    
+    if (coord.x > end.x - right_border_width * 3 &&
+        coord.y > end.y - bottom_border_width * 3) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
+    
+    if (coord.x < start.x + left_border_width * 3 &&
+        coord.y > end.y - bottom_border_width * 3) {
+        out_color = ubo.border_inner_color;
+        return;
+    }
 
     vec4 tex = texture(texture_sampler, texcoord);
     out_color = mix(color, vec4(tex.rgb, 1), tex.a);
