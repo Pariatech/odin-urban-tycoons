@@ -489,6 +489,11 @@ draw :: proc() {
 	renderer.uniform_object.proj = camera.proj
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, renderer.ubo)
+
+    ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "UniformBufferObject")
+    gl.UniformBlockBinding(renderer.shader_program, ubo_index, 2)
+
+    // ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "ubo")
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, renderer.ubo)
 	gl.BufferSubData(
 		gl.UNIFORM_BUFFER,

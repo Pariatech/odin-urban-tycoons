@@ -1,4 +1,4 @@
-#version 450
+#version 410
 
 uniform sampler2DArray texture_sampler;
 uniform sampler2DArray depth_map_texture_sampler;

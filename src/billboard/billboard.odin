@@ -48,7 +48,7 @@ Billboard_Type :: enum {
 	Cursor,
 	Chair,
 	Table,
-    Object,
+	Object,
 }
 
 Key :: struct {
@@ -585,13 +585,17 @@ load_billboard_depth_map_texture_array :: proc(
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexStorage3D(
+	gl.TexImage3D(
 		gl.TEXTURE_2D_ARRAY,
-		1,
+		0,
 		gl.R16,
 		expected_width,
 		expected_height,
 		textures,
+		0,
+		gl.RED,
+		gl.UNSIGNED_SHORT,
+		nil,
 	)
 
 	for path, i in paths {
@@ -672,7 +676,7 @@ load_billboard_texture_array :: proc(
 	gl.TexParameteri(
 		gl.TEXTURE_2D_ARRAY,
 		gl.TEXTURE_MIN_FILTER,
-		gl.NEAREST_MIPMAP_LINEAR,
+		gl.NEAREST,
 	)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
@@ -685,13 +689,17 @@ load_billboard_texture_array :: proc(
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexStorage3D(
+	gl.TexImage3D(
 		gl.TEXTURE_2D_ARRAY,
-		1,
+		0,
 		gl.RGBA8,
 		expected_width,
 		expected_height,
 		textures,
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		nil,
 	)
 
 	for path, i in paths {
@@ -827,7 +835,9 @@ billboard_1x1_remove :: proc(key: Key) {
 }
 
 get_floor_from_vec3 :: proc(pos: glsl.vec3) -> int {
-	terrain_height := terrain.get_terrain_height({i32(pos.x + 0.5), i32(pos.z + 0.5)})
+	terrain_height := terrain.get_terrain_height(
+		{i32(pos.x + 0.5), i32(pos.z + 0.5)},
+	)
 	return clamp(
 		int((pos.y - terrain_height) / constants.WALL_HEIGHT),
 		0,
@@ -1092,6 +1102,8 @@ update_after_clockwise_rotation_2x2 :: proc(
 
 draw_billboards :: proc(floor: i32) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
+    ubo_index := gl.GetUniformBlockIndex(billboard_shader_program, "UniformBufferObject")
+    gl.UniformBlockBinding(billboard_shader_program, ubo_index, 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
 
 	billboard_uniform_object.view = camera.view

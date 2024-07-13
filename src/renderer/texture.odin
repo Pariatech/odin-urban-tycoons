@@ -1,7 +1,7 @@
 package renderer
 
-import gl "vendor:OpenGL"
 import "core:fmt"
+import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
 TEXTURE_SIZE :: 128
@@ -23,13 +23,17 @@ load_texture_2D_array :: proc(
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexStorage3D(
+	gl.TexImage3D(
 		gl.TEXTURE_2D_ARRAY,
-		3,
+		0,
 		gl.RGBA8,
 		width,
 		height,
 		textures,
+        0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		nil,
 	)
 
 	for path, i in paths {
@@ -85,4 +89,3 @@ load_texture_2D_array :: proc(
 
 	return
 }
-

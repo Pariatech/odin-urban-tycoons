@@ -1,6 +1,6 @@
-#version 450
+#version 410
 
-layout(binding = 2) uniform UniformBufferObject {
+uniform UniformBufferObject {
     mat4 proj;
     mat4 view;
 } ubo;

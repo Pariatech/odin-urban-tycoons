@@ -95,7 +95,7 @@ font_atlas_update :: proc(
 }
 
 create_font_atlas_texture :: proc(using ctx: ^Context) {
-	gl.CreateTextures(gl.TEXTURE_2D, 1, &text_renderer.atlas)
+	gl.GenTextures(1, &text_renderer.atlas)
 
 	defer gl.BindTexture(gl.TEXTURE_2D, 0)
 	gl.BindTexture(gl.TEXTURE_2D, text_renderer.atlas)

@@ -3,8 +3,8 @@ package main
 import "base:runtime"
 import "core:log"
 import "core:math/linalg/glsl"
-import "core:time"
 import "core:os"
+import "core:time"
 import "vendor:glfw"
 
 import "billboard"
@@ -35,39 +35,28 @@ framebuffer_size_callback :: proc "c" (
 ) {
 	context = runtime.default_context()
 
+	// log.debug(glsl.ivec2{width, height})
+	// log.debug(glfw.GetWindowSize(handle))
+
 	renderer.framebuffer_resized = true
 	window.size.x = f32(width)
 	window.size.y = f32(height)
 }
 
 start :: proc() -> (ok: bool = false) {
-    when ODIN_DEBUG {
-	    context.logger = log.create_console_logger()
-        defer log.destroy_console_logger(context.logger)
-    } else {
-        if h, ok := os.open("logs"); ok == os.ERROR_NONE {
-	        context.logger = log.create_file_logger(h)
-            defer log.destroy_file_logger(context.logger)
-            defer os.close(h)
-        }
-    }
-
-	if !bool(glfw.Init()) {
-		log.fatal("GLFW has failed to load.")
-		return
+	when ODIN_DEBUG {
+		context.logger = log.create_console_logger()
+		defer log.destroy_console_logger(context.logger)
+	} else {
+		if h, ok := os.open("logs"); ok == os.ERROR_NONE {
+			context.logger = log.create_file_logger(h)
+			defer log.destroy_file_logger(context.logger)
+			defer os.close(h)
+		}
 	}
 
-	glfw.WindowHint(glfw.SAMPLES, 4)
-	window.handle = glfw.CreateWindow(
-		window.WIDTH,
-		window.HEIGHT,
-		TITLE,
-		nil,
-		nil,
-	)
-
-	defer glfw.DestroyWindow(window.handle)
-	defer glfw.Terminate()
+	window.init(TITLE) or_return
+	defer window.deinit()
 
 	if window.handle == nil {
 		log.fatal("GLFW has failed to load the window.")
@@ -89,9 +78,9 @@ start :: proc() -> (ok: bool = false) {
 	wall.init_wall_renderer() or_return
 
 	keyboard.init()
-    defer keyboard.deinit()
+	defer keyboard.deinit()
 	mouse.init()
-    defer mouse.deinit()
+	defer mouse.deinit()
 	cursor.init()
 
 	billboard.init_draw_contexts() or_return
@@ -99,13 +88,13 @@ start :: proc() -> (ok: bool = false) {
 	world.init()
 
 	ui.init(&ui_ctx) or_return
-    defer ui.deinit(&ui_ctx)
+	defer ui.deinit(&ui_ctx)
 
 	floor_tool.init()
 	terrain_tool.init()
 
-    tools.init()
-    defer tools.deinit()
+	tools.init()
+	defer tools.deinit()
 
 	wall.init_cutaways()
 
@@ -131,6 +120,8 @@ start :: proc() -> (ok: bool = false) {
 
 		glfw.PollEvents()
 
+		// log.debug("Window:", glfw.GetWindowSize(window.handle))
+		// log.debug("Frambuffer:", glfw.GetFramebufferSize(window.handle))
 
 		renderer.begin_draw()
 

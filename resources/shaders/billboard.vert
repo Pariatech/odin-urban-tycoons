@@ -1,9 +1,8 @@
-#version 450
+#version 410
 
-layout(binding = 2) uniform UniformBufferObject {
+layout (std140) uniform UniformBufferObject {
     mat4 proj;
     mat4 view;
-    mat4 rotation;
 } ubo;
 
 layout(location = 0) in vec3 pos;

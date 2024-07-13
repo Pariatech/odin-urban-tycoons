@@ -12,7 +12,7 @@ import "../window"
 import "../tile"
 
 GL_MAJOR_VERSION :: 4
-GL_MINOR_VERSION :: 5
+GL_MINOR_VERSION :: 1
 VERTEX_SHADER_PATH :: "resources/shaders/shader.vert"
 FRAGMENT_SHADER_PATH :: "resources/shaders/shader.frag"
 
@@ -96,7 +96,7 @@ init :: proc() -> (ok: bool = true) {
 	gl.Enable(gl.MULTISAMPLE)
 
 	gl.Enable(gl.DEBUG_OUTPUT)
-	gl.DebugMessageCallback(gl_debug_callback, nil)
+	// gl.DebugMessageCallback(gl_debug_callback, nil)
 
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)

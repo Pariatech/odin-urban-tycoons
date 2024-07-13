@@ -176,24 +176,16 @@ init_icon_renderer :: proc(using ctx: ^Context) -> (ok: bool = false) {
 init_icon_texture_array :: proc(
 	texture_array: ^u32,
 	textures: []cstring,
-    wrap: i32 = gl.REPEAT
+	wrap: i32 = gl.REPEAT,
 ) -> (
 	ok: bool = true,
 ) {
-	gl.CreateTextures(gl.TEXTURE_2D_ARRAY, 1, texture_array)
+	gl.GenTextures(1, texture_array)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array^)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
-	gl.TexParameteri(
-		gl.TEXTURE_2D_ARRAY,
-		gl.TEXTURE_WRAP_S,
-        wrap,
-	)
-	gl.TexParameteri(
-		gl.TEXTURE_2D_ARRAY,
-		gl.TEXTURE_WRAP_T,
-        wrap,
-	)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, wrap)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, wrap)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
@@ -286,7 +278,18 @@ load_texture_2D_array :: proc(paths: []cstring) -> (ok: bool = true) {
 	width, height: i32
 	stbi.info(paths[0], &width, &height, nil)
 
-	gl.TexStorage3D(gl.TEXTURE_2D_ARRAY, 3, gl.RGBA8, width, height, textures)
+	gl.TexImage3D(
+		gl.TEXTURE_2D_ARRAY,
+		0,
+		gl.RGBA8,
+		width,
+		height,
+		textures,
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		nil,
+	)
 
 	for path, i in paths {
 		w, h: i32

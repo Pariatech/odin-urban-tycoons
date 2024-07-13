@@ -1,7 +1,7 @@
-#version 450
+#version 410
 
 
-layout(binding = 0) uniform UniformBufferObject {
+uniform UniformBufferObject {
 	vec4  border_inner_color;
 	vec4  border_outer_color;
 	float border_width;

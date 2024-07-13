@@ -1,9 +1,9 @@
-#version 450
+#version 410
 
 uniform sampler2DArray texture_sampler;
 uniform sampler2DArray mask_sampler;
 
-layout(binding = 2) uniform UniformBufferObject {
+uniform UniformBufferObject {
     mat4 proj;
     mat4 view;
 } ubo;
