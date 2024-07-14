@@ -1,15 +1,15 @@
 package renderer
 
+import "base:runtime"
+import "core:log"
 import "core:math/linalg/glsl"
 import "core:os"
-import "core:log"
-import "base:runtime"
 import gl "vendor:OpenGL"
 import "vendor:glfw"
 import stbi "vendor:stb/image"
 
-import "../window"
 import "../tile"
+import "../window"
 
 GL_MAJOR_VERSION :: 4
 GL_MINOR_VERSION :: 1
@@ -95,9 +95,9 @@ init :: proc() -> (ok: bool = true) {
 
 	gl.Enable(gl.MULTISAMPLE)
 
-    when ODIN_OS != .Darwin {
-	    gl.Enable(gl.DEBUG_OUTPUT)
-    }
+	when ODIN_DEBUG && ODIN_OS != .Darwin {
+		gl.Enable(gl.DEBUG_OUTPUT)
+	}
 	// gl.DebugMessageCallback(gl_debug_callback, nil)
 
 	gl.Enable(gl.DEPTH_TEST)
@@ -116,7 +116,7 @@ init :: proc() -> (ok: bool = true) {
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 	// gl.ActiveTexture(gl.TEXTURE1)
 
-    log.debug(gl.GetString(gl.VERSION))
+	log.debug(gl.GetString(gl.VERSION))
 
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
