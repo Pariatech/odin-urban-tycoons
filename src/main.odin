@@ -22,6 +22,7 @@ import "ui"
 import "wall"
 import "window"
 import "world"
+import "object"
 
 TITLE :: "My Window!"
 
@@ -85,6 +86,9 @@ start :: proc() -> (ok: bool = false) {
 
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
+
+    object.init() or_return
+
 	world.init()
 
 	ui.init(&ui_ctx) or_return
@@ -143,6 +147,7 @@ start :: proc() -> (ok: bool = false) {
 		tools.update(delta_time)
 
 		world.draw()
+        object.draw()
 
 		ui.draw(&ui_ctx)
 

@@ -15,8 +15,6 @@ terrain_heights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]f32
 terrain_lights: [constants.WORLD_WIDTH + 1][constants.WORLD_DEPTH + 1]glsl.vec3
 
 init_terrain :: proc() {
-	set_terrain_height(3, 3, .5)
-
 	for x in 0 ..= constants.WORLD_WIDTH {
 		for z in 0 ..= constants.WORLD_DEPTH {
 			calculate_terrain_light(x, z)
