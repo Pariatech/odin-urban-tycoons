@@ -66,64 +66,64 @@ Texture :: enum {
 	Wood_Window_SE,
 	Wood_Window_NE,
 	Wood_Window_NW,
-	Wood_Chair_SW,
-	Wood_Chair_SE,
-	Wood_Chair_NE,
-	Wood_Chair_NW,
-	Wood_Table_1x2_1_SW,
-	Wood_Table_1x2_2_SW,
-	Wood_Table_1x2_1_SE,
-	Wood_Table_1x2_2_SE,
-	Wood_Table_1x2_1_NE,
-	Wood_Table_1x2_2_NE,
-	Wood_Table_1x2_1_NW,
-	Wood_Table_1x2_2_NW,
+	Wood_Chair_S,
+	Wood_Chair_W,
+	Wood_Chair_N,
+	Wood_Chair_E,
+	Wood_Table_1x2_1_S,
+	Wood_Table_1x2_2_S,
+	Wood_Table_1x2_1_W,
+	Wood_Table_1x2_2_W,
+	Wood_Table_1x2_1_N,
+	Wood_Table_1x2_2_N,
+	Wood_Table_1x2_1_E,
+	Wood_Table_1x2_2_E,
 }
 
 DIFFUSE_PATHS :: [Texture]cstring {
-	.Wood_Door_SW        = "resources/textures/billboards/door-wood/sw-diffuse.png",
-	.Wood_Door_SE        = "resources/textures/billboards/door-wood/se-diffuse.png",
-	.Wood_Door_NE        = "resources/textures/billboards/door-wood/ne-diffuse.png",
-	.Wood_Door_NW        = "resources/textures/billboards/door-wood/nw-diffuse.png",
-	.Wood_Window_SW      = "resources/textures/billboards/window-wood/sw-diffuse.png",
-	.Wood_Window_SE      = "resources/textures/billboards/window-wood/se-diffuse.png",
-	.Wood_Window_NE      = "resources/textures/billboards/window-wood/ne-diffuse.png",
-	.Wood_Window_NW      = "resources/textures/billboards/window-wood/nw-diffuse.png",
-	.Wood_Chair_SW       = "resources/textures/objects/Chairs/diffuse/Chair_0001.png",
-	.Wood_Chair_SE       = "resources/textures/objects/Chairs/diffuse/Chair_0002.png",
-	.Wood_Chair_NE       = "resources/textures/objects/Chairs/diffuse/Chair_0003.png",
-	.Wood_Chair_NW       = "resources/textures/objects/Chairs/diffuse/Chair_0004.png",
-	.Wood_Table_1x2_1_SW = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0001.png",
-	.Wood_Table_1x2_2_SW = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0001.png",
-	.Wood_Table_1x2_1_SE = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0002.png",
-	.Wood_Table_1x2_2_SE = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0002.png",
-	.Wood_Table_1x2_1_NE = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0003.png",
-	.Wood_Table_1x2_2_NE = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0003.png",
-	.Wood_Table_1x2_1_NW = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0004.png",
-	.Wood_Table_1x2_2_NW = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0004.png",
+	.Wood_Door_SW       = "resources/textures/billboards/door-wood/sw-diffuse.png",
+	.Wood_Door_SE       = "resources/textures/billboards/door-wood/se-diffuse.png",
+	.Wood_Door_NE       = "resources/textures/billboards/door-wood/ne-diffuse.png",
+	.Wood_Door_NW       = "resources/textures/billboards/door-wood/nw-diffuse.png",
+	.Wood_Window_SW     = "resources/textures/billboards/window-wood/sw-diffuse.png",
+	.Wood_Window_SE     = "resources/textures/billboards/window-wood/se-diffuse.png",
+	.Wood_Window_NE     = "resources/textures/billboards/window-wood/ne-diffuse.png",
+	.Wood_Window_NW     = "resources/textures/billboards/window-wood/nw-diffuse.png",
+	.Wood_Chair_S       = "resources/textures/objects/Chairs/diffuse/Chair_0001.png",
+	.Wood_Chair_W       = "resources/textures/objects/Chairs/diffuse/Chair_0002.png",
+	.Wood_Chair_N       = "resources/textures/objects/Chairs/diffuse/Chair_0003.png",
+	.Wood_Chair_E       = "resources/textures/objects/Chairs/diffuse/Chair_0004.png",
+	.Wood_Table_1x2_1_S = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0001.png",
+	.Wood_Table_1x2_2_S = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0001.png",
+	.Wood_Table_1x2_1_W = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0002.png",
+	.Wood_Table_1x2_2_W = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0002.png",
+	.Wood_Table_1x2_1_N = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0003.png",
+	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0003.png",
+	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0004.png",
+	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0004.png",
 }
 
 DEPTH_MAP_PATHS :: [Texture]cstring {
-	.Wood_Door_SW        = "resources/textures/billboards/door-wood/sw-depth-map.png",
-	.Wood_Door_SE        = "resources/textures/billboards/door-wood/se-depth-map.png",
-	.Wood_Door_NE        = "resources/textures/billboards/door-wood/ne-depth-map.png",
-	.Wood_Door_NW        = "resources/textures/billboards/door-wood/nw-depth-map.png",
-	.Wood_Window_SW      = "resources/textures/billboards/window-wood/sw-depth-map.png",
-	.Wood_Window_SE      = "resources/textures/billboards/window-wood/se-depth-map.png",
-	.Wood_Window_NE      = "resources/textures/billboards/window-wood/ne-depth-map.png",
-	.Wood_Window_NW      = "resources/textures/billboards/window-wood/nw-depth-map.png",
-	.Wood_Chair_SW       = "resources/textures/objects/Chairs/mist/Chair_0001.png",
-	.Wood_Chair_SE       = "resources/textures/objects/Chairs/mist/Chair_0002.png",
-	.Wood_Chair_NE       = "resources/textures/objects/Chairs/mist/Chair_0003.png",
-	.Wood_Chair_NW       = "resources/textures/objects/Chairs/mist/Chair_0004.png",
-	.Wood_Table_1x2_1_SW = "resources/textures/objects/Tables/mist/Table.6Places.001_0001.png",
-	.Wood_Table_1x2_2_SW = "resources/textures/objects/Tables/mist/Table.6Places.002_0001.png",
-	.Wood_Table_1x2_1_SE = "resources/textures/objects/Tables/mist/Table.6Places.001_0002.png",
-	.Wood_Table_1x2_2_SE = "resources/textures/objects/Tables/mist/Table.6Places.002_0002.png",
-	.Wood_Table_1x2_1_NE = "resources/textures/objects/Tables/mist/Table.6Places.001_0003.png",
-	.Wood_Table_1x2_2_NE = "resources/textures/objects/Tables/mist/Table.6Places.002_0003.png",
-	.Wood_Table_1x2_1_NW = "resources/textures/objects/Tables/mist/Table.6Places.001_0004.png",
-	.Wood_Table_1x2_2_NW = "resources/textures/objects/Tables/mist/Table.6Places.002_0004.png",
+	.Wood_Door_SW       = "resources/textures/billboards/door-wood/sw-depth-map.png",
+	.Wood_Door_SE       = "resources/textures/billboards/door-wood/se-depth-map.png",
+	.Wood_Door_NE       = "resources/textures/billboards/door-wood/ne-depth-map.png",
+	.Wood_Door_NW       = "resources/textures/billboards/door-wood/nw-depth-map.png",
+	.Wood_Window_SW     = "resources/textures/billboards/window-wood/sw-depth-map.png",
+	.Wood_Window_SE     = "resources/textures/billboards/window-wood/se-depth-map.png",
+	.Wood_Window_NE     = "resources/textures/billboards/window-wood/ne-depth-map.png",
+	.Wood_Window_NW     = "resources/textures/billboards/window-wood/nw-depth-map.png",
+	.Wood_Chair_S       = "resources/textures/objects/Chairs/mist/Chair_0001.png",
+	.Wood_Chair_W       = "resources/textures/objects/Chairs/mist/Chair_0002.png",
+	.Wood_Chair_N       = "resources/textures/objects/Chairs/mist/Chair_0003.png",
+	.Wood_Chair_E       = "resources/textures/objects/Chairs/mist/Chair_0004.png",
+	.Wood_Table_1x2_1_S = "resources/textures/objects/Tables/mist/Table.6Places.001_0001.png",
+	.Wood_Table_1x2_2_S = "resources/textures/objects/Tables/mist/Table.6Places.002_0001.png",
+	.Wood_Table_1x2_1_W = "resources/textures/objects/Tables/mist/Table.6Places.001_0002.png",
+	.Wood_Table_1x2_2_W = "resources/textures/objects/Tables/mist/Table.6Places.002_0002.png",
+	.Wood_Table_1x2_1_N = "resources/textures/objects/Tables/mist/Table.6Places.001_0003.png",
+	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/mist/Table.6Places.002_0003.png",
+	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/mist/Table.6Places.001_0004.png",
+	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/mist/Table.6Places.002_0004.png",
 }
 
 BILLBOARDS :: [Model][Orientation][]Texture {
@@ -140,16 +140,16 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.West = {.Wood_Window_NW},
 	},
 	.Wood_Chair =  {
-		.South = {.Wood_Chair_SW},
-		.East = {.Wood_Chair_SE},
-		.North = {.Wood_Chair_NE},
-		.West = {.Wood_Chair_NW},
+		.South = {.Wood_Chair_S},
+		.East = {.Wood_Chair_E},
+		.North = {.Wood_Chair_N},
+		.West = {.Wood_Chair_W},
 	},
 	.Wood_Table_1x2 =  {
-		.South = {.Wood_Table_1x2_1_SW, .Wood_Table_1x2_2_SW},
-		.East = {.Wood_Table_1x2_1_SE, .Wood_Table_1x2_2_SE},
-		.North = {.Wood_Table_1x2_1_NE, .Wood_Table_1x2_2_NE},
-		.West = {.Wood_Table_1x2_1_NW, .Wood_Table_1x2_2_NW},
+		.South = {.Wood_Table_1x2_1_S, .Wood_Table_1x2_2_S},
+		.East = {.Wood_Table_1x2_1_E, .Wood_Table_1x2_2_E},
+		.North = {.Wood_Table_1x2_1_N, .Wood_Table_1x2_2_N},
+		.West = {.Wood_Table_1x2_1_W, .Wood_Table_1x2_2_W},
 	},
 }
 
@@ -256,7 +256,21 @@ init :: proc() -> (ok: bool = true) {
 		}
 	}
 
-    add({1, 0, 1}, .Wood_Chair, .South)
+	add({3, 0, 3}, .Wood_Chair, .South)
+	add({4, 0, 4}, .Wood_Chair, .East)
+	add({3, 0, 5}, .Wood_Chair, .North)
+	add({2, 0, 4}, .Wood_Chair, .West)
+
+	add({0, 0, 1}, .Wood_Table_1x2, .South)
+	add({2, 0, 0}, .Wood_Table_1x2, .North)
+	add({0, 0, 2}, .Wood_Table_1x2, .East)
+	add({1, 0, 4}, .Wood_Table_1x2, .West)
+
+    // log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
+    // log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
+    // log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .West))
+    // log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .East))
+    // log.debug(can_add({3, 0, 4}, .Wood_Table_1x2, .East))
 
 	return true
 }
@@ -418,8 +432,8 @@ draw :: proc() {
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 
-    // gl.Disable(gl.DEPTH_TEST)
-    // defer gl.Enable(gl.DEPTH_TEST)
+	// gl.Disable(gl.DEPTH_TEST)
+	// defer gl.Enable(gl.DEPTH_TEST)
 
 	for floor in 0 ..< c.WORLD_HEIGHT {
 		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
@@ -665,13 +679,13 @@ load_texture_array :: proc() -> (ok: bool = true) {
 relative_pos :: proc(x, z: i32, orientation: Orientation) -> glsl.ivec3 {
 	switch orientation {
 	case .South:
-		return {x, 0, z}
-	case .East:
-		return {-x, 0, z}
-	case .North:
 		return {x, 0, -z}
+	case .East:
+		return {z, 0, x}
+	case .North:
+		return {x, 0, z}
 	case .West:
-		return {-x, 0, -z}
+		return {-z, 0, x}
 	}
 
 	return {}
@@ -693,18 +707,43 @@ add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
 	type_map := TYPE_MAP
 	model_size := MODEL_SIZE
 
-    parent := pos
+	parent := pos
 	size := model_size[model]
 	for x in 0 ..< size.x {
 		for y in 0 ..< size.y {
-            pos := pos + relative_pos(x, y, orientation)
-	        chunk := &chunks[pos.y][pos.x][pos.z]
+			pos := pos + relative_pos(x, y, orientation)
+			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
 			chunk.objects[type_map[model]][pos] = {
 				texture = get_texture(x, y, model, orientation),
-				parent  = parent,
-                light = {1, 1, 1},
+				parent = parent,
+				light = {1, 1, 1},
 			}
-	        chunk.dirty = true
+			chunk.dirty = true
 		}
 	}
+}
+
+can_add :: proc(
+	pos: glsl.ivec3,
+	model: Model,
+	orientation: Orientation,
+) -> bool {
+	type_map := TYPE_MAP
+	model_size := MODEL_SIZE
+
+	size := model_size[model]
+	for x in 0 ..< size.x {
+		for y in 0 ..< size.y {
+			pos := pos + relative_pos(x, y, orientation)
+			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
+
+			for objects in chunk.objects {
+				if pos in objects {
+					return false
+				}
+			}
+		}
+	}
+
+    return true
 }
