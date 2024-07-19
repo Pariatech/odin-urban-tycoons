@@ -87,9 +87,9 @@ start :: proc() -> (ok: bool = false) {
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 
-    object.init() or_return
-
 	world.init()
+
+    object.init() or_return
 
 	ui.init(&ui_ctx) or_return
 	defer ui.deinit(&ui_ctx)

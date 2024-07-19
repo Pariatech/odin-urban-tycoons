@@ -9,11 +9,11 @@ import "../camera"
 import "../constants"
 import "../floor"
 import "../furniture"
+import "../object"
 import "../renderer"
 import "../tile"
 import "../tools/wall_tool"
 import "../wall"
-import "../object"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -491,10 +491,13 @@ draw :: proc() {
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, renderer.ubo)
 
-    ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "UniformBufferObject")
-    gl.UniformBlockBinding(renderer.shader_program, ubo_index, 2)
+	ubo_index := gl.GetUniformBlockIndex(
+		renderer.shader_program,
+		"UniformBufferObject",
+	)
+	gl.UniformBlockBinding(renderer.shader_program, ubo_index, 2)
 
-    // ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "ubo")
+	// ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "ubo")
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, renderer.ubo)
 	gl.BufferSubData(
 		gl.UNIFORM_BUFFER,
@@ -509,7 +512,7 @@ draw :: proc() {
 		tile.draw_tiles(flr)
 		wall.draw_walls(flr)
 		billboard.draw_billboards(flr)
-        // object.draw(flr)
+		// object.draw(flr)
 	}
 }
 
@@ -523,5 +526,5 @@ update_after_rotation :: proc(rotated: camera.Rotated) {
 		billboard.update_after_clockwise_rotation()
 	}
 	wall.update_after_rotation()
-    object.on_rotation()
+	object.on_rotation()
 }

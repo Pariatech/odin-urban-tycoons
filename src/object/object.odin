@@ -12,6 +12,7 @@ import "../camera"
 import c "../constants"
 import "../floor"
 import "../renderer"
+import "../wall"
 
 Type :: enum {
 	Door,
@@ -34,9 +35,27 @@ Orientation :: enum {
 	West,
 }
 
+Placement :: enum {
+	Floor,
+	Wall,
+	Counter,
+	Table,
+}
+
+Placement_Set :: bit_set[Placement]
+
+TYPE_PLACEMENT_TABLE :: #partial [Type]Placement_Set {
+	.Door = {.Wall},
+	.Window = {.Wall},
+	.Chair = {.Floor},
+	.Table = {.Floor},
+}
+
+MODEL_PLACEMENT_TABLE :: #partial [Model]Placement_Set{}
+
 MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Wood_Door = {1, 1},
-	.Wood_Window = {1, 1},
+	.Wood_Window = {1, 2},
 	.Wood_Chair = {1, 1},
 	.Wood_Table_1x2 = {1, 2},
 }
@@ -63,10 +82,14 @@ Texture :: enum {
 	Wood_Door_SE,
 	Wood_Door_NE,
 	Wood_Door_NW,
-	Wood_Window_SW,
-	Wood_Window_SE,
-	Wood_Window_NE,
-	Wood_Window_NW,
+	Wood_Window_1_S,
+	Wood_Window_1_W,
+	Wood_Window_1_N,
+	Wood_Window_1_E,
+	Wood_Window_2_S,
+	Wood_Window_2_W,
+	Wood_Window_2_N,
+	Wood_Window_2_E,
 	Wood_Chair_S,
 	Wood_Chair_W,
 	Wood_Chair_N,
@@ -86,10 +109,14 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Wood_Door_SE       = "resources/textures/billboards/door-wood/se-diffuse.png",
 	.Wood_Door_NE       = "resources/textures/billboards/door-wood/ne-diffuse.png",
 	.Wood_Door_NW       = "resources/textures/billboards/door-wood/nw-diffuse.png",
-	.Wood_Window_SW     = "resources/textures/billboards/window-wood/sw-diffuse.png",
-	.Wood_Window_SE     = "resources/textures/billboards/window-wood/se-diffuse.png",
-	.Wood_Window_NE     = "resources/textures/billboards/window-wood/ne-diffuse.png",
-	.Wood_Window_NW     = "resources/textures/billboards/window-wood/nw-diffuse.png",
+	.Wood_Window_1_S    = "resources/textures/objects/Windows/diffuse/Wood.Window.001_0001.png",
+	.Wood_Window_1_W    = "resources/textures/objects/Windows/diffuse/Wood.Window.001_0002.png",
+	.Wood_Window_1_N    = "resources/textures/objects/Windows/diffuse/Wood.Window.001_0003.png",
+	.Wood_Window_1_E    = "resources/textures/objects/Windows/diffuse/Wood.Window.001_0004.png",
+	.Wood_Window_2_S    = "resources/textures/objects/Windows/diffuse/Wood.Window.002_0001.png",
+	.Wood_Window_2_W    = "resources/textures/objects/Windows/diffuse/Wood.Window.002_0002.png",
+	.Wood_Window_2_N    = "resources/textures/objects/Windows/diffuse/Wood.Window.002_0003.png",
+	.Wood_Window_2_E    = "resources/textures/objects/Windows/diffuse/Wood.Window.002_0004.png",
 	.Wood_Chair_S       = "resources/textures/objects/Chairs/diffuse/Chair_0001.png",
 	.Wood_Chair_W       = "resources/textures/objects/Chairs/diffuse/Chair_0002.png",
 	.Wood_Chair_N       = "resources/textures/objects/Chairs/diffuse/Chair_0003.png",
@@ -109,10 +136,14 @@ DEPTH_MAP_PATHS :: [Texture]cstring {
 	.Wood_Door_SE       = "resources/textures/billboards/door-wood/se-depth-map.png",
 	.Wood_Door_NE       = "resources/textures/billboards/door-wood/ne-depth-map.png",
 	.Wood_Door_NW       = "resources/textures/billboards/door-wood/nw-depth-map.png",
-	.Wood_Window_SW     = "resources/textures/billboards/window-wood/sw-depth-map.png",
-	.Wood_Window_SE     = "resources/textures/billboards/window-wood/se-depth-map.png",
-	.Wood_Window_NE     = "resources/textures/billboards/window-wood/ne-depth-map.png",
-	.Wood_Window_NW     = "resources/textures/billboards/window-wood/nw-depth-map.png",
+	.Wood_Window_1_S    = "resources/textures/objects/Windows/mist/Wood.Window.001_0001.png",
+	.Wood_Window_1_W    = "resources/textures/objects/Windows/mist/Wood.Window.001_0002.png",
+	.Wood_Window_1_N    = "resources/textures/objects/Windows/mist/Wood.Window.001_0003.png",
+	.Wood_Window_1_E    = "resources/textures/objects/Windows/mist/Wood.Window.001_0004.png",
+	.Wood_Window_2_S    = "resources/textures/objects/Windows/mist/Wood.Window.002_0001.png",
+	.Wood_Window_2_W    = "resources/textures/objects/Windows/mist/Wood.Window.002_0002.png",
+	.Wood_Window_2_N    = "resources/textures/objects/Windows/mist/Wood.Window.002_0003.png",
+	.Wood_Window_2_E    = "resources/textures/objects/Windows/mist/Wood.Window.002_0004.png",
 	.Wood_Chair_S       = "resources/textures/objects/Chairs/mist/Chair_0001.png",
 	.Wood_Chair_W       = "resources/textures/objects/Chairs/mist/Chair_0002.png",
 	.Wood_Chair_N       = "resources/textures/objects/Chairs/mist/Chair_0003.png",
@@ -135,10 +166,10 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.West = {.Wood_Door_NW},
 	},
 	.Wood_Window =  {
-		.South = {.Wood_Window_SW},
-		.East = {.Wood_Window_SE},
-		.North = {.Wood_Window_NE},
-		.West = {.Wood_Window_NW},
+		.South = {.Wood_Window_1_S, .Wood_Window_2_S},
+		.East = {.Wood_Window_1_E, .Wood_Window_2_E},
+		.North = {.Wood_Window_1_N, .Wood_Window_2_N},
+		.West = {.Wood_Window_1_W, .Wood_Window_2_W},
 	},
 	.Wood_Chair =  {
 		.South = {.Wood_Chair_S},
@@ -160,8 +191,15 @@ Object :: struct {
 	parent:  glsl.ivec3,
 }
 
+Object_Key :: struct {
+	pos:         glsl.ivec3,
+	type:        Type,
+	orientation: Orientation,
+	placement:   Placement,
+}
+
 Chunk :: struct {
-	objects:  [Type]map[glsl.ivec3]Object,
+	objects:  map[Object_Key]Object,
 	vao, ibo: u32,
 	dirty:    bool,
 }
@@ -257,15 +295,56 @@ init :: proc() -> (ok: bool = true) {
 		}
 	}
 
-	add({3, 0, 3}, .Wood_Chair, .South)
-	add({4, 0, 4}, .Wood_Chair, .East)
-	add({3, 0, 5}, .Wood_Chair, .North)
-	add({2, 0, 4}, .Wood_Chair, .West)
+	add({3, 0, 3}, .Wood_Chair, .South, .Floor)
+	add({4, 0, 4}, .Wood_Chair, .East, .Floor)
+	add({3, 0, 5}, .Wood_Chair, .North, .Floor)
+	add({2, 0, 4}, .Wood_Chair, .West, .Floor)
 
-	add({0, 0, 1}, .Wood_Table_1x2, .South)
-	add({2, 0, 0}, .Wood_Table_1x2, .North)
-	add({0, 0, 2}, .Wood_Table_1x2, .East)
-	add({1, 0, 4}, .Wood_Table_1x2, .West)
+	add({0, 0, 1}, .Wood_Table_1x2, .South, .Floor)
+	add({2, 0, 0}, .Wood_Table_1x2, .North, .Floor)
+	add({0, 0, 2}, .Wood_Table_1x2, .East, .Floor)
+	add({1, 0, 4}, .Wood_Table_1x2, .West, .Floor)
+
+	wall.set_wall(
+		{5, 0, 5},
+		.N_S,
+		 {
+			type = .End_Right_Corner,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+	wall.set_wall(
+		{5, 0, 5},
+		.E_W,
+		 {
+			type = .Left_Corner_End,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+
+	add({5, 0, 5}, .Wood_Window, .South, .Wall)
+	add({5, 0, 5}, .Wood_Window, .West, .Wall)
+
+	wall.set_wall(
+		{7, 0, 5},
+		.N_S,
+		 {
+			type = .End_Right_Corner,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+	wall.set_wall(
+		{7, 0, 5},
+		.E_W,
+		 {
+			type = .Left_Corner_End,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+
+	add({7, 0, 4}, .Wood_Window, .North, .Wall)
+	add({6, 0, 5}, .Wood_Window, .East, .Wall)
+
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
@@ -365,10 +444,7 @@ get_draw_texture :: proc(tex: Texture) -> f32 {
 }
 
 draw_chunk :: proc(using chunk: ^Chunk) {
-	instances: int
-	for o in objects {
-		instances += len(o)
-	}
+	instances := len(objects)
 
 	if dirty {
 		dirty = false
@@ -383,23 +459,21 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 		)
 
 		i := 0
-		for o in objects {
-			for pos, v in o {
-				texture := f32(v.texture)
-				instance: Instance = {
-					position = {f32(pos.x), f32(pos.y), f32(pos.z)},
-					light = v.light,
-					texture = get_draw_texture(v.texture),
-					depth_map = get_draw_texture(v.texture),
-				}
-				gl.BufferSubData(
-					gl.ARRAY_BUFFER,
-					i * size_of(Instance),
-					size_of(Instance),
-					&instance,
-				)
-				i += 1
+		for k, v in objects {
+			texture := f32(v.texture)
+			instance: Instance = {
+				position = {f32(k.pos.x), f32(k.pos.y), f32(k.pos.z)},
+				light = v.light,
+				texture = get_draw_texture(v.texture),
+				depth_map = get_draw_texture(v.texture),
 			}
+			gl.BufferSubData(
+				gl.ARRAY_BUFFER,
+				i * size_of(Instance),
+				size_of(Instance),
+				&instance,
+			)
+			i += 1
 		}
 
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -711,17 +785,29 @@ get_texture :: proc(
 	return billboards[model][orientation][x * size.x + z]
 }
 
-add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
+add :: proc(
+	pos: glsl.ivec3,
+	model: Model,
+	orientation: Orientation,
+	placement: Placement,
+) {
 	type_map := TYPE_MAP
 	model_size := MODEL_SIZE
 
 	parent := pos
 	size := model_size[model]
+	type := type_map[model]
 	for x in 0 ..< size.x {
 		for y in 0 ..< size.y {
 			pos := pos + relative_pos(x, y, orientation)
 			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
-			chunk.objects[type_map[model]][pos] = {
+			key := Object_Key {
+				pos         = pos,
+				type        = type,
+				orientation = orientation,
+				placement   = placement,
+			}
+			chunk.objects[key] = {
 				texture = get_texture(x, y, model, orientation),
 				parent = parent,
 				light = {1, 1, 1},
@@ -729,6 +815,95 @@ add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
 			chunk.dirty = true
 		}
 	}
+
+    on_add(pos, model, orientation)
+}
+
+on_add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
+	type_map := TYPE_MAP
+	type := type_map[model]
+
+    if type != .Window && type != .Door {
+        return
+    }
+
+		switch orientation {
+		case .South, .North:
+			pos := pos
+			if orientation == .North {
+				pos += {0, 0, 1}
+			}
+			if w, ok := wall.get_wall(pos, .E_W); ok {
+                if type == .Window {
+                    w.mask = .Window_Opening
+                } else {
+                    w.mask = .Door_Opening
+                }
+				wall.set_wall(pos, .E_W, w)
+			}
+		case .East, .West:
+			pos := pos
+			if orientation == .East {
+				pos += {1, 0, 0}
+			}
+			if w, ok := wall.get_wall(pos, .N_S); ok {
+                if type == .Window {
+                    w.mask = .Window_Opening
+                } else {
+                    w.mask = .Door_Opening
+                }
+				wall.set_wall(pos, .N_S, w)
+			}
+		}
+}
+
+can_add_on_wall :: proc(
+	pos: glsl.ivec3,
+	model: Model,
+	orientation: Orientation,
+) -> bool {
+	model_size := MODEL_SIZE
+
+	size := model_size[model]
+	for x in 0 ..< size.x {
+		switch orientation {
+		case .South, .North:
+			pos := pos + {x, 0, 0}
+			if orientation == .North {
+				pos += {0, 0, 1}
+			}
+			if !wall.has_east_west_wall(pos) {
+				return false
+			}
+		case .East, .West:
+			pos := pos + {0, 0, x}
+			if orientation == .East {
+				pos += {1, 0, 0}
+			}
+			if !wall.has_north_south_wall(pos) {
+				return false
+			}
+		}
+
+		for y in 0 ..< size.y {
+			pos := pos + relative_pos(x, y, orientation)
+			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
+
+			obstacle_orientation := orientation
+			if y != 0 {
+				obstacle_orientation = Orientation(int(orientation) + 2 % 4)
+			}
+			for k, v in chunk.objects {
+				if k.pos == pos &&
+				   k.placement == .Wall &&
+				   k.orientation == obstacle_orientation {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
 }
 
 can_add :: proc(
@@ -736,7 +911,6 @@ can_add :: proc(
 	model: Model,
 	orientation: Orientation,
 ) -> bool {
-	type_map := TYPE_MAP
 	model_size := MODEL_SIZE
 
 	size := model_size[model]
@@ -745,8 +919,8 @@ can_add :: proc(
 			pos := pos + relative_pos(x, y, orientation)
 			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
 
-			for objects in chunk.objects {
-				if pos in objects {
+			for k, v in chunk.objects {
+				if k.pos == pos {
 					return false
 				}
 			}
@@ -777,7 +951,7 @@ on_rotation :: proc() {
 	for &y in chunks {
 		for &x in y {
 			for &z in x {
-                z.dirty = true
+				z.dirty = true
 			}
 		}
 	}
