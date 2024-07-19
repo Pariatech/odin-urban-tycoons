@@ -1,6 +1,7 @@
 package object
 
 import "core:log"
+import "core:math"
 import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
@@ -71,12 +72,12 @@ Texture :: enum {
 	Wood_Chair_N,
 	Wood_Chair_E,
 	Wood_Table_1x2_1_S,
-	Wood_Table_1x2_2_S,
 	Wood_Table_1x2_1_W,
-	Wood_Table_1x2_2_W,
 	Wood_Table_1x2_1_N,
-	Wood_Table_1x2_2_N,
 	Wood_Table_1x2_1_E,
+	Wood_Table_1x2_2_S,
+	Wood_Table_1x2_2_W,
+	Wood_Table_1x2_2_N,
 	Wood_Table_1x2_2_E,
 }
 
@@ -266,11 +267,11 @@ init :: proc() -> (ok: bool = true) {
 	add({0, 0, 2}, .Wood_Table_1x2, .East)
 	add({1, 0, 4}, .Wood_Table_1x2, .West)
 
-    // log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
-    // log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
-    // log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .West))
-    // log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .East))
-    // log.debug(can_add({3, 0, 4}, .Wood_Table_1x2, .East))
+	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
+	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
+	// log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .West))
+	// log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .East))
+	// log.debug(can_add({3, 0, 4}, .Wood_Table_1x2, .East))
 
 	return true
 }
@@ -357,6 +358,12 @@ init_chunk :: proc(using chunk: ^Chunk) {
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
+get_draw_texture :: proc(tex: Texture) -> f32 {
+	family := (int(tex) / 4) * 4
+	index := int(tex) - family
+	return f32(family + (index + int(camera.rotation)) % 4)
+}
+
 draw_chunk :: proc(using chunk: ^Chunk) {
 	instances: int
 	for o in objects {
@@ -378,11 +385,12 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 		i := 0
 		for o in objects {
 			for pos, v in o {
+				texture := f32(v.texture)
 				instance: Instance = {
 					position = {f32(pos.x), f32(pos.y), f32(pos.z)},
 					light = v.light,
-					texture = f32(v.texture),
-					depth_map = f32(v.texture),
+					texture = get_draw_texture(v.texture),
+					depth_map = get_draw_texture(v.texture),
 				}
 				gl.BufferSubData(
 					gl.ARRAY_BUFFER,
@@ -745,5 +753,32 @@ can_add :: proc(
 		}
 	}
 
-    return true
+	return true
+}
+
+on_rotation :: proc() {
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	for v, i in vertices {
+		v := v
+		rotation := glsl.mat4Rotate(
+			{0, 1, 0},
+			(math.PI / 2) * f32(camera.rotation),
+		)
+		v.pos = (glsl.vec4{v.pos.x, v.pos.y, v.pos.z, 1} * rotation).xyz
+		gl.BufferSubData(
+			gl.ARRAY_BUFFER,
+			i * size_of(Vertex),
+			size_of(Vertex),
+			&v,
+		)
+	}
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+
+	for &y in chunks {
+		for &x in y {
+			for &z in x {
+                z.dirty = true
+			}
+		}
+	}
 }

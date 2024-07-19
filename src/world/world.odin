@@ -523,4 +523,5 @@ update_after_rotation :: proc(rotated: camera.Rotated) {
 		billboard.update_after_clockwise_rotation()
 	}
 	wall.update_after_rotation()
+    object.on_rotation()
 }
