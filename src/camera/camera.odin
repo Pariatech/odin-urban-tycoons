@@ -1,6 +1,7 @@
 package camera
 
 import "core:math"
+import "core:log"
 import "core:math/linalg"
 import "core:math/linalg/glsl"
 import "vendor:glfw"

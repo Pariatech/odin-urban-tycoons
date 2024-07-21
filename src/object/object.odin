@@ -19,6 +19,9 @@ Type :: enum {
 	Window,
 	Chair,
 	Table,
+	Painting,
+	Counter,
+	Carpet,
 }
 
 Model :: enum {
@@ -26,6 +29,9 @@ Model :: enum {
 	Wood_Window,
 	Wood_Chair,
 	Wood_Table_1x2,
+	Poutine_Painting,
+	Wood_Counter,
+	Small_Carpet,
 }
 
 Orientation :: enum {
@@ -49,6 +55,9 @@ TYPE_PLACEMENT_TABLE :: #partial [Type]Placement_Set {
 	.Window = {.Wall},
 	.Chair = {.Floor},
 	.Table = {.Floor},
+	.Painting = {.Wall},
+	.Counter = {.Floor},
+	.Carpet = {.Floor},
 }
 
 MODEL_PLACEMENT_TABLE :: #partial [Model]Placement_Set{}
@@ -58,17 +67,23 @@ MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Wood_Window = {1, 2},
 	.Wood_Chair = {1, 1},
 	.Wood_Table_1x2 = {1, 2},
+	.Poutine_Painting = {1, 1},
+	.Wood_Counter = {1, 1},
+	.Small_Carpet = {1, 1},
 }
 
 TYPE_MAP :: [Model]Type {
-	.Wood_Door      = .Door,
-	.Wood_Window    = .Window,
-	.Wood_Chair     = .Chair,
-	.Wood_Table_1x2 = .Table,
+	.Wood_Door        = .Door,
+	.Wood_Window      = .Window,
+	.Wood_Chair       = .Chair,
+	.Wood_Table_1x2   = .Table,
+	.Poutine_Painting = .Painting,
+	.Wood_Counter     = .Counter,
+	.Small_Carpet     = .Carpet,
 }
 
-WIDTH :: 128
-HEIGHT :: 256
+WIDTH :: 512
+HEIGHT :: 1024
 
 Instance :: struct {
 	position:  glsl.vec3,
@@ -106,6 +121,18 @@ Texture :: enum {
 	Wood_Table_1x2_2_W,
 	Wood_Table_1x2_2_N,
 	Wood_Table_1x2_2_E,
+	Poutine_Painting_S,
+	Poutine_Painting_W,
+	Poutine_Painting_N,
+	Poutine_Painting_E,
+	Wood_Counter_S,
+	Wood_Counter_W,
+	Wood_Counter_N,
+	Wood_Counter_E,
+	Small_Carpet_S,
+	Small_Carpet_W,
+	Small_Carpet_N,
+	Small_Carpet_E,
 }
 
 DIFFUSE_PATHS :: [Texture]cstring {
@@ -137,6 +164,18 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0003.png",
 	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/diffuse/Table.6Places.001_0004.png",
 	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/diffuse/Table.6Places.002_0004.png",
+	.Poutine_Painting_S = "resources/textures/objects/Paintings/diffuse/Poutine.Painting_0001.png",
+	.Poutine_Painting_W = "resources/textures/objects/Paintings/diffuse/Poutine.Painting_0002.png",
+	.Poutine_Painting_N = "resources/textures/objects/Paintings/diffuse/Poutine.Painting_0003.png",
+	.Poutine_Painting_E = "resources/textures/objects/Paintings/diffuse/Poutine.Painting_0004.png",
+	.Wood_Counter_S     = "resources/textures/objects/Counters/diffuse/Wood.Counter_0001.png",
+	.Wood_Counter_W     = "resources/textures/objects/Counters/diffuse/Wood.Counter_0002.png",
+	.Wood_Counter_N     = "resources/textures/objects/Counters/diffuse/Wood.Counter_0003.png",
+	.Wood_Counter_E     = "resources/textures/objects/Counters/diffuse/Wood.Counter_0004.png",
+	.Small_Carpet_S     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0001.png",
+	.Small_Carpet_W     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0002.png",
+	.Small_Carpet_N     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0003.png",
+	.Small_Carpet_E     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0004.png",
 }
 
 DEPTH_MAP_PATHS :: [Texture]cstring {
@@ -168,6 +207,18 @@ DEPTH_MAP_PATHS :: [Texture]cstring {
 	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/mist/Table.6Places.002_0003.png",
 	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/mist/Table.6Places.001_0004.png",
 	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/mist/Table.6Places.002_0004.png",
+	.Poutine_Painting_S = "resources/textures/objects/Paintings/mist/Poutine.Painting_0001.png",
+	.Poutine_Painting_W = "resources/textures/objects/Paintings/mist/Poutine.Painting_0002.png",
+	.Poutine_Painting_N = "resources/textures/objects/Paintings/mist/Poutine.Painting_0003.png",
+	.Poutine_Painting_E = "resources/textures/objects/Paintings/mist/Poutine.Painting_0004.png",
+	.Wood_Counter_S     = "resources/textures/objects/Counters/mist/Wood.Counter_0001.png",
+	.Wood_Counter_W     = "resources/textures/objects/Counters/mist/Wood.Counter_0002.png",
+	.Wood_Counter_N     = "resources/textures/objects/Counters/mist/Wood.Counter_0003.png",
+	.Wood_Counter_E     = "resources/textures/objects/Counters/mist/Wood.Counter_0004.png",
+	.Small_Carpet_S     = "resources/textures/objects/Carpets/mist/Small.Carpet_0001.png",
+	.Small_Carpet_W     = "resources/textures/objects/Carpets/mist/Small.Carpet_0002.png",
+	.Small_Carpet_N     = "resources/textures/objects/Carpets/mist/Small.Carpet_0003.png",
+	.Small_Carpet_E     = "resources/textures/objects/Carpets/mist/Small.Carpet_0004.png",
 }
 
 BILLBOARDS :: [Model][Orientation][]Texture {
@@ -194,6 +245,24 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.East = {.Wood_Table_1x2_1_E, .Wood_Table_1x2_2_E},
 		.North = {.Wood_Table_1x2_1_N, .Wood_Table_1x2_2_N},
 		.West = {.Wood_Table_1x2_1_W, .Wood_Table_1x2_2_W},
+	},
+	.Poutine_Painting =  {
+		.South = {.Poutine_Painting_S},
+		.East = {.Poutine_Painting_E},
+		.North = {.Poutine_Painting_N},
+		.West = {.Poutine_Painting_W},
+	},
+	.Wood_Counter =  {
+		.South = {.Wood_Counter_S},
+		.East = {.Wood_Counter_E},
+		.North = {.Wood_Counter_N},
+		.West = {.Wood_Counter_W},
+	},
+	.Small_Carpet =  {
+		.South = {.Small_Carpet_S},
+		.East = {.Small_Carpet_E},
+		.North = {.Small_Carpet_N},
+		.West = {.Small_Carpet_W},
 	},
 }
 
@@ -242,6 +311,8 @@ texture_array: u32
 depth_map_texture_array: u32
 
 init :: proc() -> (ok: bool = true) {
+    // gl.Enable(gl.MULTISAMPLE)
+
 	load_model() or_return
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -396,6 +467,40 @@ init :: proc() -> (ok: bool = true) {
 
 	add({11, 0, 4}, .Wood_Door, .North, .Wall)
 	add({10, 0, 5}, .Wood_Door, .East, .Wall)
+
+	wall.set_wall(
+		{13, 0, 5},
+		.N_S,
+		 {
+			type = .End_Right_Corner,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+	wall.set_wall(
+		{13, 0, 5},
+		.E_W,
+		 {
+			type = .Left_Corner_End,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+		},
+	)
+
+	add({13, 0, 5}, .Poutine_Painting, .South, .Wall)
+	add({13, 0, 5}, .Poutine_Painting, .West, .Wall)
+	add({13, 0, 4}, .Poutine_Painting, .North, .Wall)
+	add({12, 0, 5}, .Poutine_Painting, .East, .Wall)
+
+	add({1, 0, 7}, .Wood_Counter, .South, .Floor)
+	add({0, 0, 8}, .Wood_Counter, .West, .Floor)
+	add({2, 0, 8}, .Wood_Counter, .East, .Floor)
+	add({1, 0, 9}, .Wood_Counter, .North, .Floor)
+
+	add({0, 0, 11}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 12}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 13}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 14}, .Wood_Counter, .West, .Floor)
+
+    add({12, 1, 0}, .Small_Carpet, .South, .Floor)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
@@ -632,11 +737,13 @@ load_model :: proc() -> (ok: bool = true) {
 }
 
 load_depth_map_texture_array :: proc() -> (ok: bool = true) {
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	paths := DEPTH_MAP_PATHS
 	textures := i32(len(paths))
@@ -725,13 +832,31 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 }
 
 load_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
 
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+
+	// gl.TexParameteri(
+	// 	gl.TEXTURE_2D_ARRAY,
+	// 	gl.TEXTURE_MIN_FILTER,
+	// 	gl.NEAREST_MIPMAP_NEAREST,
+	// )
+
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	// max_anisotropy: f32
+	// gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+	// gl.TexParameterf(
+	// 	gl.TEXTURE_2D_ARRAY,
+	// 	gl.TEXTURE_MAX_ANISOTROPY,
+	// 	max_anisotropy,
+	// )
 
 	paths := DIFFUSE_PATHS
 	textures := i32(len(paths))
@@ -805,6 +930,8 @@ load_texture_array :: proc() -> (ok: bool = true) {
 			pixels,
 		)
 	}
+
+	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
 }
@@ -957,7 +1084,7 @@ can_add_on_wall :: proc(
 	return true
 }
 
-can_add :: proc(
+can_add_on_floor :: proc(
 	pos: glsl.ivec3,
 	model: Model,
 	orientation: Orientation,
@@ -971,7 +1098,7 @@ can_add :: proc(
 			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
 
 			for k, v in chunk.objects {
-				if k.pos == pos {
+				if k.pos == pos && k.placement == .Floor {
 					return false
 				}
 			}

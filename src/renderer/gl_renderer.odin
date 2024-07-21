@@ -94,6 +94,7 @@ init :: proc() -> (ok: bool = true) {
 	gl.load_up_to(GL_MAJOR_VERSION, GL_MINOR_VERSION, glfw.gl_set_proc_address)
 
 	gl.Enable(gl.MULTISAMPLE)
+	// gl.Disable(gl.MULTISAMPLE)
 
 	when ODIN_DEBUG && ODIN_OS != .Darwin {
 		gl.Enable(gl.DEBUG_OUTPUT)

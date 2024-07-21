@@ -11,12 +11,12 @@ import "../window"
 FURNITURE_PANEL_TILE_SIZE :: 96
 
 FURNITURE_PANEL_ICONS :: [furniture.Type]cstring {
-	.Chair    = "resources/textures/object_icons/Chair.png",
-	.Table6   = "resources/textures/object_icons/Table.6Places.png",
-	.Letter_A = "resources/textures/object_icons/Letter_A.png",
-	.Letter_G = "resources/textures/object_icons/Letter_G.png",
-	.Letter_D = "resources/textures/object_icons/Letter_D.png",
-	.Letter_E = "resources/textures/object_icons/Letter_E.png",
+	// .Chair    = "resources/textures/object_icons/Chair.png",
+	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
+	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
+	// .Letter_G = "resources/textures/object_icons/Letter_G.png",
+	// .Letter_D = "resources/textures/object_icons/Letter_D.png",
+	// .Letter_E = "resources/textures/object_icons/Letter_E.png",
 }
 
 furniture_panel_icon_texture_array: u32
