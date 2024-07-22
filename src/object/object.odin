@@ -82,8 +82,8 @@ TYPE_MAP :: [Model]Type {
 	.Small_Carpet     = .Carpet,
 }
 
-WIDTH :: 512
-HEIGHT :: 1024
+WIDTH :: 256
+HEIGHT :: 512
 
 Instance :: struct {
 	position:  glsl.vec3,
@@ -745,6 +745,14 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
+	// max_anisotropy: f32
+	// gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
+	// gl.TexParameterf(
+	// 	gl.TEXTURE_2D_ARRAY,
+	// 	gl.TEXTURE_MAX_ANISOTROPY,
+	// 	max_anisotropy,
+	// )
+
 	paths := DEPTH_MAP_PATHS
 	textures := i32(len(paths))
 
@@ -849,7 +857,6 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	// 	gl.NEAREST_MIPMAP_NEAREST,
 	// )
 
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	// max_anisotropy: f32
 	// gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
 	// gl.TexParameterf(
