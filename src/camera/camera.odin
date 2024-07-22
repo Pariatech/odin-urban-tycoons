@@ -92,10 +92,7 @@ update :: proc(delta_time: f64) {
 
 	view = glsl.mat4LookAt(position + translate, position, {0, 1, 0})
 	aspect_ratio := f32(height) / f32(width)
-	// scale := f32(width) / (176.775 / zoom)
-    // zoom = 0.5
 	scale := f32(width) / (math.pow(f32(2.8284), 5) / zoom)
-	// scale := f32(width) / (181.010656 / zoom)
     scale *= window.scale.y
 
 	left = scale

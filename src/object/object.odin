@@ -843,27 +843,9 @@ load_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
 
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
-
-	// gl.TexParameteri(
-	// 	gl.TEXTURE_2D_ARRAY,
-	// 	gl.TEXTURE_MIN_FILTER,
-	// 	gl.NEAREST_MIPMAP_NEAREST,
-	// )
-
-	// max_anisotropy: f32
-	// gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &max_anisotropy)
-	// gl.TexParameterf(
-	// 	gl.TEXTURE_2D_ARRAY,
-	// 	gl.TEXTURE_MAX_ANISOTROPY,
-	// 	max_anisotropy,
-	// )
 
 	paths := DIFFUSE_PATHS
 	textures := i32(len(paths))
@@ -937,8 +919,6 @@ load_texture_array :: proc() -> (ok: bool = true) {
 			pixels,
 		)
 	}
-
-	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
 }
