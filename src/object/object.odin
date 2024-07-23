@@ -22,6 +22,7 @@ Type :: enum {
 	Painting,
 	Counter,
 	Carpet,
+	Tree,
 }
 
 Model :: enum {
@@ -32,6 +33,7 @@ Model :: enum {
 	Poutine_Painting,
 	Wood_Counter,
 	Small_Carpet,
+	Tree,
 }
 
 Orientation :: enum {
@@ -58,6 +60,7 @@ TYPE_PLACEMENT_TABLE :: #partial [Type]Placement_Set {
 	.Painting = {.Wall},
 	.Counter = {.Floor},
 	.Carpet = {.Floor},
+	.Tree = {.Floor},
 }
 
 MODEL_PLACEMENT_TABLE :: #partial [Model]Placement_Set{}
@@ -70,6 +73,7 @@ MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Poutine_Painting = {1, 1},
 	.Wood_Counter = {1, 1},
 	.Small_Carpet = {1, 1},
+	.Tree = {2, 2},
 }
 
 TYPE_MAP :: [Model]Type {
@@ -80,6 +84,7 @@ TYPE_MAP :: [Model]Type {
 	.Poutine_Painting = .Painting,
 	.Wood_Counter     = .Counter,
 	.Small_Carpet     = .Carpet,
+	.Tree             = .Tree,
 }
 
 WIDTH :: 256
@@ -133,6 +138,22 @@ Texture :: enum {
 	Small_Carpet_W,
 	Small_Carpet_N,
 	Small_Carpet_E,
+	Tree_1_S,
+	Tree_1_W,
+	Tree_1_N,
+	Tree_1_E,
+	Tree_2_S,
+	Tree_2_W,
+	Tree_2_N,
+	Tree_2_E,
+	Tree_3_S,
+	Tree_3_W,
+	Tree_3_N,
+	Tree_3_E,
+	Tree_4_S,
+	Tree_4_W,
+	Tree_4_N,
+	Tree_4_E,
 }
 
 DIFFUSE_PATHS :: [Texture]cstring {
@@ -176,6 +197,22 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Small_Carpet_W     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0002.png",
 	.Small_Carpet_N     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0003.png",
 	.Small_Carpet_E     = "resources/textures/objects/Carpets/diffuse/Small.Carpet_0004.png",
+	.Tree_1_S           = "resources/textures/objects/Trees/diffuse/Tree.001_0001.png",
+	.Tree_1_W           = "resources/textures/objects/Trees/diffuse/Tree.001_0002.png",
+	.Tree_1_N           = "resources/textures/objects/Trees/diffuse/Tree.001_0003.png",
+	.Tree_1_E           = "resources/textures/objects/Trees/diffuse/Tree.001_0004.png",
+	.Tree_2_S           = "resources/textures/objects/Trees/diffuse/Tree.002_0001.png",
+	.Tree_2_W           = "resources/textures/objects/Trees/diffuse/Tree.002_0002.png",
+	.Tree_2_N           = "resources/textures/objects/Trees/diffuse/Tree.002_0003.png",
+	.Tree_2_E           = "resources/textures/objects/Trees/diffuse/Tree.002_0004.png",
+	.Tree_3_S           = "resources/textures/objects/Trees/diffuse/Tree.003_0001.png",
+	.Tree_3_W           = "resources/textures/objects/Trees/diffuse/Tree.003_0002.png",
+	.Tree_3_N           = "resources/textures/objects/Trees/diffuse/Tree.003_0003.png",
+	.Tree_3_E           = "resources/textures/objects/Trees/diffuse/Tree.003_0004.png",
+	.Tree_4_S           = "resources/textures/objects/Trees/diffuse/Tree.004_0001.png",
+	.Tree_4_W           = "resources/textures/objects/Trees/diffuse/Tree.004_0002.png",
+	.Tree_4_N           = "resources/textures/objects/Trees/diffuse/Tree.004_0003.png",
+	.Tree_4_E           = "resources/textures/objects/Trees/diffuse/Tree.004_0004.png",
 }
 
 DEPTH_MAP_PATHS :: [Texture]cstring {
@@ -219,6 +256,22 @@ DEPTH_MAP_PATHS :: [Texture]cstring {
 	.Small_Carpet_W     = "resources/textures/objects/Carpets/mist/Small.Carpet_0002.png",
 	.Small_Carpet_N     = "resources/textures/objects/Carpets/mist/Small.Carpet_0003.png",
 	.Small_Carpet_E     = "resources/textures/objects/Carpets/mist/Small.Carpet_0004.png",
+	.Tree_1_S           = "resources/textures/objects/Trees/mist/Tree.001_0001.png",
+	.Tree_1_W           = "resources/textures/objects/Trees/mist/Tree.001_0002.png",
+	.Tree_1_N           = "resources/textures/objects/Trees/mist/Tree.001_0003.png",
+	.Tree_1_E           = "resources/textures/objects/Trees/mist/Tree.001_0004.png",
+	.Tree_2_S           = "resources/textures/objects/Trees/mist/Tree.002_0001.png",
+	.Tree_2_W           = "resources/textures/objects/Trees/mist/Tree.002_0002.png",
+	.Tree_2_N           = "resources/textures/objects/Trees/mist/Tree.002_0003.png",
+	.Tree_2_E           = "resources/textures/objects/Trees/mist/Tree.002_0004.png",
+	.Tree_3_S           = "resources/textures/objects/Trees/mist/Tree.003_0001.png",
+	.Tree_3_W           = "resources/textures/objects/Trees/mist/Tree.003_0002.png",
+	.Tree_3_N           = "resources/textures/objects/Trees/mist/Tree.003_0003.png",
+	.Tree_3_E           = "resources/textures/objects/Trees/mist/Tree.003_0004.png",
+	.Tree_4_S           = "resources/textures/objects/Trees/mist/Tree.004_0001.png",
+	.Tree_4_W           = "resources/textures/objects/Trees/mist/Tree.004_0002.png",
+	.Tree_4_N           = "resources/textures/objects/Trees/mist/Tree.004_0003.png",
+	.Tree_4_E           = "resources/textures/objects/Trees/mist/Tree.004_0004.png",
 }
 
 BILLBOARDS :: [Model][Orientation][]Texture {
@@ -263,6 +316,12 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.East = {.Small_Carpet_E},
 		.North = {.Small_Carpet_N},
 		.West = {.Small_Carpet_W},
+	},
+	.Tree =  {
+		.South = {.Tree_1_S, .Tree_2_S, .Tree_3_S, .Tree_4_S},
+		.East = {.Tree_1_E, .Tree_2_E, .Tree_3_E, .Tree_4_E},
+		.North = {.Tree_1_N, .Tree_2_N, .Tree_3_N, .Tree_4_N},
+		.West = {.Tree_1_W, .Tree_2_W, .Tree_3_W, .Tree_4_W},
 	},
 }
 
@@ -311,7 +370,7 @@ texture_array: u32
 depth_map_texture_array: u32
 
 init :: proc() -> (ok: bool = true) {
-    // gl.Enable(gl.MULTISAMPLE)
+	// gl.Enable(gl.MULTISAMPLE)
 
 	load_model() or_return
 
@@ -495,12 +554,20 @@ init :: proc() -> (ok: bool = true) {
 	add({2, 0, 8}, .Wood_Counter, .East, .Floor)
 	add({1, 0, 9}, .Wood_Counter, .North, .Floor)
 
-	add({0, 0, 11}, .Wood_Counter, .West, .Floor)
-	add({0, 0, 12}, .Wood_Counter, .West, .Floor)
-	add({0, 0, 13}, .Wood_Counter, .West, .Floor)
 	add({0, 0, 14}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 13}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 12}, .Wood_Counter, .West, .Floor)
+	add({0, 0, 11}, .Wood_Counter, .West, .Floor)
 
-    add({12, 1, 0}, .Small_Carpet, .South, .Floor)
+	add({12, 0, 0}, .Small_Carpet, .South, .Floor)
+
+
+	add({14, 0, 1}, .Tree, .South, .Floor)
+
+	add({17, 0, 0}, .Tree, .North, .Floor)
+
+	add({20, 0, 1}, .Tree, .East, .Floor)
+	add({24, 0, 0}, .Tree, .West, .Floor)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
@@ -646,6 +713,30 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 	gl.BindVertexArray(0)
 }
 
+Visible_Chunk_Iterator :: struct {
+	pos: glsl.ivec2,
+}
+
+next_visible_chunk :: proc(it: ^Visible_Chunk_Iterator) -> (glsl.ivec2, bool) {
+	if it.pos.x >= camera.visible_chunks_end.x &&
+	   it.pos.y >= camera.visible_chunks_end.y {
+		return {}, false
+	}
+
+	if it.pos.x >= camera.visible_chunks_end.x {
+		it.pos.x = camera.visible_chunks_start.x
+		it.pos.y += 1
+	}
+
+    pos := it.pos
+    it.pos.x += 1
+	return pos, true
+}
+
+make_visible_chunk_iterator :: proc() -> Visible_Chunk_Iterator {
+	return {pos = camera.visible_chunks_start}
+}
+
 draw :: proc() {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	ubo_index := gl.GetUniformBlockIndex(shader_program, "UniformBufferObject")
@@ -674,10 +765,9 @@ draw :: proc() {
 	// defer gl.Enable(gl.DEPTH_TEST)
 
 	for floor in 0 ..< c.WORLD_HEIGHT {
-		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
-			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
-				draw_chunk(&chunks[floor][x][z])
-			}
+		it := make_visible_chunk_iterator()
+		for pos in next_visible_chunk(&it) {
+			draw_chunk(&chunks[floor][pos.x][pos.y])
 		}
 	}
 }
@@ -926,9 +1016,9 @@ load_texture_array :: proc() -> (ok: bool = true) {
 relative_pos :: proc(x, z: i32, orientation: Orientation) -> glsl.ivec3 {
 	switch orientation {
 	case .South:
-		return {x, 0, -z}
+		return {-x, 0, -z}
 	case .East:
-		return {z, 0, x}
+		return {z, 0, -x}
 	case .North:
 		return {x, 0, z}
 	case .West:
