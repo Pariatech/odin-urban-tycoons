@@ -3,6 +3,7 @@ package object
 import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:slice"
 
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
@@ -326,20 +327,17 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 }
 
 Object :: struct {
-	texture: Texture,
-	light:   glsl.vec3,
-	parent:  glsl.ivec3,
-}
-
-Object_Key :: struct {
 	pos:         glsl.ivec3,
 	type:        Type,
 	orientation: Orientation,
 	placement:   Placement,
+	texture:     Texture,
+	light:       glsl.vec3,
+	parent:      glsl.ivec3,
 }
 
 Chunk :: struct {
-	objects:  map[Object_Key]Object,
+	objects:  [dynamic]Object,
 	vao, ibo: u32,
 	dirty:    bool,
 }
@@ -666,6 +664,20 @@ get_draw_texture :: proc(tex: Texture) -> f32 {
 	return f32(family + (index + int(camera.rotation)) % 4)
 }
 
+sort_objects :: proc(a, b: Object) -> bool {
+	switch camera.rotation {
+	case .South_West:
+		return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
+    case .South_East:
+		return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
+    case .North_East:
+		return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
+    case .North_West:
+		return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
+	}
+    return false
+}
+
 draw_chunk :: proc(using chunk: ^Chunk) {
 	instances := len(objects)
 
@@ -681,11 +693,12 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 			gl.STATIC_DRAW,
 		)
 
+	    slice.sort_by(objects[:], sort_objects)
 		i := 0
-		for k, v in objects {
+		for v in objects {
 			texture := f32(v.texture)
 			instance: Instance = {
-				position = {f32(k.pos.x), f32(k.pos.y), f32(k.pos.z)},
+				position = {f32(v.pos.x), f32(v.pos.y), f32(v.pos.z)},
 				light = v.light,
 				texture = get_draw_texture(v.texture),
 				depth_map = get_draw_texture(v.texture),
@@ -713,30 +726,6 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 	gl.BindVertexArray(0)
 }
 
-Visible_Chunk_Iterator :: struct {
-	pos: glsl.ivec2,
-}
-
-next_visible_chunk :: proc(it: ^Visible_Chunk_Iterator) -> (glsl.ivec2, bool) {
-	if it.pos.x >= camera.visible_chunks_end.x &&
-	   it.pos.y >= camera.visible_chunks_end.y {
-		return {}, false
-	}
-
-	if it.pos.x >= camera.visible_chunks_end.x {
-		it.pos.x = camera.visible_chunks_start.x
-		it.pos.y += 1
-	}
-
-    pos := it.pos
-    it.pos.x += 1
-	return pos, true
-}
-
-make_visible_chunk_iterator :: proc() -> Visible_Chunk_Iterator {
-	return {pos = camera.visible_chunks_start}
-}
-
 draw :: proc() {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	ubo_index := gl.GetUniformBlockIndex(shader_program, "UniformBufferObject")
@@ -761,12 +750,12 @@ draw :: proc() {
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 
-	// gl.Disable(gl.DEPTH_TEST)
-	// defer gl.Enable(gl.DEPTH_TEST)
+    gl.DepthFunc(gl.ALWAYS)
+	defer gl.DepthFunc(gl.LEQUAL)
 
 	for floor in 0 ..< c.WORLD_HEIGHT {
-		it := make_visible_chunk_iterator()
-		for pos in next_visible_chunk(&it) {
+		it := camera.make_visible_chunk_iterator()
+		for pos in it->next() {
 			draw_chunk(&chunks[floor][pos.x][pos.y])
 		}
 	}
@@ -1056,17 +1045,18 @@ add :: proc(
 		for y in 0 ..< size.y {
 			pos := pos + relative_pos(x, y, orientation)
 			chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
-			key := Object_Key {
-				pos         = pos,
-				type        = type,
-				orientation = orientation,
-				placement   = placement,
-			}
-			chunk.objects[key] = {
-				texture = get_texture(x, y, model, orientation),
-				parent = parent,
-				light = {1, 1, 1},
-			}
+			append(
+				&chunk.objects,
+				Object {
+					pos = pos,
+					type = type,
+					orientation = orientation,
+					placement = placement,
+					texture = get_texture(x, y, model, orientation),
+					parent = parent,
+					light = {1, 1, 1},
+				},
+			)
 			chunk.dirty = true
 		}
 	}

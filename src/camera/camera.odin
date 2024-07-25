@@ -178,3 +178,109 @@ get_aabb :: proc() -> utils.Rectangle {
 
 	return aabb
 }
+
+Visible_Chunk_Iterator :: struct {
+	pos:  glsl.ivec2,
+	next: proc(it: ^Visible_Chunk_Iterator) -> (glsl.ivec2, bool),
+}
+
+next_visible_chunk_south_west :: proc(
+	it: ^Visible_Chunk_Iterator,
+) -> (
+	glsl.ivec2,
+	bool,
+) {
+	if it.pos.x < visible_chunks_start.x {
+		it.pos.x = visible_chunks_end.x - 1
+		it.pos.y -= 1
+	}
+
+	if it.pos.y < visible_chunks_start.y {
+		return {}, false
+	}
+
+	pos := it.pos
+	it.pos.x -= 1
+	return pos, true
+}
+
+next_visible_chunk_south_east :: proc(
+	it: ^Visible_Chunk_Iterator,
+) -> (
+	glsl.ivec2,
+	bool,
+) {
+	if it.pos.x >= visible_chunks_end.x {
+		it.pos.x = visible_chunks_start.x
+		it.pos.y -= 1
+	}
+
+	if it.pos.y < visible_chunks_start.y {
+		return {}, false
+	}
+
+	pos := it.pos
+	it.pos.x += 1
+	return pos, true
+}
+
+next_visible_chunk_north_east :: proc(
+	it: ^Visible_Chunk_Iterator,
+) -> (
+	glsl.ivec2,
+	bool,
+) {
+	if it.pos.x >= visible_chunks_end.x {
+		it.pos.x = visible_chunks_start.x
+		it.pos.y += 1
+	}
+
+	if it.pos.y >= visible_chunks_end.y {
+		return {}, false
+	}
+
+	pos := it.pos
+	it.pos.x += 1
+	return pos, true
+}
+
+next_visible_chunk_north_west :: proc(
+	it: ^Visible_Chunk_Iterator,
+) -> (
+	glsl.ivec2,
+	bool,
+) {
+	if it.pos.x < visible_chunks_start.x {
+		it.pos.x = visible_chunks_end.x - 1
+		it.pos.y += 1
+	}
+
+	if it.pos.y >= visible_chunks_end.y {
+		return {}, false
+	}
+
+	pos := it.pos
+	it.pos.x -= 1
+	return pos, true
+}
+
+make_visible_chunk_iterator :: proc() -> Visible_Chunk_Iterator {
+	it: Visible_Chunk_Iterator
+	switch rotation {
+	case .South_West:
+		it.pos = visible_chunks_end
+        it.next = next_visible_chunk_south_west
+    case .South_East:
+        it.pos.x = visible_chunks_start.x
+        it.pos.y = visible_chunks_end.y
+        it.next = next_visible_chunk_south_east
+    case .North_East:
+        it.pos = visible_chunks_start
+        it.next = next_visible_chunk_north_east
+    case .North_West:
+        it.pos.x = visible_chunks_end.x
+        it.pos.y = visible_chunks_start.y
+        it.next = next_visible_chunk_north_west
+	}
+    return it
+}
