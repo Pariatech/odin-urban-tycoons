@@ -753,6 +753,9 @@ draw :: proc() {
     gl.DepthFunc(gl.ALWAYS)
 	defer gl.DepthFunc(gl.LEQUAL)
 
+    gl.Disable(gl.MULTISAMPLE)
+    defer gl.Enable(gl.MULTISAMPLE)
+
 	for floor in 0 ..< c.WORLD_HEIGHT {
 		it := camera.make_visible_chunk_iterator()
 		for pos in it->next() {
@@ -811,6 +814,8 @@ load_model :: proc() -> (ok: bool = true) {
 			}
 		}
 	}
+
+    log.info(vertices)
 
 	return true
 }

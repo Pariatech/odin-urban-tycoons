@@ -221,6 +221,9 @@ next_visible_chunk_south_east :: proc(
 
 	pos := it.pos
 	it.pos.x += 1
+    if pos.y == 8 {
+        log.fatal("Eille le Y est pas bon!")
+    }
 	return pos, true
 }
 
@@ -268,17 +271,17 @@ make_visible_chunk_iterator :: proc() -> Visible_Chunk_Iterator {
 	it: Visible_Chunk_Iterator
 	switch rotation {
 	case .South_West:
-		it.pos = visible_chunks_end
+		it.pos = visible_chunks_end - {1, 1}
         it.next = next_visible_chunk_south_west
     case .South_East:
         it.pos.x = visible_chunks_start.x
-        it.pos.y = visible_chunks_end.y
+        it.pos.y = visible_chunks_end.y - 1
         it.next = next_visible_chunk_south_east
     case .North_East:
         it.pos = visible_chunks_start
         it.next = next_visible_chunk_north_east
     case .North_West:
-        it.pos.x = visible_chunks_end.x
+        it.pos.x = visible_chunks_end.x - 1
         it.pos.y = visible_chunks_start.y
         it.next = next_visible_chunk_north_west
 	}

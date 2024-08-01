@@ -525,8 +525,10 @@ load_billboard_model :: proc(
 
 	for mesh in data.meshes {
 		primitive := mesh.primitives[0]
+        log.info(mesh.name)
 		if primitive.indices != nil {
 			accessor := primitive.indices
+            log.info(path, accessor.count)
 			for i in 0 ..< accessor.count {
 				index := cgltf.accessor_read_index(accessor, i)
 				indices[i] = u8(index)

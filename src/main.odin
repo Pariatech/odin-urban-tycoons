@@ -49,11 +49,10 @@ start :: proc() -> (ok: bool = false) {
 		context.logger = log.create_console_logger()
 		defer log.destroy_console_logger(context.logger)
 	} else {
-		if h, ok := os.open("logs"); ok == os.ERROR_NONE {
-			context.logger = log.create_file_logger(h)
-			defer log.destroy_file_logger(context.logger)
-			defer os.close(h)
-		}
+		h, _ := os.open("logs", os.O_WRONLY + os.O_CREATE, os.S_IRUSR + os.S_IWUSR)
+		context.logger = log.create_file_logger(h)
+
+		defer log.destroy_file_logger(context.logger)
 	}
 
 	window.init(TITLE) or_return
