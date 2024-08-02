@@ -24,6 +24,7 @@ Type :: enum {
 	Counter,
 	Carpet,
 	Tree,
+	Wall,
 }
 
 Model :: enum {
@@ -35,6 +36,13 @@ Model :: enum {
 	Wood_Counter,
 	Small_Carpet,
 	Tree,
+	Wall_Cutaway_Left,
+	Wall_Cutaway_Right,
+	Wall_Down,
+	Wall_Short,
+	Wall_Side,
+	Wall_Side_Door,
+	Wall_Side_Window,
 }
 
 Orientation :: enum {
@@ -53,7 +61,7 @@ Placement :: enum {
 
 Placement_Set :: bit_set[Placement]
 
-TYPE_PLACEMENT_TABLE :: #partial [Type]Placement_Set {
+TYPE_PLACEMENT_TABLE :: [Type]Placement_Set {
 	.Door = {.Wall},
 	.Window = {.Wall},
 	.Chair = {.Floor},
@@ -62,6 +70,7 @@ TYPE_PLACEMENT_TABLE :: #partial [Type]Placement_Set {
 	.Counter = {.Floor},
 	.Carpet = {.Floor},
 	.Tree = {.Floor},
+	.Wall = {.Floor},
 }
 
 MODEL_PLACEMENT_TABLE :: #partial [Model]Placement_Set{}
@@ -75,17 +84,31 @@ MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Wood_Counter = {1, 1},
 	.Small_Carpet = {1, 1},
 	.Tree = {2, 2},
+	.Wall_Cutaway_Left = {1, 1},
+	.Wall_Cutaway_Right = {1, 1},
+	.Wall_Down = {1, 1},
+	.Wall_Short = {1, 1},
+	.Wall_Side = {1, 1},
+	.Wall_Side_Door = {1, 1},
+	.Wall_Side_Window = {1, 1},
 }
 
 TYPE_MAP :: [Model]Type {
-	.Wood_Door        = .Door,
-	.Wood_Window      = .Window,
-	.Wood_Chair       = .Chair,
-	.Wood_Table_1x2   = .Table,
-	.Poutine_Painting = .Painting,
-	.Wood_Counter     = .Counter,
-	.Small_Carpet     = .Carpet,
-	.Tree             = .Tree,
+	.Wood_Door          = .Door,
+	.Wood_Window        = .Window,
+	.Wood_Chair         = .Chair,
+	.Wood_Table_1x2     = .Table,
+	.Poutine_Painting   = .Painting,
+	.Wood_Counter       = .Counter,
+	.Small_Carpet       = .Carpet,
+	.Tree               = .Tree,
+	.Wall_Cutaway_Left  = .Wall,
+	.Wall_Cutaway_Right = .Wall,
+	.Wall_Down          = .Wall,
+	.Wall_Short         = .Wall,
+	.Wall_Side          = .Wall,
+	.Wall_Side_Door     = .Wall,
+	.Wall_Side_Window   = .Wall,
 }
 
 WIDTH :: 256
@@ -96,6 +119,7 @@ Instance :: struct {
 	light:     glsl.vec3,
 	texture:   f32,
 	depth_map: f32,
+	mirror:    f32,
 }
 
 Texture :: enum {
@@ -155,6 +179,37 @@ Texture :: enum {
 	Tree_4_W,
 	Tree_4_N,
 	Tree_4_E,
+	Wall_Cutaway_Left,
+	Wall_Cutaway_Right,
+	Wall_Down,
+	Wall_Short,
+	Wall_Side,
+	Wall_Side_Door,
+	Wall_Side_Window,
+}
+
+Mask :: enum {
+	None,
+	Wall_Frame,
+	Wall_Drywall,
+	Wall_Brick,
+	Wall_White,
+	Wall_Royal_Blue,
+	Wall_Dark_Blue,
+	Wall_White_Cladding,
+	Wall_Bricks_012,
+	Wall_Marble_001,
+	Wall_Paint_001,
+	Wall_Paint_002,
+	Wall_Paint_003,
+	Wall_Paint_004,
+	Wall_Paint_005,
+	Wall_Paint_006,
+	Wall_Planks_003,
+	Wall_Planks_011,
+	Wall_Tiles_009,
+	Wall_Tiles_077,
+	Wall_WoodSiding_002,
 }
 
 DIFFUSE_PATHS :: [Texture]cstring {
@@ -214,6 +269,13 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Tree_4_W           = "resources/textures/objects/Trees/diffuse/Tree.004_0002.png",
 	.Tree_4_N           = "resources/textures/objects/Trees/diffuse/Tree.004_0003.png",
 	.Tree_4_E           = "resources/textures/objects/Trees/diffuse/Tree.004_0004.png",
+	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/diffuse/Walls.Cutaway.Left_0001.png",
+	.Wall_Cutaway_Right = "resources/textures/objects/Walls/diffuse/Walls.Cutaway.Right_0001.png",
+	.Wall_Down          = "resources/textures/objects/Walls/diffuse/Walls.Down_0001.png",
+	.Wall_Short         = "resources/textures/objects/Walls/diffuse/Walls.Short_0001.png",
+	.Wall_Side          = "resources/textures/objects/Walls/diffuse/Walls.Side_0001.png",
+	.Wall_Side_Door     = "resources/textures/objects/Walls/diffuse/Walls.Side.Door_0001.png",
+	.Wall_Side_Window   = "resources/textures/objects/Walls/diffuse/Walls.Side.Window_0001.png",
 }
 
 DEPTH_MAP_PATHS :: [Texture]cstring {
@@ -273,6 +335,37 @@ DEPTH_MAP_PATHS :: [Texture]cstring {
 	.Tree_4_W           = "resources/textures/objects/Trees/mist/Tree.004_0002.png",
 	.Tree_4_N           = "resources/textures/objects/Trees/mist/Tree.004_0003.png",
 	.Tree_4_E           = "resources/textures/objects/Trees/mist/Tree.004_0004.png",
+	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/mist/Walls.Cutaway.Left_0001.png",
+	.Wall_Cutaway_Right = "resources/textures/objects/Walls/mist/Walls.Cutaway.Right_0001.png",
+	.Wall_Down          = "resources/textures/objects/Walls/mist/Walls.Down_0001.png",
+	.Wall_Short         = "resources/textures/objects/Walls/mist/Walls.Short_0001.png",
+	.Wall_Side          = "resources/textures/objects/Walls/mist/Walls.Side_0001.png",
+	.Wall_Side_Door     = "resources/textures/objects/Walls/mist/Walls.Side.Door_0001.png",
+	.Wall_Side_Window   = "resources/textures/objects/Walls/mist/Walls.Side.Window_0001.png",
+}
+
+MASK_PATHS :: [Mask]cstring {
+	.None                = "resources/textures/objects/Wall_Masks/None.png",
+	.Wall_Frame          = "resources/textures/objects/Wall_Masks/frame.png",
+	.Wall_Drywall        = "resources/textures/objects/Wall_Masks/drywall.png",
+	.Wall_Brick          = "resources/textures/objects/Wall_Masks/brick-wall.png",
+	.Wall_White          = "resources/textures/objects/Wall_Masks/white.png",
+	.Wall_Royal_Blue     = "resources/textures/objects/Wall_Masks/royal_blue.png",
+	.Wall_Dark_Blue      = "resources/textures/objects/Wall_Masks/dark_blue.png",
+	.Wall_White_Cladding = "resources/textures/objects/Wall_Masks/white_cladding.png",
+	.Wall_Bricks_012     = "resources/textures/objects/Wall_Masks/Bricks012.png",
+	.Wall_Marble_001     = "resources/textures/objects/Wall_Masks/Marble001.png",
+	.Wall_Paint_001      = "resources/textures/objects/Wall_Masks/Paint001.png",
+	.Wall_Paint_002      = "resources/textures/objects/Wall_Masks/Paint002.png",
+	.Wall_Paint_003      = "resources/textures/objects/Wall_Masks/Paint003.png",
+	.Wall_Paint_004      = "resources/textures/objects/Wall_Masks/Paint004.png",
+	.Wall_Paint_005      = "resources/textures/objects/Wall_Masks/Paint005.png",
+	.Wall_Paint_006      = "resources/textures/objects/Wall_Masks/Paint006.png",
+	.Wall_Planks_003     = "resources/textures/objects/Wall_Masks/Planks003.png",
+	.Wall_Planks_011     = "resources/textures/objects/Wall_Masks/Planks011.png",
+	.Wall_Tiles_009      = "resources/textures/objects/Wall_Masks/Tiles009.png",
+	.Wall_Tiles_077      = "resources/textures/objects/Wall_Masks/Tiles077.png",
+	.Wall_WoodSiding_002 = "resources/textures/objects/Wall_Masks/WoodSiding002.png",
 }
 
 BILLBOARDS :: [Model][Orientation][]Texture {
@@ -324,16 +417,59 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.North = {.Tree_1_N, .Tree_2_N, .Tree_3_N, .Tree_4_N},
 		.West = {.Tree_1_W, .Tree_2_W, .Tree_3_W, .Tree_4_W},
 	},
+	.Wall_Cutaway_Left =  {
+		.South = {.Wall_Cutaway_Left},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Cutaway_Left},
+	},
+	.Wall_Cutaway_Right =  {
+		.South = {.Wall_Cutaway_Right},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Cutaway_Right},
+	},
+	.Wall_Down =  {
+		.South = {.Wall_Down},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Down},
+	},
+	.Wall_Short =  {
+		.South = {.Wall_Short},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Short},
+	},
+	.Wall_Side =  {
+		.South = {.Wall_Side},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Side},
+	},
+	.Wall_Side_Door =  {
+		.South = {.Wall_Side_Door},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Side_Door},
+	},
+	.Wall_Side_Window =  {
+		.South = {.Wall_Side_Window},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Side_Window},
+	},
 }
 
 Object :: struct {
 	pos:         glsl.ivec3,
+	light:       glsl.vec3,
+	parent:      glsl.ivec3,
 	type:        Type,
 	orientation: Orientation,
 	placement:   Placement,
 	texture:     Texture,
-	light:       glsl.vec3,
-	parent:      glsl.ivec3,
+	mask:        Mask,
 }
 
 Chunk :: struct {
@@ -353,8 +489,8 @@ Vertex :: struct {
 	texcoords: glsl.vec2,
 }
 
-VERTEX_SHADER_PATH :: "resources/shaders/billboard.vert"
-FRAGMENT_SHADER_PATH :: "resources/shaders/billboard.frag"
+VERTEX_SHADER_PATH :: "resources/shaders/object.vert"
+FRAGMENT_SHADER_PATH :: "resources/shaders/object.frag"
 MODEL_PATH :: "resources/models/billboard.glb"
 
 chunks: Chunks
@@ -366,6 +502,7 @@ vertices: [4]Vertex
 vbo, ebo: u32
 texture_array: u32
 depth_map_texture_array: u32
+mask_texture_array: u32
 
 init :: proc() -> (ok: bool = true) {
 	// gl.Enable(gl.MULTISAMPLE)
@@ -401,12 +538,17 @@ init :: proc() -> (ok: bool = true) {
 	gl.GenTextures(1, &texture_array)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
-	load_texture_array() or_return
+	load_texture_array(DIFFUSE_PATHS) or_return
 
 	gl.GenTextures(1, &depth_map_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 	load_depth_map_texture_array() or_return
+
+	gl.GenTextures(1, &mask_texture_array)
+	gl.ActiveTexture(gl.TEXTURE2)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_texture_array)
+	load_texture_array(MASK_PATHS) or_return
 
 	renderer.load_shader_program(
 		&shader_program,
@@ -567,6 +709,10 @@ init :: proc() -> (ok: bool = true) {
 	add({20, 0, 1}, .Tree, .East, .Floor)
 	add({24, 0, 0}, .Tree, .West, .Floor)
 
+	add({3, 0, 11}, .Wall_Side, .South, .Floor)
+	add({3, 0, 11}, .Wall_Side, .West, .Floor)
+	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
+
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
 	// log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .West))
@@ -648,17 +794,31 @@ init_chunk :: proc(using chunk: ^Chunk) {
 		offset_of(Instance, depth_map),
 	)
 
+	gl.EnableVertexAttribArray(6)
+	gl.VertexAttribPointer(
+		6,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Instance),
+		offset_of(Instance, mirror),
+	)
+
 	gl.VertexAttribDivisor(2, 1)
 	gl.VertexAttribDivisor(3, 1)
 	gl.VertexAttribDivisor(4, 1)
 	gl.VertexAttribDivisor(5, 1)
+	gl.VertexAttribDivisor(6, 1)
 
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
-get_draw_texture :: proc(tex: Texture) -> f32 {
+get_draw_texture :: proc(type: Type, tex: Texture) -> f32 {
+	if type == .Wall {
+		return f32(tex)
+	}
 	family := (int(tex) / 4) * 4
 	index := int(tex) - family
 	return f32(family + (index + int(camera.rotation)) % 4)
@@ -667,15 +827,114 @@ get_draw_texture :: proc(tex: Texture) -> f32 {
 sort_objects :: proc(a, b: Object) -> bool {
 	switch camera.rotation {
 	case .South_West:
+		if a.type == .Wall &&
+		   b.type != .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return false
+		}
+		if a.type != .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return true
+		}
 		return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
-    case .South_East:
+	case .South_East:
+		if a.type == .Wall &&
+		   b.type != .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return a.orientation == .West
+		}
+		if a.type != .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return b.orientation == .South
+		}
+		if a.type == .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+               return a.orientation == .West
+		}
 		return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
-    case .North_East:
+	case .North_East:
+		if a.type == .Wall &&
+		   b.type != .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return true
+		}
+		if a.type != .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return false
+		}
 		return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
-    case .North_West:
+	case .North_West:
+		if a.type == .Wall &&
+		   b.type != .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return a.orientation == .South
+		}
+		if a.type != .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+			return b.orientation == .West
+		}
+		if a.type == .Wall &&
+		   b.type == .Wall &&
+		   a.pos.x == b.pos.x &&
+		   a.pos.z == b.pos.z {
+               return a.orientation == .South
+		}
 		return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
 	}
-    return false
+	return false
+}
+
+get_instance :: proc(using v: Object) -> Instance {
+	instance: Instance = {
+		position = {f32(pos.x), f32(pos.y), f32(pos.z)},
+		light = light,
+		texture = get_draw_texture(type, texture),
+		depth_map = get_draw_texture(type, texture),
+		mirror = 1,
+	}
+
+	if type == .Wall {
+		switch camera.rotation {
+		case .South_West:
+			if orientation == .West {
+				instance.mirror = -1
+			}
+		case .South_East:
+			if orientation == .West {
+				instance.position.x -= 1
+			} else {
+				instance.mirror = -1
+			}
+		case .North_East:
+			if orientation == .West {
+				instance.position.x -= 1
+				instance.mirror = -1
+			} else {
+				instance.position.z -= 1
+			}
+		case .North_West:
+			if orientation == .South {
+				instance.position.z -= 1
+				instance.mirror = -1
+			}
+		}
+	}
+
+	return instance
 }
 
 draw_chunk :: proc(using chunk: ^Chunk) {
@@ -693,16 +952,11 @@ draw_chunk :: proc(using chunk: ^Chunk) {
 			gl.STATIC_DRAW,
 		)
 
-	    slice.sort_by(objects[:], sort_objects)
+		slice.sort_by(objects[:], sort_objects)
 		i := 0
 		for v in objects {
 			texture := f32(v.texture)
-			instance: Instance = {
-				position = {f32(v.pos.x), f32(v.pos.y), f32(v.pos.z)},
-				light = v.light,
-				texture = get_draw_texture(v.texture),
-				depth_map = get_draw_texture(v.texture),
-			}
+			instance := get_instance(v)
 			gl.BufferSubData(
 				gl.ARRAY_BUFFER,
 				i * size_of(Instance),
@@ -750,11 +1004,11 @@ draw :: proc() {
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
 
-    gl.DepthFunc(gl.ALWAYS)
+	gl.DepthFunc(gl.ALWAYS)
 	defer gl.DepthFunc(gl.LEQUAL)
 
-    gl.Disable(gl.MULTISAMPLE)
-    defer gl.Enable(gl.MULTISAMPLE)
+	gl.Disable(gl.MULTISAMPLE)
+	defer gl.Enable(gl.MULTISAMPLE)
 
 	for floor in 0 ..< c.WORLD_HEIGHT {
 		it := camera.make_visible_chunk_iterator()
@@ -815,14 +1069,14 @@ load_model :: proc() -> (ok: bool = true) {
 		}
 	}
 
-    log.info(vertices)
+	log.info(vertices)
 
 	return true
 }
 
 load_depth_map_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
@@ -923,15 +1177,15 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	return
 }
 
-load_texture_array :: proc() -> (ok: bool = true) {
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
+load_texture_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 
-	paths := DIFFUSE_PATHS
+	// paths := DIFFUSE_PATHS
 	textures := i32(len(paths))
 
 	if (textures == 0) {
