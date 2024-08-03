@@ -39,6 +39,7 @@ Model :: enum {
 	Wall_Cutaway_Left,
 	Wall_Cutaway_Right,
 	Wall_Down,
+	Wall_Down_Short,
 	Wall_Short,
 	Wall_Side,
 	Wall_Side_Door,
@@ -87,6 +88,7 @@ MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Wall_Cutaway_Left = {1, 1},
 	.Wall_Cutaway_Right = {1, 1},
 	.Wall_Down = {1, 1},
+	.Wall_Down_Short = {1, 1},
 	.Wall_Short = {1, 1},
 	.Wall_Side = {1, 1},
 	.Wall_Side_Door = {1, 1},
@@ -105,6 +107,7 @@ TYPE_MAP :: [Model]Type {
 	.Wall_Cutaway_Left  = .Wall,
 	.Wall_Cutaway_Right = .Wall,
 	.Wall_Down          = .Wall,
+	.Wall_Down_Short    = .Wall,
 	.Wall_Short         = .Wall,
 	.Wall_Side          = .Wall,
 	.Wall_Side_Door     = .Wall,
@@ -120,6 +123,7 @@ Instance :: struct {
 	texture:   f32,
 	depth_map: f32,
 	mirror:    f32,
+	mask:      f32,
 }
 
 Texture :: enum {
@@ -182,6 +186,7 @@ Texture :: enum {
 	Wall_Cutaway_Left,
 	Wall_Cutaway_Right,
 	Wall_Down,
+	Wall_Down_Short,
 	Wall_Short,
 	Wall_Side,
 	Wall_Side_Door,
@@ -272,6 +277,7 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/diffuse/Walls.Cutaway.Left_0001.png",
 	.Wall_Cutaway_Right = "resources/textures/objects/Walls/diffuse/Walls.Cutaway.Right_0001.png",
 	.Wall_Down          = "resources/textures/objects/Walls/diffuse/Walls.Down_0001.png",
+	.Wall_Down_Short    = "resources/textures/objects/Walls/diffuse/Walls.Down.Short_0001.png",
 	.Wall_Short         = "resources/textures/objects/Walls/diffuse/Walls.Short_0001.png",
 	.Wall_Side          = "resources/textures/objects/Walls/diffuse/Walls.Side_0001.png",
 	.Wall_Side_Door     = "resources/textures/objects/Walls/diffuse/Walls.Side.Door_0001.png",
@@ -338,6 +344,7 @@ DEPTH_MAP_PATHS :: [Texture]cstring {
 	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/mist/Walls.Cutaway.Left_0001.png",
 	.Wall_Cutaway_Right = "resources/textures/objects/Walls/mist/Walls.Cutaway.Right_0001.png",
 	.Wall_Down          = "resources/textures/objects/Walls/mist/Walls.Down_0001.png",
+	.Wall_Down_Short    = "resources/textures/objects/Walls/mist/Walls.Down.Short_0001.png",
 	.Wall_Short         = "resources/textures/objects/Walls/mist/Walls.Short_0001.png",
 	.Wall_Side          = "resources/textures/objects/Walls/mist/Walls.Side_0001.png",
 	.Wall_Side_Door     = "resources/textures/objects/Walls/mist/Walls.Side.Door_0001.png",
@@ -434,6 +441,12 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.East = {},
 		.North = {},
 		.West = {.Wall_Down},
+	},
+	.Wall_Down_Short =  {
+		.South = {.Wall_Down_Short},
+		.East = {},
+		.North = {},
+		.West = {.Wall_Down_Short},
 	},
 	.Wall_Short =  {
 		.South = {.Wall_Short},
@@ -561,6 +574,10 @@ init :: proc() -> (ok: bool = true) {
 	gl.Uniform1i(
 		gl.GetUniformLocation(shader_program, "depth_map_texture_sampler"),
 		1,
+	)
+	gl.Uniform1i(
+		gl.GetUniformLocation(shader_program, "mask_texture_sampler"),
+		2,
 	)
 
 	gl.GenBuffers(1, &ubo)
@@ -709,9 +726,17 @@ init :: proc() -> (ok: bool = true) {
 	add({20, 0, 1}, .Tree, .East, .Floor)
 	add({24, 0, 0}, .Tree, .West, .Floor)
 
-	add({3, 0, 11}, .Wall_Side, .South, .Floor)
-	add({3, 0, 11}, .Wall_Side, .West, .Floor)
+	add({3, 0, 11}, .Wall_Side, .South, .Floor, mask = .Wall_Brick)
+	add({4, 0, 11}, .Wall_Cutaway_Left, .South, .Floor, mask = .Wall_Brick)
+	add({5, 0, 11}, .Wall_Down, .South, .Floor, mask = .Wall_Brick)
+	add({6, 0, 11}, .Wall_Down_Short, .South, .Floor, mask = .Wall_Brick)
+
 	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
+
+	add({3, 0, 11}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 12}, .Wall_Cutaway_Left, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 13}, .Wall_Down, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 14}, .Wall_Down_Short, .West, .Floor, mask = .Wall_Brick)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
@@ -804,11 +829,22 @@ init_chunk :: proc(using chunk: ^Chunk) {
 		offset_of(Instance, mirror),
 	)
 
+	gl.EnableVertexAttribArray(7)
+	gl.VertexAttribPointer(
+		7,
+		1,
+		gl.FLOAT,
+		gl.FALSE,
+		size_of(Instance),
+		offset_of(Instance, mask),
+	)
+
 	gl.VertexAttribDivisor(2, 1)
 	gl.VertexAttribDivisor(3, 1)
 	gl.VertexAttribDivisor(4, 1)
 	gl.VertexAttribDivisor(5, 1)
 	gl.VertexAttribDivisor(6, 1)
+	gl.VertexAttribDivisor(7, 1)
 
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -857,7 +893,7 @@ sort_objects :: proc(a, b: Object) -> bool {
 		   b.type == .Wall &&
 		   a.pos.x == b.pos.x &&
 		   a.pos.z == b.pos.z {
-               return a.orientation == .West
+			return a.orientation == .West
 		}
 		return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
 	case .North_East:
@@ -891,7 +927,7 @@ sort_objects :: proc(a, b: Object) -> bool {
 		   b.type == .Wall &&
 		   a.pos.x == b.pos.x &&
 		   a.pos.z == b.pos.z {
-               return a.orientation == .South
+			return a.orientation == .South
 		}
 		return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
 	}
@@ -905,6 +941,7 @@ get_instance :: proc(using v: Object) -> Instance {
 		texture = get_draw_texture(type, texture),
 		depth_map = get_draw_texture(type, texture),
 		mirror = 1,
+		mask = f32(mask),
 	}
 
 	if type == .Wall {
@@ -1003,6 +1040,9 @@ draw :: proc() {
 
 	gl.ActiveTexture(gl.TEXTURE1)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
+
+	gl.ActiveTexture(gl.TEXTURE2)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_texture_array)
 
 	gl.DepthFunc(gl.ALWAYS)
 	defer gl.DepthFunc(gl.LEQUAL)
@@ -1293,6 +1333,7 @@ add :: proc(
 	model: Model,
 	orientation: Orientation,
 	placement: Placement,
+	mask: Mask = .None,
 ) {
 	type_map := TYPE_MAP
 	model_size := MODEL_SIZE
@@ -1314,6 +1355,7 @@ add :: proc(
 					texture = get_texture(x, y, model, orientation),
 					parent = parent,
 					light = {1, 1, 1},
+					mask = mask,
 				},
 			)
 			chunk.dirty = true
