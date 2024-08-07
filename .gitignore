@@ -7,3 +7,4 @@ urban-tycoons-windows.zip
 output.mp4
 *.log
 *.dSYM/
+.DS_Store
