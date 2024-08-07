@@ -734,21 +734,21 @@ init :: proc() -> (ok: bool = true) {
 	add({20, 0, 1}, .Tree, .East, .Floor)
 	add({24, 0, 0}, .Tree, .West, .Floor)
 
-	add({3, 0, 11}, .Wall_Side, .South, .Floor, mask = .Wall_Brick)
-	add({4, 0, 11}, .Wall_Cutaway_Left, .South, .Floor, mask = .Wall_Brick)
-	add({5, 0, 11}, .Wall_Down, .South, .Floor, mask = .Wall_Brick)
-	add({6, 0, 11}, .Wall_Down_Short, .South, .Floor, mask = .Wall_Brick)
+	add({3, 0, 11}, .Wall_Side, .South, .Floor, mask = .Wall_Paint_002)
+	add({4, 0, 11}, .Wall_Cutaway_Left, .South, .Floor, mask = .Wall_Paint_002)
+	add({5, 0, 11}, .Wall_Down, .South, .Floor, mask = .Wall_Paint_002)
+	add({6, 0, 11}, .Wall_Down_Short, .South, .Floor, mask = .Wall_Paint_002)
 
 	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
 
-	add({3, 0, 11}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 12}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 13}, .Wall_Cutaway_Left, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 14}, .Wall_Down, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 15}, .Wall_Down_Short, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 11}, .Wall_Side, .West, .Floor, mask = .Wall_Paint_002)
+	add({3, 0, 12}, .Wall_Side, .West, .Floor, mask = .Wall_Paint_002)
+	add({3, 0, 13}, .Wall_Cutaway_Left, .West, .Floor, mask = .Wall_Paint_002)
+	add({3, 0, 14}, .Wall_Down, .West, .Floor, mask = .Wall_Paint_002)
+	add({3, 0, 15}, .Wall_Down_Short, .West, .Floor, mask = .Wall_Paint_002)
 
-	add({15, 0, 15}, .Wall_Side, .South, .Floor, mask = .Wall_Brick)
-	add({15, 0, 15}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
+	add({15, 0, 15}, .Wall_Side, .South, .Floor, mask = .Wall_Paint_002)
+	add({15, 0, 15}, .Wall_Side, .West, .Floor, mask = .Wall_Paint_002)
 	add({15, 0, 15}, .Wood_Counter, .East, .Floor)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))

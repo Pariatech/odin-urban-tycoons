@@ -21,7 +21,7 @@ ANGLE :: (math.RAD_PER_DEG * 30)
 zoom: f32 = 1
 position: glsl.vec3
 rotation: Rotation
-distance := f32(30)
+distance := f32(20)
 translate := glsl.vec3 {
 	-distance,
 	math.sqrt(math.pow(distance, 2) * 2) * math.tan_f32(ANGLE),
@@ -90,6 +90,11 @@ update :: proc(delta_time: f64) {
 	} else if keyboard.is_key_down(.Key_D) {
 		position += glsl.vec3{-movement.z, 0, movement.x}
 	}
+
+    // position.x = math.floor(position.x * 512) / 512
+    // position.y = math.floor(position.y * 512) / 512
+    // position.z = math.floor(position.z * 512) / 512
+    // log.info(position)
 
 	view = glsl.mat4LookAt(position + translate, position, {0, 1, 0})
 	aspect_ratio := f32(height) / f32(width)
