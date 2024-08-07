@@ -2,6 +2,7 @@ package tile
 
 import "core:fmt"
 import "core:math/linalg/glsl"
+import "core:math"
 import gl "vendor:OpenGL"
 
 import "../camera"
@@ -363,12 +364,16 @@ get_terrain_tile_triangle_heights :: proc(
 	heights: [3]f32,
 ) {
 	heights = {0, 0, 0}
+    left_x := math.clamp(x, 0, constants.WORLD_WIDTH)
+    right_x := math.clamp(x + w, 0, constants.WORLD_WIDTH)
+    top_z := math.clamp(z, 0, constants.WORLD_HEIGHT)
+    bottom_z := math.clamp(z + w, 0, constants.WORLD_HEIGHT)
 
 	tile_heights := [4]f32 {
-		terrain.terrain_heights[x][z],
-		terrain.terrain_heights[x + w][z],
-		terrain.terrain_heights[x + w][z + w],
-		terrain.terrain_heights[x][z + w],
+		terrain.terrain_heights[left_x][top_z],
+		terrain.terrain_heights[right_x][top_z],
+		terrain.terrain_heights[right_x][bottom_z],
+		terrain.terrain_heights[left_x][bottom_z],
 	}
 
 	heights[2] = 0

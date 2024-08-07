@@ -1,9 +1,12 @@
 package object
 
+import "core:fmt"
 import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:path/filepath"
 import "core:slice"
+import "core:strings"
 
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
@@ -116,6 +119,8 @@ TYPE_MAP :: [Model]Type {
 
 WIDTH :: 256
 HEIGHT :: 512
+MIPMAP_LEVELS :: i32(2)
+OBJECTS_PATH :: "resources/textures/objects/"
 
 Instance :: struct {
 	position:  glsl.vec3,
@@ -217,162 +222,164 @@ Mask :: enum {
 	Wall_WoodSiding_002,
 }
 
+
 DIFFUSE_PATHS :: [Texture]cstring {
-	.Wood_Door_1_S      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.001_0001.png",
-	.Wood_Door_1_W      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.001_0002.png",
-	.Wood_Door_1_N      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.001_0003.png",
-	.Wood_Door_1_E      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.001_0004.png",
-	.Wood_Door_2_S      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.002_0001.png",
-	.Wood_Door_2_W      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.002_0002.png",
-	.Wood_Door_2_N      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.002_0003.png",
-	.Wood_Door_2_E      = "resources/textures/objects/Doors/diffuse/256x512/Wood.Door.002_0004.png",
-	.Wood_Window_1_S    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.001_0001.png",
-	.Wood_Window_1_W    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.001_0002.png",
-	.Wood_Window_1_N    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.001_0003.png",
-	.Wood_Window_1_E    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.001_0004.png",
-	.Wood_Window_2_S    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.002_0001.png",
-	.Wood_Window_2_W    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.002_0002.png",
-	.Wood_Window_2_N    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.002_0003.png",
-	.Wood_Window_2_E    = "resources/textures/objects/Windows/diffuse/256x512/Wood.Window.002_0004.png",
-	.Wood_Chair_S       = "resources/textures/objects/Chairs/diffuse/256x512/Chair_0001.png",
-	.Wood_Chair_W       = "resources/textures/objects/Chairs/diffuse/256x512/Chair_0002.png",
-	.Wood_Chair_N       = "resources/textures/objects/Chairs/diffuse/256x512/Chair_0003.png",
-	.Wood_Chair_E       = "resources/textures/objects/Chairs/diffuse/256x512/Chair_0004.png",
-	.Wood_Table_1x2_1_S = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.001_0001.png",
-	.Wood_Table_1x2_2_S = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.002_0001.png",
-	.Wood_Table_1x2_1_W = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.001_0002.png",
-	.Wood_Table_1x2_2_W = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.002_0002.png",
-	.Wood_Table_1x2_1_N = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.001_0003.png",
-	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.002_0003.png",
-	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.001_0004.png",
-	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/diffuse/256x512/Table.6Places.002_0004.png",
-	.Poutine_Painting_S = "resources/textures/objects/Paintings/diffuse/256x512/Poutine.Painting_0001.png",
-	.Poutine_Painting_W = "resources/textures/objects/Paintings/diffuse/256x512/Poutine.Painting_0002.png",
-	.Poutine_Painting_N = "resources/textures/objects/Paintings/diffuse/256x512/Poutine.Painting_0003.png",
-	.Poutine_Painting_E = "resources/textures/objects/Paintings/diffuse/256x512/Poutine.Painting_0004.png",
-	.Wood_Counter_S     = "resources/textures/objects/Counters/diffuse/256x512/Wood.Counter_0001.png",
-	.Wood_Counter_W     = "resources/textures/objects/Counters/diffuse/256x512/Wood.Counter_0002.png",
-	.Wood_Counter_N     = "resources/textures/objects/Counters/diffuse/256x512/Wood.Counter_0003.png",
-	.Wood_Counter_E     = "resources/textures/objects/Counters/diffuse/256x512/Wood.Counter_0004.png",
-	.Small_Carpet_S     = "resources/textures/objects/Carpets/diffuse/256x512/Small.Carpet_0001.png",
-	.Small_Carpet_W     = "resources/textures/objects/Carpets/diffuse/256x512/Small.Carpet_0002.png",
-	.Small_Carpet_N     = "resources/textures/objects/Carpets/diffuse/256x512/Small.Carpet_0003.png",
-	.Small_Carpet_E     = "resources/textures/objects/Carpets/diffuse/256x512/Small.Carpet_0004.png",
-	.Tree_1_S           = "resources/textures/objects/Trees/diffuse/256x512/Tree.001_0001.png",
-	.Tree_1_W           = "resources/textures/objects/Trees/diffuse/256x512/Tree.001_0002.png",
-	.Tree_1_N           = "resources/textures/objects/Trees/diffuse/256x512/Tree.001_0003.png",
-	.Tree_1_E           = "resources/textures/objects/Trees/diffuse/256x512/Tree.001_0004.png",
-	.Tree_2_S           = "resources/textures/objects/Trees/diffuse/256x512/Tree.002_0001.png",
-	.Tree_2_W           = "resources/textures/objects/Trees/diffuse/256x512/Tree.002_0002.png",
-	.Tree_2_N           = "resources/textures/objects/Trees/diffuse/256x512/Tree.002_0003.png",
-	.Tree_2_E           = "resources/textures/objects/Trees/diffuse/256x512/Tree.002_0004.png",
-	.Tree_3_S           = "resources/textures/objects/Trees/diffuse/256x512/Tree.003_0001.png",
-	.Tree_3_W           = "resources/textures/objects/Trees/diffuse/256x512/Tree.003_0002.png",
-	.Tree_3_N           = "resources/textures/objects/Trees/diffuse/256x512/Tree.003_0003.png",
-	.Tree_3_E           = "resources/textures/objects/Trees/diffuse/256x512/Tree.003_0004.png",
-	.Tree_4_S           = "resources/textures/objects/Trees/diffuse/256x512/Tree.004_0001.png",
-	.Tree_4_W           = "resources/textures/objects/Trees/diffuse/256x512/Tree.004_0002.png",
-	.Tree_4_N           = "resources/textures/objects/Trees/diffuse/256x512/Tree.004_0003.png",
-	.Tree_4_E           = "resources/textures/objects/Trees/diffuse/256x512/Tree.004_0004.png",
-	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/diffuse/256x512/Walls.Cutaway.Left_0001.png",
-	.Wall_Cutaway_Right = "resources/textures/objects/Walls/diffuse/256x512/Walls.Cutaway.Right_0001.png",
-	.Wall_Down          = "resources/textures/objects/Walls/diffuse/256x512/Walls.Down_0001.png",
-	.Wall_Down_Short    = "resources/textures/objects/Walls/diffuse/256x512/Walls.Down.Short_0001.png",
-	.Wall_Short         = "resources/textures/objects/Walls/diffuse/256x512/Walls.Short_0001.png",
-	.Wall_Side          = "resources/textures/objects/Walls/diffuse/256x512/Walls.Side_0001.png",
-	.Wall_Side_Door     = "resources/textures/objects/Walls/diffuse/256x512/Walls.Side.Door_0001.png",
-	.Wall_Side_Window   = "resources/textures/objects/Walls/diffuse/256x512/Walls.Side.Window_0001.png",
+	.Wood_Door_1_S      = "Doors/diffuse/Wood.Door.001_0001.png",
+	.Wood_Door_1_W      = "Doors/diffuse/Wood.Door.001_0002.png",
+	.Wood_Door_1_N      = "Doors/diffuse/Wood.Door.001_0003.png",
+	.Wood_Door_1_E      = "Doors/diffuse/Wood.Door.001_0004.png",
+	.Wood_Door_2_S      = "Doors/diffuse/Wood.Door.002_0001.png",
+	.Wood_Door_2_W      = "Doors/diffuse/Wood.Door.002_0002.png",
+	.Wood_Door_2_N      = "Doors/diffuse/Wood.Door.002_0003.png",
+	.Wood_Door_2_E      = "Doors/diffuse/Wood.Door.002_0004.png",
+	.Wood_Window_1_S    = "Windows/diffuse/Wood.Window.001_0001.png",
+	.Wood_Window_1_W    = "Windows/diffuse/Wood.Window.001_0002.png",
+	.Wood_Window_1_N    = "Windows/diffuse/Wood.Window.001_0003.png",
+	.Wood_Window_1_E    = "Windows/diffuse/Wood.Window.001_0004.png",
+	.Wood_Window_2_S    = "Windows/diffuse/Wood.Window.002_0001.png",
+	.Wood_Window_2_W    = "Windows/diffuse/Wood.Window.002_0002.png",
+	.Wood_Window_2_N    = "Windows/diffuse/Wood.Window.002_0003.png",
+	.Wood_Window_2_E    = "Windows/diffuse/Wood.Window.002_0004.png",
+	.Wood_Chair_S       = "Chairs/diffuse/Chair_0001.png",
+	.Wood_Chair_W       = "Chairs/diffuse/Chair_0002.png",
+	.Wood_Chair_N       = "Chairs/diffuse/Chair_0003.png",
+	.Wood_Chair_E       = "Chairs/diffuse/Chair_0004.png",
+	.Wood_Table_1x2_1_S = "Tables/diffuse/Table.6Places.001_0001.png",
+	.Wood_Table_1x2_2_S = "Tables/diffuse/Table.6Places.002_0001.png",
+	.Wood_Table_1x2_1_W = "Tables/diffuse/Table.6Places.001_0002.png",
+	.Wood_Table_1x2_2_W = "Tables/diffuse/Table.6Places.002_0002.png",
+	.Wood_Table_1x2_1_N = "Tables/diffuse/Table.6Places.001_0003.png",
+	.Wood_Table_1x2_2_N = "Tables/diffuse/Table.6Places.002_0003.png",
+	.Wood_Table_1x2_1_E = "Tables/diffuse/Table.6Places.001_0004.png",
+	.Wood_Table_1x2_2_E = "Tables/diffuse/Table.6Places.002_0004.png",
+	.Poutine_Painting_S = "Paintings/diffuse/Poutine.Painting_0001.png",
+	.Poutine_Painting_W = "Paintings/diffuse/Poutine.Painting_0002.png",
+	.Poutine_Painting_N = "Paintings/diffuse/Poutine.Painting_0003.png",
+	.Poutine_Painting_E = "Paintings/diffuse/Poutine.Painting_0004.png",
+	.Wood_Counter_S     = "Counters/diffuse/Wood.Counter_0001.png",
+	.Wood_Counter_W     = "Counters/diffuse/Wood.Counter_0002.png",
+	.Wood_Counter_N     = "Counters/diffuse/Wood.Counter_0003.png",
+	.Wood_Counter_E     = "Counters/diffuse/Wood.Counter_0004.png",
+	.Small_Carpet_S     = "Carpets/diffuse/Small.Carpet_0001.png",
+	.Small_Carpet_W     = "Carpets/diffuse/Small.Carpet_0002.png",
+	.Small_Carpet_N     = "Carpets/diffuse/Small.Carpet_0003.png",
+	.Small_Carpet_E     = "Carpets/diffuse/Small.Carpet_0004.png",
+	.Tree_1_S           = "Trees/diffuse/Tree.001_0001.png",
+	.Tree_1_W           = "Trees/diffuse/Tree.001_0002.png",
+	.Tree_1_N           = "Trees/diffuse/Tree.001_0003.png",
+	.Tree_1_E           = "Trees/diffuse/Tree.001_0004.png",
+	.Tree_2_S           = "Trees/diffuse/Tree.002_0001.png",
+	.Tree_2_W           = "Trees/diffuse/Tree.002_0002.png",
+	.Tree_2_N           = "Trees/diffuse/Tree.002_0003.png",
+	.Tree_2_E           = "Trees/diffuse/Tree.002_0004.png",
+	.Tree_3_S           = "Trees/diffuse/Tree.003_0001.png",
+	.Tree_3_W           = "Trees/diffuse/Tree.003_0002.png",
+	.Tree_3_N           = "Trees/diffuse/Tree.003_0003.png",
+	.Tree_3_E           = "Trees/diffuse/Tree.003_0004.png",
+	.Tree_4_S           = "Trees/diffuse/Tree.004_0001.png",
+	.Tree_4_W           = "Trees/diffuse/Tree.004_0002.png",
+	.Tree_4_N           = "Trees/diffuse/Tree.004_0003.png",
+	.Tree_4_E           = "Trees/diffuse/Tree.004_0004.png",
+	.Wall_Cutaway_Left  = "Walls/diffuse/Walls.Cutaway.Left_0001.png",
+	.Wall_Cutaway_Right = "Walls/diffuse/Walls.Cutaway.Right_0001.png",
+	.Wall_Down          = "Walls/diffuse/Walls.Down_0001.png",
+	.Wall_Down_Short    = "Walls/diffuse/Walls.Down.Short_0001.png",
+	.Wall_Short         = "Walls/diffuse/Walls.Short_0001.png",
+	.Wall_Side          = "Walls/diffuse/Walls.Side_0001.png",
+	.Wall_Side_Door     = "Walls/diffuse/Walls.Side.Door_0001.png",
+	.Wall_Side_Window   = "Walls/diffuse/Walls.Side.Window_0001.png",
 }
 
 DEPTH_MAP_PATHS :: [Texture]cstring {
-	.Wood_Door_1_S      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.001_0001.png",
-	.Wood_Door_1_W      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.001_0002.png",
-	.Wood_Door_1_N      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.001_0003.png",
-	.Wood_Door_1_E      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.001_0004.png",
-	.Wood_Door_2_S      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.002_0001.png",
-	.Wood_Door_2_W      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.002_0002.png",
-	.Wood_Door_2_N      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.002_0003.png",
-	.Wood_Door_2_E      = "resources/textures/objects/Doors/mist/256x512/Wood.Door.002_0004.png",
-	.Wood_Window_1_S    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.001_0001.png",
-	.Wood_Window_1_W    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.001_0002.png",
-	.Wood_Window_1_N    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.001_0003.png",
-	.Wood_Window_1_E    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.001_0004.png",
-	.Wood_Window_2_S    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.002_0001.png",
-	.Wood_Window_2_W    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.002_0002.png",
-	.Wood_Window_2_N    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.002_0003.png",
-	.Wood_Window_2_E    = "resources/textures/objects/Windows/mist/256x512/Wood.Window.002_0004.png",
-	.Wood_Chair_S       = "resources/textures/objects/Chairs/mist/256x512/Chair_0001.png",
-	.Wood_Chair_W       = "resources/textures/objects/Chairs/mist/256x512/Chair_0002.png",
-	.Wood_Chair_N       = "resources/textures/objects/Chairs/mist/256x512/Chair_0003.png",
-	.Wood_Chair_E       = "resources/textures/objects/Chairs/mist/256x512/Chair_0004.png",
-	.Wood_Table_1x2_1_S = "resources/textures/objects/Tables/mist/256x512/Table.6Places.001_0001.png",
-	.Wood_Table_1x2_2_S = "resources/textures/objects/Tables/mist/256x512/Table.6Places.002_0001.png",
-	.Wood_Table_1x2_1_W = "resources/textures/objects/Tables/mist/256x512/Table.6Places.001_0002.png",
-	.Wood_Table_1x2_2_W = "resources/textures/objects/Tables/mist/256x512/Table.6Places.002_0002.png",
-	.Wood_Table_1x2_1_N = "resources/textures/objects/Tables/mist/256x512/Table.6Places.001_0003.png",
-	.Wood_Table_1x2_2_N = "resources/textures/objects/Tables/mist/256x512/Table.6Places.002_0003.png",
-	.Wood_Table_1x2_1_E = "resources/textures/objects/Tables/mist/256x512/Table.6Places.001_0004.png",
-	.Wood_Table_1x2_2_E = "resources/textures/objects/Tables/mist/256x512/Table.6Places.002_0004.png",
-	.Poutine_Painting_S = "resources/textures/objects/Paintings/mist/256x512/Poutine.Painting_0001.png",
-	.Poutine_Painting_W = "resources/textures/objects/Paintings/mist/256x512/Poutine.Painting_0002.png",
-	.Poutine_Painting_N = "resources/textures/objects/Paintings/mist/256x512/Poutine.Painting_0003.png",
-	.Poutine_Painting_E = "resources/textures/objects/Paintings/mist/256x512/Poutine.Painting_0004.png",
-	.Wood_Counter_S     = "resources/textures/objects/Counters/mist/256x512/Wood.Counter_0001.png",
-	.Wood_Counter_W     = "resources/textures/objects/Counters/mist/256x512/Wood.Counter_0002.png",
-	.Wood_Counter_N     = "resources/textures/objects/Counters/mist/256x512/Wood.Counter_0003.png",
-	.Wood_Counter_E     = "resources/textures/objects/Counters/mist/256x512/Wood.Counter_0004.png",
-	.Small_Carpet_S     = "resources/textures/objects/Carpets/mist/256x512/Small.Carpet_0001.png",
-	.Small_Carpet_W     = "resources/textures/objects/Carpets/mist/256x512/Small.Carpet_0002.png",
-	.Small_Carpet_N     = "resources/textures/objects/Carpets/mist/256x512/Small.Carpet_0003.png",
-	.Small_Carpet_E     = "resources/textures/objects/Carpets/mist/256x512/Small.Carpet_0004.png",
-	.Tree_1_S           = "resources/textures/objects/Trees/mist/256x512/Tree.001_0001.png",
-	.Tree_1_W           = "resources/textures/objects/Trees/mist/256x512/Tree.001_0002.png",
-	.Tree_1_N           = "resources/textures/objects/Trees/mist/256x512/Tree.001_0003.png",
-	.Tree_1_E           = "resources/textures/objects/Trees/mist/256x512/Tree.001_0004.png",
-	.Tree_2_S           = "resources/textures/objects/Trees/mist/256x512/Tree.002_0001.png",
-	.Tree_2_W           = "resources/textures/objects/Trees/mist/256x512/Tree.002_0002.png",
-	.Tree_2_N           = "resources/textures/objects/Trees/mist/256x512/Tree.002_0003.png",
-	.Tree_2_E           = "resources/textures/objects/Trees/mist/256x512/Tree.002_0004.png",
-	.Tree_3_S           = "resources/textures/objects/Trees/mist/256x512/Tree.003_0001.png",
-	.Tree_3_W           = "resources/textures/objects/Trees/mist/256x512/Tree.003_0002.png",
-	.Tree_3_N           = "resources/textures/objects/Trees/mist/256x512/Tree.003_0003.png",
-	.Tree_3_E           = "resources/textures/objects/Trees/mist/256x512/Tree.003_0004.png",
-	.Tree_4_S           = "resources/textures/objects/Trees/mist/256x512/Tree.004_0001.png",
-	.Tree_4_W           = "resources/textures/objects/Trees/mist/256x512/Tree.004_0002.png",
-	.Tree_4_N           = "resources/textures/objects/Trees/mist/256x512/Tree.004_0003.png",
-	.Tree_4_E           = "resources/textures/objects/Trees/mist/256x512/Tree.004_0004.png",
-	.Wall_Cutaway_Left  = "resources/textures/objects/Walls/mist/256x512/Walls.Cutaway.Left_0001.png",
-	.Wall_Cutaway_Right = "resources/textures/objects/Walls/mist/256x512/Walls.Cutaway.Right_0001.png",
-	.Wall_Down          = "resources/textures/objects/Walls/mist/256x512/Walls.Down_0001.png",
-	.Wall_Down_Short    = "resources/textures/objects/Walls/mist/256x512/Walls.Down.Short_0001.png",
-	.Wall_Short         = "resources/textures/objects/Walls/mist/256x512/Walls.Short_0001.png",
-	.Wall_Side          = "resources/textures/objects/Walls/mist/256x512/Walls.Side_0001.png",
-	.Wall_Side_Door     = "resources/textures/objects/Walls/mist/256x512/Walls.Side.Door_0001.png",
-	.Wall_Side_Window   = "resources/textures/objects/Walls/mist/256x512/Walls.Side.Window_0001.png",
+	.Wood_Door_1_S      = "Doors/mist/Wood.Door.001_0001.png",
+	.Wood_Door_1_W      = "Doors/mist/Wood.Door.001_0002.png",
+	.Wood_Door_1_N      = "Doors/mist/Wood.Door.001_0003.png",
+	.Wood_Door_1_E      = "Doors/mist/Wood.Door.001_0004.png",
+	.Wood_Door_2_S      = "Doors/mist/Wood.Door.002_0001.png",
+	.Wood_Door_2_W      = "Doors/mist/Wood.Door.002_0002.png",
+	.Wood_Door_2_N      = "Doors/mist/Wood.Door.002_0003.png",
+	.Wood_Door_2_E      = "Doors/mist/Wood.Door.002_0004.png",
+	.Wood_Window_1_S    = "Windows/mist/Wood.Window.001_0001.png",
+	.Wood_Window_1_W    = "Windows/mist/Wood.Window.001_0002.png",
+	.Wood_Window_1_N    = "Windows/mist/Wood.Window.001_0003.png",
+	.Wood_Window_1_E    = "Windows/mist/Wood.Window.001_0004.png",
+	.Wood_Window_2_S    = "Windows/mist/Wood.Window.002_0001.png",
+	.Wood_Window_2_W    = "Windows/mist/Wood.Window.002_0002.png",
+	.Wood_Window_2_N    = "Windows/mist/Wood.Window.002_0003.png",
+	.Wood_Window_2_E    = "Windows/mist/Wood.Window.002_0004.png",
+	.Wood_Chair_S       = "Chairs/mist/Chair_0001.png",
+	.Wood_Chair_W       = "Chairs/mist/Chair_0002.png",
+	.Wood_Chair_N       = "Chairs/mist/Chair_0003.png",
+	.Wood_Chair_E       = "Chairs/mist/Chair_0004.png",
+	.Wood_Table_1x2_1_S = "Tables/mist/Table.6Places.001_0001.png",
+	.Wood_Table_1x2_2_S = "Tables/mist/Table.6Places.002_0001.png",
+	.Wood_Table_1x2_1_W = "Tables/mist/Table.6Places.001_0002.png",
+	.Wood_Table_1x2_2_W = "Tables/mist/Table.6Places.002_0002.png",
+	.Wood_Table_1x2_1_N = "Tables/mist/Table.6Places.001_0003.png",
+	.Wood_Table_1x2_2_N = "Tables/mist/Table.6Places.002_0003.png",
+	.Wood_Table_1x2_1_E = "Tables/mist/Table.6Places.001_0004.png",
+	.Wood_Table_1x2_2_E = "Tables/mist/Table.6Places.002_0004.png",
+	.Poutine_Painting_S = "Paintings/mist/Poutine.Painting_0001.png",
+	.Poutine_Painting_W = "Paintings/mist/Poutine.Painting_0002.png",
+	.Poutine_Painting_N = "Paintings/mist/Poutine.Painting_0003.png",
+	.Poutine_Painting_E = "Paintings/mist/Poutine.Painting_0004.png",
+	.Wood_Counter_S     = "Counters/mist/Wood.Counter_0001.png",
+	.Wood_Counter_W     = "Counters/mist/Wood.Counter_0002.png",
+	.Wood_Counter_N     = "Counters/mist/Wood.Counter_0003.png",
+	.Wood_Counter_E     = "Counters/mist/Wood.Counter_0004.png",
+	.Small_Carpet_S     = "Carpets/mist/Small.Carpet_0001.png",
+	.Small_Carpet_W     = "Carpets/mist/Small.Carpet_0002.png",
+	.Small_Carpet_N     = "Carpets/mist/Small.Carpet_0003.png",
+	.Small_Carpet_E     = "Carpets/mist/Small.Carpet_0004.png",
+	.Tree_1_S           = "Trees/mist/Tree.001_0001.png",
+	.Tree_1_W           = "Trees/mist/Tree.001_0002.png",
+	.Tree_1_N           = "Trees/mist/Tree.001_0003.png",
+	.Tree_1_E           = "Trees/mist/Tree.001_0004.png",
+	.Tree_2_S           = "Trees/mist/Tree.002_0001.png",
+	.Tree_2_W           = "Trees/mist/Tree.002_0002.png",
+	.Tree_2_N           = "Trees/mist/Tree.002_0003.png",
+	.Tree_2_E           = "Trees/mist/Tree.002_0004.png",
+	.Tree_3_S           = "Trees/mist/Tree.003_0001.png",
+	.Tree_3_W           = "Trees/mist/Tree.003_0002.png",
+	.Tree_3_N           = "Trees/mist/Tree.003_0003.png",
+	.Tree_3_E           = "Trees/mist/Tree.003_0004.png",
+	.Tree_4_S           = "Trees/mist/Tree.004_0001.png",
+	.Tree_4_W           = "Trees/mist/Tree.004_0002.png",
+	.Tree_4_N           = "Trees/mist/Tree.004_0003.png",
+	.Tree_4_E           = "Trees/mist/Tree.004_0004.png",
+	.Wall_Cutaway_Left  = "Walls/mist/Walls.Cutaway.Left_0001.png",
+	.Wall_Cutaway_Right = "Walls/mist/Walls.Cutaway.Right_0001.png",
+	.Wall_Down          = "Walls/mist/Walls.Down_0001.png",
+	.Wall_Down_Short    = "Walls/mist/Walls.Down.Short_0001.png",
+	.Wall_Short         = "Walls/mist/Walls.Short_0001.png",
+	.Wall_Side          = "Walls/mist/Walls.Side_0001.png",
+	.Wall_Side_Door     = "Walls/mist/Walls.Side.Door_0001.png",
+	.Wall_Side_Window   = "Walls/mist/Walls.Side.Window_0001.png",
 }
 
 MASK_PATHS :: [Mask]cstring {
-	.None                = "resources/textures/objects/Wall_Masks/256x512/None.png",
-	.Wall_Frame          = "resources/textures/objects/Wall_Masks/256x512/frame.png",
-	.Wall_Drywall        = "resources/textures/objects/Wall_Masks/256x512/drywall.png",
-	.Wall_Brick          = "resources/textures/objects/Wall_Masks/256x512/brick-wall.png",
-	.Wall_White          = "resources/textures/objects/Wall_Masks/256x512/white.png",
-	.Wall_Royal_Blue     = "resources/textures/objects/Wall_Masks/256x512/royal_blue.png",
-	.Wall_Dark_Blue      = "resources/textures/objects/Wall_Masks/256x512/dark_blue.png",
-	.Wall_White_Cladding = "resources/textures/objects/Wall_Masks/256x512/white_cladding.png",
-	.Wall_Bricks_012     = "resources/textures/objects/Wall_Masks/256x512/Bricks012.png",
-	.Wall_Marble_001     = "resources/textures/objects/Wall_Masks/256x512/Marble001.png",
-	.Wall_Paint_001      = "resources/textures/objects/Wall_Masks/256x512/Paint001.png",
-	.Wall_Paint_002      = "resources/textures/objects/Wall_Masks/256x512/Paint002.png",
-	.Wall_Paint_003      = "resources/textures/objects/Wall_Masks/256x512/Paint003.png",
-	.Wall_Paint_004      = "resources/textures/objects/Wall_Masks/256x512/Paint004.png",
-	.Wall_Paint_005      = "resources/textures/objects/Wall_Masks/256x512/Paint005.png",
-	.Wall_Paint_006      = "resources/textures/objects/Wall_Masks/256x512/Paint006.png",
-	.Wall_Planks_003     = "resources/textures/objects/Wall_Masks/256x512/Planks003.png",
-	.Wall_Planks_011     = "resources/textures/objects/Wall_Masks/256x512/Planks011.png",
-	.Wall_Tiles_009      = "resources/textures/objects/Wall_Masks/256x512/Tiles009.png",
-	.Wall_Tiles_077      = "resources/textures/objects/Wall_Masks/256x512/Tiles077.png",
-	.Wall_WoodSiding_002 = "resources/textures/objects/Wall_Masks/256x512/WoodSiding002.png",
+	// .None                = "Wall_Masks/None.png",
+	.None                = "Wall_Masks/frame.png",
+	.Wall_Frame          = "Wall_Masks/frame.png",
+	.Wall_Drywall        = "Wall_Masks/drywall.png",
+	.Wall_Brick          = "Wall_Masks/brick-wall.png",
+	.Wall_White          = "Wall_Masks/white.png",
+	.Wall_Royal_Blue     = "Wall_Masks/royal_blue.png",
+	.Wall_Dark_Blue      = "Wall_Masks/dark_blue.png",
+	.Wall_White_Cladding = "Wall_Masks/white_cladding.png",
+	.Wall_Bricks_012     = "Wall_Masks/Bricks012.png",
+	.Wall_Marble_001     = "Wall_Masks/Marble001.png",
+	.Wall_Paint_001      = "Wall_Masks/Paint001.png",
+	.Wall_Paint_002      = "Wall_Masks/Paint002.png",
+	.Wall_Paint_003      = "Wall_Masks/Paint003.png",
+	.Wall_Paint_004      = "Wall_Masks/Paint004.png",
+	.Wall_Paint_005      = "Wall_Masks/Paint005.png",
+	.Wall_Paint_006      = "Wall_Masks/Paint006.png",
+	.Wall_Planks_003     = "Wall_Masks/Planks003.png",
+	.Wall_Planks_011     = "Wall_Masks/Planks011.png",
+	.Wall_Tiles_009      = "Wall_Masks/Tiles009.png",
+	.Wall_Tiles_077      = "Wall_Masks/Tiles077.png",
+	.Wall_WoodSiding_002 = "Wall_Masks/WoodSiding002.png",
 }
 
 BILLBOARDS :: [Model][Orientation][]Texture {
@@ -735,9 +742,10 @@ init :: proc() -> (ok: bool = true) {
 	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
 
 	add({3, 0, 11}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 12}, .Wall_Cutaway_Left, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 13}, .Wall_Down, .West, .Floor, mask = .Wall_Brick)
-	add({3, 0, 14}, .Wall_Down_Short, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 12}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 13}, .Wall_Cutaway_Left, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 14}, .Wall_Down, .West, .Floor, mask = .Wall_Brick)
+	add({3, 0, 15}, .Wall_Down_Short, .West, .Floor, mask = .Wall_Brick)
 
 	add({15, 0, 15}, .Wall_Side, .South, .Floor, mask = .Wall_Brick)
 	add({15, 0, 15}, .Wall_Side, .West, .Floor, mask = .Wall_Brick)
@@ -1152,8 +1160,10 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_LEVEL, MIPMAP_LEVELS)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
@@ -1175,68 +1185,116 @@ load_depth_map_texture_array :: proc() -> (ok: bool = true) {
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexImage3D(
-		gl.TEXTURE_2D_ARRAY,
-		0,
-		gl.R16,
-		WIDTH,
-		HEIGHT,
-		textures,
-		0,
-		gl.RED,
-		gl.UNSIGNED_SHORT,
-		nil,
-	)
-
-	for path, i in paths {
-		width: i32
-		height: i32
-		channels: i32
-		pixels := stbi.load_16(path, &width, &height, &channels, 1)
-		defer stbi.image_free(pixels)
-
-		if pixels == nil {
-			log.error("Failed to load texture: ", path)
-			return false
-		}
-
-		if width != WIDTH {
-			log.error(
-				"Texture: ",
-				path,
-				" is of a different width. expected: ",
-				WIDTH,
-				" got: ",
-				width,
-			)
-			return false
-		}
-
-		if height != HEIGHT {
-			log.error(
-				"Texture: ",
-				path,
-				" is of a different height. expected: ",
-				HEIGHT,
-				" got: ",
-				height,
-			)
-			return false
-		}
-
-		gl.TexSubImage3D(
+	width: i32 = WIDTH
+	height: i32 = HEIGHT
+	level: i32 = 0
+	for level <= MIPMAP_LEVELS {
+		gl.TexImage3D(
 			gl.TEXTURE_2D_ARRAY,
+			level,
+			gl.R16,
+			width,
+			height,
+			textures,
 			0,
-			0,
-			0,
-			i32(i),
-			WIDTH,
-			HEIGHT,
-			1,
 			gl.RED,
 			gl.UNSIGNED_SHORT,
-			pixels,
+			nil,
 		)
+
+		width /= 2
+		height /= 2
+		level += 1
+	}
+
+    level = 0
+	width = WIDTH
+	height = HEIGHT
+	defer free_all(context.temp_allocator)
+	for level in 0 ..= MIPMAP_LEVELS {
+		// gl.TexImage3D(
+		// 	gl.TEXTURE_2D_ARRAY,
+		// 	level,
+		// 	gl.R16,
+		// 	width,
+		// 	height,
+		// 	textures,
+		// 	0,
+		// 	gl.RED,
+		// 	gl.UNSIGNED_SHORT,
+		// 	nil,
+		// )
+
+		for path, i in paths {
+			path := fmt.ctprint(
+				OBJECTS_PATH,
+				width,
+				"x",
+				height,
+				"/",
+				path,
+				sep = "",
+			)
+			// defer delete(path)
+
+			image_width: i32
+			image_height: i32
+			channels: i32
+			pixels := stbi.load_16(
+				path,
+				&image_width,
+				&image_height,
+				&channels,
+				1,
+			)
+			defer stbi.image_free(pixels)
+
+			if pixels == nil {
+				log.error("Failed to load texture: ", path)
+				return false
+			}
+
+			if image_width != width {
+				log.error(
+					"Texture: ",
+					path,
+					" is of a different width. expected: ",
+					width,
+					" got: ",
+					image_width,
+				)
+				return false
+			}
+
+			if image_height != height {
+				log.error(
+					"Texture: ",
+					path,
+					" is of a different height. expected: ",
+					height,
+					" got: ",
+					image_height,
+				)
+				return false
+			}
+
+			gl.TexSubImage3D(
+				gl.TEXTURE_2D_ARRAY,
+				level,
+				0,
+				0,
+				i32(i),
+				width,
+				height,
+				1,
+				gl.RED,
+				gl.UNSIGNED_SHORT,
+				pixels,
+			)
+		}
+
+        width /= 2
+        height /= 2
 	}
 
 	gl_error := gl.GetError()
@@ -1255,8 +1313,14 @@ load_texture_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(
+		gl.TEXTURE_2D_ARRAY,
+		gl.TEXTURE_MIN_FILTER,
+		gl.NEAREST_MIPMAP_LINEAR,
+		// gl.NEAREST,
+	)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+    gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAX_LEVEL, MIPMAP_LEVELS)
 
 
 	// paths := DIFFUSE_PATHS
@@ -1269,68 +1333,119 @@ load_texture_array :: proc(paths: [$T]cstring) -> (ok: bool = true) {
 	stbi.set_flip_vertically_on_load(0)
 	stbi.set_flip_vertically_on_load_thread(false)
 
-	gl.TexImage3D(
-		gl.TEXTURE_2D_ARRAY,
-		0,
-		gl.RGBA8,
-		WIDTH,
-		HEIGHT,
-		textures,
-		0,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		nil,
-	)
-
-	for path, i in paths {
-		width: i32
-		height: i32
-		pixels := stbi.load(path, &width, &height, nil, 4)
-		defer stbi.image_free(pixels)
-
-		if pixels == nil {
-			log.error("Failed to load texture: ", path)
-			return false
-		}
-
-		if width != WIDTH {
-			log.error(
-				"Texture: ",
-				path,
-				" is of a different width. expected: ",
-				WIDTH,
-				" got: ",
-				width,
-			)
-			return false
-		}
-
-		if height != HEIGHT {
-			log.error(
-				"Texture: ",
-				path,
-				" is of a different height. expected: ",
-				HEIGHT,
-				" got: ",
-				height,
-			)
-			return false
-		}
-
-		gl.TexSubImage3D(
+	defer free_all(context.temp_allocator)
+	width: i32 = WIDTH
+	height: i32 = HEIGHT
+	level: i32 = 0
+	for level <= MIPMAP_LEVELS {
+		gl.TexImage3D(
 			gl.TEXTURE_2D_ARRAY,
+			level,
+			gl.RGBA8,
+			width,
+			height,
+			textures,
 			0,
-			0,
-			0,
-			i32(i),
-			WIDTH,
-			HEIGHT,
-			1,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
-			pixels,
+			nil,
 		)
+
+		width /= 2
+		height /= 2
+		level += 1
 	}
+
+    level = 0
+	width = WIDTH
+	height = HEIGHT
+	for level <= MIPMAP_LEVELS {
+		// gl.TexImage3D(
+		// 	gl.TEXTURE_2D_ARRAY,
+		// 	level,
+		// 	gl.RGBA8,
+		// 	width,
+		// 	height,
+		// 	textures,
+		// 	0,
+		// 	gl.RGBA,
+		// 	gl.UNSIGNED_BYTE,
+		// 	nil,
+		// )
+
+		for path, i in paths {
+			path := fmt.ctprint(
+				OBJECTS_PATH,
+				width,
+				"x",
+				height,
+				"/",
+				path,
+				sep = "",
+			)
+			// log.info(path)
+			// defer delete(path)
+
+			image_width, image_height: i32
+			pixels := stbi.load(path, &image_width, &image_height, nil, 4)
+			defer stbi.image_free(pixels)
+
+			if pixels == nil {
+				log.error("Failed to load texture: ", path)
+				return false
+			}
+
+			if image_width != width {
+				log.error(
+					"Texture: ",
+					path,
+					" is of a different width. expected: ",
+					width,
+					" got: ",
+					image_width,
+				)
+				return false
+			}
+
+			if image_height != height {
+				log.error(
+					"Texture: ",
+					path,
+					" is of a different height. expected: ",
+					height,
+					" got: ",
+					image_height,
+				)
+				return false
+			}
+
+			gl.TexSubImage3D(
+				gl.TEXTURE_2D_ARRAY,
+				level,
+				0,
+				0,
+				i32(i),
+				width,
+				height,
+				1,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				pixels,
+			)
+		}
+
+		width /= 2
+		height /= 2
+		level += 1
+	}
+
+	gl_error := gl.GetError()
+	if (gl_error != gl.NO_ERROR) {
+		log.error("Error loading billboard texture array: ", gl_error)
+		return false
+	}
+
+	// gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
 }
