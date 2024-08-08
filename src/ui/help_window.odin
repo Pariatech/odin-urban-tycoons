@@ -119,7 +119,7 @@ help_window_body :: proc(
 	   cursor.pos.x < pos.x + size.x + HELP_WINDOW_SCROLL_BAR_WIDTH &&
 	   cursor.pos.y >= pos.y &&
 	   cursor.pos.y < pos.y + size.y {
-		scroll_bar_offset -= (mouse.vertical_scroll() * scroll_bar_percent / 8)
+		scroll_bar_offset -= (f32(mouse.vertical_scroll()) * scroll_bar_percent / 8)
 		scroll_bar_offset = clamp(
 			scroll_bar_offset,
 			0,

@@ -1,8 +1,7 @@
 #version 410
 
 layout (std140) uniform UniformBufferObject {
-    mat4 proj;
-    mat4 view;
+    mat4 view_proj;
 } ubo;
 
 layout(location = 0) in vec3 pos;
@@ -23,7 +22,7 @@ layout(location = 4) out float frag_mask;
 
 void main() {
     vec4 translated_pos = vec4(pos, 1.0) + vec4(world_pos, 0.0);
-    gl_Position = ubo.proj * ubo.view * translated_pos;
+    gl_Position = ubo.view_proj * translated_pos;
 
     frag_light = light;
 

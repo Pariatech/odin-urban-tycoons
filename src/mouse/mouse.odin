@@ -41,7 +41,7 @@ buttons: [Button]Button_State
 buttons_captured: [Button]bool
 
 @(private)
-scroll: glsl.vec2
+scroll: glsl.dvec2
 
 @(private)
 cursors: [Cursor]glfw.CursorHandle
@@ -60,11 +60,11 @@ CURSOR_HOTSPOTS :: [Cursor]glsl.ivec2 {
 	.Rotate  = {24, 24},
 }
 
-get_scroll :: proc() -> glsl.vec2 {
+get_scroll :: proc() -> glsl.dvec2 {
 	return scroll
 }
 
-vertical_scroll :: proc() -> f32 {
+vertical_scroll :: proc() -> f64 {
 	return scroll.y
 }
 
@@ -81,8 +81,8 @@ scroll_callback :: proc "c" (
 	xoffset, yoffset: f64,
 ) {
 	context = runtime.default_context()
-	scroll.x = f32(xoffset)
-	scroll.y = f32(yoffset)
+	scroll.x = xoffset
+	scroll.y = yoffset
 }
 
 on_button :: proc "c" (

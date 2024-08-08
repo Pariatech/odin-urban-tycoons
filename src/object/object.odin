@@ -502,7 +502,7 @@ Chunk :: struct {
 Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Chunk
 
 Uniform_Object :: struct {
-	proj, view: glsl.mat4,
+	view_proj: glsl.mat4,
 }
 
 Vertex :: struct {
@@ -1065,8 +1065,7 @@ draw :: proc() {
 	gl.UniformBlockBinding(shader_program, ubo_index, 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
-	uniform_object.view = camera.view
-	uniform_object.proj = camera.proj
+	uniform_object.view_proj = camera.view_proj
 
 	gl.BufferData(
 		gl.UNIFORM_BUFFER,
