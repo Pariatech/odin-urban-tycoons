@@ -106,6 +106,8 @@ Model :: enum {
 	Wall_Diagonal_Side_Top,
 	Wall_Short_Top,
 	Wall_Side_Top,
+	Wall_Down_Short_Top,
+	Wall_Down_Side_Top,
 }
 
 Orientation :: enum {
@@ -214,6 +216,8 @@ MODEL_SIZE :: [Model]glsl.ivec2 {
 	.Wall_Diagonal_Side_Top = {1, 1},
 	.Wall_Short_Top = {1, 1},
 	.Wall_Side_Top = {1, 1},
+	.Wall_Down_Short_Top = {1, 1},
+	.Wall_Down_Side_Top = {1, 1},
 }
 
 TYPE_MAP :: [Model]Type {
@@ -291,6 +295,8 @@ TYPE_MAP :: [Model]Type {
 	.Wall_Diagonal_Side_Top              = .Wall_Top,
 	.Wall_Short_Top                      = .Wall_Top,
 	.Wall_Side_Top                       = .Wall_Top,
+	.Wall_Down_Short_Top                 = .Wall_Top,
+	.Wall_Down_Side_Top                  = .Wall_Top,
 }
 
 WIDTH :: 256
@@ -430,6 +436,8 @@ Texture :: enum {
 	Wall_Diagonal_Side_Top,
 	Wall_Short_Top,
 	Wall_Side_Top,
+	Wall_Down_Short_Top,
+	Wall_Down_Side_Top,
 }
 
 Depth_Map :: enum {
@@ -498,6 +506,8 @@ Depth_Map :: enum {
 	Wall_Diagonal_Side_Top,
 	Wall_Short_Top,
 	Wall_Side_Top,
+	Wall_Down_Short_Top,
+	Wall_Down_Side_Top,
 }
 
 Mask :: enum {
@@ -635,6 +645,8 @@ DIFFUSE_PATHS :: [Texture]cstring {
 	.Wall_Diagonal_Side_Top              = "Walls_Top/diffuse/Walls.Diagonal.Side.Top_0001.png",
 	.Wall_Short_Top                      = "Walls_Top/diffuse/Walls.Short.Top_0001.png",
 	.Wall_Side_Top                       = "Walls_Top/diffuse/Walls.Side.Top_0001.png",
+	.Wall_Down_Short_Top                 = "Walls_Top/diffuse/Walls.Down.Short.Top_0001.png",
+	.Wall_Down_Side_Top                  = "Walls_Top/diffuse/Walls.Down.Top_0001.png",
 }
 
 DEPTH_MAP_PATHS :: [Depth_Map]cstring {
@@ -703,6 +715,8 @@ DEPTH_MAP_PATHS :: [Depth_Map]cstring {
 	.Wall_Diagonal_Side_Top  = "Walls_Top/mist/Walls.Diagonal.Side.Top_0001.png",
 	.Wall_Short_Top          = "Walls_Top/mist/Walls.Short.Top_0001.png",
 	.Wall_Side_Top           = "Walls_Top/mist/Walls.Side.Top_0001.png",
+	.Wall_Down_Short_Top     = "Walls_Top/mist/Walls.Down.Short.Top_0001.png",
+	.Wall_Down_Side_Top      = "Walls_Top/mist/Walls.Down.Top_0001.png",
 }
 
 MASK_PATHS :: [Mask]cstring {
@@ -887,9 +901,9 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 	},
 	.Wall_Diagonal_Bricks012 =  {
 		.South = {.Wall_Diagonal_Bricks012},
-		.East = {.Wall_Diagonal_Bricks012},
+		.East = {.Wall_Diagonal_Cross_Bricks012},
 		.North = {.Wall_Diagonal_Bricks012},
-		.West = {.Wall_Diagonal_Bricks012},
+		.West = {.Wall_Diagonal_Cross_Bricks012},
 	},
 	.Wall_Diagonal_Brick =  {
 		.South = {.Wall_Diagonal_Brick},
@@ -1161,6 +1175,18 @@ BILLBOARDS :: [Model][Orientation][]Texture {
 		.North = {.Wall_Side_Top},
 		.West = {.Wall_Side_Top},
 	},
+	.Wall_Down_Short_Top =  {
+		.South = {.Wall_Down_Short_Top},
+		.East = {.Wall_Down_Short_Top},
+		.North = {.Wall_Down_Short_Top},
+		.West = {.Wall_Down_Short_Top},
+	},
+	.Wall_Down_Side_Top =  {
+		.South = {.Wall_Down_Side_Top},
+		.East = {.Wall_Down_Side_Top},
+		.North = {.Wall_Down_Side_Top},
+		.West = {.Wall_Down_Side_Top},
+	},
 }
 
 DEPTH_MAPS :: [Model][Orientation][]Depth_Map {
@@ -1334,9 +1360,9 @@ DEPTH_MAPS :: [Model][Orientation][]Depth_Map {
 	},
 	.Wall_Diagonal_Bricks012 =  {
 		.South = {.Wall_Diagonal},
-		.East = {.Wall_Diagonal},
+		.East = {.Wall_Diagonal_Cross},
 		.North = {.Wall_Diagonal},
-		.West = {.Wall_Diagonal},
+		.West = {.Wall_Diagonal_Cross},
 	},
 	.Wall_Diagonal_Brick =  {
 		.South = {.Wall_Diagonal},
@@ -1608,6 +1634,18 @@ DEPTH_MAPS :: [Model][Orientation][]Depth_Map {
 		.North = {.Wall_Side_Top},
 		.West = {.Wall_Side_Top},
 	},
+	.Wall_Down_Short_Top =  {
+		.South = {.Wall_Down_Short_Top},
+		.East = {.Wall_Down_Short_Top},
+		.North = {.Wall_Down_Short_Top},
+		.West = {.Wall_Down_Short_Top},
+	},
+	.Wall_Down_Side_Top =  {
+		.South = {.Wall_Down_Side_Top},
+		.East = {.Wall_Down_Side_Top},
+		.North = {.Wall_Down_Side_Top},
+		.West = {.Wall_Down_Side_Top},
+	},
 }
 
 Object :: struct {
@@ -1865,29 +1903,48 @@ init :: proc() -> (ok: bool = true) {
 	add({20, 0, 1}, .Tree, .East, .Floor)
 	add({24, 0, 0}, .Tree, .West, .Floor)
 
-	add({3, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 2.75)
-	add({3, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
+	add({3, 0, 11}, .Wall_Side_Top, .South, .Floor)
+	add({3, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Window)
 
-	add({4, 0, 11}, .Wall_Cutaway_Left_Top, .South, .Floor, mask = .None)
+	add({4, 0, 11}, .Wall_Cutaway_Left_Top, .South, .Floor)
 	add({4, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Cutaway_Left)
 
-	add({5, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 0.115)
+	add({5, 0, 11}, .Wall_Down_Side_Top, .South, .Floor)
 	add({5, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down)
 
-	add({6, 0, 11}, .Wall_Short_Top, .South, .Floor, mask = .None, offset_y = 0.115)
+	add({6, 0, 11}, .Wall_Down_Short_Top, .South, .Floor)
 	add({6, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down_Short)
 
 	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
 
-	add({3, 0, 11}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	add({3, 0, 12}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
+	add({3, 0, 11}, .Wall_Side_Top, .West, .Floor)
+	add({3, 0, 11}, .Wall_Side_Bricks012, .West, .Floor)
+
+	add({3, 0, 12}, .Wall_Side_Top, .West, .Floor)
+	add({3, 0, 12}, .Wall_Side_Bricks012, .West, .Floor)
+
+	add({3, 0, 13}, .Wall_Cutaway_Left_Top, .West, .Floor)
 	add({3, 0, 13}, .Wall_Side_Bricks012, .West, .Floor, mask = .Cutaway_Left)
+
+	add({3, 0, 14}, .Wall_Down_Side_Top, .West, .Floor)
 	add({3, 0, 14}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down)
+
+	add({3, 0, 15}, .Wall_Down_Short_Top, .West, .Floor)
 	add({3, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down_Short)
 
-	add({15, 0, 15}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
-	add({15, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
+	add({15, 0, 15}, .Wall_Side_Bricks012, .South, .Floor)
+	add({15, 0, 15}, .Wall_Side_Bricks012, .West, .Floor)
 	add({15, 0, 15}, .Wood_Counter, .East, .Floor)
+
+	add({3, 0, 21}, .Wall_Diagonal_Side_Top, .South, .Floor)
+	add({3, 0, 21}, .Wall_Diagonal_Bricks012, .South, .Floor)
+	add({4, 0, 20}, .Wall_Diagonal_Side_Top, .South, .Floor)
+	add({4, 0, 20}, .Wall_Diagonal_Bricks012, .South, .Floor)
+	add({5, 0, 19}, .Wall_Diagonal_Side_Top, .South, .Floor)
+	add({5, 0, 19}, .Wall_Diagonal_Bricks012, .South, .Floor)
+
+	add({5, 0, 18}, .Wall_Diagonal_Cross_Top, .South, .Floor)
+	add({5, 0, 18}, .Wall_Diagonal_Cross_Bricks012, .South, .Floor)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
@@ -2003,8 +2060,9 @@ init_chunk :: proc(using chunk: ^Chunk) {
 }
 
 get_draw_texture :: proc(using v: Object) -> f32 {
-	if type == .Wall {
-		texture := texture
+	if type == .Wall || type == .Wall_Top {
+        billboards:= BILLBOARDS
+		texture := billboards[model][Orientation(camera.rotation)][0]
 		// #partial switch model {
 		// case .Wall_Cutaway_Left:
 		// 	#partial switch camera.rotation {
@@ -2038,6 +2096,45 @@ get_draw_texture :: proc(using v: Object) -> f32 {
 	family := (int(texture) / 4) * 4
 	index := int(texture) - family
 	return f32(family + (index + int(camera.rotation)) % 4)
+}
+
+get_draw_depth_map_texture :: proc(using v: Object) -> f32 {
+	if type == .Wall || type == .Wall_Top {
+		texture := depth_map
+		// #partial switch model {
+		// case .Wall_Cutaway_Left:
+		// 	#partial switch camera.rotation {
+		// 	case .South_East:
+		// 		if orientation == .South {
+		// 			texture = .Wall_Cutaway_Right
+		// 		}
+		// 	case .North_East:
+		// 		texture = .Wall_Cutaway_Right
+		// 	case .North_West:
+		// 		if orientation == .West {
+		// 			texture = .Wall_Cutaway_Right
+		// 		}
+		// 	}
+		// case .Wall_Cutaway_Right:
+		// 	#partial switch camera.rotation {
+		// 	case .South_East:
+		// 		if orientation == .South {
+		// 			texture = .Wall_Cutaway_Left
+		// 		}
+		// 	case .North_East:
+		// 		texture = .Wall_Cutaway_Left
+		// 	case .North_West:
+		// 		if orientation == .West {
+		// 			texture = .Wall_Cutaway_Left
+		// 		}
+		// 	}
+		// }
+		return f32(texture)
+	}
+	family := (int(depth_map) / 4) * 4
+	index := int(depth_map) - family
+	return f32(family + (index + int(camera.rotation)) % 4)
+
 }
 
 sort_objects :: proc(a, b: Object) -> bool {
@@ -2119,12 +2216,12 @@ get_instance :: proc(using v: Object) -> Instance {
 		position = {f32(pos.x), f32(pos.y) + offset_y, f32(pos.z)},
 		light = light,
 		texture = get_draw_texture(v),
-		depth_map = get_draw_texture(v),
+		depth_map = get_draw_depth_map_texture(v),
 		mirror = 1,
 		mask = f32(mask),
 	}
 
-	if type == .Wall {
+	if type == .Wall || type == .Wall_Top {
 		switch camera.rotation {
 		case .South_West:
 			if orientation == .West {

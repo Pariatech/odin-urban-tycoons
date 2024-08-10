@@ -135,7 +135,7 @@ Wall_Texture :: enum (u16) {
 
 Wall_Index :: u32
 
-WALL_TEXTURE_HEIGHT :: 384
+WALL_TEXTURE_HEIGHT :: 256
 WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {

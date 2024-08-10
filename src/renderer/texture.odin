@@ -1,6 +1,7 @@
 package renderer
 
 import "core:fmt"
+import "core:log"
 import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
@@ -42,12 +43,12 @@ load_texture_2D_array :: proc(
 		defer stbi.image_free(pixels)
 
 		if pixels == nil {
-			fmt.eprintln("Failed to load texture: ", path)
+			log.error("Failed to load texture: ", path)
 			return false
 		}
 
 		if w != width {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different width. expected: ",
@@ -59,7 +60,7 @@ load_texture_2D_array :: proc(
 		}
 
 		if h != height {
-			fmt.eprintln(
+			log.error(
 				"Texture: ",
 				path,
 				" is of a different height. expected: ",
