@@ -7,6 +7,7 @@ import glsl "core:math/linalg/glsl"
 import "../camera"
 import "../constants"
 import "../terrain"
+import "../models"
 
 Diagonal_Wall_Mask :: enum {
 	Full,
@@ -19,11 +20,16 @@ Diagonal_Wall_Mask :: enum {
 DIAGONAL_WALL_TOP_CROSS_OFFSET :: -0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
-diagonal_wall_vertices := [State][Diagonal_Wall_Mask][dynamic]Wall_Vertex{}
-diagonal_wall_indices := [State][Diagonal_Wall_Mask][dynamic]Wall_Index{}
+DIAGONAL_WALL_MASK_MODEL_NAME_MAP :: [Diagonal_Wall_Mask]string {
+	// .Start          = "Diagonal_Wall.Up.Start.Outside",
+	// .End            = "Diagonal_Wall.Up.End.Outside",
+	.Left_Extension  = "Diagonal_Wall.Up.Extended_Left.Outside",
+	.Right_Extension = "Diagonal_Wall.Up.Extended_Right.Outside",
+	.Full           = "Diagonal_Wall.Up.Full.Outside",
+	.Side           = "Diagonal_Wall.Up.Side.Outside",
+	.Cross           = "Diagonal_Wall.Up.Side.Outside",
+}
 
-diagonal_wall_top_vertices := [State][Diagonal_Wall_Mask][dynamic]Wall_Vertex{}
-diagonal_wall_top_indices := [State][Diagonal_Wall_Mask][dynamic]Wall_Index{}
 
 DIAGONAL_WALL_MASK_MAP ::
 	#partial [Wall_Axis][camera.Rotation][Wall_Type]Diagonal_Wall_Mask {
@@ -585,8 +591,14 @@ draw_diagonal_wall :: proc(
     light:= glsl.vec3{0.95, 0.95, 0.95}
 
 	if draw {
-		wall_vertices := diagonal_wall_vertices[wall.state][mask][:]
-        wall_indices := diagonal_wall_indices[wall.state][mask][:]
+	    model_name_map := DIAGONAL_WALL_MASK_MODEL_NAME_MAP
+	    model_name := model_name_map[mask]
+	    model := models.models[model_name]
+	    wall_vertices := model.vertices[:]
+	    wall_indices := model.indices[:]
+
+		// wall_vertices := diagonal_wall_vertices[wall.state][mask][:]
+  //       wall_indices := diagonal_wall_indices[wall.state][mask][:]
 
 		draw_wall_mesh(
 			wall_vertices,
@@ -600,21 +612,21 @@ draw_diagonal_wall :: proc(
 		)
 	}
 
-	top_vertices := diagonal_wall_top_vertices[wall.state][top_mask][:]
-	top_indices := diagonal_wall_top_indices[wall.state][top_mask][:]
-
-	transform *= glsl.mat4Translate(
-		{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
-	)
-
-	draw_wall_mesh(
-		top_vertices,
-		top_indices,
-		transform,
-		.Wall_Top,
-		wall.mask,
-        light,
-		vertex_buffer,
-		index_buffer,
-	)
+	// top_vertices := diagonal_wall_top_vertices[wall.state][top_mask][:]
+	// top_indices := diagonal_wall_top_indices[wall.state][top_mask][:]
+	//
+	// transform *= glsl.mat4Translate(
+	// 	{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
+	// )
+	//
+	// draw_wall_mesh(
+	// 	top_vertices,
+	// 	top_indices,
+	// 	transform,
+	// 	.Wall_Top,
+	// 	wall.mask,
+ //        light,
+	// 	vertex_buffer,
+	// 	index_buffer,
+	// )
 }

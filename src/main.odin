@@ -23,6 +23,7 @@ import "wall"
 import "window"
 import "world"
 import "object"
+import "models"
 
 TITLE :: "My Window!"
 
@@ -100,6 +101,8 @@ start :: proc() -> (ok: bool = false) {
 	defer tools.deinit()
 
 	wall.init_cutaways()
+
+    models.load() or_return
 
 	should_close := false
 	current_time_ns := time.now()

@@ -7,10 +7,10 @@ import glsl "core:math/linalg/glsl"
 import "core:strings"
 
 import gl "vendor:OpenGL"
-import "vendor:cgltf"
 
 import "../camera"
 import "../constants"
+import "../models"
 import "../renderer"
 import "../terrain"
 import "../utils"
@@ -62,8 +62,10 @@ Wall_Texture_Position :: enum {
 
 Wall_Mask :: enum {
 	Full,
-	Extended_Side,
+	Extended_Left,
+	Extended_Right,
 	Side,
+	Start,
 	End,
 }
 
@@ -139,27 +141,27 @@ WALL_TEXTURE_HEIGHT :: 384
 WALL_TEXTURE_WIDTH :: 128
 
 WALL_TEXTURE_PATHS :: [Wall_Texture]cstring {
-	.Wall_Top                   = "resources/textures/walls/wall-top.png",
-	.Frame                      = "resources/textures/walls/side/frame.png",
-	.Drywall                    = "resources/textures/walls/side/drywall.png",
-	.Brick                      = "resources/textures/walls/side/brick-wall.png",
-	.White                      = "resources/textures/walls/side/white.png",
-	.Royal_Blue                 = "resources/textures/walls/side/royal_blue.png",
-	.Dark_Blue                  = "resources/textures/walls/side/dark_blue.png",
-	.White_Cladding             = "resources/textures/walls/side/white_cladding.png",
-	.Bricks_012                 = "resources/textures/walls/side/Bricks012.png",
-	.Marble_001                 = "resources/textures/walls/side/Marble001.png",
-	.Paint_001                  = "resources/textures/walls/side/Paint001.png",
-	.Paint_002                  = "resources/textures/walls/side/Paint002.png",
-	.Paint_003                  = "resources/textures/walls/side/Paint003.png",
-	.Paint_004                  = "resources/textures/walls/side/Paint004.png",
-	.Paint_005                  = "resources/textures/walls/side/Paint005.png",
-	.Paint_006                  = "resources/textures/walls/side/Paint006.png",
-	.Planks_003                 = "resources/textures/walls/side/Planks003.png",
-	.Planks_011                 = "resources/textures/walls/side/Planks011.png",
-	.Tiles_009                  = "resources/textures/walls/side/Tiles009.png",
-	.Tiles_077                  = "resources/textures/walls/side/Tiles077.png",
-	.WoodSiding_002             = "resources/textures/walls/side/WoodSiding002.png",
+	.Wall_Top       = "resources/textures/walls/wall-top.png",
+	.Frame          = "resources/textures/walls/side/frame.png",
+	.Drywall        = "resources/textures/walls/side/drywall.png",
+	.Brick          = "resources/textures/walls/side/brick-wall.png",
+	.White          = "resources/textures/walls/side/white.png",
+	.Royal_Blue     = "resources/textures/walls/side/royal_blue.png",
+	.Dark_Blue      = "resources/textures/walls/side/dark_blue.png",
+	.White_Cladding = "resources/textures/walls/side/white_cladding.png",
+	.Bricks_012     = "resources/textures/walls/side/Bricks012.png",
+	.Marble_001     = "resources/textures/walls/side/Marble001.png",
+	.Paint_001      = "resources/textures/walls/side/Paint001.png",
+	.Paint_002      = "resources/textures/walls/side/Paint002.png",
+	.Paint_003      = "resources/textures/walls/side/Paint003.png",
+	.Paint_004      = "resources/textures/walls/side/Paint004.png",
+	.Paint_005      = "resources/textures/walls/side/Paint005.png",
+	.Paint_006      = "resources/textures/walls/side/Paint006.png",
+	.Planks_003     = "resources/textures/walls/side/Planks003.png",
+	.Planks_011     = "resources/textures/walls/side/Planks011.png",
+	.Tiles_009      = "resources/textures/walls/side/Tiles009.png",
+	.Tiles_077      = "resources/textures/walls/side/Tiles077.png",
+	.WoodSiding_002 = "resources/textures/walls/side/WoodSiding002.png",
 }
 
 WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
@@ -168,10 +170,14 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 	.Window_Opening = "resources/textures/wall-masks/window-opening.png",
 }
 
-wall_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
-wall_indices := [State][Wall_Mask][dynamic]Wall_Index{}
-wall_top_vertices := [State][Wall_Mask][dynamic]Wall_Vertex{}
-wall_top_indices := [State][Wall_Mask][dynamic]Wall_Index{}
+WALL_MASK_MODEL_NAME_MAP :: [Wall_Mask]string {
+	.Start          = "Wall.Up.Start.Outside",
+	.End            = "Wall.Up.End.Outside",
+	.Extended_Left  = "Wall.Up.Extended_Left.Outside",
+	.Extended_Right = "Wall.Up.Extended_Right.Outside",
+	.Full           = "Wall.Up.Full.Outside",
+	.Side           = "Wall.Up.Side.Outside",
+}
 
 chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
@@ -505,15 +511,15 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	},
 	.End_Side = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
-			.South_East = .Extended_Side,
+			.South_West = .Extended_Right,
+			.South_East = .Extended_Right,
 			.North_East = .End,
 			.North_West = .End,
 		},
 		.E_W =  {
 			.South_West = .End,
-			.South_East = .Extended_Side,
-			.North_East = .Extended_Side,
+			.South_East = .Extended_Right,
+			.North_East = .Extended_Right,
 			.North_West = .End,
 		},
 	},
@@ -521,41 +527,41 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		.N_S =  {
 			.South_West = .End,
 			.South_East = .End,
-			.North_East = .Extended_Side,
-			.North_West = .Extended_Side,
+			.North_East = .Extended_Right,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .End,
 			.North_East = .End,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 	},
 	.Left_Corner_End = #partial {
 		.N_S =  {
 			.South_West = .End,
 			.South_East = .Full,
-			.North_East = .Extended_Side,
-			.North_West = .Extended_Side,
+			.North_East = .Extended_Right,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Full,
 			.North_East = .End,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 	},
 	.End_Left_Corner = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
-			.South_East = .Extended_Side,
+			.South_West = .Extended_Right,
+			.South_East = .Extended_Right,
 			.North_East = .Full,
 			.North_West = .End,
 		},
 		.E_W =  {
 			.South_West = .Full,
-			.South_East = .Extended_Side,
-			.North_East = .Extended_Side,
+			.South_East = .Extended_Right,
+			.North_East = .Extended_Right,
 			.North_West = .End,
 		},
 	},
@@ -563,40 +569,40 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		.N_S =  {
 			.South_West = .Full,
 			.South_East = .End,
-			.North_East = .Extended_Side,
-			.North_West = .Extended_Side,
+			.North_East = .Extended_Right,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .End,
 			.North_East = .Full,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 	},
 	.End_Right_Corner = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
-			.South_East = .Extended_Side,
+			.South_West = .Extended_Right,
+			.South_East = .Extended_Right,
 			.North_East = .End,
 			.North_West = .Full,
 		},
 		.E_W =  {
 			.South_West = .End,
-			.South_East = .Extended_Side,
-			.North_East = .Extended_Side,
+			.South_East = .Extended_Right,
+			.North_East = .Extended_Right,
 			.North_West = .Full,
 		},
 	},
 	.Left_Corner_Side = #partial {
 		.N_S =  {
 			.South_West = .Side,
-			.South_East = .Extended_Side,
+			.South_East = .Extended_Right,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
 		.E_W =  {
 			.South_West = .Side,
-			.South_East = .Extended_Side,
+			.South_East = .Extended_Right,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
@@ -605,11 +611,11 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		.N_S =  {
 			.South_West = .Side,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
+			.North_East = .Extended_Right,
 			.North_West = .Side,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
@@ -617,7 +623,7 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 	},
 	.Right_Corner_Side = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Side,
 			.North_East = .Side,
 			.North_West = .Side,
@@ -625,7 +631,7 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
+			.North_East = .Extended_Right,
 			.North_West = .Side,
 		},
 	},
@@ -634,68 +640,68 @@ WALL_MASK_MAP :: [Wall_Type][Wall_Axis][camera.Rotation]Wall_Mask {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 	},
 	.Left_Corner_Left_Corner = #partial {
 		.N_S =  {
 			.South_West = .Side,
-			.South_East = .Extended_Side,
-			.North_East = .Extended_Side,
+			.South_East = .Extended_Right,
+			.North_East = .Extended_Right,
 			.North_West = .Side,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
-			.South_East = .Extended_Side,
+			.South_West = .Extended_Right,
+			.South_East = .Extended_Right,
 			.North_East = .Side,
 			.North_West = .Side,
 		},
 	},
 	.Right_Corner_Right_Corner = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Side,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
 			.South_West = .Side,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
-			.North_West = .Extended_Side,
+			.North_East = .Extended_Right,
+			.North_West = .Extended_Right,
 		},
 	},
 	.Left_Corner_Right_Corner = #partial {
 		.N_S =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
+			.North_East = .Extended_Right,
 			.North_West = .Side,
 		},
 		.E_W =  {
 			.South_West = .Side,
-			.South_East = .Extended_Side,
+			.South_East = .Extended_Right,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 	},
 	.Right_Corner_Left_Corner = #partial {
 		.N_S =  {
 			.South_West = .Side,
-			.South_East = .Extended_Side,
+			.South_East = .Extended_Right,
 			.North_East = .Side,
-			.North_West = .Extended_Side,
+			.North_West = .Extended_Right,
 		},
 		.E_W =  {
-			.South_West = .Extended_Side,
+			.South_West = .Extended_Right,
 			.South_East = .Side,
-			.North_East = .Extended_Side,
+			.North_East = .Extended_Right,
 			.North_West = .Side,
 		},
 	},
@@ -754,7 +760,6 @@ load_wall_texture_array :: proc() -> (ok: bool = true) {
 init_wall_renderer :: proc() -> (ok: bool) {
 	load_wall_texture_array() or_return
 	load_wall_mask_array() or_return
-	load_models() or_return
 
 	return true
 }
@@ -764,8 +769,8 @@ deinit_wall_renderer :: proc() {
 }
 
 draw_wall_mesh :: proc(
-	vertices: []Wall_Vertex,
-	indices: []Wall_Index,
+	vertices: []models.Vertex,
+	indices: []models.Index,
 	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
@@ -775,11 +780,14 @@ draw_wall_mesh :: proc(
 ) {
 	index_offset := u32(len(vertex_buffer))
 	for i in 0 ..< len(vertices) {
-		vertex := vertices[i]
+		vertex: Wall_Vertex
+		vertex.pos = vertices[i].pos
+		vertex.texcoords.xy = vertices[i].texcoords.xy
 		vertex.light = light
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
+        log.info(vertex)
 
 		append(vertex_buffer, vertex)
 	}
@@ -816,12 +824,17 @@ draw_wall :: proc(
 	transform *= transform_map[axis][camera.rotation]
 
 	// vertices_map := WALL_VERTICES
-	vertices_map := wall_vertices
-	vertices: []Wall_Vertex = vertices_map[wall.state][mask][:]
+	// vertices_map := wall_vertices
+	model_name_map := WALL_MASK_MODEL_NAME_MAP
+	model_name := model_name_map[mask]
+	model := models.models[model_name]
+	vertices := model.vertices[:]
+	indices := model.indices[:]
+    log.info(vertices)
+    log.info(indices)
 
 	// indices_map := WALL_INDICES
-	indices_map := wall_indices
-	indices: []Wall_Index = indices_map[wall.state][mask][:]
+	// indices_map := wall_indices
 
 	light := glsl.vec3{1, 1, 1}
 	if axis == .N_S {
@@ -839,21 +852,21 @@ draw_wall :: proc(
 		index_buffer,
 	)
 
-	top_vertices := wall_top_vertices[wall.state][top_mesh][:]
-	transform *= glsl.mat4Translate(
-		{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
-	)
-
-	draw_wall_mesh(
-		top_vertices,
-		wall_top_indices[wall.state][top_mesh][:],
-		transform,
-		.Wall_Top,
-		wall.mask,
-		light,
-		vertex_buffer,
-		index_buffer,
-	)
+	// top_vertices := wall_top_vertices[wall.state][top_mesh][:]
+	// transform *= glsl.mat4Translate(
+	// 	{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
+	// )
+	//
+	// draw_wall_mesh(
+	// 	top_vertices,
+	// 	wall_top_indices[wall.state][top_mesh][:],
+	// 	transform,
+	// 	.Wall_Top,
+	// 	wall.mask,
+	// 	light,
+	// 	vertex_buffer,
+	// 	index_buffer,
+	// )
 }
 
 get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
@@ -1212,6 +1225,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			)
 		}
 
+        log.info(vertices)
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(vertices) * size_of(Wall_Vertex),
@@ -1219,6 +1233,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			gl.STATIC_DRAW,
 		)
 
+        log.info(indices)
 		gl.BufferData(
 			gl.ELEMENT_ARRAY_BUFFER,
 			len(indices) * size_of(Wall_Index),
@@ -1258,203 +1273,4 @@ update_after_rotation :: proc() {
 			}
 		}
 	}
-}
-
-load_wall_model :: proc(
-	parts: []string,
-	node: ^cgltf.node,
-	vertices: ^[State][Wall_Mask][dynamic]Wall_Vertex,
-	indices: ^[State][Wall_Mask][dynamic]Wall_Index,
-) {
-	state: State
-	mask: Wall_Mask
-
-	switch parts[0] {
-	case "Left":
-		state = .Left
-	case "Right":
-		state = .Right
-	case "Up":
-		state = .Up
-	case "Down":
-		state = .Down
-	}
-	switch parts[1] {
-	case "End":
-		mask = .End
-	case "Extended_Side":
-		mask = .Extended_Side
-	case "Full":
-		mask = .Full
-	case "Side":
-		mask = .Side
-	}
-
-	mesh := node.mesh
-	primitive := mesh.primitives[0]
-	if primitive.indices != nil {
-		accessor := primitive.indices
-		for i in 0 ..< accessor.count {
-			index := cgltf.accessor_read_index(accessor, i)
-			append(&indices[state][mask], Wall_Index(index))
-		}
-	}
-
-	for attribute in primitive.attributes {
-		if attribute.type == .position {
-			accessor := attribute.data
-			for i in 0 ..< accessor.count {
-				if i >= len(vertices[state][mask]) {
-					append(&vertices[state][mask], Wall_Vertex{})
-				}
-				_ = cgltf.accessor_read_float(
-					accessor,
-					i,
-					raw_data(&vertices[state][mask][i].pos),
-					3,
-				)
-				vertices[state][mask][i].pos.x *= -1
-			}
-		}
-		if attribute.type == .texcoord {
-			accessor := attribute.data
-			for i in 0 ..< accessor.count {
-				if i >= len(vertices[state][mask]) {
-					append(&vertices[state][mask], Wall_Vertex{})
-				}
-				_ = cgltf.accessor_read_float(
-					accessor,
-					i,
-					raw_data(&vertices[state][mask][i].texcoords),
-					2,
-				)
-			}
-		}
-	}
-}
-
-load_diagonal_wall_model :: proc(
-	parts: []string,
-	node: ^cgltf.node,
-	vertices: ^[State][Diagonal_Wall_Mask][dynamic]Wall_Vertex,
-	indices: ^[State][Diagonal_Wall_Mask][dynamic]Wall_Index,
-) {
-	state: State
-	mask: Diagonal_Wall_Mask
-
-	switch parts[0] {
-	case "Left":
-		state = .Left
-	case "Right":
-		state = .Right
-	case "Up":
-		state = .Up
-	case "Down":
-		state = .Down
-	}
-	switch parts[1] {
-	case "Cross":
-		mask = .Cross
-	case "Left_Extension":
-		mask = .Left_Extension
-	case "Right_Extension":
-		mask = .Right_Extension
-	case "Full":
-		mask = .Full
-	case "Side":
-		mask = .Side
-	}
-
-	mesh := node.mesh
-	primitive := mesh.primitives[0]
-	if primitive.indices != nil {
-		accessor := primitive.indices
-		for i in 0 ..< accessor.count {
-			index := cgltf.accessor_read_index(accessor, i)
-			append(&indices[state][mask], Wall_Index(index))
-		}
-	}
-
-	for attribute in primitive.attributes {
-		if attribute.type == .position {
-			accessor := attribute.data
-			for i in 0 ..< accessor.count {
-				if i >= len(vertices[state][mask]) {
-					append(&vertices[state][mask], Wall_Vertex{})
-				}
-				_ = cgltf.accessor_read_float(
-					accessor,
-					i,
-					raw_data(&vertices[state][mask][i].pos),
-					3,
-				)
-				vertices[state][mask][i].pos.x *= -1
-			}
-		}
-		if attribute.type == .texcoord {
-			accessor := attribute.data
-			for i in 0 ..< accessor.count {
-				if i >= len(vertices[state][mask]) {
-					append(&vertices[state][mask], Wall_Vertex{})
-				}
-				_ = cgltf.accessor_read_float(
-					accessor,
-					i,
-					raw_data(&vertices[state][mask][i].texcoords),
-					2,
-				)
-			}
-		}
-	}
-
-}
-
-load_models :: proc() -> (ok: bool = false) {
-	path: cstring = "resources/models/walls.glb"
-	options: cgltf.options
-	data, result := cgltf.parse_file(options, path)
-	if result != .success {
-		fmt.println("failed to parse file")
-		return
-	}
-	result = cgltf.load_buffers(options, data, path)
-	if result != .success {
-		fmt.println("failed to load buffers")
-		return
-	}
-	defer cgltf.free(data)
-
-	for node in data.scene.nodes {
-
-		parts := strings.split(string(node.name), ".")
-		defer delete(parts)
-
-		switch parts[0] {
-		case "Wall":
-			load_wall_model(parts[1:], node, &wall_vertices, &wall_indices)
-		case "Wall_Top":
-			load_wall_model(
-				parts[1:],
-				node,
-				&wall_top_vertices,
-				&wall_top_indices,
-			)
-		case "Diagonal_Wall":
-			load_diagonal_wall_model(
-				parts[1:],
-				node,
-				&diagonal_wall_vertices,
-				&diagonal_wall_indices,
-			)
-		case "Diagonal_Wall_Top":
-			load_diagonal_wall_model(
-				parts[1:],
-				node,
-				&diagonal_wall_top_vertices,
-				&diagonal_wall_top_indices,
-			)
-		}
-	}
-
-	return true
 }
