@@ -1,6 +1,7 @@
 package wall
 
 import "core:fmt"
+import "core:math"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 
@@ -20,16 +21,55 @@ Diagonal_Wall_Mask :: enum {
 DIAGONAL_WALL_TOP_CROSS_OFFSET :: -0.0002
 DIAGONAL_WALL_TOP_OFFSET :: 0.0003
 
-DIAGONAL_WALL_MASK_MODEL_NAME_MAP :: [Wall_Type]string {
-	.Start          = "Diagonal_Wall.Up.Start.Outside",
-	.End            = "Diagonal_Wall.Up.End.Outside",
-	.Extended_Left  = "Diagonal_Wall.Up.Extended_Left.Outside",
-	.Extended_Right = "Diagonal_Wall.Up.Extended_Right.Outside",
-	.Full           = "Diagonal_Wall.Up.Full.Outside",
-	.Side           = "Diagonal_Wall.Up.Side.Outside",
-	.Extended_Start = "Wall.Up.Extended_Start.Outside",
-	.Extended_End   = "Wall.Up.Extended_End.Outside",
-	.Extended       = "Wall.Up.Extended.Outside",
+DIAGONAL_WALL_MASK_MODEL_NAME_MAP :: [Wall_Type][Wall_Side]string {
+	.Start =  {
+		.Outside = "Wall_Diagonal.Up.Start.Outside",
+		.Inside = "Wall_Diagonal.Up.Start.Inside",
+	},
+	.End =  {
+		.Outside = "Wall_Diagonal.Up.End.Outside",
+		.Inside = "Wall_Diagonal.Up.End.Inside",
+	},
+	.Extended_Left =  {
+		.Outside = "Wall_Diagonal.Up.Extended_Left.Outside",
+		.Inside = "Wall_Diagonal.Up.Extended_Left.Inside",
+	},
+	.Extended_Right =  {
+		.Outside = "Wall_Diagonal.Up.Extended_Right.Outside",
+		.Inside = "Wall_Diagonal.Up.Extended_Right.Inside",
+	},
+	.Full =  {
+		.Outside = "Wall_Diagonal.Up.Full.Outside",
+		.Inside = "Wall_Diagonal.Up.Full.Inside",
+	},
+	.Side =  {
+		.Outside = "Wall_Diagonal.Up.Side.Outside",
+		.Inside = "Wall_Diagonal.Up.Side.Inside",
+	},
+	.Extended_Start =  {
+		.Outside = "Wall_Diagonal.Up.Extended_Start.Outside",
+		.Inside = "Wall_Diagonal.Up.Extended_Start.Inside",
+	},
+	.Extended_End =  {
+		.Outside = "Wall_Diagonal.Up.Extended_End.Outside",
+		.Inside = "Wall_Diagonal.Up.Extended_End.Inside",
+	},
+	.Extended =  {
+		.Outside = "Wall_Diagonal.Up.Extended.Outside",
+		.Inside = "Wall_Diagonal.Up.Extended.Inside",
+	},
+}
+
+DIAGONAL_WALL_TYPE_TOP_MODEL_NAME_MAP :: [Wall_Type]string {
+	.Start          = "Wall_Diagonal.Up.Top.Extended_Left",
+	.End            = "Wall_Diagonal.Up.Top.Extended_Right",
+	.Extended_Left  = "Wall_Diagonal.Up.Top.Extended_Left",
+	.Extended_Right = "Wall_Diagonal.Up.Top.Extended_Right",
+	.Full           = "Wall_Diagonal.Up.Top.Full",
+	.Side           = "Wall_Diagonal.Up.Top.Side",
+	.Extended_Start = "Wall_Diagonal.Up.Top.Extended_Left",
+	.Extended_End   = "Wall_Diagonal.Up.Top.Extended_Right",
+	.Extended       = "Wall_Diagonal.Up.Top.Full",
 }
 
 DIAGONAL_WALL_ROTATION_MAP :: #partial [Wall_Axis][camera.Rotation]Wall_Axis {
@@ -74,45 +114,43 @@ draw_diagonal_wall :: proc(
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
-	transform *= transform_map[camera.rotation]
+	if axis == .SW_NE {
+		transform *= glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+	}
 
 	light := glsl.vec3{0.95, 0.95, 0.95}
 
-	model_name_map := DIAGONAL_WALL_MASK_MODEL_NAME_MAP
+	for texture, side in wall.textures {
+		model_name_map := DIAGONAL_WALL_MASK_MODEL_NAME_MAP
+		model_name := model_name_map[wall.type][side]
+		model := models.models[model_name]
+		vertices := model.vertices[:]
+		indices := model.indices[:]
+		draw_wall_mesh(
+			vertices,
+			indices,
+			transform,
+			texture,
+			wall.mask,
+			light,
+			vertex_buffer,
+			index_buffer,
+		)
+	}
+
+	model_name_map := DIAGONAL_WALL_TYPE_TOP_MODEL_NAME_MAP
 	model_name := model_name_map[wall.type]
 	model := models.models[model_name]
-	wall_vertices := model.vertices[:]
-	wall_indices := model.indices[:]
-
-	// wall_vertices := diagonal_wall_vertices[wall.state][mask][:]
-	//       wall_indices := diagonal_wall_indices[wall.state][mask][:]
-
-	// draw_wall_mesh(
-	// 	wall_vertices,
-	// 	wall_indices,
-	// 	transform,
-	// 	texture,
-	// 	wall.mask,
-	// 	light,
-	// 	vertex_buffer,
-	// 	index_buffer,
-	// )
-
-	// top_vertices := diagonal_wall_top_vertices[wall.state][top_mask][:]
-	// top_indices := diagonal_wall_top_indices[wall.state][top_mask][:]
-	//
-	// transform *= glsl.mat4Translate(
-	// 	{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
-	// )
-	//
-	// draw_wall_mesh(
-	// 	top_vertices,
-	// 	top_indices,
-	// 	transform,
-	// 	.Wall_Top,
-	// 	wall.mask,
-	//        light,
-	// 	vertex_buffer,
-	// 	index_buffer,
-	// )
+	vertices := model.vertices[:]
+	indices := model.indices[:]
+	draw_wall_mesh(
+		vertices,
+		indices,
+		transform,
+		.Wall_Top,
+		.Full_Mask,
+		light,
+		vertex_buffer,
+		index_buffer,
+	)
 }

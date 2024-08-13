@@ -2,6 +2,7 @@ package wall
 
 import "core:fmt"
 import "core:log"
+import "core:math"
 import "core:math/linalg"
 import glsl "core:math/linalg/glsl"
 import "core:strings"
@@ -190,6 +191,18 @@ WALL_TYPE_MODEL_NAME_MAP :: [Wall_Type][Wall_Side]string {
 	},
 }
 
+WALL_TYPE_TOP_MODEL_NAME_MAP :: [Wall_Type]string {
+	.Start          = "Wall.Up.Top.Extended_Left",
+	.End            = "Wall.Up.Top.Extended_Right",
+	.Extended_Left  = "Wall.Up.Top.Extended_Left",
+	.Extended_Right = "Wall.Up.Top.Extended_Right",
+	.Full           = "Wall.Up.Top.Full",
+	.Side           = "Wall.Up.Top.Side",
+	.Extended_Start = "Wall.Up.Top.Extended_Left",
+	.Extended_End   = "Wall.Up.Top.Extended_Right",
+	.Extended       = "Wall.Up.Top.Full",
+}
+
 chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
 WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
@@ -222,11 +235,10 @@ WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
 WALL_TRANSFORM_MAP :: #partial [Wall_Axis][camera.Rotation]glsl.mat4 {
 	.N_S =  {
 		.South_West = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-		// .South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.South_East = {0, 0, -1, -1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
 		.North_East = {0, 0, -1, -1, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
 		.North_West = {0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1},
-	},
+	}, // .South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 	.E_W =  {
 		.South_West = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
 		.South_East = {-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
@@ -316,7 +328,6 @@ draw_wall_mesh :: proc(
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
 		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
-		log.info(vertex)
 
 		append(vertex_buffer, vertex)
 	}
@@ -333,8 +344,6 @@ draw_wall :: proc(
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
-	transform_map := WALL_TRANSFORM_MAP
-
 	position := glsl.vec3 {
 		f32(pos.x),
 		f32(pos.y) * constants.WALL_HEIGHT +
@@ -342,13 +351,9 @@ draw_wall :: proc(
 		f32(pos.z),
 	}
 	transform := glsl.mat4Translate(position)
-	transform *= transform_map[axis][.South_West]
-
-	// vertices_map := WALL_VERTICES
-	// vertices_map := wall_vertices
-
-	// indices_map := WALL_INDICES
-	// indices_map := wall_indices
+	if axis == .N_S {
+		transform *= glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+	}
 
 	light := glsl.vec3{1, 1, 1}
 	if axis == .N_S {
@@ -374,21 +379,21 @@ draw_wall :: proc(
 		)
 	}
 
-	// top_vertices := wall_top_vertices[wall.state][top_mesh][:]
-	// transform *= glsl.mat4Translate(
-	// 	{0, constants.WALL_TOP_OFFSET * f32(axis), 0},
-	// )
-	//
-	// draw_wall_mesh(
-	// 	top_vertices,
-	// 	wall_top_indices[wall.state][top_mesh][:],
-	// 	transform,
-	// 	.Wall_Top,
-	// 	wall.mask,
-	// 	light,
-	// 	vertex_buffer,
-	// 	index_buffer,
-	// )
+	model_name_map := WALL_TYPE_TOP_MODEL_NAME_MAP
+	model_name := model_name_map[wall.type]
+	model := models.models[model_name]
+	vertices := model.vertices[:]
+	indices := model.indices[:]
+	draw_wall_mesh(
+		vertices,
+		indices,
+		transform,
+		.Wall_Top,
+		.Full_Mask,
+		light,
+		vertex_buffer,
+		index_buffer,
+	)
 }
 
 get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {
@@ -747,7 +752,6 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			)
 		}
 
-		log.info(vertices)
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(vertices) * size_of(Wall_Vertex),
@@ -755,7 +759,6 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 			gl.STATIC_DRAW,
 		)
 
-		log.info(indices)
 		gl.BufferData(
 			gl.ELEMENT_ARRAY_BUFFER,
 			len(indices) * size_of(Wall_Index),

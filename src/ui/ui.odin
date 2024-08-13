@@ -239,6 +239,9 @@ update :: proc(using ctx: ^Context) {
 }
 
 draw :: proc(using ctx: ^Context) {
+    gl.Disable(gl.CULL_FACE)
+    defer gl.Enable(gl.CULL_FACE)
+
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
 	defer gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 
