@@ -1733,161 +1733,161 @@ init :: proc() -> (ok: bool = true) {
 		}
 	}
 
-	add({3, 0, 3}, .Wood_Chair, .South, .Floor)
-	add({4, 0, 4}, .Wood_Chair, .East, .Floor)
-	add({3, 0, 5}, .Wood_Chair, .North, .Floor)
-	add({2, 0, 4}, .Wood_Chair, .West, .Floor)
-
-	add({0, 0, 1}, .Wood_Table_1x2, .South, .Floor)
-	add({2, 0, 0}, .Wood_Table_1x2, .North, .Floor)
-	add({0, 0, 2}, .Wood_Table_1x2, .East, .Floor)
-	add({1, 0, 4}, .Wood_Table_1x2, .West, .Floor)
-
-	wall.set_wall(
-		{5, 0, 5},
-		.N_S,
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-	wall.set_wall(
-		{5, 0, 5},
-		.E_W,
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-
-	add({5, 0, 5}, .Wood_Window, .South, .Wall)
-	add({5, 0, 5}, .Wood_Window, .West, .Wall)
-
-	wall.set_wall(
-		{7, 0, 5},
-		.N_S,
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-	wall.set_wall(
-		{7, 0, 5},
-		.E_W,
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-
-	add({7, 0, 4}, .Wood_Window, .North, .Wall)
-	add({6, 0, 5}, .Wood_Window, .East, .Wall)
-
-	wall.set_wall(
-		{9, 0, 5},
-		.N_S,
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-	wall.set_wall(
-		{9, 0, 5},
-		.E_W,
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-
-	add({9, 0, 5}, .Wood_Door, .South, .Wall)
-	add({9, 0, 5}, .Wood_Door, .West, .Wall)
-
-	wall.set_wall(
-		{11, 0, 5},
-		.N_S,
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-	wall.set_wall(
-		{11, 0, 5},
-		.E_W,
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-
-	add({11, 0, 4}, .Wood_Door, .North, .Wall)
-	add({10, 0, 5}, .Wood_Door, .East, .Wall)
-
-	wall.set_wall(
-		{13, 0, 5},
-		.N_S,
-		 {
-			type = .End_Right_Corner,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-	wall.set_wall(
-		{13, 0, 5},
-		.E_W,
-		 {
-			type = .Left_Corner_End,
-			textures = {.Inside = .Brick, .Outside = .Brick},
-		},
-	)
-
-	add({13, 0, 5}, .Poutine_Painting, .South, .Wall)
-	add({13, 0, 5}, .Poutine_Painting, .West, .Wall)
-	add({13, 0, 4}, .Poutine_Painting, .North, .Wall)
-	add({12, 0, 5}, .Poutine_Painting, .East, .Wall)
-
-	add({1, 0, 7}, .Wood_Counter, .South, .Floor)
-	add({0, 0, 8}, .Wood_Counter, .West, .Floor)
-	add({2, 0, 8}, .Wood_Counter, .East, .Floor)
-	add({1, 0, 9}, .Wood_Counter, .North, .Floor)
-
-	add({0, 0, 14}, .Wood_Counter, .West, .Floor)
-	add({0, 0, 13}, .Wood_Counter, .West, .Floor)
-	add({0, 0, 12}, .Wood_Counter, .West, .Floor)
-	add({0, 0, 11}, .Wood_Counter, .West, .Floor)
-
-	add({12, 0, 0}, .Small_Carpet, .South, .Floor)
-
-
-	add({14, 0, 1}, .Tree, .South, .Floor)
-
-	add({17, 0, 0}, .Tree, .North, .Floor)
-
-	add({20, 0, 1}, .Tree, .East, .Floor)
-	add({24, 0, 0}, .Tree, .West, .Floor)
-
-	add({3, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 2.75)
-	add({3, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
-
-	add({4, 0, 11}, .Wall_Cutaway_Left_Top, .South, .Floor, mask = .None)
-	add({4, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Cutaway_Left)
-
-	add({5, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 0.115)
-	add({5, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down)
-
-	add({6, 0, 11}, .Wall_Short_Top, .South, .Floor, mask = .None, offset_y = 0.115)
-	add({6, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down_Short)
-
-	add({3, 0, 11}, .Wood_Counter, .East, .Floor)
-
-	add({3, 0, 11}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	add({3, 0, 12}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	add({3, 0, 13}, .Wall_Side_Bricks012, .West, .Floor, mask = .Cutaway_Left)
-	add({3, 0, 14}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down)
-	add({3, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down_Short)
-
-	add({15, 0, 15}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
-	add({15, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	add({15, 0, 15}, .Wood_Counter, .East, .Floor)
+	// add({3, 0, 3}, .Wood_Chair, .South, .Floor)
+	// add({4, 0, 4}, .Wood_Chair, .East, .Floor)
+	// add({3, 0, 5}, .Wood_Chair, .North, .Floor)
+	// add({2, 0, 4}, .Wood_Chair, .West, .Floor)
+	//
+	// add({0, 0, 1}, .Wood_Table_1x2, .South, .Floor)
+	// add({2, 0, 0}, .Wood_Table_1x2, .North, .Floor)
+	// add({0, 0, 2}, .Wood_Table_1x2, .East, .Floor)
+	// add({1, 0, 4}, .Wood_Table_1x2, .West, .Floor)
+	//
+	// wall.set_wall(
+	// 	{5, 0, 5},
+	// 	.N_S,
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	// wall.set_wall(
+	// 	{5, 0, 5},
+	// 	.E_W,
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// add({5, 0, 5}, .Wood_Window, .South, .Wall)
+	// add({5, 0, 5}, .Wood_Window, .West, .Wall)
+	//
+	// wall.set_wall(
+	// 	{7, 0, 5},
+	// 	.N_S,
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	// wall.set_wall(
+	// 	{7, 0, 5},
+	// 	.E_W,
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// add({7, 0, 4}, .Wood_Window, .North, .Wall)
+	// add({6, 0, 5}, .Wood_Window, .East, .Wall)
+	//
+	// wall.set_wall(
+	// 	{9, 0, 5},
+	// 	.N_S,
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	// wall.set_wall(
+	// 	{9, 0, 5},
+	// 	.E_W,
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// add({9, 0, 5}, .Wood_Door, .South, .Wall)
+	// add({9, 0, 5}, .Wood_Door, .West, .Wall)
+	//
+	// wall.set_wall(
+	// 	{11, 0, 5},
+	// 	.N_S,
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	// wall.set_wall(
+	// 	{11, 0, 5},
+	// 	.E_W,
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// add({11, 0, 4}, .Wood_Door, .North, .Wall)
+	// add({10, 0, 5}, .Wood_Door, .East, .Wall)
+	//
+	// wall.set_wall(
+	// 	{13, 0, 5},
+	// 	.N_S,
+	// 	 {
+	// 		type = .End_Right_Corner,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	// wall.set_wall(
+	// 	{13, 0, 5},
+	// 	.E_W,
+	// 	 {
+	// 		type = .Left_Corner_End,
+	// 		textures = {.Inside = .Brick, .Outside = .Brick},
+	// 	},
+	// )
+	//
+	// add({13, 0, 5}, .Poutine_Painting, .South, .Wall)
+	// add({13, 0, 5}, .Poutine_Painting, .West, .Wall)
+	// add({13, 0, 4}, .Poutine_Painting, .North, .Wall)
+	// add({12, 0, 5}, .Poutine_Painting, .East, .Wall)
+	//
+	// add({1, 0, 7}, .Wood_Counter, .South, .Floor)
+	// add({0, 0, 8}, .Wood_Counter, .West, .Floor)
+	// add({2, 0, 8}, .Wood_Counter, .East, .Floor)
+	// add({1, 0, 9}, .Wood_Counter, .North, .Floor)
+	//
+	// add({0, 0, 14}, .Wood_Counter, .West, .Floor)
+	// add({0, 0, 13}, .Wood_Counter, .West, .Floor)
+	// add({0, 0, 12}, .Wood_Counter, .West, .Floor)
+	// add({0, 0, 11}, .Wood_Counter, .West, .Floor)
+	//
+	// add({12, 0, 0}, .Small_Carpet, .South, .Floor)
+	//
+	//
+	// add({14, 0, 1}, .Tree, .South, .Floor)
+	//
+	// add({17, 0, 0}, .Tree, .North, .Floor)
+	//
+	// add({20, 0, 1}, .Tree, .East, .Floor)
+	// add({24, 0, 0}, .Tree, .West, .Floor)
+	//
+	// add({3, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 2.75)
+	// add({3, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
+	//
+	// add({4, 0, 11}, .Wall_Cutaway_Left_Top, .South, .Floor, mask = .None)
+	// add({4, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Cutaway_Left)
+	//
+	// add({5, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 0.115)
+	// add({5, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down)
+	//
+	// add({6, 0, 11}, .Wall_Short_Top, .South, .Floor, mask = .None, offset_y = 0.115)
+	// add({6, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down_Short)
+	//
+	// add({3, 0, 11}, .Wood_Counter, .East, .Floor)
+	//
+	// add({3, 0, 11}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
+	// add({3, 0, 12}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
+	// add({3, 0, 13}, .Wall_Side_Bricks012, .West, .Floor, mask = .Cutaway_Left)
+	// add({3, 0, 14}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down)
+	// add({3, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down_Short)
+	//
+	// add({15, 0, 15}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
+	// add({15, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
+	// add({15, 0, 15}, .Wood_Counter, .East, .Floor)
 
 	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
 	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))

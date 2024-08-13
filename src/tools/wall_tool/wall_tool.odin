@@ -593,7 +593,7 @@ set_south_west_north_east_wall :: proc(
 	wall.set_south_west_north_east_wall(
 		pos,
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = texture, .Outside = texture},
 		},
 	)
@@ -624,7 +624,7 @@ set_north_west_south_east_wall :: proc(
 	wall.set_north_west_south_east_wall(
 		pos,
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = texture, .Outside = texture},
 		},
 	)
@@ -653,7 +653,7 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 	wall.set_east_west_wall(
 		pos,
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = texture, .Outside = texture},
 		},
 	)
@@ -681,7 +681,7 @@ set_north_south_wall :: proc(pos: glsl.ivec3, texture: wall.Wall_Texture) {
 	wall.set_north_south_wall(
 		pos,
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = texture, .Outside = texture},
 		},
 	)

@@ -219,7 +219,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x, floor, house_z},
 		 {
-			type = .Side_Right_Corner,
+			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -227,7 +227,7 @@ add_house_floor_walls :: proc(
 		wall.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 1},
 			 {
-				type = .Side_Side,
+				type = .Side,
 				textures =  {
 					.Inside = inside_texture,
 					.Outside = outside_texture,
@@ -238,7 +238,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x, floor, house_z + 3},
 		 {
-			type = .Right_Corner_Side,
+			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -246,7 +246,7 @@ add_house_floor_walls :: proc(
 	wall.set_south_west_north_east_wall(
 		{house_x, floor, house_z + 4},
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -257,7 +257,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x + 1, floor, house_z + 5},
 		 {
-			type = .Left_Corner_Left_Corner,
+			type = .Extended,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 			mask = mask,
 		},
@@ -295,7 +295,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
 		 {
-			type = .End_Side,
+			type = .Start,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -303,7 +303,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x, floor, house_z + 7},
 		 {
-			type = .Side_Right_Corner,
+			type = .Extended_Right,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -312,7 +312,7 @@ add_house_floor_walls :: proc(
 		wall.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 8},
 			 {
-				type = .Side_Side,
+				type = .Side,
 				textures =  {
 					.Inside = inside_texture,
 					.Outside = outside_texture,
@@ -340,7 +340,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x, floor, house_z + 10},
 		 {
-			type = .Right_Corner_Side,
+			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -349,7 +349,7 @@ add_house_floor_walls :: proc(
 	wall.set_east_west_wall(
 		{house_x, floor, house_z},
 		 {
-			type = .Left_Corner_Side,
+			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -358,7 +358,7 @@ add_house_floor_walls :: proc(
 		wall.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z},
 			 {
-				type = .Side_Side,
+				type = .Side,
 				textures =  {
 					.Inside = inside_texture,
 					.Outside = outside_texture,
@@ -387,7 +387,7 @@ add_house_floor_walls :: proc(
 	wall.set_east_west_wall(
 		{house_x + 3, floor, house_z},
 		 {
-			type = .Side_Left_Corner,
+			type = .Extended_Right,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
@@ -396,7 +396,7 @@ add_house_floor_walls :: proc(
 	wall.set_east_west_wall(
 		{house_x, floor, house_z + 11},
 		 {
-			type = .Right_Corner_Side,
+			type = .Extended_Left,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
@@ -405,7 +405,7 @@ add_house_floor_walls :: proc(
 		wall.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
-				type = .Side_Side,
+				type = .Side,
 				textures =  {
 					.Inside = outside_texture,
 					.Outside = inside_texture,
@@ -433,7 +433,7 @@ add_house_floor_walls :: proc(
 	wall.set_east_west_wall(
 		{house_x + 3, floor, house_z + 11},
 		 {
-			type = .Side_Right_Corner,
+			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
@@ -442,7 +442,7 @@ add_house_floor_walls :: proc(
 	wall.set_south_west_north_east_wall(
 		{house_x + 4, floor, house_z},
 		 {
-			type = .Side_Side,
+			type = .Side,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
@@ -450,7 +450,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x + 5, floor, house_z + 1},
 		 {
-			type = .Side_Left_Corner,
+			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
@@ -459,7 +459,7 @@ add_house_floor_walls :: proc(
 		wall.set_north_south_wall(
 			{house_x + 5, floor, house_z + i32(i) + 2},
 			 {
-				type = .Side_Side,
+				type = .Side,
 				textures =  {
 					.Inside = outside_texture,
 					.Outside = inside_texture,
@@ -471,7 +471,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_south_wall(
 		{house_x + 5, floor, house_z + 9},
 		 {
-			type = .Left_Corner_Side,
+			type = .Extended_Left,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
@@ -479,7 +479,7 @@ add_house_floor_walls :: proc(
 	wall.set_north_west_south_east_wall(
 		{house_x + 4, floor, house_z + 10},
 		 {
-			type = .End_Side,
+			type = .Start,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)

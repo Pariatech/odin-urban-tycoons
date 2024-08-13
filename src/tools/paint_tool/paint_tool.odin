@@ -14,6 +14,33 @@ import "../../wall"
 
 WALL_SELECTION_DISTANCE :: 4
 
+WALL_SIDE_MAP :: [wall.Wall_Axis][camera.Rotation]wall.Wall_Side {
+	.N_S =  {
+		.South_West = .Outside,
+		.South_East = .Inside,
+		.North_East = .Inside,
+		.North_West = .Outside,
+	},
+	.E_W =  {
+		.South_West = .Outside,
+		.South_East = .Outside,
+		.North_East = .Inside,
+		.North_West = .Inside,
+	},
+	.SW_NE =  {
+		.South_West = .Outside,
+		.South_East = .Inside,
+		.North_East = .Inside,
+		.North_West = .Outside,
+	},
+	.NW_SE =  {
+		.South_West = .Outside,
+		.South_East = .Outside,
+		.North_East = .Inside,
+		.North_West = .Inside,
+	},
+}
+
 position: glsl.ivec3
 side: tile.Tile_Triangle_Side
 
@@ -128,7 +155,7 @@ set_texture :: proc(tex: wall.Wall_Texture) {
 }
 
 apply_flood_fill :: proc(texture: wall.Wall_Texture) {
-	side_map := wall.WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 	wall_side := side_map[found_wall_intersect.axis][camera.rotation]
 
 	flood_fill(
@@ -141,7 +168,7 @@ apply_flood_fill :: proc(texture: wall.Wall_Texture) {
 }
 
 clear_previous_walls :: proc() {
-	side_map := wall.WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 	for &axis_walls, axis in previous_walls {
 		for pos, textures in axis_walls {
 			if w, ok := wall.get_wall(pos, axis); ok {
@@ -154,7 +181,7 @@ clear_previous_walls :: proc() {
 }
 
 get_found_wall_texture :: proc() -> wall.Wall_Texture {
-	side_map := wall.WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 	using found_wall_intersect
 	switch axis {
 	case .E_W:
@@ -201,7 +228,7 @@ paint_wall :: proc(
 	axis: wall.Wall_Axis,
 	texture: wall.Wall_Texture,
 ) {
-	side_map := wall.WALL_SIDE_MAP
+	side_map := WALL_SIDE_MAP
 	switch axis {
 	case .E_W:
 		if w, ok := wall.get_east_west_wall(position); ok {

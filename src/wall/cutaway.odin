@@ -16,7 +16,7 @@ cutaway_state: Cutaway_State
 previous_visible_chunks_start: glsl.ivec2
 previous_visible_chunks_end: glsl.ivec2
 
-CUTAWAY_WALL_MASK_MAP :: [State][Wall_Axis][camera.Rotation]Wall_Mask{}
+CUTAWAY_WALL_MASK_MAP :: [State][Wall_Axis][camera.Rotation]Wall_Type{}
 
 set_walls_down :: proc() {
 	cutaway_state = .Down

@@ -65,7 +65,7 @@ load :: proc() -> (ok: bool) {
 						raw_data(&vertices[i].pos),
 						3,
 					)
-					// vertices[i].pos.x *= -1
+					vertices[i].pos.x *= -1
 				}
 			}
 			if attribute.type == .texcoord {

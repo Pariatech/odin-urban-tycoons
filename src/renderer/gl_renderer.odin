@@ -108,6 +108,10 @@ init :: proc() -> (ok: bool = true) {
 	gl.BlendEquation(gl.FUNC_ADD)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+    gl.Enable(gl.CULL_FACE)
+    gl.CullFace(gl.BACK)
+    gl.FrontFace(gl.CCW)
+
 	load_texture_array() or_return
 	load_mask_array() or_return
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
