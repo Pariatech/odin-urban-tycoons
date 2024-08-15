@@ -23,7 +23,7 @@ import "wall"
 import "window"
 import "world"
 import "object"
-import "models"
+import "game"
 
 TITLE :: "My Window!"
 
@@ -46,6 +46,9 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
+    game_state: game.Game
+    defer game.free_models(&game_state.models)
+
 	when ODIN_DEBUG {
 		context.logger = log.create_console_logger()
 		defer log.destroy_console_logger(context.logger)
@@ -102,7 +105,7 @@ start :: proc() -> (ok: bool = false) {
 
 	wall.init_cutaways()
 
-    models.load() or_return
+    game.load_models(&game_state.models) or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -149,7 +152,7 @@ start :: proc() -> (ok: bool = false) {
 		tools.update(delta_time)
 
         object.draw()
-		world.draw()
+		world.draw(&game_state)
 
 		ui.draw(&ui_ctx)
 

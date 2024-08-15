@@ -11,7 +11,7 @@ import gl "vendor:OpenGL"
 
 import "../camera"
 import "../constants"
-import "../models"
+import "../game"
 import "../renderer"
 import "../terrain"
 import "../utils"
@@ -310,8 +310,8 @@ deinit_wall_renderer :: proc() {
 }
 
 draw_wall_mesh :: proc(
-	vertices: []models.Vertex,
-	indices: []models.Index,
+	vertices: []game.Model_Vertex,
+	indices: []game.Model_Index,
 	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
@@ -338,6 +338,7 @@ draw_wall_mesh :: proc(
 }
 
 draw_wall :: proc(
+    using game: ^game.Game,
 	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,
@@ -658,7 +659,7 @@ chunk_remove_south_west_north_east_wall :: proc(
 	chunk.dirty = true
 }
 
-chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
+chunk_draw_walls :: proc(game: ^game.Game, chunk: ^Chunk, pos: glsl.ivec3) {
 	if !chunk.initialized {
 		chunk.initialized = true
 		chunk.dirty = true
@@ -714,6 +715,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		for wall_pos, w in chunk.east_west {
 			draw_wall(
+                game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.E_W,
@@ -724,6 +726,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		for wall_pos, w in chunk.north_south {
 			draw_wall(
+                game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.N_S,
@@ -734,6 +737,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		for wall_pos, w in chunk.south_west_north_east {
 			draw_diagonal_wall(
+                game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.SW_NE,
@@ -744,6 +748,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 
 		for wall_pos, w in chunk.north_west_south_east {
 			draw_diagonal_wall(
+                game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.NW_SE,
@@ -776,7 +781,7 @@ chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 }
 
 
-draw_walls :: proc(floor: i32) {
+draw_walls :: proc(game: ^game.Game, floor: i32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -785,7 +790,7 @@ draw_walls :: proc(floor: i32) {
 	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 			chunk := &chunks[floor][x][z]
-			chunk_draw_walls(chunk, {x, i32(floor), z})
+			chunk_draw_walls(game, chunk, {x, i32(floor), z})
 		}
 	}
 }

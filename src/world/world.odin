@@ -14,6 +14,7 @@ import "../renderer"
 import "../tile"
 import "../tools/wall_tool"
 import "../wall"
+import "../game"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -485,7 +486,7 @@ add_house_floor_walls :: proc(
 	)
 }
 
-draw :: proc() {
+draw :: proc(game: ^game.Game) {
 	renderer.uniform_object.view = camera.view
 	renderer.uniform_object.proj = camera.proj
 
@@ -510,7 +511,7 @@ draw :: proc() {
 	for flr in 0 ..= floor.floor {
 		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(flr)
-		wall.draw_walls(flr)
+		wall.draw_walls(game, flr)
 		billboard.draw_billboards(flr)
 		// object.draw(flr)
 	}
@@ -526,5 +527,4 @@ update_after_rotation :: proc(rotated: camera.Rotated) {
 		billboard.update_after_clockwise_rotation()
 	}
 	wall.update_after_rotation()
-	object.on_rotation()
 }
