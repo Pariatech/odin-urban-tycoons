@@ -47,8 +47,8 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 		primitive := mesh.primitives[0]
 		indices: [dynamic]Model_Index
 		vertices: [dynamic]Model_Vertex
-		// indices:= make([dynamic]Index)
-		// vertices:= make([dynamic]Vertex)
+		// indices:= make([dynamic]Model_Index)
+		// vertices:= make([dynamic]Model_Vertex)
 		if primitive.indices != nil {
 			accessor := primitive.indices
 			for i in 0 ..< accessor.count {
@@ -90,7 +90,6 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 		}
 
 		name := strings.clone_from_cstring(node.name)
-        defer delete(name)
 		models[name] = {
 			name     = name,
 			vertices = vertices,
@@ -102,7 +101,8 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 }
 
 free_models :: proc(using ctx: ^Models_Context) {
-    for _, v in models {
+    for k, v in models {
+        delete(k)
         delete(v.indices)
         delete(v.vertices)
     }

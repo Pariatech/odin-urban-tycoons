@@ -17,6 +17,7 @@ import c "../constants"
 import "../floor"
 import "../renderer"
 import "../wall"
+import "../terrain"
 
 Type :: enum {
 	// Door,
@@ -89,7 +90,7 @@ MODEL_MAP :: [Model]string {
 }
 
 MODEL_TEXTURE_MAP :: [Model]string {
-    .Wood_Counter = "Wood.Counter.png",
+    .Wood_Counter = "objects/Wood.Counter.png",
 }
 
 Object :: struct {
@@ -104,7 +105,6 @@ Object :: struct {
 
 Chunk :: struct {
 	objects:  [dynamic]Object,
-	vao, ibo: u32,
 	dirty:    bool,
 }
 
@@ -112,11 +112,6 @@ Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Chunk
 
 Uniform_Object :: struct {
 	mvp: glsl.mat4,
-}
-
-Vertex :: struct {
-	pos:       glsl.vec3,
-	texcoords: glsl.vec2,
 }
 
 VERTEX_SHADER_PATH :: "resources/shaders/object.vert"
@@ -144,14 +139,6 @@ init :: proc() -> (ok: bool = true) {
 
 
 	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
-	gl.Uniform1i(
-		gl.GetUniformLocation(shader_program, "depth_map_texture_sampler"),
-		1,
-	)
-	gl.Uniform1i(
-		gl.GetUniformLocation(shader_program, "mask_texture_sampler"),
-		2,
-	)
 
 	gl.GenBuffers(1, &ubo)
 
@@ -493,12 +480,20 @@ draw :: proc() {
 }
 
 add :: proc(
-	pos: glsl.ivec3,
+	pos: glsl.vec3,
 	model: Model,
 	orientation: Orientation,
 	placement: Placement,
 	offset_y: f32 = 0,
 ) {
+    x := int(pos.x)
+    z := int(pos.z)
+    y := int(pos.y - terrain.get_tile_height(x, z)) / c.WALL_HEIGHT
+    x /= c.CHUNK_WIDTH
+    z /= c.CHUNK_DEPTH
+    chunk := &chunks[y][x][z]
+
+    chunk.dirty = true
 	// type_map := TYPE_MAP
 	// model_size := MODEL_SIZE
 	//

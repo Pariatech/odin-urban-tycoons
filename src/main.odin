@@ -11,8 +11,10 @@ import "billboard"
 import "camera"
 import "cursor"
 import "floor"
+import "game"
 import "keyboard"
 import "mouse"
+import "object"
 import "renderer"
 import "terrain"
 import "tools"
@@ -22,8 +24,6 @@ import "ui"
 import "wall"
 import "window"
 import "world"
-import "object"
-import "game"
 
 TITLE :: "My Window!"
 
@@ -46,14 +46,18 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
-    game_state: game.Game
-    defer game.free_models(&game_state.models)
+	game_state: game.Game
+	defer game.free_models(&game_state.models)
 
 	when ODIN_DEBUG {
 		context.logger = log.create_console_logger()
 		defer log.destroy_console_logger(context.logger)
 	} else {
-		h, _ := os.open("logs", os.O_WRONLY + os.O_CREATE, os.S_IRUSR + os.S_IWUSR)
+		h, _ := os.open(
+			"logs",
+			os.O_WRONLY + os.O_CREATE,
+			os.S_IRUSR + os.S_IWUSR,
+		)
 		context.logger = log.create_file_logger(h)
 
 		defer log.destroy_file_logger(context.logger)
@@ -92,7 +96,7 @@ start :: proc() -> (ok: bool = false) {
 
 	world.init()
 
-    object.init() or_return
+	object.init() or_return
 
 	ui.init(&ui_ctx) or_return
 	defer ui.deinit(&ui_ctx)
@@ -105,7 +109,7 @@ start :: proc() -> (ok: bool = false) {
 
 	wall.init_cutaways()
 
-    game.load_models(&game_state.models) or_return
+	game.load_models(&game_state.models) or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -151,7 +155,7 @@ start :: proc() -> (ok: bool = false) {
 		wall.update_cutaways()
 		tools.update(delta_time)
 
-        object.draw()
+		object.draw()
 		world.draw(&game_state)
 
 		ui.draw(&ui_ctx)

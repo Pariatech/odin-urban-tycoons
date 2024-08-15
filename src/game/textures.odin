@@ -6,6 +6,8 @@ import "core:strings"
 import gl "vendor:OpenGL"
 import stbi "vendor:stb/image"
 
+TEXTURES_PATH :: "resources/textures"
+
 Textures_Context :: struct {
 	textures: map[string]Texture,
 }
@@ -47,9 +49,11 @@ bind_texture_from_path :: proc(
 		stbi.set_flip_vertically_on_load(0)
 		stbi.set_flip_vertically_on_load_thread(false)
 
+		full_path := strings.join({TEXTURES_PATH, path}, "/")
+        defer delete(full_path)
 		w, h: i32
 		pixels := stbi.load(
-			strings.unsafe_string_to_cstring(path),
+			strings.unsafe_string_to_cstring(full_path),
 			&w,
 			&h,
 			nil,

@@ -367,6 +367,7 @@ draw_wall :: proc(
 		model_name := model_name_map[wall.type][side]
 		model := models.models[model_name]
 		vertices := model.vertices[:]
+        log.info(model_name, vertices)
 		indices := model.indices[:]
 		draw_wall_mesh(
 			vertices,
@@ -757,6 +758,8 @@ chunk_draw_walls :: proc(game: ^game.Game, chunk: ^Chunk, pos: glsl.ivec3) {
 			)
 		}
 
+        log.info(vertices)
+
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
 			len(vertices) * size_of(Wall_Vertex),
@@ -796,11 +799,4 @@ draw_walls :: proc(game: ^game.Game, floor: i32) {
 }
 
 update_after_rotation :: proc() {
-	for &floor in chunks {
-		for &row in floor {
-			for &chunk in row {
-				chunk.dirty = true
-			}
-		}
-	}
 }
