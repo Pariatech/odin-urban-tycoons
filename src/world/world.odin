@@ -9,12 +9,11 @@ import "../camera"
 import "../constants"
 import "../floor"
 import "../furniture"
-import "../object"
+import "../game"
 import "../renderer"
 import "../tile"
 import "../tools/wall_tool"
 import "../wall"
-import "../game"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -38,7 +37,7 @@ update :: proc() {
 	)
 }
 
-init :: proc() {
+init :: proc(using ctx: ^game.Game_Context) {
 	tile.chunk_init()
 
 	// furniture.add({1, 0, 1}, .Chair, .South)
@@ -47,8 +46,8 @@ init :: proc() {
 	// furniture.add({1, 0, 2}, .Chair, .West)
 
 	// The house
-	add_house_floor_walls(0, .Royal_Blue, .Brick)
-	add_house_floor_walls(1, .Dark_Blue, .Brick)
+	add_house_floor_walls(ctx, 0, .Royal_Blue, .Brick)
+	add_house_floor_walls(ctx, 1, .Dark_Blue, .Brick)
 	add_house_floor_triangles(2, .Wood_Floor_008)
 
 	for x in 0 ..< constants.WORLD_WIDTH {
@@ -212,6 +211,7 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 }
 
 add_house_floor_walls :: proc(
+	using ctx: ^game.Game_Context,
 	floor: i32,
 	inside_texture: wall.Wall_Texture,
 	outside_texture: wall.Wall_Texture,
@@ -264,20 +264,16 @@ add_house_floor_walls :: proc(
 		},
 	)
 	if floor > 0 {
-		billboard.billboard_1x1_set(
+		game.add_object(
+			ctx,
 			 {
-				type = .Window_N_S,
-				pos =  {
-					f32(house_x + 1),
-					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z + 5),
-				},
+				f32(house_x + 1),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 5),
 			},
-			 {
-				light = {1, 1, 1},
-				texture = .Window_Wood_SE,
-				depth_map = .Window_Wood_SE,
-			},
+			.Wood_Window,
+			.West,
+			.Wall,
 		)
 	} else {
 		billboard.billboard_1x1_set(
@@ -321,20 +317,17 @@ add_house_floor_walls :: proc(
 				mask = .Window_Opening,
 			},
 		)
-		billboard.billboard_1x1_set(
+
+		game.add_object(
+			ctx,
 			 {
-				type = .Window_N_S,
-				pos =  {
-					f32(house_x),
-					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
-				},
+				f32(house_x),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + i32(i) + 8),
 			},
-			 {
-				light = {1, 1, 1},
-				texture = .Window_Wood_SE,
-				depth_map = .Window_Wood_SE,
-			},
+			.Wood_Window,
+			.West,
+			.Wall,
 		)
 	}
 
@@ -368,20 +361,16 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		billboard.billboard_1x1_set(
+		game.add_object(
+			ctx,
 			 {
-				type = .Window_E_W,
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z),
-				},
+				f32(house_x + i32(i) + 1),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z),
 			},
-			 {
-				light = {1, 1, 1},
-				texture = .Window_Wood_SW,
-				depth_map = .Window_Wood_SW,
-			},
+			.Wood_Window,
+			.South,
+			.Wall,
 		)
 	}
 
@@ -415,20 +404,16 @@ add_house_floor_walls :: proc(
 			},
 		)
 
-		billboard.billboard_1x1_set(
+		game.add_object(
+			ctx,
 			 {
-				type = .Window_E_W,
-				pos =  {
-					f32(house_x + i32(i) + 1),
-					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z + 11),
-				},
+				f32(house_x + i32(i) + 1),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 11),
 			},
-			 {
-				light = {1, 1, 1},
-				texture = .Window_Wood_SW,
-				depth_map = .Window_Wood_SW,
-			},
+			.Wood_Window,
+			.South,
+			.Wall,
 		)
 	}
 	wall.set_east_west_wall(
@@ -486,7 +471,7 @@ add_house_floor_walls :: proc(
 	)
 }
 
-draw :: proc(game: ^game.Game) {
+draw :: proc(game: ^game.Game_Context) {
 	renderer.uniform_object.view = camera.view
 	renderer.uniform_object.proj = camera.proj
 

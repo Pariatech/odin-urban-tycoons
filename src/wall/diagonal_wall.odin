@@ -96,7 +96,7 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [camera.Rotation]glsl.mat4 {
 
 
 draw_diagonal_wall :: proc(
-    using game: ^game.Game,
+    using game: ^game.Game_Context,
 	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,

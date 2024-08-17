@@ -71,14 +71,14 @@ rotate_clockwise :: proc() {
 update :: proc(delta_time: f64) {
 	zoom -= mouse.get_scroll().y * ZOOM_SPEED
 	zoom = math.clamp(zoom, ZOOM_MIN, ZOOM_MAX)
-	fixed_zoom := math.pow(2, math.round(math.log2(zoom)))
+	// fixed_zoom := math.pow(2, math.round(math.log2(zoom)))
 
 	width, height := glfw.GetWindowSize(window.handle)
 
 	movement := glsl.dvec3 {
-		SPEED * delta_time * (fixed_zoom + 1),
+		SPEED * delta_time * (zoom + 1),
 		0,
-		SPEED * delta_time * (fixed_zoom + 1),
+		SPEED * delta_time * (zoom + 1),
 	}
 
 	movement *= translate / distance
@@ -102,7 +102,7 @@ update :: proc(delta_time: f64) {
 
 	dview = glsl.dmat4LookAt(position + translate, position, {0, 1, 0})
 	aspect_ratio := f64(height) / f64(width)
-	scale := f64(width) / (math.pow(f64(2.8284), 5) / fixed_zoom)
+	scale := f64(width) / (math.pow(f64(2.8284), 5) / zoom)
 	scale *= f64(window.scale.y)
 
 	left = scale

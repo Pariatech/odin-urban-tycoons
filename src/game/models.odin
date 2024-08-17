@@ -25,7 +25,7 @@ Model :: struct {
 }
 
 Models_Context :: struct {
-    models: map[string]Model
+	models: map[string]Model,
 }
 
 load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
@@ -101,30 +101,32 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 }
 
 free_models :: proc(using ctx: ^Models_Context) {
-    for k, v in models {
-        delete(k)
-        delete(v.indices)
-        delete(v.vertices)
-    }
-    delete(models)
+	for k, v in models {
+		delete(k)
+		delete(v.indices)
+		delete(v.vertices)
+	}
+	delete(models)
 }
 
-bind_model_from_name :: proc(using ctx: Models_Context, model_name: string) {
-	bind_model(&models[model_name])
-}
+bind_model :: proc(using ctx: ^Models_Context, model_name: string) -> bool {
+	model, ok := &models[model_name]
+	if !ok {
+		log.error("Model ", model_name, "isn't loaded!")
+		return false
+	}
+	using model
 
-bind_model_from_model :: proc(using model: ^Model) {
 	if !uploaded {
+		uploaded = true
 		gl.GenVertexArrays(1, &vao)
 		gl.BindVertexArray(vao)
 
 		gl.GenBuffers(1, &vbo)
 		gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-		defer gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 
 		gl.GenBuffers(1, &ebo)
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-		defer gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 
 		gl.BufferData(
 			gl.ARRAY_BUFFER,
@@ -159,29 +161,27 @@ bind_model_from_model :: proc(using model: ^Model) {
 			offset_of(Model_Vertex, texcoords),
 		)
 		gl.EnableVertexAttribArray(1)
-	} else {
-		gl.BindVertexArray(vao)
-	}
-}
 
-bind_model :: proc {
-	bind_model_from_name,
-	bind_model_from_model,
+		gl.BindVertexArray(0)
+		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	} 
+
+	gl.BindVertexArray(vao)
+
+	return true
 }
 
 unbind_model :: proc() {
 	gl.BindVertexArray(0)
+	// gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
-draw_model_from_name :: proc(using ctx: Models_Context, model_name: string) {
-	draw_model(&models[model_name])
-}
-
-draw_model_from_model :: proc(using model: ^Model) {
-	gl.DrawElements(gl.TRIANGLES, i32(len(indices)), gl.UNSIGNED_INT, nil)
-}
-
-draw_model :: proc {
-	draw_model_from_name,
-	draw_model_from_model,
+draw_model :: proc(using ctx: ^Models_Context, model_name: string) {
+	model, ok := &models[model_name]
+	if !ok {
+		log.error("Did not find", model_name, "to draw!")
+	}
+	gl.DrawElements(gl.TRIANGLES, i32(len(model.indices)), gl.UNSIGNED_INT, nil)
 }

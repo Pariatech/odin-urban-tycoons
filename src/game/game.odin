@@ -1,7 +1,8 @@
 package game
 
-Game :: struct {
+Game_Context :: struct {
     textures: Textures_Context,
     models: Models_Context,
+    objects: Objects_Context,
 }
 

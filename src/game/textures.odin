@@ -17,7 +17,17 @@ Texture :: struct {
 	uploaded: bool,
 }
 
-bind_texture_from_path :: proc(
+delete_textures :: proc(ctx: ^Game_Context) {
+    using ctx.textures
+
+    for k, &v in textures {
+        gl.DeleteTextures(1, &v.handle)
+    }
+
+    delete(textures)
+}
+
+bind_texture :: proc(
 	using ctx: ^Textures_Context,
 	path: string,
 ) -> bool {
@@ -28,8 +38,13 @@ bind_texture_from_path :: proc(
 	}
 
 	if !tex.uploaded {
-		gl.TexParameteri(gl.TEXTURE, gl.TEXTURE_WRAP_S, gl.REPEAT)
-		gl.TexParameteri(gl.TEXTURE, gl.TEXTURE_WRAP_T, gl.REPEAT)
+		tex.uploaded = true
+
+        gl.GenTextures(1, &tex.handle)
+	    gl.BindTexture(gl.TEXTURE_2D, tex.handle)
+
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
 		gl.TexParameteri(
 			gl.TEXTURE_2D,
@@ -75,24 +90,13 @@ bind_texture_from_path :: proc(
 			0,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
-			nil,
+			pixels,
 		)
 
-		gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
-
-		tex.uploaded = true
-	}
-
-	bind_texture_from_texture(tex)
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+	} else {
+	    gl.BindTexture(gl.TEXTURE_2D, tex.handle)
+    }
 
 	return true
-}
-
-bind_texture_from_texture :: proc(using tex: ^Texture) {
-	gl.BindTexture(gl.TEXTURE_2D, handle)
-}
-
-bind_texture :: proc {
-	bind_texture_from_path,
-	bind_texture_from_texture,
 }

@@ -1,4 +1,4 @@
-package object
+package game
 
 import "core:fmt"
 import "core:log"
@@ -16,12 +16,11 @@ import "../camera"
 import c "../constants"
 import "../floor"
 import "../renderer"
-import "../wall"
 import "../terrain"
 
-Type :: enum {
+Object_Type :: enum {
 	// Door,
-	// Window,
+	Window,
 	// Chair,
 	// Table,
 	// Painting,
@@ -32,9 +31,9 @@ Type :: enum {
 	// Wall_Top,
 }
 
-Model :: enum {
+Object_Model :: enum {
 	// Wood_Door,
-	// Wood_Window,
+	Wood_Window,
 	// Wood_Chair,
 	// Wood_Table_1x2,
 	// Poutine_Painting,
@@ -43,25 +42,25 @@ Model :: enum {
 	// Tree,
 }
 
-Orientation :: enum {
+Object_Orientation :: enum {
 	South,
-	East,
-	North,
 	West,
+	North,
+	East,
 }
 
-Placement :: enum {
+Object_Placement :: enum {
 	Floor,
 	Wall,
 	Counter,
 	Table,
 }
 
-Placement_Set :: bit_set[Placement]
+Object_Placement_Set :: bit_set[Object_Placement]
 
-TYPE_PLACEMENT_TABLE :: [Type]Placement_Set {
+OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 	// .Door = {.Wall},
-	// .Window = {.Wall},
+	.Window = {.Wall},
 	// .Chair = {.Floor},
 	// .Table = {.Floor},
 	// .Painting = {.Wall},
@@ -72,58 +71,62 @@ TYPE_PLACEMENT_TABLE :: [Type]Placement_Set {
 	// .Wall_Top = {.Wall},
 }
 
-MODEL_PLACEMENT_TABLE :: #partial [Model]Placement_Set{}
+OBJECT_MODEL_PLACEMENT_TABLE :: #partial [Object_Model]Object_Placement_Set{}
 
-TYPE_MAP :: [Model]Type {
+OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
 	// .Wood_Door                           = .Door,
-	// .Wood_Window                         = .Window,
+	.Wood_Window                         = .Window,
 	// .Wood_Chair                          = .Chair,
 	// .Wood_Table_1x2                      = .Table,
 	// .Poutine_Painting                    = .Painting,
-	.Wood_Counter                        = .Counter,
+	.Wood_Counter = .Counter,
 	// .Small_Carpet                        = .Carpet,
 	// .Tree                                = .Tree,
 }
 
-MODEL_MAP :: [Model]string {
-    .Wood_Counter = "Wood.Counter.Bake",
+OBJECT_MODEL_MAP :: [Object_Model]string {
+	.Wood_Counter = "Wood.Counter.Bake",
+	.Wood_Window = "Window.Wood.Bake",
 }
 
-MODEL_TEXTURE_MAP :: [Model]string {
-    .Wood_Counter = "objects/Wood.Counter.png",
+OBJECT_MODEL_TEXTURE_MAP :: [Object_Model]string {
+	.Wood_Counter = "objects/Wood.Counter.png",
+	.Wood_Window = "objects/Wood.Window.png",
 }
 
 Object :: struct {
 	pos:         glsl.vec3,
 	light:       glsl.vec3,
-	model:       Model,
+	model:       string,
 	texture:     string,
-	type:        Type,
-	orientation: Orientation,
-	placement:   Placement,
+	type:        Object_Type,
+	orientation: Object_Orientation,
+	placement:   Object_Placement,
 }
 
-Chunk :: struct {
-	objects:  [dynamic]Object,
-	dirty:    bool,
+Object_Chunk :: struct {
+	objects: [dynamic]Object,
+	dirty:   bool,
 }
 
-Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Chunk
+Object_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Chunk
 
-Uniform_Object :: struct {
+Object_Uniform_Object :: struct {
 	mvp: glsl.mat4,
 }
 
-VERTEX_SHADER_PATH :: "resources/shaders/object.vert"
-FRAGMENT_SHADER_PATH :: "resources/shaders/object.frag"
+OBJECT_VERTEX_SHADER_PATH :: "resources/shaders/object.vert"
+OBJECT_FRAGMENT_SHADER_PATH :: "resources/shaders/object.frag"
 
-chunks: Chunks
-shader_program: u32
-ubo: u32
-uniform_object: Uniform_Object
+Objects_Context :: struct {
+	chunks:         Object_Chunks,
+	shader_program: u32,
+	ubo:            u32,
+}
 
-init :: proc() -> (ok: bool = true) {
-	// gl.Enable(gl.MULTISAMPLE)
+
+init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
+	using ctx.objects
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -133,8 +136,8 @@ init :: proc() -> (ok: bool = true) {
 
 	renderer.load_shader_program(
 		&shader_program,
-		VERTEX_SHADER_PATH,
-		FRAGMENT_SHADER_PATH,
+		OBJECT_VERTEX_SHADER_PATH,
+		OBJECT_FRAGMENT_SHADER_PATH,
 	) or_return
 
 
@@ -146,13 +149,9 @@ init :: proc() -> (ok: bool = true) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.UseProgram(0)
 
-	for z in 0 ..< c.WORLD_HEIGHT {
-		for x in 0 ..< c.WORLD_CHUNK_WIDTH {
-			for y in 0 ..< c.WORLD_CHUNK_DEPTH {
-				init_chunk(&chunks[z][x][y])
-			}
-		}
-	}
+	add_object(ctx, {1, 0, 1}, .Wood_Counter, .South, .Floor)
+	add_object(ctx, {2, 0, 1}, .Wood_Counter, .South, .Floor)
+	add_object(ctx, {3, 0, 1}, .Wood_Counter, .South, .Floor)
 
 	// add({3, 0, 3}, .Wood_Chair, .South, .Floor)
 	// add({4, 0, 4}, .Wood_Chair, .East, .Floor)
@@ -266,7 +265,6 @@ init :: proc() -> (ok: bool = true) {
 	// add({13, 0, 4}, .Poutine_Painting, .North, .Wall)
 	// add({12, 0, 5}, .Poutine_Painting, .East, .Wall)
 	//
-	// add({1, 0, 7}, .Wood_Counter, .South, .Floor)
 	// add({0, 0, 8}, .Wood_Counter, .West, .Floor)
 	// add({2, 0, 8}, .Wood_Counter, .East, .Floor)
 	// add({1, 0, 9}, .Wood_Counter, .North, .Floor)
@@ -319,7 +317,16 @@ init :: proc() -> (ok: bool = true) {
 	return true
 }
 
-init_chunk :: proc(using chunk: ^Chunk) {
+delete_objects :: proc(using ctx: ^Game_Context) {
+    using objects
+
+    for &row in chunks {
+        for &col in row {
+            for &chunk in col {
+                delete(chunk.objects)
+            }
+        }
+    }
 }
 
 sort_objects :: proc(a, b: Object) -> bool {
@@ -396,65 +403,52 @@ sort_objects :: proc(a, b: Object) -> bool {
 	return false
 }
 
-draw_chunk :: proc(using chunk: ^Chunk) {
-	// instances := len(objects)
-	//
-	// if dirty {
-	// 	dirty = false
-	//
-	//
-	// 	gl.BindBuffer(gl.ARRAY_BUFFER, ibo)
-	// 	gl.BufferData(
-	// 		gl.ARRAY_BUFFER,
-	// 		instances * size_of(Instance),
-	// 		nil,
-	// 		gl.STATIC_DRAW,
-	// 	)
-	//
-	// 	slice.sort_by(objects[:], sort_objects)
-	// 	i := 0
-	// 	for v in objects {
-	// 		texture := f32(v.texture)
-	// 		instance := get_instance(v)
-	// 		gl.BufferSubData(
-	// 			gl.ARRAY_BUFFER,
-	// 			i * size_of(Instance),
-	// 			size_of(Instance),
-	// 			&instance,
-	// 		)
-	// 		i += 1
-	// 	}
-	//
-	// 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	// }
-	//
-	// gl.BindVertexArray(vao)
-	// gl.DrawElementsInstanced(
-	// 	gl.TRIANGLES,
-	// 	i32(len(indices)),
-	// 	gl.UNSIGNED_BYTE,
-	// 	nil,
-	// 	i32(instances),
-	// )
-	// gl.BindVertexArray(0)
+draw_object :: proc(using ctx: ^Game_Context, using object: ^Object) -> bool {
+	translate := glsl.mat4Translate(object.pos)
+    rotation_radian := f32(orientation) * 0.5 * math.PI
+    rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
+    uniform_object:= Object_Uniform_Object{
+	    mvp = camera.view_proj * translate * rotation,
+    }
+
+	gl.BufferData(
+		gl.UNIFORM_BUFFER,
+		size_of(Object_Uniform_Object),
+		&uniform_object,
+		gl.STATIC_DRAW,
+	)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+    bind_texture(&textures, texture)
+
+	bind_model(&models, model) or_return
+    draw_model(&models, model)
+
+    return true
 }
 
-draw :: proc() {
-	// gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	// ubo_index := gl.GetUniformBlockIndex(shader_program, "UniformBufferObject")
-	// gl.UniformBlockBinding(shader_program, ubo_index, 2)
-	// gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+draw_chunk :: proc(ctx: ^Game_Context, using chunk: ^Object_Chunk) -> bool {
+    if len(objects) == 0 {
+        return true
+    }
+
+	for &object in objects {
+		draw_object(ctx, &object) or_return
+	}
+
+    return true
+}
+
+draw_objects :: proc(using ctx: ^Game_Context) -> bool {
+    using objects
+
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
+	ubo_index := gl.GetUniformBlockIndex(shader_program, "UniformBufferObject")
+	gl.UniformBlockBinding(shader_program, ubo_index, 2)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+
 	//
-	// uniform_object.view_proj = camera.view_proj
-	//
-	// gl.BufferData(
-	// 	gl.UNIFORM_BUFFER,
-	// 	size_of(Uniform_Object),
-	// 	&uniform_object,
-	// 	gl.STATIC_DRAW,
-	// )
-	//
-	// gl.UseProgram(shader_program)
+	gl.UseProgram(shader_program)
 	//
 	// gl.ActiveTexture(gl.TEXTURE0)
 	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
@@ -471,63 +465,56 @@ draw :: proc() {
 	// gl.Disable(gl.MULTISAMPLE)
 	// defer gl.Enable(gl.MULTISAMPLE)
 	//
-	// for floor in 0 ..< c.WORLD_HEIGHT {
-	// 	it := camera.make_visible_chunk_iterator()
-	// 	for pos in it->next() {
-	// 		draw_chunk(&chunks[floor][pos.x][pos.y])
-	// 	}
-	// }
+	for floor in 0 ..= floor.floor {
+		it := camera.make_visible_chunk_iterator()
+		for pos in it->next() {
+			draw_chunk(ctx, &chunks[floor][pos.x][pos.y]) or_return
+		}
+	}
+
+    return true
 }
 
-add :: proc(
+add_object :: proc(
+	using ctx: ^Game_Context,
 	pos: glsl.vec3,
-	model: Model,
-	orientation: Orientation,
-	placement: Placement,
-	offset_y: f32 = 0,
+	model: Object_Model,
+	orientation: Object_Orientation,
+	placement: Object_Placement,
 ) {
-    x := int(pos.x)
-    z := int(pos.z)
-    y := int(pos.y - terrain.get_tile_height(x, z)) / c.WALL_HEIGHT
-    x /= c.CHUNK_WIDTH
-    z /= c.CHUNK_DEPTH
-    chunk := &chunks[y][x][z]
+	using objects
+	x := int(pos.x)
+	z := int(pos.z)
+	y := int(pos.y - terrain.get_tile_height(x, z)) / c.WALL_HEIGHT
+	x /= c.CHUNK_WIDTH
+	z /= c.CHUNK_DEPTH
+	chunk := &chunks[y][x][z]
 
-    chunk.dirty = true
-	// type_map := TYPE_MAP
-	// model_size := MODEL_SIZE
-	//
-	// parent := pos
-	// size := model_size[model]
-	// type := type_map[model]
-	// for x in 0 ..< size.x {
-	// 	for y in 0 ..< size.y {
-	// 		pos := pos + relative_pos(x, y, orientation)
-	// 		chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
-	// 		append(
-	// 			&chunk.objects,
-	// 			Object {
-	// 				pos = pos,
-	// 				type = type,
-	// 				model = model,
-	// 				orientation = orientation,
-	// 				placement = placement,
-	// 				texture = get_texture(x, y, model, orientation),
-	// 				depth_map = get_depth_map(x, y, model, orientation),
-	// 				parent = parent,
-	// 				light = {1, 1, 1},
-	// 				mask = mask,
-	// 				offset_y = offset_y,
-	// 			},
-	// 		)
-	// 		chunk.dirty = true
-	// 	}
-	// }
-	//
-	// on_add(pos, model, orientation)
+	chunk.dirty = true
+
+	type_map := OBJECT_TYPE_MAP
+
+	model_map := OBJECT_MODEL_MAP
+	texture_map := OBJECT_MODEL_TEXTURE_MAP
+
+	append(
+		&chunk.objects,
+		Object {
+			pos = pos,
+			type = type_map[model],
+			model = model_map[model],
+			texture = texture_map[model],
+			orientation = orientation,
+			placement = placement,
+		},
+	)
 }
 
-on_add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
+on_add :: proc(
+	pos: glsl.ivec3,
+	model: Object_Model,
+	orientation: Object_Orientation,
+) {
 	// type_map := TYPE_MAP
 	// type := type_map[model]
 	//
@@ -567,8 +554,8 @@ on_add :: proc(pos: glsl.ivec3, model: Model, orientation: Orientation) {
 
 can_add_on_wall :: proc(
 	pos: glsl.ivec3,
-	model: Model,
-	orientation: Orientation,
+	model: Object_Model,
+	orientation: Object_Orientation,
 ) -> bool {
 	// model_size := MODEL_SIZE
 	//
@@ -616,8 +603,8 @@ can_add_on_wall :: proc(
 
 can_add_on_floor :: proc(
 	pos: glsl.ivec3,
-	model: Model,
-	orientation: Orientation,
+	model: Object_Model,
+	orientation: Object_Orientation,
 ) -> bool {
 	// model_size := MODEL_SIZE
 	//

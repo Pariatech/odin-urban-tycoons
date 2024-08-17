@@ -14,7 +14,6 @@ import "floor"
 import "game"
 import "keyboard"
 import "mouse"
-import "object"
 import "renderer"
 import "terrain"
 import "tools"
@@ -46,8 +45,8 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
-	game_state: game.Game
-	defer game.free_models(&game_state.models)
+	game_context: game.Game_Context
+	defer game.free_models(&game_context.models)
 
 	when ODIN_DEBUG {
 		context.logger = log.create_console_logger()
@@ -94,9 +93,9 @@ start :: proc() -> (ok: bool = false) {
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 
-	world.init()
+	world.init(&game_context)
 
-	object.init() or_return
+	game.init_objects(&game_context) or_return
 
 	ui.init(&ui_ctx) or_return
 	defer ui.deinit(&ui_ctx)
@@ -109,7 +108,10 @@ start :: proc() -> (ok: bool = false) {
 
 	wall.init_cutaways()
 
-	game.load_models(&game_state.models) or_return
+    defer game.delete_textures(&game_context)
+    defer game.delete_objects(&game_context)
+
+	game.load_models(&game_context.models) or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -155,8 +157,8 @@ start :: proc() -> (ok: bool = false) {
 		wall.update_cutaways()
 		tools.update(delta_time)
 
-		object.draw()
-		world.draw(&game_state)
+        game.draw_objects(&game_context) or_return
+		world.draw(&game_context)
 
 		ui.draw(&ui_ctx)
 
