@@ -276,16 +276,16 @@ add_house_floor_walls :: proc(
 			.Wall,
 		)
 	} else {
-		billboard.billboard_1x1_set(
+		game.add_object(
+			ctx,
 			 {
-				type = .Door,
-				pos = {f32(house_x + 1), f32(floor), f32(house_z + 5)},
+				f32(house_x + 1),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 5),
 			},
-			 {
-				light = {1, 1, 1},
-				texture = .Door_Wood_SE,
-				depth_map = .Door_Wood_SE,
-			},
+			.Wood_Door,
+			.West,
+			.Wall,
 		)
 	}
 
