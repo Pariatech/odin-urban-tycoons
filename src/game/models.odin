@@ -1,6 +1,7 @@
 package game
 
 import "core:log"
+import "core:math"
 import "core:math/linalg/glsl"
 import "core:strings"
 
@@ -22,6 +23,7 @@ Model :: struct {
 	indices:       [dynamic]Model_Index,
 	uploaded:      bool,
 	vbo, ebo, vao: u32,
+	size:          glsl.vec3,
 }
 
 Models_Context :: struct {
@@ -47,6 +49,9 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 		primitive := mesh.primitives[0]
 		indices: [dynamic]Model_Index
 		vertices: [dynamic]Model_Vertex
+		min := glsl.vec3{math.F32_MAX, math.F32_MAX, math.F32_MAX}
+		max := glsl.vec3{math.F32_MIN, math.F32_MIN, math.F32_MIN}
+
 		// indices:= make([dynamic]Model_Index)
 		// vertices:= make([dynamic]Model_Vertex)
 		if primitive.indices != nil {
@@ -71,6 +76,12 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 						3,
 					)
 					vertices[i].pos.x *= -1
+                    min.x = glsl.min(min.x, vertices[i].pos.x)
+                    min.y = glsl.min(min.y, vertices[i].pos.y)
+                    min.z = glsl.min(min.z, vertices[i].pos.z)
+                    max.x = glsl.max(max.x, vertices[i].pos.x)
+                    max.y = glsl.max(max.y, vertices[i].pos.y)
+                    max.z = glsl.max(max.z, vertices[i].pos.z)
 				}
 			}
 			if attribute.type == .texcoord {
@@ -94,6 +105,7 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 			name     = name,
 			vertices = vertices,
 			indices  = indices,
+            size = max - min,
 		}
 	}
 
@@ -165,7 +177,7 @@ bind_model :: proc(using ctx: ^Models_Context, model_name: string) -> bool {
 		gl.BindVertexArray(0)
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	} 
+	}
 
 	gl.BindVertexArray(vao)
 
@@ -183,5 +195,10 @@ draw_model :: proc(using ctx: ^Models_Context, model_name: string) {
 	if !ok {
 		log.error("Did not find", model_name, "to draw!")
 	}
-	gl.DrawElements(gl.TRIANGLES, i32(len(model.indices)), gl.UNSIGNED_INT, nil)
+	gl.DrawElements(
+		gl.TRIANGLES,
+		i32(len(model.indices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
 }

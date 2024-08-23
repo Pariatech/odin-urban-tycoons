@@ -3,6 +3,7 @@ package game
 import "core:fmt"
 import "core:log"
 import "core:math"
+import "core:math/linalg"
 import "core:math/linalg/glsl"
 import "core:path/filepath"
 import "core:slice"
@@ -22,7 +23,7 @@ Object_Type :: enum {
 	Door,
 	Window,
 	// Chair,
-	// Table,
+	Table,
 	// Painting,
 	Counter,
 	// Carpet,
@@ -35,7 +36,8 @@ Object_Model :: enum {
 	Wood_Door,
 	Wood_Window,
 	// Wood_Chair,
-	// Wood_Table_1x2,
+	Wood_Table_6Places,
+	Wood_Table_8Places,
 	// Poutine_Painting,
 	Wood_Counter,
 	// Small_Carpet,
@@ -62,7 +64,7 @@ OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 	.Door = {.Wall},
 	.Window = {.Wall},
 	// .Chair = {.Floor},
-	// .Table = {.Floor},
+	.Table = {.Floor},
 	// .Painting = {.Wall},
 	.Counter = {.Floor},
 	// .Carpet = {.Floor},
@@ -74,26 +76,32 @@ OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 OBJECT_MODEL_PLACEMENT_TABLE :: #partial [Object_Model]Object_Placement_Set{}
 
 OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
-	.Wood_Door    = .Door,
-	.Wood_Window  = .Window,
+	.Wood_Door          = .Door,
+	.Wood_Window        = .Window,
 	// .Wood_Chair                          = .Chair,
 	// .Wood_Table_1x2                      = .Table,
+	.Wood_Table_6Places = .Table,
+	.Wood_Table_8Places = .Table,
 	// .Poutine_Painting                    = .Painting,
-	.Wood_Counter = .Counter,
+	.Wood_Counter       = .Counter,
 	// .Small_Carpet                        = .Carpet,
 	// .Tree                                = .Tree,
 }
 
 OBJECT_MODEL_MAP :: [Object_Model]string {
-	.Wood_Counter = "Wood.Counter.Bake",
-	.Wood_Window  = "Window.Wood.Bake",
-	.Wood_Door    = "Door.Wood.Bake",
+	.Wood_Counter       = "Wood.Counter.Bake",
+	.Wood_Window        = "Window.Wood.Bake",
+	.Wood_Door          = "Door.Wood.Bake",
+	.Wood_Table_6Places = "Table.6Places.Bake",
+	.Wood_Table_8Places = "Table.8Places.Bake",
 }
 
 OBJECT_MODEL_TEXTURE_MAP :: [Object_Model]string {
-	.Wood_Counter = "objects/Wood.Counter.png",
-	.Wood_Window  = "objects/Wood.Window.png",
-	.Wood_Door    = "objects/Door.Wood.png",
+	.Wood_Counter       = "objects/Wood.Counter.png",
+	.Wood_Window        = "objects/Wood.Window.png",
+	.Wood_Door          = "objects/Door.Wood.png",
+	.Wood_Table_6Places = "objects/Table.6Places.Wood.png",
+	.Wood_Table_8Places = "objects/Table.8Places.Wood.png",
 }
 
 Object :: struct {
@@ -104,6 +112,7 @@ Object :: struct {
 	type:        Object_Type,
 	orientation: Object_Orientation,
 	placement:   Object_Placement,
+	size:        glsl.ivec3,
 }
 
 Object_Chunk :: struct {
@@ -155,166 +164,17 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 	add_object(ctx, {2, 0, 1}, .Wood_Counter, .South, .Floor)
 	add_object(ctx, {3, 0, 1}, .Wood_Counter, .South, .Floor)
 
-	// add({3, 0, 3}, .Wood_Chair, .South, .Floor)
-	// add({4, 0, 4}, .Wood_Chair, .East, .Floor)
-	// add({3, 0, 5}, .Wood_Chair, .North, .Floor)
-	// add({2, 0, 4}, .Wood_Chair, .West, .Floor)
-	//
-	// add({0, 0, 1}, .Wood_Table_1x2, .South, .Floor)
-	// add({2, 0, 0}, .Wood_Table_1x2, .North, .Floor)
-	// add({0, 0, 2}, .Wood_Table_1x2, .East, .Floor)
-	// add({1, 0, 4}, .Wood_Table_1x2, .West, .Floor)
-	//
-	// wall.set_wall(
-	// 	{5, 0, 5},
-	// 	.N_S,
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	// wall.set_wall(
-	// 	{5, 0, 5},
-	// 	.E_W,
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	//
-	// add({5, 0, 5}, .Wood_Window, .South, .Wall)
-	// add({5, 0, 5}, .Wood_Window, .West, .Wall)
-	//
-	// wall.set_wall(
-	// 	{7, 0, 5},
-	// 	.N_S,
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	// wall.set_wall(
-	// 	{7, 0, 5},
-	// 	.E_W,
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	//
-	// add({7, 0, 4}, .Wood_Window, .North, .Wall)
-	// add({6, 0, 5}, .Wood_Window, .East, .Wall)
-	//
-	// wall.set_wall(
-	// 	{9, 0, 5},
-	// 	.N_S,
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	// wall.set_wall(
-	// 	{9, 0, 5},
-	// 	.E_W,
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	//
-	// add({9, 0, 5}, .Wood_Door, .South, .Wall)
-	// add({9, 0, 5}, .Wood_Door, .West, .Wall)
-	//
-	// wall.set_wall(
-	// 	{11, 0, 5},
-	// 	.N_S,
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	// wall.set_wall(
-	// 	{11, 0, 5},
-	// 	.E_W,
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	//
-	// add({11, 0, 4}, .Wood_Door, .North, .Wall)
-	// add({10, 0, 5}, .Wood_Door, .East, .Wall)
-	//
-	// wall.set_wall(
-	// 	{13, 0, 5},
-	// 	.N_S,
-	// 	 {
-	// 		type = .End_Right_Corner,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	// wall.set_wall(
-	// 	{13, 0, 5},
-	// 	.E_W,
-	// 	 {
-	// 		type = .Left_Corner_End,
-	// 		textures = {.Inside = .Brick, .Outside = .Brick},
-	// 	},
-	// )
-	//
-	// add({13, 0, 5}, .Poutine_Painting, .South, .Wall)
-	// add({13, 0, 5}, .Poutine_Painting, .West, .Wall)
-	// add({13, 0, 4}, .Poutine_Painting, .North, .Wall)
-	// add({12, 0, 5}, .Poutine_Painting, .East, .Wall)
-	//
-	// add({0, 0, 8}, .Wood_Counter, .West, .Floor)
-	// add({2, 0, 8}, .Wood_Counter, .East, .Floor)
-	// add({1, 0, 9}, .Wood_Counter, .North, .Floor)
-	//
-	// add({0, 0, 14}, .Wood_Counter, .West, .Floor)
-	// add({0, 0, 13}, .Wood_Counter, .West, .Floor)
-	// add({0, 0, 12}, .Wood_Counter, .West, .Floor)
-	// add({0, 0, 11}, .Wood_Counter, .West, .Floor)
-	//
-	// add({12, 0, 0}, .Small_Carpet, .South, .Floor)
-	//
-	//
-	// add({14, 0, 1}, .Tree, .South, .Floor)
-	//
-	// add({17, 0, 0}, .Tree, .North, .Floor)
-	//
-	// add({20, 0, 1}, .Tree, .East, .Floor)
-	// add({24, 0, 0}, .Tree, .West, .Floor)
-	//
-	// add({3, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 2.75)
-	// add({3, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
-	//
-	// add({4, 0, 11}, .Wall_Cutaway_Left_Top, .South, .Floor, mask = .None)
-	// add({4, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Cutaway_Left)
-	//
-	// add({5, 0, 11}, .Wall_Side_Top, .South, .Floor, mask = .None, offset_y = 0.115)
-	// add({5, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down)
-	//
-	// add({6, 0, 11}, .Wall_Short_Top, .South, .Floor, mask = .None, offset_y = 0.115)
-	// add({6, 0, 11}, .Wall_Side_Bricks012, .South, .Floor, mask = .Down_Short)
-	//
-	// add({3, 0, 11}, .Wood_Counter, .East, .Floor)
-	//
-	// add({3, 0, 11}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	// add({3, 0, 12}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	// add({3, 0, 13}, .Wall_Side_Bricks012, .West, .Floor, mask = .Cutaway_Left)
-	// add({3, 0, 14}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down)
-	// add({3, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .Down_Short)
-	//
-	// add({15, 0, 15}, .Wall_Side_Bricks012, .South, .Floor, mask = .None)
-	// add({15, 0, 15}, .Wall_Side_Bricks012, .West, .Floor, mask = .None)
-	// add({15, 0, 15}, .Wood_Counter, .East, .Floor)
+	add_object(ctx, {5, 0, 1}, .Wood_Table_6Places, .South, .Floor)
+	add_object(ctx, {8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
 
-	// log.debug(can_add({0, 0, 1}, .Wood_Table_1x2, .South))
-	// log.debug(can_add({0, 0, 0}, .Wood_Table_1x2, .North))
-	// log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .West))
-	// log.debug(can_add({1, 0, 0}, .Wood_Table_1x2, .East))
-	// log.debug(can_add({3, 0, 4}, .Wood_Table_1x2, .East))
+	add_object(ctx, {5, 0, 4}, .Wood_Table_6Places, .East, .Floor)
+	add_object(ctx, {8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
+
+	add_object(ctx, {5, 0, 7}, .Wood_Table_6Places, .North, .Floor)
+	add_object(ctx, {8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
+
+	add_object(ctx, {5, 0, 10}, .Wood_Table_6Places, .West, .Floor)
+	add_object(ctx, {8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
 
 	return true
 }
@@ -477,20 +337,49 @@ draw_objects :: proc(using ctx: ^Game_Context) -> bool {
 	return true
 }
 
+world_pos_to_tile_pos :: proc(pos: glsl.vec3) -> (tile_pos: glsl.ivec2) {
+	tile_pos.x = i32(pos.x + 0.5)
+	tile_pos.y = i32(pos.z + 0.5)
+	return
+}
+
+world_pos_to_chunk_pos :: proc(
+	g: ^Game_Context,
+	pos: glsl.vec3,
+) -> (
+	chunk_pos: glsl.ivec3,
+) {
+	tile_pos := world_pos_to_tile_pos(pos)
+	tile_height := terrain.get_tile_height(int(tile_pos.x), int(tile_pos.y))
+	chunk_pos.x = tile_pos.x / c.CHUNK_WIDTH
+	chunk_pos.y = i32(pos.y - tile_height) / c.WALL_HEIGHT
+	chunk_pos.z = tile_pos.y / c.CHUNK_DEPTH
+	return
+}
+
 add_object :: proc(
 	using ctx: ^Game_Context,
 	pos: glsl.vec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 	placement: Object_Placement,
-) {
+) -> bool {
 	using objects
-	x := int(pos.x)
-	z := int(pos.z)
-	y := int(pos.y - terrain.get_tile_height(x, z)) / c.WALL_HEIGHT
-	x /= c.CHUNK_WIDTH
-	z /= c.CHUNK_DEPTH
-	chunk := &chunks[y][x][z]
+
+	tile_pos := world_pos_to_tile_pos(pos)
+	chunk_pos := world_pos_to_chunk_pos(ctx, pos)
+
+	can_add_object(
+		ctx,
+		pos,
+		tile_pos,
+		chunk_pos,
+		model,
+		orientation,
+		placement,
+	) or_return
+
+	chunk := &chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
 	chunk.dirty = true
 
@@ -510,10 +399,61 @@ add_object :: proc(
 			placement = placement,
 		},
 	)
+
+	return true
 }
 
-on_add :: proc(
-	pos: glsl.ivec3,
+get_object_size :: proc(g: ^Game_Context, model: Object_Model) -> glsl.ivec3 {
+	model_map := OBJECT_MODEL_MAP
+	model_name := model_map[model]
+	object_model := g.models.models[model_name]
+	return glsl.ivec3(linalg.array_cast(linalg.ceil(object_model.size), i32))
+}
+
+can_add_object :: proc(
+	using ctx: ^Game_Context,
+	pos: glsl.vec3,
+	tile_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
+	model: Object_Model,
+	orientation: Object_Orientation,
+	placement: Object_Placement,
+) -> bool {
+	if tile_pos.x < 0 ||
+	   tile_pos.x >= c.WORLD_WIDTH ||
+	   tile_pos.y < 0 ||
+	   tile_pos.y >= c.WORLD_DEPTH {
+		return false
+	}
+
+	switch placement {
+	case .Wall:
+		return can_add_object_on_wall(
+			ctx,
+			pos,
+			tile_pos,
+			chunk_pos,
+			model,
+			orientation,
+		)
+	case .Floor:
+		return can_add_object_on_floor(
+			ctx,
+			pos,
+			tile_pos,
+			chunk_pos,
+			model,
+			orientation,
+		)
+	case .Counter:
+	case .Table:
+	}
+
+	return true
+}
+
+on_add_object :: proc(
+	pos: glsl.vec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 ) {
@@ -554,8 +494,11 @@ on_add :: proc(
 	// }
 }
 
-can_add_on_wall :: proc(
-	pos: glsl.ivec3,
+can_add_object_on_wall :: proc(
+	using ctx: ^Game_Context,
+	pos: glsl.vec3,
+	tile_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 ) -> bool {
@@ -600,29 +543,55 @@ can_add_on_wall :: proc(
 	// 	}
 	// }
 
+	tile_pos := world_pos_to_tile_pos(pos)
+
 	return true
 }
 
-can_add_on_floor :: proc(
-	pos: glsl.ivec3,
+can_add_object_on_floor :: proc(
+	g: ^Game_Context,
+	pos: glsl.vec3,
+	tile_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 ) -> bool {
-	// model_size := MODEL_SIZE
-	//
-	// size := model_size[model]
-	// for x in 0 ..< size.x {
-	// 	for y in 0 ..< size.y {
-	// 		pos := pos + relative_pos(x, y, orientation)
-	// 		chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
-	//
-	// 		for k, v in chunk.objects {
-	// 			if k.pos == pos && k.placement == .Floor {
-	// 				return false
-	// 			}
-	// 		}
-	// 	}
-	// }
+	obj_size := get_object_size(g, model)
+
+	for x in 0 ..< obj_size.x {
+		x := x
+		if orientation == .North || orientation == .West {
+			x = -x
+		}
+		for z in 0 ..< obj_size.z {
+			z := z
+			if orientation == .South || orientation == .West {
+				z = -z
+			}
+			if has_object_at(g, pos + {f32(x), 0, f32(z)}, .Floor) {
+				return false
+			}
+		}
+	}
 
 	return true
+}
+
+has_object_at :: proc(
+	g: ^Game_Context,
+	pos: glsl.vec3,
+	placement: Object_Placement,
+) -> bool {
+	chunk_pos := world_pos_to_chunk_pos(g, pos)
+	tile_pos := world_pos_to_tile_pos(pos)
+	chunk := &g.objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+
+	for k, v in chunk.objects {
+		if world_pos_to_tile_pos(k.pos) == tile_pos &&
+		   k.placement == placement {
+			return true
+		}
+	}
+
+	return false
 }
