@@ -51,7 +51,6 @@ bind_texture :: proc(
 			gl.TEXTURE_MIN_FILTER,
 			gl.LINEAR_MIPMAP_LINEAR,
 		)
-	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
 

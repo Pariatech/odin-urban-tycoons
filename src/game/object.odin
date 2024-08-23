@@ -37,6 +37,7 @@ Object_Model :: enum {
 	Wood_Window,
 	// Wood_Chair,
 	Wood_Table_6Places,
+	Plank_Table_6Places,
 	Wood_Table_8Places,
 	// Poutine_Painting,
 	Wood_Counter,
@@ -81,6 +82,7 @@ OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
 	// .Wood_Chair                          = .Chair,
 	// .Wood_Table_1x2                      = .Table,
 	.Wood_Table_6Places = .Table,
+	.Plank_Table_6Places = .Table,
 	.Wood_Table_8Places = .Table,
 	// .Poutine_Painting                    = .Painting,
 	.Wood_Counter       = .Counter,
@@ -93,6 +95,7 @@ OBJECT_MODEL_MAP :: [Object_Model]string {
 	.Wood_Window        = "Window.Wood.Bake",
 	.Wood_Door          = "Door.Wood.Bake",
 	.Wood_Table_6Places = "Table.6Places.Bake",
+	.Plank_Table_6Places = "Plank.Table.6Places.Bake",
 	.Wood_Table_8Places = "Table.8Places.Bake",
 }
 
@@ -101,6 +104,8 @@ OBJECT_MODEL_TEXTURE_MAP :: [Object_Model]string {
 	.Wood_Window        = "objects/Wood.Window.png",
 	.Wood_Door          = "objects/Door.Wood.png",
 	.Wood_Table_6Places = "objects/Table.6Places.Wood.png",
+	.Plank_Table_6Places = "objects/Table.6Places.Plank.png",
+	// .Wood_Table_6Places = "tex_test.png",
 	.Wood_Table_8Places = "objects/Table.8Places.Wood.png",
 }
 
@@ -164,16 +169,16 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 	add_object(ctx, {2, 0, 1}, .Wood_Counter, .South, .Floor)
 	add_object(ctx, {3, 0, 1}, .Wood_Counter, .South, .Floor)
 
-	add_object(ctx, {5, 0, 1}, .Wood_Table_6Places, .South, .Floor)
+	add_object(ctx, {5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
 	add_object(ctx, {8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
 
-	add_object(ctx, {5, 0, 4}, .Wood_Table_6Places, .East, .Floor)
+	add_object(ctx, {5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
 	add_object(ctx, {8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
 
-	add_object(ctx, {5, 0, 7}, .Wood_Table_6Places, .North, .Floor)
+	add_object(ctx, {5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
 	add_object(ctx, {8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
 
-	add_object(ctx, {5, 0, 10}, .Wood_Table_6Places, .West, .Floor)
+	add_object(ctx, {5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
 	add_object(ctx, {8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
 
 	return true
@@ -309,24 +314,10 @@ draw_objects :: proc(using ctx: ^Game_Context) -> bool {
 	gl.UniformBlockBinding(shader_program, ubo_index, 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
-	//
-	gl.UseProgram(shader_program)
-	//
-	// gl.ActiveTexture(gl.TEXTURE0)
-	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, texture_array)
-	//
-	// gl.ActiveTexture(gl.TEXTURE1)
-	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, depth_map_texture_array)
-	//
-	// gl.ActiveTexture(gl.TEXTURE2)
-	// gl.BindTexture(gl.TEXTURE_2D_ARRAY, mask_texture_array)
-	//
-	// gl.DepthFunc(gl.ALWAYS)
-	// defer gl.DepthFunc(gl.LEQUAL)
-	//
 	// gl.Disable(gl.MULTISAMPLE)
-	// defer gl.Enable(gl.MULTISAMPLE)
-	//
+
+	gl.UseProgram(shader_program)
+
 	for floor in 0 ..= floor.floor {
 		it := camera.make_visible_chunk_iterator()
 		for pos in it->next() {
