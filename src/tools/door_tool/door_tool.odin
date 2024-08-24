@@ -12,7 +12,7 @@ import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
 import "../../tile"
-import "../../wall"
+import "../../game"
 import "../paint_tool"
 
 Texture :: enum {
@@ -26,10 +26,10 @@ side: tile.Tile_Triangle_Side
 texture: Texture
 
 bound_wall: Maybe(glsl.ivec3)
-bound_wall_axis: wall.Wall_Axis
+bound_wall_axis: game.Wall_Axis
 
 TEXTURE_BILLBOARD_TEXTURES_MAP ::
-	[Texture][wall.Wall_Axis][camera.Rotation]billboard.Texture_1x1 {
+	[Texture][game.Wall_Axis][camera.Rotation]billboard.Texture_1x1 {
 		.Wood = #partial {
 			.E_W =  {
 				.South_West = .Door_Wood_SW,
@@ -157,9 +157,9 @@ remove_door :: proc() {
 
 		if billboard.has_billboard_1x1({pos = fpos, type = .Door}) {
 			billboard.billboard_1x1_remove({pos = fpos, type = .Door})
-			w, _ := wall.get_wall(intersect.pos, intersect.axis)
+			w, _ := game.get_wall(intersect.pos, intersect.axis)
 			w.mask = .Full_Mask
-			wall.set_wall(intersect.pos, intersect.axis, w)
+			game.set_wall(intersect.pos, intersect.axis, w)
 		}
 	}
 }
@@ -203,9 +203,9 @@ mark_door_removal :: proc(
 
 revert_bound_wall :: proc() {
 	if pos, ok := bound_wall.?; ok {
-		w, _ := wall.get_wall(pos, bound_wall_axis)
+		w, _ := game.get_wall(pos, bound_wall_axis)
 		w.mask = .Full_Mask
-		wall.set_wall(pos, bound_wall_axis, w)
+		game.set_wall(pos, bound_wall_axis, w)
 	}
 }
 
@@ -255,10 +255,10 @@ bind_to_wall :: proc(key: ^billboard.Key) -> bool {
 	billboard.billboard_1x1_move(key, fpos)
 	billboard.billboard_1x1_set_light(key^, {1, 1, 1})
 
-	if w, ok := wall.get_wall(pos, intersect.axis); ok {
+	if w, ok := game.get_wall(pos, intersect.axis); ok {
 		w := w
 		w.mask = .Door_Opening
-		wall.set_wall(pos, intersect.axis, w)
+		game.set_wall(pos, intersect.axis, w)
 	}
 
 	return true

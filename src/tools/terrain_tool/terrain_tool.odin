@@ -14,7 +14,7 @@ import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
 import "../../tile"
-import "../../wall"
+import "../../game"
 
 terrain_tool_cursor_pos: glsl.vec3
 terrain_tool_billboard: billboard.Key
@@ -375,64 +375,64 @@ smooth_brush :: proc(delta_time: f64) {
 
 intersect_with_wall :: proc(x, z: i32) -> bool {
 	if x > 0 && z < constants.WORLD_DEPTH {
-		if _, ok := wall.get_east_west_wall({x - 1, 0, z}); ok {
+		if _, ok := game.get_east_west_wall({x - 1, 0, z}); ok {
 			return true
 		}
 		if x < constants.WORLD_WIDTH {
-			if _, ok := wall.get_east_west_wall({x, 0, z}); ok {
+			if _, ok := game.get_east_west_wall({x, 0, z}); ok {
 				return true
 			}
 		}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
-		if _, ok := wall.get_north_south_wall({x, 0, z - 1}); ok {
+		if _, ok := game.get_north_south_wall({x, 0, z - 1}); ok {
 			return true
 		}
 		if z < constants.WORLD_DEPTH {
-			if _, ok := wall.get_north_south_wall({x, 0, z}); ok {
+			if _, ok := game.get_north_south_wall({x, 0, z}); ok {
 				return true
 			}
 		}
 	}
 
 	if x > 0 && z > 0 {
-		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z - 1})
+		_, ok := game.get_south_west_north_east_wall({x - 1, 0, z - 1})
 		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
-		_, ok := wall.get_south_west_north_east_wall({x, 0, z})
+		_, ok := game.get_south_west_north_east_wall({x, 0, z})
 		if ok {return true}
 	}
 
 	if x > 0 && z < constants.WORLD_DEPTH {
-		_, ok := wall.get_south_west_north_east_wall({x - 1, 0, z})
+		_, ok := game.get_south_west_north_east_wall({x - 1, 0, z})
 		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
-		_, ok := wall.get_south_west_north_east_wall({x, 0, z - 1})
+		_, ok := game.get_south_west_north_east_wall({x, 0, z - 1})
 		if ok {return true}
 	}
 
 	if x > 0 && z > 0 {
-		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z - 1})
+		_, ok := game.get_north_west_south_east_wall({x - 1, 0, z - 1})
 		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z < constants.WORLD_DEPTH {
-		_, ok := wall.get_north_west_south_east_wall({x, 0, z})
+		_, ok := game.get_north_west_south_east_wall({x, 0, z})
 		if ok {return true}
 	}
 
 	if x < constants.WORLD_WIDTH && z > 0 {
-		_, ok := wall.get_north_west_south_east_wall({x, 0, z - 1})
+		_, ok := game.get_north_west_south_east_wall({x, 0, z - 1})
 		if ok {return true}
 	}
 
 	if x > 0 && z < constants.WORLD_DEPTH {
-		_, ok := wall.get_north_west_south_east_wall({x - 1, 0, z})
+		_, ok := game.get_north_west_south_east_wall({x - 1, 0, z})
 		if ok {return true}
 	}
 

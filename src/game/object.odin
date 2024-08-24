@@ -8,6 +8,7 @@ import "core:math/linalg/glsl"
 import "core:path/filepath"
 import "core:slice"
 import "core:strings"
+import "core:testing"
 
 import gl "vendor:OpenGL"
 import "vendor:cgltf"
@@ -18,6 +19,7 @@ import c "../constants"
 import "../floor"
 import "../renderer"
 import "../terrain"
+// import "../wall"
 
 Object_Type :: enum {
 	Door,
@@ -77,36 +79,36 @@ OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 OBJECT_MODEL_PLACEMENT_TABLE :: #partial [Object_Model]Object_Placement_Set{}
 
 OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
-	.Wood_Door          = .Door,
-	.Wood_Window        = .Window,
+	.Wood_Door           = .Door,
+	.Wood_Window         = .Window,
 	// .Wood_Chair                          = .Chair,
 	// .Wood_Table_1x2                      = .Table,
-	.Wood_Table_6Places = .Table,
+	.Wood_Table_6Places  = .Table,
 	.Plank_Table_6Places = .Table,
-	.Wood_Table_8Places = .Table,
+	.Wood_Table_8Places  = .Table,
 	// .Poutine_Painting                    = .Painting,
-	.Wood_Counter       = .Counter,
+	.Wood_Counter        = .Counter,
 	// .Small_Carpet                        = .Carpet,
 	// .Tree                                = .Tree,
 }
 
 OBJECT_MODEL_MAP :: [Object_Model]string {
-	.Wood_Counter       = "Wood.Counter.Bake",
-	.Wood_Window        = "Window.Wood.Bake",
-	.Wood_Door          = "Door.Wood.Bake",
-	.Wood_Table_6Places = "Table.6Places.Bake",
+	.Wood_Counter        = "Wood.Counter.Bake",
+	.Wood_Window         = "Window.Wood.Bake",
+	.Wood_Door           = "Door.Wood.Bake",
+	.Wood_Table_6Places  = "Table.6Places.Bake",
 	.Plank_Table_6Places = "Plank.Table.6Places.Bake",
-	.Wood_Table_8Places = "Table.8Places.Bake",
+	.Wood_Table_8Places  = "Table.8Places.Bake",
 }
 
 OBJECT_MODEL_TEXTURE_MAP :: [Object_Model]string {
-	.Wood_Counter       = "objects/Wood.Counter.png",
-	.Wood_Window        = "objects/Wood.Window.png",
-	.Wood_Door          = "objects/Door.Wood.png",
-	.Wood_Table_6Places = "objects/Table.6Places.Wood.png",
+	.Wood_Counter        = "objects/Wood.Counter.png",
+	.Wood_Window         = "objects/Wood.Window.png",
+	.Wood_Door           = "objects/Door.Wood.png",
+	.Wood_Table_6Places  = "objects/Table.6Places.Wood.png",
 	.Plank_Table_6Places = "objects/Table.6Places.Plank.png",
 	// .Wood_Table_6Places = "tex_test.png",
-	.Wood_Table_8Places = "objects/Table.8Places.Wood.png",
+	.Wood_Table_8Places  = "objects/Table.8Places.Wood.png",
 }
 
 Object :: struct {
@@ -551,15 +553,46 @@ can_add_object_on_floor :: proc(
 
 	for x in 0 ..< obj_size.x {
 		x := x
+		wall_x := x
 		if orientation == .North || orientation == .West {
 			x = -x
+			wall_x = x + 1
 		}
 		for z in 0 ..< obj_size.z {
 			z := z
+			wall_z := z
 			if orientation == .South || orientation == .West {
 				z = -z
+				wall_z = z + 1
 			}
 			if has_object_at(g, pos + {f32(x), 0, f32(z)}, .Floor) {
+				return false
+			}
+
+			// if x != 0 &&
+			//    wall.has_north_south_wall(
+			// 	   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
+			//    ) {
+			// 	return false
+			// }
+			//
+			// if z != 0 &&
+			//    wall.has_east_west_wall(
+			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
+			//    ) {
+			// 	return false
+			// }
+			//
+			// if wall.has_north_west_south_east_wall(
+			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+			//    ) ||
+			//    wall.has_north_west_south_east_wall(
+			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+			//    ) {
+			// 	return false
+			// }
+
+			if !terrain.is_tile_flat(tile_pos + {x, z}) {
 				return false
 			}
 		}
@@ -585,4 +618,62 @@ has_object_at :: proc(
 	}
 
 	return false
+}
+
+@(test)
+can_add_object_on_floor_test :: proc(t: ^testing.T) {
+	game: Game_Context
+
+    load_models(&game.models)
+    defer free_models(&game.models)
+
+    defer delete_objects(&game)
+
+	pos := glsl.vec3{1, 0, 1}
+	add_object(&game, pos, .Wood_Counter, .South, .Floor)
+	r := can_add_object_on_floor(
+		&game,
+		pos,
+		world_pos_to_tile_pos(pos),
+		world_pos_to_chunk_pos(&game, pos),
+		.Wood_Counter,
+		.South,
+	)
+	testing.expect_value(t, r, false)
+
+    pos = {2, 0, 1}
+	r = can_add_object_on_floor(
+		&game,
+		pos,
+		world_pos_to_tile_pos(pos),
+		world_pos_to_chunk_pos(&game, pos),
+		.Wood_Counter,
+		.South,
+	)
+	testing.expect_value(t, r, true)
+
+    pos = {1, 0, 1}
+	r = can_add_object_on_floor(
+		&game,
+		pos,
+		world_pos_to_tile_pos(pos),
+		world_pos_to_chunk_pos(&game, pos),
+		.Wood_Table_8Places,
+		.South,
+	)
+	testing.expect_value(t, r, false)
+	// add_object(&game, {2, 0, 1}, .Wood_Counter, .South, .Floor)
+	// add_object(&game, {3, 0, 1}, .Wood_Counter, .South, .Floor)
+	//
+	// add_object(&game, {5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
+	// add_object(&game, {8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
+	//
+	// add_object(&game, {5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
+	// add_object(&game, {8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
+	//
+	// add_object(&game, {5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
+	// add_object(&game, {8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
+	//
+	// add_object(&game, {5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
+	// add_object(&game, {8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
 }

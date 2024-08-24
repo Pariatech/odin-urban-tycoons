@@ -8,7 +8,7 @@ import gl "vendor:OpenGL"
 import "../camera"
 import "../floor"
 import "../tools"
-import "../wall"
+import "../game"
 import "../window"
 import "../world"
 import "../mouse"
@@ -157,9 +157,9 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 		camera.rotate_counter_clockwise()
 		world.update_after_rotation(.Counter_Clockwise)
 	case .Walls_Up:
-		wall.set_walls_up()
+		game.set_walls_up()
 	case .Walls_Down:
-		wall.set_walls_down()
+		game.set_walls_down()
 	case .Landscape:
 		floor_panel_ctx.opened = false
 		tools.open_land_tool()

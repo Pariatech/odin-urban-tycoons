@@ -20,7 +20,6 @@ import "tools"
 import "tools/floor_tool"
 import "tools/terrain_tool"
 import "ui"
-import "wall"
 import "window"
 import "world"
 
@@ -82,7 +81,7 @@ start :: proc() -> (ok: bool = false) {
 	if (!renderer.init()) do return
 	defer renderer.deinit()
 
-	wall.init_wall_renderer() or_return
+	game.init_wall_renderer() or_return
 
 	keyboard.init()
 	defer keyboard.deinit()
@@ -106,7 +105,7 @@ start :: proc() -> (ok: bool = false) {
 	tools.init()
 	defer tools.deinit()
 
-	wall.init_cutaways()
+	game.init_cutaways()
 
     defer game.delete_textures(&game_context)
     defer game.delete_objects(&game_context)
@@ -154,7 +153,7 @@ start :: proc() -> (ok: bool = false) {
 
 		world.update()
 
-		wall.update_cutaways()
+		game.update_cutaways()
 		tools.update(delta_time)
 
         game.draw_objects(&game_context) or_return

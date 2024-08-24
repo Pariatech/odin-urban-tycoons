@@ -13,7 +13,6 @@ import "../game"
 import "../renderer"
 import "../tile"
 import "../tools/wall_tool"
-import "../wall"
 
 house_x: i32 = 12
 house_z: i32 = 12
@@ -213,11 +212,11 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 add_house_floor_walls :: proc(
 	using ctx: ^game.Game_Context,
 	floor: i32,
-	inside_texture: wall.Wall_Texture,
-	outside_texture: wall.Wall_Texture,
+	inside_texture: game.Wall_Texture,
+	outside_texture: game.Wall_Texture,
 ) {
 	// The house's front wall
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x, floor, house_z},
 		 {
 			type = .Extended_Right,
@@ -225,7 +224,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 	for i in 0 ..< 2 {
-		wall.set_north_south_wall(
+		game.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 1},
 			 {
 				type = .Side,
@@ -236,7 +235,7 @@ add_house_floor_walls :: proc(
 			},
 		)
 	}
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x, floor, house_z + 3},
 		 {
 			type = .Extended_Left,
@@ -244,7 +243,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	wall.set_south_west_north_east_wall(
+	game.set_south_west_north_east_wall(
 		{house_x, floor, house_z + 4},
 		 {
 			type = .Side,
@@ -253,9 +252,9 @@ add_house_floor_walls :: proc(
 	)
 
 	// door?
-	mask := wall.Wall_Mask_Texture.Window_Opening
+	mask := game.Wall_Mask_Texture.Window_Opening
 	if floor == 0 do mask = .Door_Opening
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x + 1, floor, house_z + 5},
 		 {
 			type = .Extended,
@@ -289,7 +288,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	wall.set_north_west_south_east_wall(
+	game.set_north_west_south_east_wall(
 		{house_x, floor, house_z + 6},
 		 {
 			type = .Side,
@@ -297,7 +296,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x, floor, house_z + 7},
 		 {
 			type = .Extended_Right,
@@ -306,7 +305,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		wall.set_north_south_wall(
+		game.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 8},
 			 {
 				type = .Side,
@@ -331,7 +330,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x, floor, house_z + 10},
 		 {
 			type = .Extended_Left,
@@ -340,7 +339,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's right side wall
-	wall.set_east_west_wall(
+	game.set_east_west_wall(
 		{house_x, floor, house_z},
 		 {
 			type = .Extended_Left,
@@ -349,7 +348,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		wall.set_east_west_wall(
+		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z},
 			 {
 				type = .Side,
@@ -374,7 +373,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	wall.set_east_west_wall(
+	game.set_east_west_wall(
 		{house_x + 3, floor, house_z},
 		 {
 			type = .Extended_Right,
@@ -383,7 +382,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's left side wall
-	wall.set_east_west_wall(
+	game.set_east_west_wall(
 		{house_x, floor, house_z + 11},
 		 {
 			type = .Extended_Left,
@@ -392,7 +391,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 2 {
-		wall.set_east_west_wall(
+		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
 				type = .Side,
@@ -416,7 +415,7 @@ add_house_floor_walls :: proc(
 			.Wall,
 		)
 	}
-	wall.set_east_west_wall(
+	game.set_east_west_wall(
 		{house_x + 3, floor, house_z + 11},
 		 {
 			type = .Extended_Right,
@@ -425,7 +424,7 @@ add_house_floor_walls :: proc(
 	)
 
 	// The house's back wall
-	wall.set_south_west_north_east_wall(
+	game.set_south_west_north_east_wall(
 		{house_x + 4, floor, house_z},
 		 {
 			type = .Side,
@@ -433,7 +432,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x + 5, floor, house_z + 1},
 		 {
 			type = .Extended_Right,
@@ -442,7 +441,7 @@ add_house_floor_walls :: proc(
 	)
 
 	for i in 0 ..< 7 {
-		wall.set_north_south_wall(
+		game.set_north_south_wall(
 			{house_x + 5, floor, house_z + i32(i) + 2},
 			 {
 				type = .Side,
@@ -454,7 +453,7 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	wall.set_north_south_wall(
+	game.set_north_south_wall(
 		{house_x + 5, floor, house_z + 9},
 		 {
 			type = .Extended_Left,
@@ -462,7 +461,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	wall.set_north_west_south_east_wall(
+	game.set_north_west_south_east_wall(
 		{house_x + 4, floor, house_z + 10},
 		 {
 			type = .Side,
@@ -471,7 +470,7 @@ add_house_floor_walls :: proc(
 	)
 }
 
-draw :: proc(game: ^game.Game_Context) {
+draw :: proc(g: ^game.Game_Context) {
 	renderer.uniform_object.view = camera.view
 	renderer.uniform_object.proj = camera.proj
 
@@ -496,7 +495,7 @@ draw :: proc(game: ^game.Game_Context) {
 	for flr in 0 ..= floor.floor {
 		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(flr)
-		wall.draw_walls(game, flr)
+		game.draw_walls(g, flr)
 		billboard.draw_billboards(flr)
 		// object.draw(flr)
 	}
@@ -511,5 +510,5 @@ update_after_rotation :: proc(rotated: camera.Rotated) {
 	case .Clockwise:
 		billboard.update_after_clockwise_rotation()
 	}
-	wall.update_after_rotation()
+	game.update_after_rotation()
 }

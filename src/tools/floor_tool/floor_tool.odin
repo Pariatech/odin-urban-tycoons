@@ -11,7 +11,7 @@ import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
 import "../../tile"
-import "../../wall"
+import "../../game"
 
 position: glsl.ivec2
 side: tile.Tile_Triangle_Side
@@ -173,7 +173,7 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 	if triangle_mode {
 		set_tile_triangle(position, side, tile_triangle)
 	} else {
-		if wall.has_north_west_south_east_wall(position) {
+		if game.has_north_west_south_east_wall(position) {
 			set_tile_triangle(position, side, tile_triangle)
 			next_side := side
 			switch side {
@@ -187,7 +187,7 @@ set_tile :: proc(position: glsl.ivec3, delete_mode: bool) {
 				next_side = .East
 			}
 			set_tile_triangle(position, next_side, tile_triangle)
-		} else if wall.has_south_west_north_east_wall(position) {
+		} else if game.has_south_west_north_east_wall(position) {
 			set_tile_triangle(position, side, tile_triangle)
 			next_side := side
 			switch side {

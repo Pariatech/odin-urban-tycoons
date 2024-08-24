@@ -7,7 +7,7 @@ import "../../constants"
 import "../../floor"
 import "../../terrain"
 import "../../tile"
-import "../../wall"
+import "../../game"
 
 Visited_Tile_Triangle :: struct {
 	position: glsl.ivec3,
@@ -258,17 +258,17 @@ can_texture :: proc(
 		switch to.side {
 		case .South:
 		case .East:
-			_, ok := wall.get_north_west_south_east_wall(to.position)
+			_, ok := game.get_north_west_south_east_wall(to.position)
 			if ok {
 				return false
 			}
 		case .North:
-			_, ok := wall.get_east_west_wall(from.position)
+			_, ok := game.get_east_west_wall(from.position)
 			if ok {
 				return false
 			}
 		case .West:
-			_, ok := wall.get_south_west_north_east_wall(to.position)
+			_, ok := game.get_south_west_north_east_wall(to.position)
 			if ok {
 				return false
 			}
@@ -276,18 +276,18 @@ can_texture :: proc(
 	case .East:
 		switch to.side {
 		case .South:
-			_, ok := wall.get_north_west_south_east_wall(to.position)
+			_, ok := game.get_north_west_south_east_wall(to.position)
 			if ok {
 				return false
 			}
 		case .East:
 		case .North:
-			_, ok := wall.get_south_west_north_east_wall(to.position)
+			_, ok := game.get_south_west_north_east_wall(to.position)
 			if ok {
 				return false
 			}
 		case .West:
-			_, ok := wall.get_north_south_wall(to.position)
+			_, ok := game.get_north_south_wall(to.position)
 			if ok {
 				return false
 			}
@@ -295,18 +295,18 @@ can_texture :: proc(
 	case .North:
 		switch to.side {
 		case .South:
-			_, ok := wall.get_east_west_wall(to.position)
+			_, ok := game.get_east_west_wall(to.position)
 			if ok {
 				return false
 			}
 		case .East:
-			_, ok := wall.get_south_west_north_east_wall(to.position)
+			_, ok := game.get_south_west_north_east_wall(to.position)
 			if ok {
 				return false
 			}
 		case .North:
 		case .West:
-			_, ok := wall.get_north_west_south_east_wall(from.position)
+			_, ok := game.get_north_west_south_east_wall(from.position)
 			if ok {
 				return false
 			}
@@ -314,17 +314,17 @@ can_texture :: proc(
 	case .West:
 		switch to.side {
 		case .South:
-			_, ok := wall.get_south_west_north_east_wall(to.position)
+			_, ok := game.get_south_west_north_east_wall(to.position)
 			if ok {
 				return false
 			}
 		case .East:
-			_, ok := wall.get_north_south_wall(from.position)
+			_, ok := game.get_north_south_wall(from.position)
 			if ok {
 				return false
 			}
 		case .North:
-			_, ok := wall.get_north_west_south_east_wall(to.position)
+			_, ok := game.get_north_west_south_east_wall(to.position)
 			if ok {
 				return false
 			}

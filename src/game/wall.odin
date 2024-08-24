@@ -1,4 +1,4 @@
-package wall
+package game
 
 import "core:fmt"
 import "core:log"
@@ -11,7 +11,6 @@ import gl "vendor:OpenGL"
 
 import "../camera"
 import "../constants"
-import "../game"
 import "../renderer"
 import "../terrain"
 import "../utils"
@@ -310,8 +309,8 @@ deinit_wall_renderer :: proc() {
 }
 
 draw_wall_mesh :: proc(
-	vertices: []game.Model_Vertex,
-	indices: []game.Model_Index,
+	vertices: []Model_Vertex,
+	indices: []Model_Index,
 	model: glsl.mat4,
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
@@ -338,7 +337,7 @@ draw_wall_mesh :: proc(
 }
 
 draw_wall :: proc(
-	using game: ^game.Game_Context,
+	using game: ^Game_Context,
 	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,
@@ -660,7 +659,7 @@ chunk_remove_south_west_north_east_wall :: proc(
 }
 
 chunk_draw_walls :: proc(
-	game: ^game.Game_Context,
+	game: ^Game_Context,
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
@@ -785,7 +784,7 @@ chunk_draw_walls :: proc(
 }
 
 
-draw_walls :: proc(game: ^game.Game_Context, floor: i32) {
+draw_walls :: proc(game: ^Game_Context, floor: i32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)

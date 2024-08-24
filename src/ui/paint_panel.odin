@@ -4,7 +4,7 @@ import "core:math/linalg/glsl"
 
 import "../tools"
 import "../tools/paint_tool"
-import "../wall"
+import "../game"
 import "../window"
 
 init_paint_panel :: proc() -> (ok: bool = true) {
@@ -20,7 +20,7 @@ paint_panel_body :: proc(
 	size: glsl.vec2,
 ) {
 	i: int = 0
-	for tex in wall.Wall_Texture {
+	for tex in game.Wall_Texture {
 		if tex == .Wall_Top || tex == .Frame || tex == .Drywall {
 			continue
 		}
@@ -37,7 +37,7 @@ paint_panel_body :: proc(
                    pos.y + FLOOR_PANEL_PADDING,
 			   },
 			   {PAINT_PANEL_TILE_WIDTH, PAINT_PANEL_TILE_HEIGHT},
-			   wall.wall_texture_array,
+			   game.wall_texture_array,
 			   int(tex),
 			   left_border_width = border_width,
 			   right_border_width = border_width,

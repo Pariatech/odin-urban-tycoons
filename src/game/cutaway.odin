@@ -1,4 +1,4 @@
-package wall
+package game
 
 import "core:log"
 import "core:math/linalg/glsl"

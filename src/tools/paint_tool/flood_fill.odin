@@ -3,9 +3,9 @@ package paint_tool
 import "core:log"
 import "core:math/linalg/glsl"
 
-import "../../wall"
+import "../../game"
 
-NEXT_LEFT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
+NEXT_LEFT_WALL_MAP :: [game.Wall_Axis][game.Wall_Side][]Next_Wall {
 	.E_W =  {
 		.Inside =  {
 			{type = .N_S, position = {1, 0, 0}, side = .Outside},
@@ -80,7 +80,7 @@ NEXT_LEFT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
 	},
 }
 
-NEXT_RIGHT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
+NEXT_RIGHT_WALL_MAP :: [game.Wall_Axis][game.Wall_Side][]Next_Wall {
 	.E_W =  {
 		.Inside =  {
 			{type = .N_S, position = {-1, 0, 0}, side = .Inside},
@@ -157,17 +157,17 @@ NEXT_RIGHT_WALL_MAP :: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall {
 
 Next_Wall :: struct {
 	position: glsl.ivec3,
-	side:     wall.Wall_Side,
-	type:     wall.Wall_Axis,
-	wall:     wall.Wall,
+	side:     game.Wall_Side,
+	type:     game.Wall_Axis,
+	wall:     game.Wall,
 }
 
 flood_fill :: proc(
 	position: glsl.ivec3,
-	type: wall.Wall_Axis,
-	side: wall.Wall_Side,
-	previous_texture: wall.Wall_Texture,
-	texture: wall.Wall_Texture,
+	type: game.Wall_Axis,
+	side: game.Wall_Side,
+	previous_texture: game.Wall_Texture,
+	texture: game.Wall_Texture,
 ) {
 	if previous_texture == texture {
 		return
@@ -191,13 +191,13 @@ flood_fill :: proc(
 	}
 }
 
-save_old_wall :: proc(axis: wall.Wall_Axis, pos: glsl.ivec3, w: wall.Wall) {
+save_old_wall :: proc(axis: game.Wall_Axis, pos: glsl.ivec3, w: game.Wall) {
 	if !(pos in previous_walls[axis]) {
 		previous_walls[axis][pos] = w.textures
 	}
 }
 
-paint_next_wall :: proc(next_wall: Next_Wall, texture: wall.Wall_Texture) {
+paint_next_wall :: proc(next_wall: Next_Wall, texture: game.Wall_Texture) {
 	w := next_wall.wall
 	save_old_wall(next_wall.type, next_wall.position, w)
 	update_current_command(
@@ -213,37 +213,37 @@ paint_next_wall :: proc(next_wall: Next_Wall, texture: wall.Wall_Texture) {
 
 set_wall_by_type :: proc(
 	position: glsl.ivec3,
-	type: wall.Wall_Axis,
-	w: wall.Wall,
+	type: game.Wall_Axis,
+	w: game.Wall,
 ) {
 	switch type {
 	case .E_W:
-		wall.set_east_west_wall(position, w)
+		game.set_east_west_wall(position, w)
 	case .N_S:
-		wall.set_north_south_wall(position, w)
+		game.set_north_south_wall(position, w)
 	case .NW_SE:
-		wall.set_north_west_south_east_wall(position, w)
+		game.set_north_west_south_east_wall(position, w)
 	case .SW_NE:
-		wall.set_south_west_north_east_wall(position, w)
+		game.set_south_west_north_east_wall(position, w)
 	}
 }
 
 get_wall_by_type :: proc(
 	position: glsl.ivec3,
-	type: wall.Wall_Axis,
+	type: game.Wall_Axis,
 ) -> (
-	wall.Wall,
+	game.Wall,
 	bool,
 ) {
 	switch type {
 	case .E_W:
-		return wall.get_east_west_wall(position)
+		return game.get_east_west_wall(position)
 	case .N_S:
-		return wall.get_north_south_wall(position)
+		return game.get_north_south_wall(position)
 	case .NW_SE:
-		return wall.get_north_west_south_east_wall(position)
+		return game.get_north_west_south_east_wall(position)
 	case .SW_NE:
-		return wall.get_south_west_north_east_wall(position)
+		return game.get_south_west_north_east_wall(position)
 	}
 
 	return {}, false
@@ -251,7 +251,7 @@ get_wall_by_type :: proc(
 
 get_next_left_wall :: proc(
 	current: Next_Wall,
-	texture: wall.Wall_Texture,
+	texture: game.Wall_Texture,
 ) -> (
 	Next_Wall,
 	bool,
@@ -261,7 +261,7 @@ get_next_left_wall :: proc(
 
 get_next_right_wall :: proc(
 	current: Next_Wall,
-	texture: wall.Wall_Texture,
+	texture: game.Wall_Texture,
 ) -> (
 	Next_Wall,
 	bool,
@@ -271,8 +271,8 @@ get_next_right_wall :: proc(
 
 get_next_wall :: proc(
 	current: Next_Wall,
-	texture: wall.Wall_Texture,
-	next_wall_map: [wall.Wall_Axis][wall.Wall_Side][]Next_Wall,
+	texture: game.Wall_Texture,
+	next_wall_map: [game.Wall_Axis][game.Wall_Side][]Next_Wall,
 ) -> (
 	Next_Wall,
 	bool,

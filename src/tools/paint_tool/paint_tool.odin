@@ -10,11 +10,11 @@ import "../../floor"
 import "../../keyboard"
 import "../../mouse"
 import "../../tile"
-import "../../wall"
+import "../../game"
 
 WALL_SELECTION_DISTANCE :: 4
 
-WALL_SIDE_MAP :: [wall.Wall_Axis][camera.Rotation]wall.Wall_Side {
+WALL_SIDE_MAP :: [game.Wall_Axis][camera.Rotation]game.Wall_Side {
 	.N_S =  {
 		.South_West = .Outside,
 		.South_East = .Inside,
@@ -46,30 +46,30 @@ side: tile.Tile_Triangle_Side
 
 found_wall: bool
 found_wall_intersect: Wall_Intersect
-found_wall_texture: wall.Wall_Texture
+found_wall_texture: game.Wall_Texture
 
-texture: wall.Wall_Texture = .White
+texture: game.Wall_Texture = .White
 dirty: bool
 
-previous_walls: [wall.Wall_Axis]map[glsl.ivec3][wall.Wall_Side]wall.Wall_Texture
+previous_walls: [game.Wall_Axis]map[glsl.ivec3][game.Wall_Side]game.Wall_Texture
 
 add_command: proc(_: Command)
 current_command: Command
 
 Wall_Key :: struct {
-	axis: wall.Wall_Axis,
+	axis: game.Wall_Axis,
 	pos:  glsl.ivec3,
-	side: wall.Wall_Side,
+	side: game.Wall_Side,
 }
 
 Command :: struct {
-	before: map[Wall_Key]wall.Wall_Texture,
-	after:  map[Wall_Key]wall.Wall_Texture,
+	before: map[Wall_Key]game.Wall_Texture,
+	after:  map[Wall_Key]game.Wall_Texture,
 }
 
 Wall_Intersect :: struct {
 	pos:  glsl.ivec3,
-	axis: wall.Wall_Axis,
+	axis: game.Wall_Axis,
 }
 
 init :: proc() {
@@ -131,9 +131,9 @@ update :: proc() {
 			texture,
 		)
 
-		wall.update_cutaways(true)
+		game.update_cutaways(true)
 		if found_wall {
-			wall.set_wall_up(
+			game.set_wall_up(
 				found_wall_intersect.pos,
 				found_wall_intersect.axis,
 			)
@@ -143,18 +143,18 @@ update :: proc() {
 			clear(&axis_walls)
 		}
 		found_wall_texture = texture
-		wall.update_cutaways(true)
+		game.update_cutaways(true)
 	}
 
 	dirty = false
 }
 
-set_texture :: proc(tex: wall.Wall_Texture) {
+set_texture :: proc(tex: game.Wall_Texture) {
 	texture = tex
 	dirty = true
 }
 
-apply_flood_fill :: proc(texture: wall.Wall_Texture) {
+apply_flood_fill :: proc(texture: game.Wall_Texture) {
 	side_map := WALL_SIDE_MAP
 	wall_side := side_map[found_wall_intersect.axis][camera.rotation]
 
@@ -171,33 +171,33 @@ clear_previous_walls :: proc() {
 	side_map := WALL_SIDE_MAP
 	for &axis_walls, axis in previous_walls {
 		for pos, textures in axis_walls {
-			if w, ok := wall.get_wall(pos, axis); ok {
+			if w, ok := game.get_wall(pos, axis); ok {
 				w.textures = textures
-				wall.set_wall(pos, axis, w)
+				game.set_wall(pos, axis, w)
 			}
 		}
 		clear(&axis_walls)
 	}
 }
 
-get_found_wall_texture :: proc() -> wall.Wall_Texture {
+get_found_wall_texture :: proc() -> game.Wall_Texture {
 	side_map := WALL_SIDE_MAP
 	using found_wall_intersect
 	switch axis {
 	case .E_W:
-		if w, ok := wall.get_east_west_wall(pos); ok {
+		if w, ok := game.get_east_west_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .N_S:
-		if w, ok := wall.get_north_south_wall(pos); ok {
+		if w, ok := game.get_north_south_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .NW_SE:
-		if w, ok := wall.get_north_west_south_east_wall(pos); ok {
+		if w, ok := game.get_north_west_south_east_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	case .SW_NE:
-		if w, ok := wall.get_south_west_north_east_wall(pos); ok {
+		if w, ok := game.get_south_west_north_east_wall(pos); ok {
 			return w.textures[side_map[axis][camera.rotation]]
 		}
 	}
@@ -206,10 +206,10 @@ get_found_wall_texture :: proc() -> wall.Wall_Texture {
 
 update_current_command :: proc(
 	position: glsl.ivec3,
-	axis: wall.Wall_Axis,
-	side: wall.Wall_Side,
-	texture: wall.Wall_Texture,
-	w: wall.Wall,
+	axis: game.Wall_Axis,
+	side: game.Wall_Side,
+	texture: game.Wall_Texture,
+	w: game.Wall,
 ) {
 	key := Wall_Key {
 		axis = axis,
@@ -225,42 +225,42 @@ update_current_command :: proc(
 
 paint_wall :: proc(
 	position: glsl.ivec3,
-	axis: wall.Wall_Axis,
-	texture: wall.Wall_Texture,
+	axis: game.Wall_Axis,
+	texture: game.Wall_Texture,
 ) {
 	side_map := WALL_SIDE_MAP
 	switch axis {
 	case .E_W:
-		if w, ok := wall.get_east_west_wall(position); ok {
+		if w, ok := game.get_east_west_wall(position); ok {
 			save_old_wall(axis, position, w)
 			side := side_map[axis][camera.rotation]
 			update_current_command(position, axis, side, texture, w)
 			w.textures[side] = texture
-			wall.set_east_west_wall(position, w)
+			game.set_east_west_wall(position, w)
 		}
 	case .N_S:
-		if w, ok := wall.get_north_south_wall(position); ok {
+		if w, ok := game.get_north_south_wall(position); ok {
 			save_old_wall(axis, position, w)
 			side := side_map[axis][camera.rotation]
 			update_current_command(position, axis, side, texture, w)
 			w.textures[side] = texture
-			wall.set_north_south_wall(position, w)
+			game.set_north_south_wall(position, w)
 		}
 	case .NW_SE:
-		if w, ok := wall.get_north_west_south_east_wall(position); ok {
+		if w, ok := game.get_north_west_south_east_wall(position); ok {
 			save_old_wall(axis, position, w)
 			side := side_map[axis][camera.rotation]
 			update_current_command(position, axis, side, texture, w)
 			w.textures[side] = texture
-			wall.set_north_west_south_east_wall(position, w)
+			game.set_north_west_south_east_wall(position, w)
 		}
 	case .SW_NE:
-		if w, ok := wall.get_south_west_north_east_wall(position); ok {
+		if w, ok := game.get_south_west_north_east_wall(position); ok {
 			save_old_wall(axis, position, w)
 			side := side_map[axis][camera.rotation]
 			update_current_command(position, axis, side, texture, w)
 			w.textures[side] = texture
-			wall.set_south_west_north_east_wall(position, w)
+			game.set_south_west_north_east_wall(position, w)
 		}
 	}
 }
@@ -313,7 +313,7 @@ find_south_west_wall_intersect :: proc(
 	bool,
 ) {
 	wall_selection_distance := i32(WALL_SELECTION_DISTANCE)
-	if wall.cutaway_state == .Down {
+	if game.cutaway_state == .Down {
 		wall_selection_distance = 1
 	}
 	switch side {
@@ -325,7 +325,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - i,
 						   0,
 						   wall_selection_distance - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -334,7 +334,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - i,
-					   }; wall.has_north_south_wall(pos) {
+					   }; game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos :=
@@ -343,7 +343,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -352,7 +352,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_east_west_wall(pos) {
+					   }; game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 		}
@@ -364,7 +364,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - i,
-					   }; wall.has_north_south_wall(pos) {
+					   }; game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos :=
@@ -373,7 +373,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -382,7 +382,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_east_west_wall(pos) {
+					   }; game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos :=
@@ -391,7 +391,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
@@ -403,7 +403,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_east_west_wall(pos) {
+					   }; game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos :=
@@ -412,7 +412,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -421,7 +421,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_south_wall(pos) {
+					   }; game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos :=
@@ -430,14 +430,14 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< wall_selection_distance {
 			if pos := position - {wall_selection_distance - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -446,7 +446,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_east_west_wall(pos) {
+					   }; game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos :=
@@ -455,7 +455,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_west_south_east_wall(pos) {
+					   }; game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos :=
@@ -464,7 +464,7 @@ find_south_west_wall_intersect :: proc(
 						   wall_selection_distance - 1 - i,
 						   0,
 						   wall_selection_distance - 1 - i,
-					   }; wall.has_north_south_wall(pos) {
+					   }; game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 		}
@@ -484,76 +484,76 @@ find_south_east_wall_intersect :: proc(
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position - {-3 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position - {-4 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position - {-4 + i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 		}
@@ -573,76 +573,76 @@ find_north_east_wall_intersect :: proc(
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position + {4 - i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 			if pos := position + {3 - i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {3 - i, 0, 3 - i};
-			   wall.has_north_west_south_east_wall(pos) {
+			   game.has_north_west_south_east_wall(pos) {
 				return {pos, .NW_SE}, true
 			}
 		}
@@ -662,76 +662,76 @@ find_north_west_wall_intersect :: proc(
 	case .South:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {-4 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 		}
 	case .West:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-4 + i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {-4 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 		}
 	case .North:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-4 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 		}
 	case .East:
 		for i in i32(0) ..< 4 {
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_north_south_wall(pos) {
+			   game.has_north_south_wall(pos) {
 				return {pos, .N_S}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 			if pos := position + {-3 + i, 0, 4 - i};
-			   wall.has_east_west_wall(pos) {
+			   game.has_east_west_wall(pos) {
 				return {pos, .E_W}, true
 			}
 			if pos := position + {-3 + i, 0, 3 - i};
-			   wall.has_south_west_north_east_wall(pos) {
+			   game.has_south_west_north_east_wall(pos) {
 				return {pos, .SW_NE}, true
 			}
 		}
@@ -742,18 +742,18 @@ find_north_west_wall_intersect :: proc(
 
 undo :: proc(command: Command) {
 	for k, v in command.before {
-		if w, ok := wall.get_wall(k.pos, k.axis); ok {
+		if w, ok := game.get_wall(k.pos, k.axis); ok {
 			w.textures[k.side] = v
-			wall.set_wall(k.pos, k.axis, w)
+			game.set_wall(k.pos, k.axis, w)
 		}
 	}
 }
 
 redo :: proc(command: Command) {
 	for k, v in command.after {
-		if w, ok := wall.get_wall(k.pos, k.axis); ok {
+		if w, ok := game.get_wall(k.pos, k.axis); ok {
 			w.textures[k.side] = v
-			wall.set_wall(k.pos, k.axis, w)
+			game.set_wall(k.pos, k.axis, w)
 		}
 	}
 }
