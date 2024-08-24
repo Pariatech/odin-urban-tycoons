@@ -1,6 +1,6 @@
 package terrain
 
-import "core:fmt"
+import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
 import "core:math/noise"
@@ -187,6 +187,7 @@ is_tile_flat :: proc(xz: glsl.ivec2) -> bool {
 
 set_terrain_height :: proc(x, z: int, height: f32) {
 	if terrain_heights[x][z] == height {return}
+    log.info(x, z, height)
 	terrain_heights[x][z] = height
 }
 

@@ -1,6 +1,6 @@
 package tile
 
-import "core:fmt"
+import "core:log"
 import "core:math/linalg/glsl"
 import "core:math"
 import gl "vendor:OpenGL"
@@ -366,8 +366,8 @@ get_terrain_tile_triangle_heights :: proc(
 	heights = {0, 0, 0}
     left_x := math.clamp(x, 0, constants.WORLD_WIDTH)
     right_x := math.clamp(x + w, 0, constants.WORLD_WIDTH)
-    top_z := math.clamp(z, 0, constants.WORLD_HEIGHT)
-    bottom_z := math.clamp(z + w, 0, constants.WORLD_HEIGHT)
+    top_z := math.clamp(z, 0, constants.WORLD_DEPTH)
+    bottom_z := math.clamp(z + w, 0, constants.WORLD_DEPTH)
 
 	tile_heights := [4]f32 {
 		terrain.terrain_heights[left_x][top_z],
@@ -375,6 +375,8 @@ get_terrain_tile_triangle_heights :: proc(
 		terrain.terrain_heights[right_x][bottom_z],
 		terrain.terrain_heights[left_x][bottom_z],
 	}
+
+    // log.info(tile_heights)
 
 	heights[2] = 0
 	lowest := min(
