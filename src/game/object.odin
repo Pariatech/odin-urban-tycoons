@@ -569,28 +569,28 @@ can_add_object_on_floor :: proc(
 				return false
 			}
 
-			// if x != 0 &&
-			//    wall.has_north_south_wall(
-			// 	   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
-			//    ) {
-			// 	return false
-			// }
-			//
-			// if z != 0 &&
-			//    wall.has_east_west_wall(
-			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
-			//    ) {
-			// 	return false
-			// }
-			//
-			// if wall.has_north_west_south_east_wall(
-			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-			//    ) ||
-			//    wall.has_north_west_south_east_wall(
-			// 	   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-			//    ) {
-			// 	return false
-			// }
+			if x != 0 &&
+			   has_north_south_wall(
+				   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
+			   ) {
+				return false
+			}
+
+			if z != 0 &&
+			   has_east_west_wall(
+				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
+			   ) {
+				return false
+			}
+
+			if has_north_west_south_east_wall(
+				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+			   ) ||
+			   has_north_west_south_east_wall(
+				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+			   ) {
+				return false
+			}
 
 			if !terrain.is_tile_flat(tile_pos + {x, z}) {
 				return false
