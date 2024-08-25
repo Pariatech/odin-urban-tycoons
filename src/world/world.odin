@@ -470,7 +470,7 @@ add_house_floor_walls :: proc(
 	)
 }
 
-draw :: proc(g: ^game.Game_Context) {
+draw :: proc() {
 	renderer.uniform_object.view = camera.view
 	renderer.uniform_object.proj = camera.proj
 
@@ -495,7 +495,7 @@ draw :: proc(g: ^game.Game_Context) {
 	for flr in 0 ..= floor.floor {
 		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(flr)
-		game.draw_walls(g, flr)
+		game.draw_walls(flr)
 		billboard.draw_billboards(flr)
 		// object.draw(flr)
 	}

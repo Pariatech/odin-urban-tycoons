@@ -17,31 +17,29 @@ Texture :: struct {
 	uploaded: bool,
 }
 
-delete_textures :: proc(ctx: ^Game_Context) {
-    using ctx.textures
+delete_textures :: proc() {
+	ctx := get_textures_context()
 
-    for k, &v in textures {
-        gl.DeleteTextures(1, &v.handle)
-    }
+	for k, &v in ctx.textures {
+		gl.DeleteTextures(1, &v.handle)
+	}
 
-    delete(textures)
+	delete(ctx.textures)
 }
 
-bind_texture :: proc(
-	using ctx: ^Textures_Context,
-	path: string,
-) -> bool {
-	tex, ok := &textures[path]
+bind_texture :: proc(path: string) -> bool {
+	ctx := get_textures_context()
+	tex, ok := &ctx.textures[path]
 	if !ok {
-		textures[path] = {}
-		tex = &textures[path]
+		ctx.textures[path] = {}
+		tex = &ctx.textures[path]
 	}
 
 	if !tex.uploaded {
 		tex.uploaded = true
 
-        gl.GenTextures(1, &tex.handle)
-	    gl.BindTexture(gl.TEXTURE_2D, tex.handle)
+		gl.GenTextures(1, &tex.handle)
+		gl.BindTexture(gl.TEXTURE_2D, tex.handle)
 
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -66,7 +64,7 @@ bind_texture :: proc(
 		stbi.set_flip_vertically_on_load_thread(false)
 
 		full_path := strings.join({TEXTURES_PATH, path}, "/")
-        defer delete(full_path)
+		defer delete(full_path)
 		w, h: i32
 		pixels := stbi.load(
 			strings.unsafe_string_to_cstring(full_path),
@@ -96,8 +94,8 @@ bind_texture :: proc(
 
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-	    gl.BindTexture(gl.TEXTURE_2D, tex.handle)
-    }
+		gl.BindTexture(gl.TEXTURE_2D, tex.handle)
+	}
 
 	return true
 }

@@ -95,7 +95,6 @@ DIAGONAL_WALL_TRANSFORM_MAP :: [camera.Rotation]glsl.mat4 {
 
 
 draw_diagonal_wall :: proc(
-    using game: ^Game_Context,
 	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,
@@ -120,6 +119,7 @@ draw_diagonal_wall :: proc(
 
 	light := glsl.vec3{0.95, 0.95, 0.95}
 
+    models := get_models_context()
 	for texture, side in wall.textures {
 		model_name_map := DIAGONAL_WALL_MASK_MODEL_NAME_MAP
 		model_name := model_name_map[wall.type][side]

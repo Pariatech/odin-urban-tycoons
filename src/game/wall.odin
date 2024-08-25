@@ -337,13 +337,13 @@ draw_wall_mesh :: proc(
 }
 
 draw_wall :: proc(
-	using game: ^Game_Context,
 	pos: glsl.ivec3,
 	wall: Wall,
 	axis: Wall_Axis,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
+    models := get_models_context()
 	position := glsl.vec3 {
 		f32(pos.x),
 		f32(pos.y) * constants.WALL_HEIGHT +
@@ -659,7 +659,6 @@ chunk_remove_south_west_north_east_wall :: proc(
 }
 
 chunk_draw_walls :: proc(
-	game: ^Game_Context,
 	chunk: ^Chunk,
 	pos: glsl.ivec3,
 ) {
@@ -718,7 +717,6 @@ chunk_draw_walls :: proc(
 
 		for wall_pos, w in chunk.east_west {
 			draw_wall(
-				game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.E_W,
@@ -729,7 +727,6 @@ chunk_draw_walls :: proc(
 
 		for wall_pos, w in chunk.north_south {
 			draw_wall(
-				game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.N_S,
@@ -740,7 +737,6 @@ chunk_draw_walls :: proc(
 
 		for wall_pos, w in chunk.south_west_north_east {
 			draw_diagonal_wall(
-				game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.SW_NE,
@@ -751,7 +747,6 @@ chunk_draw_walls :: proc(
 
 		for wall_pos, w in chunk.north_west_south_east {
 			draw_diagonal_wall(
-				game,
 				{wall_pos.x, pos.y, wall_pos.y},
 				w,
 				.NW_SE,
@@ -784,7 +779,7 @@ chunk_draw_walls :: proc(
 }
 
 
-draw_walls :: proc(game: ^Game_Context, floor: i32) {
+draw_walls :: proc(floor: i32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_texture_array)
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -793,7 +788,7 @@ draw_walls :: proc(game: ^Game_Context, floor: i32) {
 	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 			chunk := &chunks[floor][x][z]
-			chunk_draw_walls(game, chunk, {x, i32(floor), z})
+			chunk_draw_walls(chunk, {x, i32(floor), z})
 		}
 	}
 }

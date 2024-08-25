@@ -45,7 +45,9 @@ framebuffer_size_callback :: proc "c" (
 
 start :: proc() -> (ok: bool = false) {
 	game_context: game.Game_Context
-	defer game.free_models(&game_context.models)
+    context.user_ptr = &game_context
+
+	defer game.free_models()
 
 	when ODIN_DEBUG {
 		context.logger = log.create_console_logger()
@@ -94,7 +96,7 @@ start :: proc() -> (ok: bool = false) {
 
 	world.init(&game_context)
 
-	game.init_objects(&game_context) or_return
+	game.init_objects() or_return
 
 	ui.init(&ui_ctx) or_return
 	defer ui.deinit(&ui_ctx)
@@ -107,10 +109,10 @@ start :: proc() -> (ok: bool = false) {
 
 	game.init_cutaways()
 
-    defer game.delete_textures(&game_context)
-    defer game.delete_objects(&game_context)
+    defer game.delete_textures()
+    defer game.delete_objects()
 
-	game.load_models(&game_context.models) or_return
+	game.load_models() or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -156,8 +158,8 @@ start :: proc() -> (ok: bool = false) {
 		game.update_cutaways()
 		tools.update(delta_time)
 
-        game.draw_objects(&game_context) or_return
-		world.draw(&game_context)
+        game.draw_objects() or_return
+		world.draw()
 
 		ui.draw(&ui_ctx)
 

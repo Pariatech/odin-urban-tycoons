@@ -30,7 +30,8 @@ Models_Context :: struct {
 	models: map[string]Model,
 }
 
-load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
+load_models :: proc() -> (ok: bool) {
+	ctx := get_models_context()
 	options: cgltf.options
 	data, result := cgltf.parse_file(options, MODELS_PATH)
 	if result != .success {
@@ -76,12 +77,12 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 						3,
 					)
 					vertices[i].pos.x *= -1
-                    min.x = glsl.min(min.x, vertices[i].pos.x)
-                    min.y = glsl.min(min.y, vertices[i].pos.y)
-                    min.z = glsl.min(min.z, vertices[i].pos.z)
-                    max.x = glsl.max(max.x, vertices[i].pos.x)
-                    max.y = glsl.max(max.y, vertices[i].pos.y)
-                    max.z = glsl.max(max.z, vertices[i].pos.z)
+					min.x = glsl.min(min.x, vertices[i].pos.x)
+					min.y = glsl.min(min.y, vertices[i].pos.y)
+					min.z = glsl.min(min.z, vertices[i].pos.z)
+					max.x = glsl.max(max.x, vertices[i].pos.x)
+					max.y = glsl.max(max.y, vertices[i].pos.y)
+					max.z = glsl.max(max.z, vertices[i].pos.z)
 				}
 			}
 			if attribute.type == .texcoord {
@@ -101,28 +102,30 @@ load_models :: proc(using ctx: ^Models_Context) -> (ok: bool) {
 		}
 
 		name := strings.clone_from_cstring(node.name)
-		models[name] = {
+		ctx.models[name] = {
 			name     = name,
 			vertices = vertices,
 			indices  = indices,
-            size = max - min,
+			size     = max - min,
 		}
 	}
 
 	return true
 }
 
-free_models :: proc(using ctx: ^Models_Context) {
-	for k, v in models {
+free_models :: proc() {
+	ctx := get_models_context()
+	for k, v in ctx.models {
 		delete(k)
 		delete(v.indices)
 		delete(v.vertices)
 	}
-	delete(models)
+	delete(ctx.models)
 }
 
-bind_model :: proc(using ctx: ^Models_Context, model_name: string) -> bool {
-	model, ok := &models[model_name]
+bind_model :: proc(model_name: string) -> bool {
+	ctx := get_models_context()
+	model, ok := &ctx.models[model_name]
 	if !ok {
 		log.error("Model ", model_name, "isn't loaded!")
 		return false
@@ -190,8 +193,9 @@ unbind_model :: proc() {
 	// gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 }
 
-draw_model :: proc(using ctx: ^Models_Context, model_name: string) {
-	model, ok := &models[model_name]
+draw_model :: proc(model_name: string) {
+	ctx := get_models_context()
+	model, ok := &ctx.models[model_name]
 	if !ok {
 		log.error("Did not find", model_name, "to draw!")
 	}

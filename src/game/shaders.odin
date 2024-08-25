@@ -15,7 +15,8 @@ Shaders_Context :: struct {
 	active_shader_handle: u32,
 }
 
-init_shader :: proc(ctx: ^Shaders_Context, shader: ^Shader) -> bool {
+init_shader :: proc(shader: ^Shader) -> bool {
+    ctx := get_shaders_context()
 	shader.handle = load_shader_program(
 		shader.vertex,
 		shader.fragment,
@@ -288,7 +289,8 @@ set_shader_unifrom_block_binding :: proc(
 }
 
 
-bind_shader :: proc(ctx: ^Shaders_Context, shader: ^Shader) -> bool {
+bind_shader :: proc(shader: ^Shader) -> bool {
+    ctx := get_shaders_context()
 	ctx.active_shader_handle = shader.handle
 
 	gl.UseProgram(shader.handle)

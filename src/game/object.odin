@@ -146,8 +146,8 @@ Objects_Context :: struct {
 }
 
 
-init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
-	using ctx.objects
+init_objects :: proc() -> (ok: bool = true) {
+    ctx := get_game_context()
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -161,7 +161,7 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 	// 	OBJECT_FRAGMENT_SHADER_PATH,
 	// ) or_return
 	ctx.objects.shader = OBJECT_SHADER
-	init_shader(&ctx.shaders, &ctx.objects.shader) or_return
+	init_shader(&ctx.objects.shader) or_return
 
 	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
 	set_shader_uniform(
@@ -170,7 +170,7 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 		i32(0),
 	)
 
-	gl.GenBuffers(1, &ubo)
+	gl.GenBuffers(1, &ctx.objects.ubo)
 
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -195,10 +195,10 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 	return true
 }
 
-delete_objects :: proc(using ctx: ^Game_Context) {
-	using objects
+delete_objects :: proc() {
+    ctx := get_game_context()
 
-	for &row in chunks {
+	for &row in ctx.objects.chunks {
 		for &col in row {
 			for &chunk in col {
 				delete(chunk.objects)
@@ -281,9 +281,11 @@ sort_objects :: proc(a, b: Object) -> bool {
 	return false
 }
 
-draw_object :: proc(using ctx: ^Game_Context, using object: ^Object) -> bool {
+draw_object :: proc(object: ^Object) -> bool {
+    ctx := get_game_context()
+
 	translate := glsl.mat4Translate(object.pos)
-	rotation_radian := f32(orientation) * 0.5 * math.PI
+	rotation_radian := f32(object.orientation) * 0.5 * math.PI
 	rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
 	uniform_object := Object_Uniform_Object {
 		mvp = camera.view_proj * translate * rotation,
@@ -297,42 +299,42 @@ draw_object :: proc(using ctx: ^Game_Context, using object: ^Object) -> bool {
 	)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	bind_texture(&textures, texture)
+	bind_texture(object.texture) or_return
 
-	bind_model(&models, model) or_return
-	draw_model(&models, model)
+	bind_model(object.model) or_return
+	draw_model(object.model)
 
 	return true
 }
 
-draw_chunk :: proc(ctx: ^Game_Context, using chunk: ^Object_Chunk) -> bool {
-	if len(objects) == 0 {
+draw_chunk :: proc(chunk: ^Object_Chunk) -> bool {
+	if len(chunk.objects) == 0 {
 		return true
 	}
 
-	for &object in objects {
-		draw_object(ctx, &object) or_return
+	for &object in chunk.objects {
+		draw_object(&object) or_return
 	}
 
 	return true
 }
 
-draw_objects :: proc(using ctx: ^Game_Context) -> bool {
-	using objects
+draw_objects :: proc() -> bool {
+    ctx := get_objects_context()
 
-	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	set_shader_unifrom_block_binding(&shader, "UniformBufferObject", 2)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
+	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ctx.ubo)
 
 	// gl.Disable(gl.MULTISAMPLE)
 
-	bind_shader(&ctx.shaders, &shader)
+	bind_shader(&ctx.shader)
 	// gl.UseProgram(shader_program)
 
 	for floor in 0 ..= floor.floor {
 		it := camera.make_visible_chunk_iterator()
 		for pos in it->next() {
-			draw_chunk(ctx, &chunks[floor][pos.x][pos.y]) or_return
+			draw_chunk(&ctx.chunks[floor][pos.x][pos.y]) or_return
 		}
 	}
 
@@ -632,11 +634,12 @@ has_object_at :: proc(
 @(test)
 can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	game: Game_Context
+    context.user_ptr = &game
 
-	load_models(&game.models)
-	defer free_models(&game.models)
+	load_models()
+	defer free_models()
 
-	defer delete_objects(&game)
+	defer delete_objects()
 
 	pos := glsl.vec3{1, 0, 1}
 	add_object(&game, pos, .Wood_Counter, .South, .Floor)
