@@ -133,13 +133,16 @@ Object_Uniform_Object :: struct {
 	mvp: glsl.mat4,
 }
 
-OBJECT_VERTEX_SHADER_PATH :: "resources/shaders/object.vert"
-OBJECT_FRAGMENT_SHADER_PATH :: "resources/shaders/object.frag"
+
+OBJECT_SHADER :: Shader {
+	vertex   = "resources/shaders/object.vert",
+	fragment = "resources/shaders/object.frag",
+}
 
 Objects_Context :: struct {
-	chunks:         Object_Chunks,
-	shader_program: u32,
-	ubo:            u32,
+	chunks: Object_Chunks,
+	ubo:    u32,
+	shader: Shader,
 }
 
 
@@ -152,14 +155,21 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 	gl.BindVertexArray(0)
 
 
-	renderer.load_shader_program(
-		&shader_program,
-		OBJECT_VERTEX_SHADER_PATH,
-		OBJECT_FRAGMENT_SHADER_PATH,
-	) or_return
+	// renderer.load_shader_program(
+	// 	&shader_program,
+	// 	OBJECT_VERTEX_SHADER_PATH,
+	// 	OBJECT_FRAGMENT_SHADER_PATH,
+	// ) or_return
+	ctx.objects.shader = OBJECT_SHADER
+	init_shader(&ctx.shaders, &ctx.objects.shader) or_return
 
-
-	gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
+	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
+	set_shader_uniform(
+		&ctx.shaders,
+		&ctx.objects.shader,
+		"texture_sampler",
+		i32(0),
+	)
 
 	gl.GenBuffers(1, &ubo)
 
@@ -312,13 +322,13 @@ draw_objects :: proc(using ctx: ^Game_Context) -> bool {
 	using objects
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ubo)
-	ubo_index := gl.GetUniformBlockIndex(shader_program, "UniformBufferObject")
-	gl.UniformBlockBinding(shader_program, ubo_index, 2)
+	set_shader_unifrom_block_binding(&shader, "UniformBufferObject", 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ubo)
 
 	// gl.Disable(gl.MULTISAMPLE)
 
-	gl.UseProgram(shader_program)
+	bind_shader(&ctx.shaders, &shader)
+	// gl.UseProgram(shader_program)
 
 	for floor in 0 ..= floor.floor {
 		it := camera.make_visible_chunk_iterator()
@@ -624,10 +634,10 @@ has_object_at :: proc(
 can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	game: Game_Context
 
-    load_models(&game.models)
-    defer free_models(&game.models)
+	load_models(&game.models)
+	defer free_models(&game.models)
 
-    defer delete_objects(&game)
+	defer delete_objects(&game)
 
 	pos := glsl.vec3{1, 0, 1}
 	add_object(&game, pos, .Wood_Counter, .South, .Floor)
@@ -641,7 +651,7 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	)
 	testing.expect_value(t, r, false)
 
-    pos = {2, 0, 1}
+	pos = {2, 0, 1}
 	r = can_add_object_on_floor(
 		&game,
 		pos,
@@ -652,7 +662,7 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	)
 	testing.expect_value(t, r, true)
 
-    pos = {1, 0, 1}
+	pos = {1, 0, 1}
 	r = can_add_object_on_floor(
 		&game,
 		pos,

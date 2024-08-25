@@ -4,5 +4,6 @@ Game_Context :: struct {
     textures: Textures_Context,
     models: Models_Context,
     objects: Objects_Context,
+    shaders: Shaders_Context,
 }
 
