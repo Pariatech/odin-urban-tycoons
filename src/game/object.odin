@@ -165,7 +165,6 @@ init_objects :: proc(using ctx: ^Game_Context) -> (ok: bool = true) {
 
 	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
 	set_shader_uniform(
-		&ctx.shaders,
 		&ctx.objects.shader,
 		"texture_sampler",
 		i32(0),

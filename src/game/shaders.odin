@@ -20,11 +20,11 @@ init_shader :: proc(ctx: ^Shaders_Context, shader: ^Shader) -> bool {
 		shader.vertex,
 		shader.fragment,
 	) or_return
+    gl.UseProgram(shader.handle)
 	return true
 }
 
 set_shader_uniform_f32 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: f32,
@@ -33,7 +33,6 @@ set_shader_uniform_f32 :: proc(
 }
 
 set_shader_uniform_vec2 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.vec2,
@@ -46,7 +45,6 @@ set_shader_uniform_vec2 :: proc(
 }
 
 set_shader_uniform_vec3 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.vec3,
@@ -60,7 +58,6 @@ set_shader_uniform_vec3 :: proc(
 }
 
 set_shader_uniform_vec4 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.vec4,
@@ -75,7 +72,6 @@ set_shader_uniform_vec4 :: proc(
 }
 
 set_shader_uniform_i32 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: i32,
@@ -84,7 +80,6 @@ set_shader_uniform_i32 :: proc(
 }
 
 set_shader_uniform_ivec2 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.ivec2,
@@ -97,7 +92,6 @@ set_shader_uniform_ivec2 :: proc(
 }
 
 set_shader_uniform_ivec3 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.ivec3,
@@ -111,7 +105,6 @@ set_shader_uniform_ivec3 :: proc(
 }
 
 set_shader_uniform_ivec4 :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: glsl.ivec4,
@@ -126,7 +119,6 @@ set_shader_uniform_ivec4 :: proc(
 }
 
 set_shader_uniform_f32_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []f32,
@@ -139,7 +131,6 @@ set_shader_uniform_f32_slice :: proc(
 }
 
 set_shader_uniform_vec2_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.vec2,
@@ -152,7 +143,6 @@ set_shader_uniform_vec2_slice :: proc(
 }
 
 set_shader_uniform_vec3_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.vec3,
@@ -165,7 +155,6 @@ set_shader_uniform_vec3_slice :: proc(
 }
 
 set_shader_uniform_vec4_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.vec4,
@@ -178,7 +167,6 @@ set_shader_uniform_vec4_slice :: proc(
 }
 
 set_shader_uniform_i32_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []i32,
@@ -191,7 +179,6 @@ set_shader_uniform_i32_slice :: proc(
 }
 
 set_shader_uniform_ivec2_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.ivec2,
@@ -204,7 +191,6 @@ set_shader_uniform_ivec2_slice :: proc(
 }
 
 set_shader_uniform_ivec3_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.ivec3,
@@ -217,7 +203,6 @@ set_shader_uniform_ivec3_slice :: proc(
 }
 
 set_shader_uniform_ivec4_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	value: []glsl.ivec4,
@@ -230,7 +215,6 @@ set_shader_uniform_ivec4_slice :: proc(
 }
 
 set_shader_uniform_mat2_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	transpose: bool,
@@ -245,7 +229,6 @@ set_shader_uniform_mat2_slice :: proc(
 }
 
 set_shader_uniform_mat3_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	transpose: bool,
@@ -260,7 +243,6 @@ set_shader_uniform_mat3_slice :: proc(
 }
 
 set_shader_uniform_mat4_slice :: proc(
-	ctx: ^Shaders_Context,
 	shader: ^Shader,
 	location: cstring,
 	transpose: bool,
