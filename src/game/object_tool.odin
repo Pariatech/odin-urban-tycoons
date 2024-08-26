@@ -17,9 +17,9 @@ init_object_tool :: proc() {
 	ctx := get_object_tool_context()
 	ctx.object.type = .Table
 	ctx.object.light = {1, 1, 1}
-	ctx.object.size = get_object_size(.Plank_Table_6Places)
 	model_map := OBJECT_MODEL_MAP
 	ctx.object.model = model_map[.Plank_Table_6Places]
+	ctx.object.size = get_object_size(ctx.object.model)
 	texture_map := OBJECT_MODEL_TEXTURE_MAP
 	ctx.object.texture = texture_map[.Plank_Table_6Places]
 	ctx.object.placement = .Floor
@@ -39,24 +39,38 @@ update_object_tool :: proc() {
 		floor.floor,
 	)
 
-    draw_object_tool()
+	can_add := can_add_object(
+		ctx.object.pos,
+		ctx.object.model,
+		ctx.object.orientation,
+		ctx.object.placement,
+	)
+
+	if can_add {
+		ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
+		ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+	}
+
+	draw_object_tool()
 }
 
 object_tool_on_intersect :: proc(intersect: glsl.vec3) {
 	ctx := get_object_tool_context()
 	ctx.object.pos = intersect
-	ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
-	ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
 }
 
 draw_object_tool :: proc() -> bool {
 	ctx := get_object_tool_context()
 
-    objects_ctx := get_objects_context()
+	objects_ctx := get_objects_context()
 	bind_shader(&objects_ctx.shader)
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, objects_ctx.ubo)
-	set_shader_unifrom_block_binding(&objects_ctx.shader, "UniformBufferObject", 2)
+	set_shader_unifrom_block_binding(
+		&objects_ctx.shader,
+		"UniformBufferObject",
+		2,
+	)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, objects_ctx.ubo)
 
 	draw_object(&ctx.object) or_return
@@ -65,7 +79,6 @@ draw_object_tool :: proc() -> bool {
 	model_map := OBJECT_MODEL_MAP
 	model_name := model_map[.Plank_Table_6Places]
 	object_model := models.models[model_name]
-    log.info(object_model.size, ctx.object.size)
 	for x in 0 ..< ctx.object.size.x {
 		x := x
 		if ctx.object.orientation == .North ||

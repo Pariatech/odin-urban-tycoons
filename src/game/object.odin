@@ -123,8 +123,9 @@ Object :: struct {
 }
 
 Object_Chunk :: struct {
-	objects: [dynamic]Object,
-	dirty:   bool,
+	objects:       [dynamic]Object,
+	dirty:         bool,
+	placement_map: [c.CHUNK_WIDTH][c.CHUNK_DEPTH][Object_Placement][Object_Orientation]bool,
 }
 
 Object_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Chunk
@@ -362,14 +363,8 @@ add_object :: proc(
 	tile_pos := world_pos_to_tile_pos(pos)
 	chunk_pos := world_pos_to_chunk_pos(pos)
 
-	can_add_object(
-		pos,
-		tile_pos,
-		chunk_pos,
-		model,
-		orientation,
-		placement,
-	) or_return
+	model_map := OBJECT_MODEL_MAP
+	can_add_object(pos, model_map[model], orientation, placement) or_return
 
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
@@ -377,8 +372,9 @@ add_object :: proc(
 
 	type_map := OBJECT_TYPE_MAP
 
-	model_map := OBJECT_MODEL_MAP
 	texture_map := OBJECT_MODEL_TEXTURE_MAP
+
+	update_object_placement_map(pos, model_map[model], placement, orientation)
 
 	append(
 		&chunk.objects,
@@ -395,11 +391,41 @@ add_object :: proc(
 	return true
 }
 
-get_object_size :: proc(model: Object_Model) -> glsl.ivec3 {
+update_object_placement_map :: proc(
+	pos: glsl.vec3,
+	model: string,
+	placement: Object_Placement,
+	orientation: Object_Orientation,
+) {
+	obj_size := get_object_size(model)
+
+	log.info(model, obj_size)
+
+	for x in 0 ..< obj_size.x {
+		x := x
+		if orientation == .North || orientation == .West {
+			x = -x
+		}
+		for z in 0 ..< obj_size.z {
+			z := z
+			if orientation == .South || orientation == .West {
+				z = -z
+			}
+
+			pos := pos + {f32(x), 0, f32(z)}
+			tile_pos := world_pos_to_tile_pos(pos)
+			chunk_pos := world_pos_to_chunk_pos(pos)
+			ctx := get_objects_context()
+			chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+			chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement][orientation] =
+				true
+		}
+	}
+}
+
+get_object_size :: proc(model: string) -> glsl.ivec3 {
 	models := get_models_context()
-	model_map := OBJECT_MODEL_MAP
-	model_name := model_map[model]
-	object_model := models.models[model_name]
+	object_model := models.models[model]
 	return glsl.ivec3(
 		linalg.array_cast(
 			linalg.ceil(object_model.size - {0.01, 0.01, 0.01}),
@@ -410,12 +436,13 @@ get_object_size :: proc(model: Object_Model) -> glsl.ivec3 {
 
 can_add_object :: proc(
 	pos: glsl.vec3,
-	tile_pos: glsl.ivec2,
-	chunk_pos: glsl.ivec3,
-	model: Object_Model,
+	model: string,
 	orientation: Object_Orientation,
 	placement: Object_Placement,
 ) -> bool {
+	tile_pos := world_pos_to_tile_pos(pos)
+	chunk_pos := world_pos_to_chunk_pos(pos)
+
 	if tile_pos.x < 0 ||
 	   tile_pos.x >= c.WORLD_WIDTH ||
 	   tile_pos.y < 0 ||
@@ -425,13 +452,7 @@ can_add_object :: proc(
 
 	switch placement {
 	case .Wall:
-		return can_add_object_on_wall(
-			pos,
-			tile_pos,
-			chunk_pos,
-			model,
-			orientation,
-		)
+		return can_add_object_on_wall(pos, tile_pos, chunk_pos, orientation)
 	case .Floor:
 		return can_add_object_on_floor(
 			pos,
@@ -493,7 +514,6 @@ can_add_object_on_wall :: proc(
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
-	model: Object_Model,
 	orientation: Object_Orientation,
 ) -> bool {
 	// model_size := MODEL_SIZE
@@ -546,7 +566,7 @@ can_add_object_on_floor :: proc(
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
-	model: Object_Model,
+	model: string,
 	orientation: Object_Orientation,
 ) -> bool {
 	obj_size := get_object_size(model)
@@ -607,55 +627,46 @@ has_object_at :: proc(pos: glsl.vec3, placement: Object_Placement) -> bool {
 	tile_pos := world_pos_to_tile_pos(pos)
 	chunk := &objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
-	for k, v in chunk.objects {
-		if world_pos_to_tile_pos(k.pos) == tile_pos &&
-		   k.placement == placement {
+	orientations :=
+		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement]
+
+	for orientation in orientations {
+		if orientation {
 			return true
 		}
 	}
+	// for k, v in chunk.objects {
+	// 	if world_pos_to_tile_pos(k.pos) == tile_pos &&
+	// 	   k.placement == placement {
+	// 		return true
+	// 	}
+	// }
 
 	return false
 }
 
 @(test)
 can_add_object_on_floor_test :: proc(t: ^testing.T) {
-	game: Game_Context
-	context.user_ptr = &game
+	game := new(Game_Context)
+	context.user_ptr = game
 
 	load_models()
 	defer free_models()
 
 	defer delete_objects()
 
+	model_map := OBJECT_MODEL_MAP
 	pos := glsl.vec3{1, 0, 1}
 	add_object(pos, .Wood_Counter, .South, .Floor)
-	r := can_add_object_on_floor(
-		pos,
-		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(pos),
-		.Wood_Counter,
-		.South,
-	)
+	r := can_add_object(pos, model_map[.Wood_Counter], .South, .Floor)
 	testing.expect_value(t, r, false)
 
 	pos = {2, 0, 1}
-	r = can_add_object_on_floor(
-		pos,
-		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(pos),
-		.Wood_Counter,
-		.South,
-	)
+	r = can_add_object(pos, model_map[.Wood_Counter], .South, .Floor)
 	testing.expect_value(t, r, true)
 
 	pos = {1, 0, 1}
-	r = can_add_object_on_floor(
-		pos,
-		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(pos),
-		.Wood_Table_8Places,
-		.South,
-	)
+	r = can_add_object(pos, model_map[.Wood_Table_8Places], .South, .Floor)
 	testing.expect_value(t, r, false)
 	// add_object(&game, {2, 0, 1}, .Wood_Counter, .South, .Floor)
 	// add_object(&game, {3, 0, 1}, .Wood_Counter, .South, .Floor)

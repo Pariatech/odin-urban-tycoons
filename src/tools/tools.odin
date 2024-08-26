@@ -18,7 +18,7 @@ DOOR_TOOL_KEY :: keyboard.Key_Value.Key_5
 WINDOW_TOOL_KEY :: keyboard.Key_Value.Key_6
 FURNITURE_TOOL_KEY :: keyboard.Key_Value.Key_7
 
-active_tool: Tool = .Terrain
+active_tool: Tool = .Furniture
 
 Tool :: enum {
 	Terrain,

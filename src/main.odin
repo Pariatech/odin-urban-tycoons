@@ -44,8 +44,9 @@ framebuffer_size_callback :: proc "c" (
 }
 
 start :: proc() -> (ok: bool = false) {
-	game_context: game.Game_Context
-    context.user_ptr = &game_context
+	game_context := new(game.Game_Context)
+    defer free(game_context)
+	context.user_ptr = game_context
 
 	defer game.free_models()
 
@@ -94,6 +95,8 @@ start :: proc() -> (ok: bool = false) {
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 
+	game.load_models() or_return
+
 	world.init()
 
 	game.init_objects() or_return
@@ -109,12 +112,11 @@ start :: proc() -> (ok: bool = false) {
 
 	game.init_cutaways()
 
-    defer game.delete_textures()
-    defer game.delete_objects()
+	defer game.delete_textures()
+	defer game.delete_objects()
 
-	game.load_models() or_return
 
-    game.init_game() or_return
+	game.init_game() or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -160,9 +162,9 @@ start :: proc() -> (ok: bool = false) {
 		game.update_cutaways()
 		tools.update(delta_time)
 
-        game.draw_objects() or_return
+		game.draw_objects() or_return
 
-        // game.draw_object_tool()
+		// game.draw_object_tool()
 		world.draw()
 
 		ui.draw(&ui_ctx)
