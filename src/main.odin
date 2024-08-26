@@ -94,7 +94,7 @@ start :: proc() -> (ok: bool = false) {
 	billboard.init_draw_contexts() or_return
 	terrain.init_terrain()
 
-	world.init(&game_context)
+	world.init()
 
 	game.init_objects() or_return
 
@@ -113,6 +113,8 @@ start :: proc() -> (ok: bool = false) {
     defer game.delete_objects()
 
 	game.load_models() or_return
+
+    game.init_game() or_return
 
 	should_close := false
 	current_time_ns := time.now()
@@ -159,6 +161,8 @@ start :: proc() -> (ok: bool = false) {
 		tools.update(delta_time)
 
         game.draw_objects() or_return
+
+        // game.draw_object_tool()
 		world.draw()
 
 		ui.draw(&ui_ctx)

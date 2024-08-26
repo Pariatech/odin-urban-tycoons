@@ -5,6 +5,7 @@ Game_Context :: struct {
     models: Models_Context,
     objects: Objects_Context,
     shaders: Shaders_Context,
+    object_tool: Object_Tool_Context,
 }
 
 get_game_context :: proc() -> ^Game_Context {
@@ -25,5 +26,14 @@ get_models_context :: proc() -> ^Models_Context {
 
 get_shaders_context :: proc() -> ^Shaders_Context {
     return &get_game_context().shaders
+}
+
+get_object_tool_context :: proc() -> ^Object_Tool_Context {
+    return &get_game_context().object_tool
+}
+
+init_game :: proc() -> bool {
+    init_object_tool()
+    return true
 }
 

@@ -36,7 +36,7 @@ update :: proc() {
 	)
 }
 
-init :: proc(using ctx: ^game.Game_Context) {
+init :: proc() {
 	tile.chunk_init()
 
 	// furniture.add({1, 0, 1}, .Chair, .South)
@@ -45,8 +45,8 @@ init :: proc(using ctx: ^game.Game_Context) {
 	// furniture.add({1, 0, 2}, .Chair, .West)
 
 	// The house
-	add_house_floor_walls(ctx, 0, .Royal_Blue, .Brick)
-	add_house_floor_walls(ctx, 1, .Dark_Blue, .Brick)
+	add_house_floor_walls(0, .Royal_Blue, .Brick)
+	add_house_floor_walls(1, .Dark_Blue, .Brick)
 	add_house_floor_triangles(2, .Wood_Floor_008)
 
 	for x in 0 ..< constants.WORLD_WIDTH {
@@ -210,7 +210,6 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 }
 
 add_house_floor_walls :: proc(
-	using ctx: ^game.Game_Context,
 	floor: i32,
 	inside_texture: game.Wall_Texture,
 	outside_texture: game.Wall_Texture,
@@ -264,7 +263,6 @@ add_house_floor_walls :: proc(
 	)
 	if floor > 0 {
 		game.add_object(
-			ctx,
 			 {
 				f32(house_x + 1),
 				f32(floor * constants.WALL_HEIGHT),
@@ -276,7 +274,6 @@ add_house_floor_walls :: proc(
 		)
 	} else {
 		game.add_object(
-			ctx,
 			 {
 				f32(house_x + 1),
 				f32(floor * constants.WALL_HEIGHT),
@@ -318,7 +315,6 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			ctx,
 			 {
 				f32(house_x),
 				f32(floor * constants.WALL_HEIGHT),
@@ -361,7 +357,6 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			ctx,
 			 {
 				f32(house_x + i32(i) + 1),
 				f32(floor * constants.WALL_HEIGHT),
@@ -404,7 +399,6 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			ctx,
 			 {
 				f32(house_x + i32(i) + 1),
 				f32(floor * constants.WALL_HEIGHT),

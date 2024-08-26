@@ -147,7 +147,7 @@ Objects_Context :: struct {
 
 
 init_objects :: proc() -> (ok: bool = true) {
-    ctx := get_game_context()
+	ctx := get_game_context()
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -164,11 +164,7 @@ init_objects :: proc() -> (ok: bool = true) {
 	init_shader(&ctx.objects.shader) or_return
 
 	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
-	set_shader_uniform(
-		&ctx.objects.shader,
-		"texture_sampler",
-		i32(0),
-	)
+	set_shader_uniform(&ctx.objects.shader, "texture_sampler", i32(0))
 
 	gl.GenBuffers(1, &ctx.objects.ubo)
 
@@ -176,27 +172,27 @@ init_objects :: proc() -> (ok: bool = true) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.UseProgram(0)
 
-	add_object(ctx, {1, 0, 1}, .Wood_Counter, .South, .Floor)
-	add_object(ctx, {2, 0, 1}, .Wood_Counter, .South, .Floor)
-	add_object(ctx, {3, 0, 1}, .Wood_Counter, .South, .Floor)
+	add_object({1, 0, 1}, .Wood_Counter, .South, .Floor)
+	add_object({2, 0, 1}, .Wood_Counter, .South, .Floor)
+	add_object({3, 0, 1}, .Wood_Counter, .South, .Floor)
 
-	add_object(ctx, {5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
-	add_object(ctx, {8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
+	add_object({5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
+	add_object({8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
 
-	add_object(ctx, {5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
-	add_object(ctx, {8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
+	add_object({5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
+	add_object({8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
 
-	add_object(ctx, {5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
-	add_object(ctx, {8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
+	add_object({5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
+	add_object({8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
 
-	add_object(ctx, {5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
-	add_object(ctx, {8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
+	add_object({5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
+	add_object({8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
 
 	return true
 }
 
 delete_objects :: proc() {
-    ctx := get_game_context()
+	ctx := get_game_context()
 
 	for &row in ctx.objects.chunks {
 		for &col in row {
@@ -282,7 +278,7 @@ sort_objects :: proc(a, b: Object) -> bool {
 }
 
 draw_object :: proc(object: ^Object) -> bool {
-    ctx := get_game_context()
+	ctx := get_game_context()
 
 	translate := glsl.mat4Translate(object.pos)
 	rotation_radian := f32(object.orientation) * 0.5 * math.PI
@@ -320,7 +316,7 @@ draw_chunk :: proc(chunk: ^Object_Chunk) -> bool {
 }
 
 draw_objects :: proc() -> bool {
-    ctx := get_objects_context()
+	ctx := get_objects_context()
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
 	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
@@ -347,12 +343,7 @@ world_pos_to_tile_pos :: proc(pos: glsl.vec3) -> (tile_pos: glsl.ivec2) {
 	return
 }
 
-world_pos_to_chunk_pos :: proc(
-	g: ^Game_Context,
-	pos: glsl.vec3,
-) -> (
-	chunk_pos: glsl.ivec3,
-) {
+world_pos_to_chunk_pos :: proc(pos: glsl.vec3) -> (chunk_pos: glsl.ivec3) {
 	tile_pos := world_pos_to_tile_pos(pos)
 	tile_height := terrain.get_tile_height(int(tile_pos.x), int(tile_pos.y))
 	chunk_pos.x = tile_pos.x / c.CHUNK_WIDTH
@@ -362,19 +353,16 @@ world_pos_to_chunk_pos :: proc(
 }
 
 add_object :: proc(
-	using ctx: ^Game_Context,
 	pos: glsl.vec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 	placement: Object_Placement,
 ) -> bool {
-	using objects
-
+	ctx := get_objects_context()
 	tile_pos := world_pos_to_tile_pos(pos)
-	chunk_pos := world_pos_to_chunk_pos(ctx, pos)
+	chunk_pos := world_pos_to_chunk_pos(pos)
 
 	can_add_object(
-		ctx,
 		pos,
 		tile_pos,
 		chunk_pos,
@@ -383,7 +371,7 @@ add_object :: proc(
 		placement,
 	) or_return
 
-	chunk := &chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
 	chunk.dirty = true
 
@@ -407,15 +395,20 @@ add_object :: proc(
 	return true
 }
 
-get_object_size :: proc(g: ^Game_Context, model: Object_Model) -> glsl.ivec3 {
+get_object_size :: proc(model: Object_Model) -> glsl.ivec3 {
+	models := get_models_context()
 	model_map := OBJECT_MODEL_MAP
 	model_name := model_map[model]
-	object_model := g.models.models[model_name]
-	return glsl.ivec3(linalg.array_cast(linalg.ceil(object_model.size), i32))
+	object_model := models.models[model_name]
+	return glsl.ivec3(
+		linalg.array_cast(
+			linalg.ceil(object_model.size - {0.01, 0.01, 0.01}),
+			i32,
+		),
+	)
 }
 
 can_add_object :: proc(
-	using ctx: ^Game_Context,
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
@@ -433,7 +426,6 @@ can_add_object :: proc(
 	switch placement {
 	case .Wall:
 		return can_add_object_on_wall(
-			ctx,
 			pos,
 			tile_pos,
 			chunk_pos,
@@ -442,7 +434,6 @@ can_add_object :: proc(
 		)
 	case .Floor:
 		return can_add_object_on_floor(
-			ctx,
 			pos,
 			tile_pos,
 			chunk_pos,
@@ -499,7 +490,6 @@ on_add_object :: proc(
 }
 
 can_add_object_on_wall :: proc(
-	using ctx: ^Game_Context,
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
@@ -553,14 +543,13 @@ can_add_object_on_wall :: proc(
 }
 
 can_add_object_on_floor :: proc(
-	g: ^Game_Context,
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
 	model: Object_Model,
 	orientation: Object_Orientation,
 ) -> bool {
-	obj_size := get_object_size(g, model)
+	obj_size := get_object_size(model)
 
 	for x in 0 ..< obj_size.x {
 		x := x
@@ -576,7 +565,7 @@ can_add_object_on_floor :: proc(
 				z = -z
 				wall_z = z + 1
 			}
-			if has_object_at(g, pos + {f32(x), 0, f32(z)}, .Floor) {
+			if has_object_at(pos + {f32(x), 0, f32(z)}, .Floor) {
 				return false
 			}
 
@@ -612,14 +601,11 @@ can_add_object_on_floor :: proc(
 	return true
 }
 
-has_object_at :: proc(
-	g: ^Game_Context,
-	pos: glsl.vec3,
-	placement: Object_Placement,
-) -> bool {
-	chunk_pos := world_pos_to_chunk_pos(g, pos)
+has_object_at :: proc(pos: glsl.vec3, placement: Object_Placement) -> bool {
+	objects := get_objects_context()
+	chunk_pos := world_pos_to_chunk_pos(pos)
 	tile_pos := world_pos_to_tile_pos(pos)
-	chunk := &g.objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk := &objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
 	for k, v in chunk.objects {
 		if world_pos_to_tile_pos(k.pos) == tile_pos &&
@@ -634,7 +620,7 @@ has_object_at :: proc(
 @(test)
 can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	game: Game_Context
-    context.user_ptr = &game
+	context.user_ptr = &game
 
 	load_models()
 	defer free_models()
@@ -642,12 +628,11 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 	defer delete_objects()
 
 	pos := glsl.vec3{1, 0, 1}
-	add_object(&game, pos, .Wood_Counter, .South, .Floor)
+	add_object(pos, .Wood_Counter, .South, .Floor)
 	r := can_add_object_on_floor(
-		&game,
 		pos,
 		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(&game, pos),
+		world_pos_to_chunk_pos(pos),
 		.Wood_Counter,
 		.South,
 	)
@@ -655,10 +640,9 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 
 	pos = {2, 0, 1}
 	r = can_add_object_on_floor(
-		&game,
 		pos,
 		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(&game, pos),
+		world_pos_to_chunk_pos(pos),
 		.Wood_Counter,
 		.South,
 	)
@@ -666,10 +650,9 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 
 	pos = {1, 0, 1}
 	r = can_add_object_on_floor(
-		&game,
 		pos,
 		world_pos_to_tile_pos(pos),
-		world_pos_to_chunk_pos(&game, pos),
+		world_pos_to_chunk_pos(pos),
 		.Wood_Table_8Places,
 		.South,
 	)

@@ -8,6 +8,7 @@ import "terrain_tool"
 import "wall_tool"
 import "window_tool"
 import "furniture_tool"
+import "../game"
 
 TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_1
 WALL_TOOL_KEY :: keyboard.Key_Value.Key_2
@@ -43,7 +44,7 @@ update :: proc(delta_time: f64) {
 	} else if keyboard.is_key_press(WINDOW_TOOL_KEY) {
 		open_window_tool()
 	} else if keyboard.is_key_press(FURNITURE_TOOL_KEY) {
-        open_furniture_tool()
+        // open_furniture_tool()
     }
 
 	switch active_tool {
@@ -60,7 +61,8 @@ update :: proc(delta_time: f64) {
 	case .Window:
 		window_tool.update()
     case .Furniture:
-        furniture_tool.update()
+        // furniture_tool.update()
+        game.update_object_tool()
 	}
 }
 
@@ -145,7 +147,8 @@ open_furniture_tool :: proc() {
 	door_tool.deinit()
 	window_tool.deinit()
 
-    furniture_tool.init()
+    // furniture_tool.init()
+    // game.init_object_tool()
 	active_tool = .Furniture
 }
 
