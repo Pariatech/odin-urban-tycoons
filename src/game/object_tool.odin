@@ -7,8 +7,10 @@ import gl "vendor:OpenGL"
 
 import "../cursor"
 import "../floor"
+import "../mouse"
 
 Object_Tool_Context :: struct {
+	cursor_pos:  glsl.vec3,
 	object:      Object,
 	tile_marker: Object,
 }
@@ -23,7 +25,7 @@ init_object_tool :: proc() {
 	texture_map := OBJECT_MODEL_TEXTURE_MAP
 	ctx.object.texture = texture_map[.Plank_Table_6Places]
 	ctx.object.placement = .Floor
-	ctx.object.orientation = .South
+	ctx.object.orientation = .North
 
 	ctx.tile_marker.model = "Tile_Marker.Bake"
 	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
@@ -32,12 +34,38 @@ init_object_tool :: proc() {
 
 update_object_tool :: proc() {
 	ctx := get_object_tool_context()
-	previous_pos := ctx.object.pos
+	previous_pos := ctx.cursor_pos
 	cursor.on_tile_intersect(
 		object_tool_on_intersect,
 		floor.previous_floor,
 		floor.floor,
 	)
+
+	if mouse.is_button_down(.Left) {
+		mouse.set_cursor(.Rotate)
+
+		dx := ctx.cursor_pos.x - ctx.object.pos.x
+		dz := ctx.cursor_pos.z - ctx.object.pos.z
+
+		if glsl.abs(dx) > glsl.abs(dz) {
+			if dx == 0 {
+			} else if dx > 0 {
+				ctx.object.orientation = .East
+			} else {
+				ctx.object.orientation = .West
+			}
+		} else {
+			if dz == 0 {
+			} else if dz > 0 {
+				ctx.object.orientation = .North
+			} else {
+				ctx.object.orientation = .South
+			}
+		}
+	} else {
+		mouse.set_cursor(.Arrow)
+        ctx.object.pos = ctx.cursor_pos
+	}
 
 	can_add := can_add_object(
 		ctx.object.pos,
@@ -46,21 +74,26 @@ update_object_tool :: proc() {
 		ctx.object.placement,
 	)
 
-	if can_add {
-		ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
-		ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
-	}
-
-	draw_object_tool()
+	draw_object_tool(can_add)
 }
 
 object_tool_on_intersect :: proc(intersect: glsl.vec3) {
 	ctx := get_object_tool_context()
-	ctx.object.pos = intersect
+	ctx.cursor_pos = intersect
 }
 
-draw_object_tool :: proc() -> bool {
+draw_object_tool :: proc(can_add: bool) -> bool {
 	ctx := get_object_tool_context()
+	object := ctx.object
+
+	if can_add {
+		object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
+		object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+		object.light = {1, 1, 1}
+	} else {
+		object.light = {0.8, 0.2, 0.2}
+		object.pos += {0, 0.01, 0}
+	}
 
 	objects_ctx := get_objects_context()
 	bind_shader(&objects_ctx.shader)
@@ -73,28 +106,34 @@ draw_object_tool :: proc() -> bool {
 	)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, objects_ctx.ubo)
 
-	draw_object(&ctx.object) or_return
+	draw_object(&object) or_return
 
 	models := get_models_context()
 	model_map := OBJECT_MODEL_MAP
 	model_name := model_map[.Plank_Table_6Places]
 	object_model := models.models[model_name]
-	for x in 0 ..< ctx.object.size.x {
-		x := x
-		if ctx.object.orientation == .North ||
-		   ctx.object.orientation == .West {
-			x = -x
-		}
-		for z in 0 ..< ctx.object.size.z {
-			z := z
-			if ctx.object.orientation == .South ||
-			   ctx.object.orientation == .West {
-				z = -z
+
+	for x in 0 ..< object.size.x {
+		tx := x
+		for z in 0 ..< object.size.z {
+			tz := z
+			switch object.orientation {
+			case .South:
+				tz = -z
+			case .East:
+				tx = z
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = -z
+				tz = -x
 			}
 
-			ctx.tile_marker.pos = ctx.object.pos + {f32(x), 0, f32(z)}
+			ctx.tile_marker.pos = object.pos + {f32(tx), 0, f32(tz)}
 			draw_object(&ctx.tile_marker) or_return
 		}
 	}
+
 	return true
 }

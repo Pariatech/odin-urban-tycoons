@@ -49,6 +49,22 @@ init :: proc() {
 	add_house_floor_walls(1, .Dark_Blue, .Brick)
 	add_house_floor_triangles(2, .Wood_Floor_008)
 
+	game.add_object({1, 0, 1}, .Wood_Counter, .South, .Floor)
+	game.add_object({2, 0, 1}, .Wood_Counter, .South, .Floor)
+	game.add_object({3, 0, 1}, .Wood_Counter, .South, .Floor)
+
+	game.add_object({5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
+	game.add_object({8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
+
+	game.add_object({5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
+	game.add_object({8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
+
+	game.add_object({5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
+	game.add_object({8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
+
+	game.add_object({5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
+	game.add_object({8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
+
 	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {
 			tile.set_tile(

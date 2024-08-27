@@ -131,7 +131,8 @@ Object_Chunk :: struct {
 Object_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Chunk
 
 Object_Uniform_Object :: struct {
-	mvp: glsl.mat4,
+	mvp:   glsl.mat4,
+	light: glsl.vec3,
 }
 
 
@@ -172,22 +173,6 @@ init_objects :: proc() -> (ok: bool = true) {
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.UseProgram(0)
-
-	add_object({1, 0, 1}, .Wood_Counter, .South, .Floor)
-	add_object({2, 0, 1}, .Wood_Counter, .South, .Floor)
-	add_object({3, 0, 1}, .Wood_Counter, .South, .Floor)
-
-	add_object({5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
-	add_object({8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
-
-	add_object({5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
-	add_object({8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
-
-	add_object({5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
-	add_object({8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
-
-	add_object({5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
-	add_object({8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
 
 	return true
 }
@@ -285,7 +270,8 @@ draw_object :: proc(object: ^Object) -> bool {
 	rotation_radian := f32(object.orientation) * 0.5 * math.PI
 	rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
 	uniform_object := Object_Uniform_Object {
-		mvp = camera.view_proj * translate * rotation,
+		mvp   = camera.view_proj * translate * rotation,
+		light = object.light,
 	}
 
 	gl.BufferData(
@@ -358,6 +344,7 @@ add_object :: proc(
 	model: Object_Model,
 	orientation: Object_Orientation,
 	placement: Object_Placement,
+	light: glsl.vec3 = {1, 1, 1},
 ) -> bool {
 	ctx := get_objects_context()
 	tile_pos := world_pos_to_tile_pos(pos)
@@ -385,6 +372,7 @@ add_object :: proc(
 			texture = texture_map[model],
 			orientation = orientation,
 			placement = placement,
+			light = light,
 		},
 	)
 
@@ -399,20 +387,24 @@ update_object_placement_map :: proc(
 ) {
 	obj_size := get_object_size(model)
 
-	log.info(model, obj_size)
-
 	for x in 0 ..< obj_size.x {
-		x := x
-		if orientation == .North || orientation == .West {
-			x = -x
-		}
+		tx := x
 		for z in 0 ..< obj_size.z {
-			z := z
-			if orientation == .South || orientation == .West {
-				z = -z
+			tz := z
+			switch orientation {
+			case .South:
+				tz = -z
+			case .East:
+				tx = z
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = -z
+				tz = -x
 			}
 
-			pos := pos + {f32(x), 0, f32(z)}
+			pos := pos + {f32(tx), 0, f32(tz)}
 			tile_pos := world_pos_to_tile_pos(pos)
 			chunk_pos := world_pos_to_chunk_pos(pos)
 			ctx := get_objects_context()
@@ -574,15 +566,25 @@ can_add_object_on_floor :: proc(
 	for x in 0 ..< obj_size.x {
 		x := x
 		wall_x := x
-		if orientation == .North || orientation == .West {
-			x = -x
-			wall_x = x + 1
-		}
 		for z in 0 ..< obj_size.z {
 			z := z
 			wall_z := z
-			if orientation == .South || orientation == .West {
+			switch orientation {
+			case .South:
 				z = -z
+				wall_z = z + 1
+			case .East:
+				tmp := x
+				x = z
+				z = tmp
+			case .North:
+				x = -x
+				wall_x = x + 1
+			case .West:
+				tmp := x
+				x = -z
+				z = -tmp
+				wall_x = x + 1
 				wall_z = z + 1
 			}
 			if has_object_at(pos + {f32(x), 0, f32(z)}, .Floor) {
