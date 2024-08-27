@@ -49,21 +49,120 @@ init :: proc() {
 	add_house_floor_walls(1, .Dark_Blue, .Brick)
 	add_house_floor_triangles(2, .Wood_Floor_008)
 
-	game.add_object({1, 0, 1}, .Wood_Counter, .South, .Floor)
-	game.add_object({2, 0, 1}, .Wood_Counter, .South, .Floor)
-	game.add_object({3, 0, 1}, .Wood_Counter, .South, .Floor)
+	game.add_object(
+		 {
+			pos = {1, 0, 1},
+			model = game.WOOD_COUNTER_MODEL,
+			texture = game.WOOD_COUNTER_TEXTURE,
+			orientation = .South,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {2, 0, 1},
+			model = game.WOOD_COUNTER_MODEL,
+			texture = game.WOOD_COUNTER_TEXTURE,
+			orientation = .South,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {3, 0, 1},
+			model = game.WOOD_COUNTER_MODEL,
+			texture = game.WOOD_COUNTER_TEXTURE,
+			orientation = .South,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
 
-	game.add_object({5, 0, 1}, .Plank_Table_6Places, .South, .Floor)
-	game.add_object({8, 0, 1}, .Wood_Table_8Places, .South, .Floor)
+	game.add_object(
+		 {
+			pos = {5, 0, 1},
+			model = game.PLANK_TABLE_6PLACES_MODEL,
+			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+			orientation = .South,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {8, 0, 1},
+			model = game.WOOD_TABLE_8PLACES_MODEL,
+			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
+			orientation = .South,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
 
-	game.add_object({5, 0, 4}, .Plank_Table_6Places, .East, .Floor)
-	game.add_object({8, 0, 4}, .Wood_Table_8Places, .East, .Floor)
+	game.add_object(
+		 {
+			pos = {5, 0, 4},
+			model = game.PLANK_TABLE_6PLACES_MODEL,
+			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+			orientation = .East,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {8, 0, 4},
+			model = game.WOOD_TABLE_8PLACES_MODEL,
+			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
+			orientation = .East,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
 
-	game.add_object({5, 0, 7}, .Plank_Table_6Places, .North, .Floor)
-	game.add_object({8, 0, 7}, .Wood_Table_8Places, .North, .Floor)
+	game.add_object(
+		 {
+			pos = {5, 0, 7},
+			model = game.PLANK_TABLE_6PLACES_MODEL,
+			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+			orientation = .North,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {8, 0, 7},
+			model = game.WOOD_TABLE_8PLACES_MODEL,
+			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
+			orientation = .North,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
 
-	game.add_object({5, 0, 10}, .Plank_Table_6Places, .West, .Floor)
-	game.add_object({8, 0, 10}, .Wood_Table_8Places, .West, .Floor)
+	game.add_object(
+		 {
+			pos = {5, 0, 10},
+			model = game.PLANK_TABLE_6PLACES_MODEL,
+			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+			orientation = .West,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
+	game.add_object(
+		 {
+			pos = {8, 0, 10},
+			model = game.WOOD_TABLE_8PLACES_MODEL,
+			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
+			orientation = .West,
+			placement = .Floor,
+			light = {1, 1, 1},
+		},
+	)
 
 	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {
@@ -280,24 +379,32 @@ add_house_floor_walls :: proc(
 	if floor > 0 {
 		game.add_object(
 			 {
-				f32(house_x + 1),
-				f32(floor * constants.WALL_HEIGHT),
-				f32(house_z + 5),
+				pos =  {
+					f32(house_x + 1),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z + 5),
+				},
+				model = game.WOOD_WINDOW_MODEL,
+				texture = game.WOOD_WINDOW_TEXTURE,
+				orientation = .West,
+				placement = .Wall,
+				light = {1, 1, 1},
 			},
-			.Wood_Window,
-			.West,
-			.Wall,
 		)
 	} else {
 		game.add_object(
 			 {
-				f32(house_x + 1),
-				f32(floor * constants.WALL_HEIGHT),
-				f32(house_z + 5),
+				pos =  {
+					f32(house_x + 1),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z + 5),
+				},
+				model = game.WOOD_DOOR_MODEL,
+				texture = game.WOOD_DOOR_TEXTURE,
+				orientation = .West,
+				placement = .Wall,
+				light = {1, 1, 1},
 			},
-			.Wood_Door,
-			.West,
-			.Wall,
 		)
 	}
 
@@ -332,13 +439,17 @@ add_house_floor_walls :: proc(
 
 		game.add_object(
 			 {
-				f32(house_x),
-				f32(floor * constants.WALL_HEIGHT),
-				f32(house_z + i32(i) + 8),
+				pos =  {
+					f32(house_x),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z + i32(i) + 8),
+				},
+				model = game.WOOD_WINDOW_MODEL,
+				texture = game.WOOD_WINDOW_TEXTURE,
+				orientation = .West,
+				placement = .Wall,
+				light = {1, 1, 1},
 			},
-			.Wood_Window,
-			.West,
-			.Wall,
 		)
 	}
 
@@ -374,13 +485,17 @@ add_house_floor_walls :: proc(
 
 		game.add_object(
 			 {
-				f32(house_x + i32(i) + 1),
-				f32(floor * constants.WALL_HEIGHT),
-				f32(house_z),
+				pos =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z),
+				},
+				model = game.WOOD_WINDOW_MODEL,
+				texture = game.WOOD_WINDOW_TEXTURE,
+				orientation = .South,
+				placement = .Wall,
+				light = {1, 1, 1},
 			},
-			.Wood_Window,
-			.South,
-			.Wall,
 		)
 	}
 
@@ -416,13 +531,17 @@ add_house_floor_walls :: proc(
 
 		game.add_object(
 			 {
-				f32(house_x + i32(i) + 1),
-				f32(floor * constants.WALL_HEIGHT),
-				f32(house_z + 11),
+				pos =  {
+					f32(house_x + i32(i) + 1),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z + 11),
+				},
+				model = game.WOOD_WINDOW_MODEL,
+				texture = game.WOOD_WINDOW_TEXTURE,
+				orientation = .South,
+				placement = .Wall,
+				light = {1, 1, 1},
 			},
-			.Wood_Window,
-			.South,
-			.Wall,
 		)
 	}
 	game.set_east_west_wall(

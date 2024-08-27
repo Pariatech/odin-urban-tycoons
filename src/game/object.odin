@@ -92,24 +92,19 @@ OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
 	// .Tree                                = .Tree,
 }
 
-OBJECT_MODEL_MAP :: [Object_Model]string {
-	.Wood_Counter        = "Wood.Counter.Bake",
-	.Wood_Window         = "Window.Wood.Bake",
-	.Wood_Door           = "Door.Wood.Bake",
-	.Wood_Table_6Places  = "Table.6Places.Bake",
-	.Plank_Table_6Places = "Plank.Table.6Places.Bake",
-	.Wood_Table_8Places  = "Table.8Places.Bake",
-}
+WOOD_COUNTER_MODEL :: "Wood.Counter.Bake"
+WOOD_WINDOW_MODEL :: "Window.Wood.Bake"
+WOOD_DOOR_MODEL :: "Door.Wood.Bake"
+WOOD_TABLE_6PLACES_MODEL :: "Table.6Places.Bake"
+PLANK_TABLE_6PLACES_MODEL :: "Plank.Table.6Places.Bake"
+WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
 
-OBJECT_MODEL_TEXTURE_MAP :: [Object_Model]string {
-	.Wood_Counter        = "objects/Wood.Counter.png",
-	.Wood_Window         = "objects/Wood.Window.png",
-	.Wood_Door           = "objects/Door.Wood.png",
-	.Wood_Table_6Places  = "objects/Table.6Places.Wood.png",
-	.Plank_Table_6Places = "objects/Table.6Places.Plank.png",
-	// .Wood_Table_6Places = "tex_test.png",
-	.Wood_Table_8Places  = "objects/Table.8Places.Wood.png",
-}
+WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
+WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
+WOOD_DOOR_TEXTURE :: "objects/Door.Wood.png"
+WOOD_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Wood.png"
+PLANK_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Plank.png"
+WOOD_TABLE_8PLACES_TEXTURE :: "objects/Table.8Places.Wood.png"
 
 Object :: struct {
 	pos:         glsl.vec3,
@@ -339,19 +334,12 @@ world_pos_to_chunk_pos :: proc(pos: glsl.vec3) -> (chunk_pos: glsl.ivec3) {
 	return
 }
 
-add_object :: proc(
-	pos: glsl.vec3,
-	model: Object_Model,
-	orientation: Object_Orientation,
-	placement: Object_Placement,
-	light: glsl.vec3 = {1, 1, 1},
-) -> bool {
+add_object :: proc(obj: Object) -> bool {
 	ctx := get_objects_context()
-	tile_pos := world_pos_to_tile_pos(pos)
-	chunk_pos := world_pos_to_chunk_pos(pos)
+	tile_pos := world_pos_to_tile_pos(obj.pos)
+	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
-	model_map := OBJECT_MODEL_MAP
-	can_add_object(pos, model_map[model], orientation, placement) or_return
+	can_add_object(obj.pos, obj.model, obj.orientation, obj.placement) or_return
 
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
@@ -359,22 +347,14 @@ add_object :: proc(
 
 	type_map := OBJECT_TYPE_MAP
 
-	texture_map := OBJECT_MODEL_TEXTURE_MAP
-
-	update_object_placement_map(pos, model_map[model], placement, orientation)
-
-	append(
-		&chunk.objects,
-		Object {
-			pos = pos,
-			type = type_map[model],
-			model = model_map[model],
-			texture = texture_map[model],
-			orientation = orientation,
-			placement = placement,
-			light = light,
-		},
+	update_object_placement_map(
+		obj.pos,
+		obj.model,
+		obj.placement,
+		obj.orientation,
 	)
+
+	append(&chunk.objects, obj)
 
 	return true
 }
@@ -657,18 +637,24 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 
 	defer delete_objects()
 
-	model_map := OBJECT_MODEL_MAP
 	pos := glsl.vec3{1, 0, 1}
-	add_object(pos, .Wood_Counter, .South, .Floor)
-	r := can_add_object(pos, model_map[.Wood_Counter], .South, .Floor)
+	add_object(
+		 {
+			pos = pos,
+			model = WOOD_COUNTER_MODEL,
+			orientation = .South,
+			placement = .Floor,
+		},
+	)
+	r := can_add_object(pos, WOOD_COUNTER_MODEL, .South, .Floor)
 	testing.expect_value(t, r, false)
 
 	pos = {2, 0, 1}
-	r = can_add_object(pos, model_map[.Wood_Counter], .South, .Floor)
+	r = can_add_object(pos, WOOD_COUNTER_MODEL, .South, .Floor)
 	testing.expect_value(t, r, true)
 
 	pos = {1, 0, 1}
-	r = can_add_object(pos, model_map[.Wood_Table_8Places], .South, .Floor)
+	r = can_add_object(pos, WOOD_TABLE_8PLACES_MODEL, .South, .Floor)
 	testing.expect_value(t, r, false)
 	// add_object(&game, {2, 0, 1}, .Wood_Counter, .South, .Floor)
 	// add_object(&game, {3, 0, 1}, .Wood_Counter, .South, .Floor)

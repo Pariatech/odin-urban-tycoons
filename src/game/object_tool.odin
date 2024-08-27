@@ -19,11 +19,9 @@ init_object_tool :: proc() {
 	ctx := get_object_tool_context()
 	ctx.object.type = .Table
 	ctx.object.light = {1, 1, 1}
-	model_map := OBJECT_MODEL_MAP
-	ctx.object.model = model_map[.Plank_Table_6Places]
+	ctx.object.model = PLANK_TABLE_6PLACES_MODEL
 	ctx.object.size = get_object_size(ctx.object.model)
-	texture_map := OBJECT_MODEL_TEXTURE_MAP
-	ctx.object.texture = texture_map[.Plank_Table_6Places]
+	ctx.object.texture = PLANK_TABLE_6PLACES_TEXTURE
 	ctx.object.placement = .Floor
 	ctx.object.orientation = .North
 
@@ -62,10 +60,18 @@ update_object_tool :: proc() {
 				ctx.object.orientation = .South
 			}
 		}
+	} else if mouse.is_button_release(.Left) {
+		mouse.set_cursor(.Arrow)
+		obj := ctx.object
+		obj.pos.x = glsl.floor(obj.pos.x + 0.5)
+		obj.pos.z = glsl.floor(obj.pos.z + 0.5)
+		obj.light = glsl.vec3{1, 1, 1}
+		add_object(obj)
 	} else {
 		mouse.set_cursor(.Arrow)
-        ctx.object.pos = ctx.cursor_pos
+		ctx.object.pos = ctx.cursor_pos
 	}
+
 
 	can_add := can_add_object(
 		ctx.object.pos,
@@ -107,11 +113,6 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, objects_ctx.ubo)
 
 	draw_object(&object) or_return
-
-	models := get_models_context()
-	model_map := OBJECT_MODEL_MAP
-	model_name := model_map[.Plank_Table_6Places]
-	object_model := models.models[model_name]
 
 	for x in 0 ..< object.size.x {
 		tx := x
