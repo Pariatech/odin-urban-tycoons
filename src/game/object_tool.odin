@@ -80,6 +80,11 @@ update_object_tool :: proc() {
 		ctx.object.placement,
 	)
 
+	if can_add {
+		ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
+		ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+	}
+
 	draw_object_tool(can_add)
 }
 
@@ -91,15 +96,11 @@ object_tool_on_intersect :: proc(intersect: glsl.vec3) {
 draw_object_tool :: proc(can_add: bool) -> bool {
 	ctx := get_object_tool_context()
 	object := ctx.object
-
-	if can_add {
-		object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
-		object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
-		object.light = {1, 1, 1}
-	} else {
+	if !can_add {
 		object.light = {0.8, 0.2, 0.2}
 		object.pos += {0, 0.01, 0}
 	}
+
 
 	objects_ctx := get_objects_context()
 	bind_shader(&objects_ctx.shader)
