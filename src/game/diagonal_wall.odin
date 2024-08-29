@@ -114,7 +114,7 @@ draw_diagonal_wall :: proc(
 	}
 	transform := glsl.mat4Translate(position)
 	if axis == .SW_NE {
-		transform *= glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+		transform *= glsl.mat4Rotate({0, 1, 0}, -0.5 * math.PI)
 	}
 
 	light := glsl.vec3{0.95, 0.95, 0.95}

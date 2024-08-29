@@ -28,10 +28,10 @@ WALL_SIDE_MAP :: [game.Wall_Axis][camera.Rotation]game.Wall_Side {
 		.North_West = .Inside,
 	},
 	.SW_NE =  {
-		.South_West = .Outside,
-		.South_East = .Inside,
-		.North_East = .Inside,
-		.North_West = .Outside,
+		.South_West = .Inside,
+		.South_East = .Outside,
+		.North_East = .Outside,
+		.North_West = .Inside,
 	},
 	.NW_SE =  {
 		.South_West = .Outside,
