@@ -30,9 +30,30 @@ init_object_tool :: proc() {
 	ctx.tile_marker.light = {1, 1, 1}
 }
 
+set_object_tool_model :: proc(model: string) {
+	ctx := get_object_tool_context()
+	ctx.object.model = model
+}
+
+set_object_tool_texture :: proc(texture: string) {
+	ctx := get_object_tool_context()
+	ctx.object.texture = texture
+}
+
+set_object_tool_placement :: proc(placement: Object_Placement) {
+	ctx := get_object_tool_context()
+	ctx.object.placement = placement
+}
+
+set_object_tool_type :: proc(type: Object_Type) {
+	ctx := get_object_tool_context()
+	ctx.object.type = type
+}
+
 update_object_tool :: proc() {
 	ctx := get_object_tool_context()
-	previous_pos := ctx.cursor_pos
+	previous_pos := ctx.object.pos
+	previous_orientation := ctx.object.orientation
 	cursor.on_tile_intersect(
 		object_tool_on_intersect,
 		floor.previous_floor,
@@ -45,19 +66,19 @@ update_object_tool :: proc() {
 		dx := ctx.cursor_pos.x - ctx.object.pos.x
 		dz := ctx.cursor_pos.z - ctx.object.pos.z
 
-		if glsl.abs(dx) > glsl.abs(dz) {
-			if dx == 0 {
-			} else if dx > 0 {
-				ctx.object.orientation = .East
+		if glsl.abs(dx) > 0.5 || glsl.abs(dz) > 0.5 {
+			if glsl.abs(dx) > glsl.abs(dz) {
+				if dx > 0 {
+					ctx.object.orientation = .East
+				} else {
+					ctx.object.orientation = .West
+				}
 			} else {
-				ctx.object.orientation = .West
-			}
-		} else {
-			if dz == 0 {
-			} else if dz > 0 {
-				ctx.object.orientation = .North
-			} else {
-				ctx.object.orientation = .South
+				if dz > 0 {
+					ctx.object.orientation = .North
+				} else {
+					ctx.object.orientation = .South
+				}
 			}
 		}
 	} else if mouse.is_button_release(.Left) {
@@ -76,6 +97,7 @@ update_object_tool :: proc() {
 	can_add := can_add_object(
 		ctx.object.pos,
 		ctx.object.model,
+		ctx.object.type,
 		ctx.object.orientation,
 		ctx.object.placement,
 	)
@@ -83,9 +105,105 @@ update_object_tool :: proc() {
 	if can_add {
 		ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
 		ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+	} else if ctx.object.placement == .Wall && mouse.is_button_up(.Left) {
+		snap_wall_object()
 	}
 
+	update_wall_masks_on_object_placement(previous_pos, previous_orientation)
 	draw_object_tool(can_add)
+}
+
+snap_wall_object :: proc() {
+	ctx := get_object_tool_context()
+
+	for i in 0 ..< len(Object_Orientation) - 1 {
+		obj := ctx.object
+		obj.orientation = Object_Orientation(
+			(int(obj.orientation) + i) % len(Object_Orientation),
+		)
+
+		if can_add_object(
+			   obj.pos,
+			   obj.model,
+			   obj.type,
+			   obj.orientation,
+			   obj.placement,
+		   ) {
+			ctx.object.orientation = obj.orientation
+			break
+		}
+	}
+}
+
+update_wall_masks_on_object_placement :: proc(
+	previous_pos: glsl.vec3,
+	previous_orientation: Object_Orientation,
+) {
+	ctx := get_object_tool_context()
+
+	if ctx.object.type != .Window && ctx.object.type != .Door {
+		return
+	}
+
+	previous_tile_pos := world_pos_to_tile_pos(previous_pos)
+	current_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
+	if previous_tile_pos == current_tile_pos &&
+	   ctx.object.orientation == previous_orientation {
+		return
+	}
+
+	previous_obj := ctx.object
+	previous_obj.pos = previous_pos
+	previous_obj.orientation = previous_orientation
+
+	if can_add_object(
+		   previous_pos,
+		   ctx.object.model,
+		   ctx.object.type,
+		   previous_orientation,
+		   ctx.object.placement,
+	   ) {
+		set_wall_mask_from_object(previous_obj, .Full_Mask)
+	}
+
+	if can_add_object(
+		   ctx.object.pos,
+		   ctx.object.model,
+		   ctx.object.type,
+		   ctx.object.orientation,
+		   ctx.object.placement,
+	   ) {
+		if ctx.object.type == .Window {
+			set_wall_mask_from_object(ctx.object, .Window_Opening)
+		} else {
+			set_wall_mask_from_object(ctx.object, .Door_Opening)
+		}
+	}
+}
+
+set_wall_mask_from_object :: proc(obj: Object, mask: Wall_Mask_Texture) {
+	tile_pos := world_pos_to_tile_pos(obj.pos)
+	chunk_pos := world_pos_to_chunk_pos(obj.pos)
+
+	if obj.type == .Window {
+		axis: Wall_Axis
+		switch obj.orientation {
+		case .East, .West:
+			axis = .N_S
+		case .South, .North:
+			axis = .E_W
+		}
+		wall_pos := glsl.ivec3{tile_pos.x, chunk_pos.y, tile_pos.y}
+		#partial switch obj.orientation {
+		case .East:
+			wall_pos += {1, 0, 0}
+		case .North:
+			wall_pos += {0, 0, 1}
+		}
+		w, _ := get_wall(wall_pos, axis)
+		w.mask = mask
+		set_wall(wall_pos, axis, w)
+	}
 }
 
 object_tool_on_intersect :: proc(intersect: glsl.vec3) {
@@ -101,6 +219,7 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		object.pos += {0, 0.01, 0}
 	}
 
+	ctx.tile_marker.light = object.light
 
 	objects_ctx := get_objects_context()
 	bind_shader(&objects_ctx.shader)

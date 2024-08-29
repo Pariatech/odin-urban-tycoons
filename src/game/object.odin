@@ -339,7 +339,13 @@ add_object :: proc(obj: Object) -> bool {
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
-	can_add_object(obj.pos, obj.model, obj.orientation, obj.placement) or_return
+	can_add_object(
+		obj.pos,
+		obj.model,
+        obj.type,
+		obj.orientation,
+		obj.placement,
+	) or_return
 
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
@@ -355,6 +361,26 @@ add_object :: proc(obj: Object) -> bool {
 	)
 
 	append(&chunk.objects, obj)
+
+	if obj.type == .Window {
+		axis: Wall_Axis
+		switch obj.orientation {
+		case .East, .West:
+			axis = .N_S
+		case .South, .North:
+			axis = .E_W
+		}
+		wall_pos := glsl.ivec3{tile_pos.x, chunk_pos.y, tile_pos.y}
+		#partial switch obj.orientation {
+		case .East:
+			wall_pos += {1, 0, 0}
+		case .North:
+			wall_pos += {0, 0, 1}
+		}
+		w, _ := get_wall(wall_pos, axis)
+		w.mask = .Window_Opening
+		set_wall(wall_pos, axis, w)
+	}
 
 	return true
 }
@@ -409,6 +435,7 @@ get_object_size :: proc(model: string) -> glsl.ivec3 {
 can_add_object :: proc(
 	pos: glsl.vec3,
 	model: string,
+	type: Object_Type,
 	orientation: Object_Orientation,
 	placement: Object_Placement,
 ) -> bool {
@@ -424,7 +451,14 @@ can_add_object :: proc(
 
 	switch placement {
 	case .Wall:
-		return can_add_object_on_wall(pos, tile_pos, chunk_pos, orientation)
+		return can_add_object_on_wall(
+			pos,
+			tile_pos,
+			chunk_pos,
+			model,
+			type,
+			orientation,
+		)
 	case .Floor:
 		return can_add_object_on_floor(
 			pos,
@@ -486,50 +520,63 @@ can_add_object_on_wall :: proc(
 	pos: glsl.vec3,
 	tile_pos: glsl.ivec2,
 	chunk_pos: glsl.ivec3,
+	model: string,
+	type: Object_Type,
 	orientation: Object_Orientation,
 ) -> bool {
-	// model_size := MODEL_SIZE
-	//
-	// size := model_size[model]
-	// for x in 0 ..< size.x {
-	// 	switch orientation {
-	// 	case .South, .North:
-	// 		pos := pos + {x, 0, 0}
-	// 		if orientation == .North {
-	// 			pos += {0, 0, 1}
-	// 		}
-	// 		if !wall.has_east_west_wall(pos) {
-	// 			return false
-	// 		}
-	// 	case .East, .West:
-	// 		pos := pos + {0, 0, x}
-	// 		if orientation == .East {
-	// 			pos += {1, 0, 0}
-	// 		}
-	// 		if !wall.has_north_south_wall(pos) {
-	// 			return false
-	// 		}
-	// 	}
-	//
-	// 	for y in 0 ..< size.y {
-	// 		pos := pos + relative_pos(x, y, orientation)
-	// 		chunk := &chunks[pos.y][pos.x / c.CHUNK_WIDTH][pos.z / c.CHUNK_DEPTH]
-	//
-	// 		obstacle_orientation := orientation
-	// 		if y != 0 {
-	// 			obstacle_orientation = Orientation(int(orientation) + 2 % 4)
-	// 		}
-	// 		for k, v in chunk.objects {
-	// 			if k.pos == pos &&
-	// 			   k.placement == .Wall &&
-	// 			   k.orientation == obstacle_orientation {
-	// 				return false
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	tile_pos := world_pos_to_tile_pos(pos)
+	switch orientation {
+	case .East:
+		if !has_north_south_wall({tile_pos.x + 1, chunk_pos.y, tile_pos.y}) {
+			return false
+		}
+	case .West:
+		if !has_north_south_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+			return false
+		}
+	case .South:
+		if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+			return false
+		}
+	case .North:
+		if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y + 1}) {
+			return false
+		}
+	}
+
+	obj_size := get_object_size(model)
+	for x in 0 ..< obj_size.x {
+		tx := x
+		tz: i32 = 0
+		#partial switch orientation {
+		case .East:
+			tx = 0
+			tz = x
+		case .North:
+			tx = -x
+		case .West:
+			tx = 0
+			tz = -x
+		}
+
+		tpos := pos + {f32(tx), 0, f32(tz)}
+		if has_object_at(tpos, .Wall, orientation) {
+			return false
+		}
+
+		if type == .Window || type == .Door {
+			switch orientation {
+			case .South:
+				return !has_object_at(tpos + {0, 0, -1}, .Wall, .North)
+			case .East:
+				return !has_object_at(tpos + {1, 0, 0}, .Wall, .West)
+			case .North:
+				return !has_object_at(tpos + {0, 0, 1}, .Wall, .South)
+			case .West:
+				return !has_object_at(tpos + {-1, 0, 0}, .Wall, .East)
+			}
+		}
+	}
 
 	return true
 }
@@ -557,6 +604,7 @@ can_add_object_on_floor :: proc(
 				tmp := x
 				x = z
 				z = tmp
+				wall_x = x
 			case .North:
 				x = -x
 				wall_x = x + 1
@@ -603,7 +651,11 @@ can_add_object_on_floor :: proc(
 	return true
 }
 
-has_object_at :: proc(pos: glsl.vec3, placement: Object_Placement) -> bool {
+has_object_at :: proc(
+	pos: glsl.vec3,
+	placement: Object_Placement,
+	orientation: Object_Orientation = nil,
+) -> bool {
 	objects := get_objects_context()
 	chunk_pos := world_pos_to_chunk_pos(pos)
 	tile_pos := world_pos_to_tile_pos(pos)
@@ -612,8 +664,14 @@ has_object_at :: proc(pos: glsl.vec3, placement: Object_Placement) -> bool {
 	orientations :=
 		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement]
 
-	for orientation in orientations {
-		if orientation {
+	if orientation == nil {
+		for orientation in orientations {
+			if orientation {
+				return true
+			}
+		}
+	} else {
+		if orientations[orientation] {
 			return true
 		}
 	}
@@ -646,15 +704,15 @@ can_add_object_on_floor_test :: proc(t: ^testing.T) {
 			placement = .Floor,
 		},
 	)
-	r := can_add_object(pos, WOOD_COUNTER_MODEL, .South, .Floor)
+	r := can_add_object(pos, WOOD_COUNTER_MODEL, .Table, .South, .Floor)
 	testing.expect_value(t, r, false)
 
 	pos = {2, 0, 1}
-	r = can_add_object(pos, WOOD_COUNTER_MODEL, .South, .Floor)
+	r = can_add_object(pos, WOOD_COUNTER_MODEL, .Table, .South, .Floor)
 	testing.expect_value(t, r, true)
 
 	pos = {1, 0, 1}
-	r = can_add_object(pos, WOOD_TABLE_8PLACES_MODEL, .South, .Floor)
+	r = can_add_object(pos, WOOD_TABLE_8PLACES_MODEL, .Table, .South, .Floor)
 	testing.expect_value(t, r, false)
 	// add_object(&game, {2, 0, 1}, .Wood_Counter, .South, .Floor)
 	// add_object(&game, {3, 0, 1}, .Wood_Counter, .South, .Floor)

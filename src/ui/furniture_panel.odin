@@ -3,20 +3,48 @@ package ui
 import "core:math/linalg/glsl"
 
 import "../billboard"
-import "../furniture"
+import "../game"
 import "../tools"
 import "../tools/furniture_tool"
 import "../window"
 
-FURNITURE_PANEL_TILE_SIZE :: 96
+FURNITURE_PANEL_TILE_SIZE :: 47
+FURNITURE_PANEL_PADDING :: 4
 
-FURNITURE_PANEL_ICONS :: [furniture.Type]cstring {
+Furniture :: struct {
+	icon:      cstring,
+	model:     string,
+	texture:   string,
+	placement: game.Object_Placement,
+    type: game.Object_Type,
+}
+
+FURNITURE_PANEL_ICONS :: []cstring {
+	"resources/textures/object_icons/Plank.Table.6Places.png",
+	"resources/textures/object_icons/Window.Wood.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
 	// .Letter_G = "resources/textures/object_icons/Letter_G.png",
 	// .Letter_D = "resources/textures/object_icons/Letter_D.png",
 	// .Letter_E = "resources/textures/object_icons/Letter_E.png",
+}
+
+FURNITURES :: []Furniture {
+	 {
+		icon = "resources/textures/object_icons/Plank.Table.6Places.png",
+		model = game.PLANK_TABLE_6PLACES_MODEL,
+		texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+		placement = .Floor,
+        type = .Table,
+	},
+	 {
+		icon = "resources/textures/object_icons/Window.Wood.png",
+		model = game.WOOD_WINDOW_MODEL,
+		texture = game.WOOD_WINDOW_TEXTURE,
+		placement = .Wall,
+        type = .Window,
+	},
 }
 
 furniture_panel_icon_texture_array: u32
@@ -26,32 +54,40 @@ furniture_panel_body :: proc(
 	pos: glsl.vec2,
 	size: glsl.vec2,
 ) {
-	for i in furniture.Type {
+	icons := FURNITURE_PANEL_ICONS
+	for icon, i in icons {
 		border_width := f32(BORDER_WIDTH)
-		if furniture_tool.type == i && furniture_tool.state == .Moving {
-			border_width *= 2
-		}
+		// if furniture_tool.type == i && furniture_tool.state == .Moving {
+		// 	border_width *= 2
+		// }
 
 		if icon_button(
 			   ctx,
 			    {
-				   2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),
-				   window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
+				   2 + f32(i / 2) * (FURNITURE_PANEL_TILE_SIZE + 2),// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
+				   pos.y +
+				   FURNITURE_PANEL_PADDING +
+				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
 			   },
 			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
 			   furniture_panel_icon_texture_array,
 			   int(i),
-			   top_padding = 4,
-			   bottom_padding = 4,
-               left_padding = 4,
-               right_padding = 4,
+			   top_padding = 0,
+			   bottom_padding = 0,
+			   left_padding = 0,
+			   right_padding = 0,
 			   left_border_width = border_width,
 			   right_border_width = border_width,
 			   top_border_width = border_width,
 			   bottom_border_width = border_width,
 			   color = DAY_SKY_BLUE,
 		   ) {
-			furniture_tool.place_furniture(i)
+			// furniture_tool.place_furniture(i)
+			furnitures := FURNITURES
+			game.set_object_tool_model(furnitures[i].model)
+			game.set_object_tool_texture(furnitures[i].texture)
+			game.set_object_tool_placement(furnitures[i].placement)
+			game.set_object_tool_type(furnitures[i].type)
 		}
 	}
 }
@@ -73,7 +109,7 @@ init_furniture_panel :: proc() -> bool {
 
 	init_icon_texture_array(
 		&furniture_panel_icon_texture_array,
-		raw_data(&icons)[0:len(icons)],
+		icons,
 	) or_return
 
 	return true
