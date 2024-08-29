@@ -26,7 +26,7 @@ Object_Type :: enum {
 	Window,
 	// Chair,
 	Table,
-	// Painting,
+	Painting,
 	Counter,
 	// Carpet,
 	// Tree,
@@ -68,7 +68,7 @@ OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 	.Window = {.Wall},
 	// .Chair = {.Floor},
 	.Table = {.Floor},
-	// .Painting = {.Wall},
+	.Painting = {.Wall},
 	.Counter = {.Floor},
 	// .Carpet = {.Floor},
 	// .Tree = {.Floor},
@@ -98,6 +98,7 @@ WOOD_DOOR_MODEL :: "Door.Wood.Bake"
 WOOD_TABLE_6PLACES_MODEL :: "Table.6Places.Bake"
 PLANK_TABLE_6PLACES_MODEL :: "Plank.Table.6Places.Bake"
 WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
+POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
 
 WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
 WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
@@ -105,6 +106,7 @@ WOOD_DOOR_TEXTURE :: "objects/Door.Wood.png"
 WOOD_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Wood.png"
 PLANK_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Plank.png"
 WOOD_TABLE_8PLACES_TEXTURE :: "objects/Table.8Places.Wood.png"
+POUTINE_PAINTING_TEXTURE :: "objects/Poutine.Painting.Bake.png"
 
 Object :: struct {
 	pos:         glsl.vec3,

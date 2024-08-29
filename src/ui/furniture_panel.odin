@@ -16,12 +16,13 @@ Furniture :: struct {
 	model:     string,
 	texture:   string,
 	placement: game.Object_Placement,
-    type: game.Object_Type,
+	type:      game.Object_Type,
 }
 
 FURNITURE_PANEL_ICONS :: []cstring {
 	"resources/textures/object_icons/Plank.Table.6Places.png",
 	"resources/textures/object_icons/Window.Wood.png",
+	"resources/textures/object_icons/Poutine.Painting.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
@@ -36,14 +37,21 @@ FURNITURES :: []Furniture {
 		model = game.PLANK_TABLE_6PLACES_MODEL,
 		texture = game.PLANK_TABLE_6PLACES_TEXTURE,
 		placement = .Floor,
-        type = .Table,
+		type = .Table,
 	},
 	 {
 		icon = "resources/textures/object_icons/Window.Wood.png",
 		model = game.WOOD_WINDOW_MODEL,
 		texture = game.WOOD_WINDOW_TEXTURE,
 		placement = .Wall,
-        type = .Window,
+		type = .Window,
+	},
+	 {
+		icon = "resources/textures/object_icons/Poutine.Painting.png",
+		model = game.POUTINE_PAINTING_MODEL,
+		texture = game.POUTINE_PAINTING_TEXTURE,
+		placement = .Wall,
+		type = .Painting,
 	},
 }
 
@@ -64,8 +72,8 @@ furniture_panel_body :: proc(
 		if icon_button(
 			   ctx,
 			    {
-				   2 + f32(i / 2) * (FURNITURE_PANEL_TILE_SIZE + 2),// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
-				   pos.y +
+				   2 + f32(i / 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
+				   pos.y +// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
 				   FURNITURE_PANEL_PADDING +
 				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
 			   },
