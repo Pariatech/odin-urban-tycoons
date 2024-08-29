@@ -771,6 +771,10 @@ chunk_draw_walls :: proc(
 		chunk.num_indices = i32(len(indices))
 	}
 
+    if chunk.num_indices == 0 {
+        return
+    }
+
 	gl.DrawElements(gl.TRIANGLES, chunk.num_indices, gl.UNSIGNED_INT, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)

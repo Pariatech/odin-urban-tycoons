@@ -989,6 +989,10 @@ chunk_billboards_draw :: proc(
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	}
 
+    if len(billboard_draw_context.indices) == 0 {
+        return
+    }
+
 	gl.BindVertexArray(billboards.vao)
 	gl.DrawElementsInstanced(
 		gl.TRIANGLES,

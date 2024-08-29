@@ -104,8 +104,6 @@ draw_diagonal_wall :: proc(
 	rotation_map := DIAGONAL_WALL_ROTATION_MAP
 	transform_map := DIAGONAL_WALL_TRANSFORM_MAP
 
-	rotation := rotation_map[axis][camera.rotation]
-	// texture := wall.textures[side]
 	position := glsl.vec3 {
 		f32(pos.x),
 		f32(pos.y) * constants.WALL_HEIGHT +

@@ -312,6 +312,10 @@ chunk_draw_tiles :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 		chunk.num_indices = i32(len(indices))
 	}
 
+    if chunk.num_indices == 0 {
+        return
+    }
+
 	gl.DrawElements(gl.TRIANGLES, chunk.num_indices, gl.UNSIGNED_INT, nil)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
