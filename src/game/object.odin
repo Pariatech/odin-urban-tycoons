@@ -99,6 +99,7 @@ WOOD_TABLE_6PLACES_MODEL :: "Table.6Places.Bake"
 PLANK_TABLE_6PLACES_MODEL :: "Plank.Table.6Places.Bake"
 WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
 POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
+DOUBLE_WINDOW_MODEL :: "Double_Window.Bake"
 
 WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
 WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
@@ -107,6 +108,12 @@ WOOD_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Wood.png"
 PLANK_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Plank.png"
 WOOD_TABLE_8PLACES_TEXTURE :: "objects/Table.8Places.Wood.png"
 POUTINE_PAINTING_TEXTURE :: "objects/Poutine.Painting.Bake.png"
+DOUBLE_WINDOW_TEXTURE :: "objects/Double_Window.Bake.png"
+
+window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
+	WOOD_WINDOW_MODEL   = .Window_Opening,
+	DOUBLE_WINDOW_MODEL = .Double_Window,
+}
 
 Object :: struct {
 	pos:         glsl.vec3,
@@ -170,6 +177,9 @@ init_objects :: proc() -> (ok: bool = true) {
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.UseProgram(0)
+
+
+	log.info(get_object_size(DOUBLE_WINDOW_MODEL))
 
 	return true
 }
@@ -306,6 +316,10 @@ draw_objects :: proc() -> bool {
 	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ctx.ubo)
 
+	// gl.Enable(gl.BLEND)
+	// gl.BlendEquation(gl.FUNC_ADD)
+	// gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
 	// gl.Disable(gl.MULTISAMPLE)
 
 	bind_shader(&ctx.shader)
@@ -344,7 +358,7 @@ add_object :: proc(obj: Object) -> bool {
 	can_add_object(
 		obj.pos,
 		obj.model,
-        obj.type,
+		obj.type,
 		obj.orientation,
 		obj.placement,
 	) or_return
@@ -365,23 +379,44 @@ add_object :: proc(obj: Object) -> bool {
 	append(&chunk.objects, obj)
 
 	if obj.type == .Window {
-		axis: Wall_Axis
-		switch obj.orientation {
-		case .East, .West:
-			axis = .N_S
-		case .South, .North:
-			axis = .E_W
+		for x in 0 ..< obj.size.x {
+			tx := x
+			tz: i32 = 0
+			#partial switch obj.orientation {
+			case .East:
+				tx = 0
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = 0
+				tz = -x
+			}
+
+			tpos := obj.pos + {f32(tx), 0, f32(tz)}
+
+			tile_pos := world_pos_to_tile_pos(tpos)
+			wall_pos: glsl.ivec3 = {tile_pos.x, chunk_pos.y, tile_pos.y}
+			axis: Wall_Axis
+
+			switch obj.orientation {
+			case .East:
+				wall_pos.x += 1
+				axis = .N_S
+			case .West:
+				axis = .N_S
+			case .South:
+				axis = .E_W
+			case .North:
+				wall_pos.z += 1
+				axis = .E_W
+			}
+
+			w, _ := get_wall(wall_pos, axis)
+			mask := window_model_to_wall_mask_map[obj.model]
+			w.mask = mask
+			set_wall(wall_pos, axis, w)
 		}
-		wall_pos := glsl.ivec3{tile_pos.x, chunk_pos.y, tile_pos.y}
-		#partial switch obj.orientation {
-		case .East:
-			wall_pos += {1, 0, 0}
-		case .North:
-			wall_pos += {0, 0, 1}
-		}
-		w, _ := get_wall(wall_pos, axis)
-		w.mask = .Window_Opening
-		set_wall(wall_pos, axis, w)
 	}
 
 	return true
@@ -526,25 +561,6 @@ can_add_object_on_wall :: proc(
 	type: Object_Type,
 	orientation: Object_Orientation,
 ) -> bool {
-	tile_pos := world_pos_to_tile_pos(pos)
-	switch orientation {
-	case .East:
-		if !has_north_south_wall({tile_pos.x + 1, chunk_pos.y, tile_pos.y}) {
-			return false
-		}
-	case .West:
-		if !has_north_south_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
-			return false
-		}
-	case .South:
-		if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
-			return false
-		}
-	case .North:
-		if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y + 1}) {
-			return false
-		}
-	}
 
 	obj_size := get_object_size(model)
 	for x in 0 ..< obj_size.x {
@@ -562,6 +578,29 @@ can_add_object_on_wall :: proc(
 		}
 
 		tpos := pos + {f32(tx), 0, f32(tz)}
+
+		tile_pos := world_pos_to_tile_pos(tpos)
+		switch orientation {
+		case .East:
+			if !has_north_south_wall(
+				   {tile_pos.x + 1, chunk_pos.y, tile_pos.y},
+			   ) {
+				return false
+			}
+		case .West:
+			if !has_north_south_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+				return false
+			}
+		case .South:
+			if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+				return false
+			}
+		case .North:
+			if !has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y + 1}) {
+				return false
+			}
+		}
+
 		if has_object_at(tpos, .Wall, orientation) {
 			return false
 		}
@@ -569,13 +608,21 @@ can_add_object_on_wall :: proc(
 		if type == .Window || type == .Door {
 			switch orientation {
 			case .South:
-				return !has_object_at(tpos + {0, 0, -1}, .Wall, .North)
+				if has_object_at(tpos + {0, 0, -1}, .Wall, .North) {
+					return false
+				}
 			case .East:
-				return !has_object_at(tpos + {1, 0, 0}, .Wall, .West)
+				if has_object_at(tpos + {1, 0, 0}, .Wall, .West) {
+					return false
+				}
 			case .North:
-				return !has_object_at(tpos + {0, 0, 1}, .Wall, .South)
+				if has_object_at(tpos + {0, 0, 1}, .Wall, .South) {
+					return false
+				}
 			case .West:
-				return !has_object_at(tpos + {-1, 0, 0}, .Wall, .East)
+				if has_object_at(tpos + {-1, 0, 0}, .Wall, .East) {
+					return false
+				}
 			}
 		}
 	}

@@ -20,6 +20,7 @@ Wall_Mask_Texture :: enum (u16) {
 	Full_Mask,
 	Door_Opening,
 	Window_Opening,
+	Double_Window,
 }
 
 Wall_Axis :: enum {
@@ -152,6 +153,7 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 	.Full_Mask      = "resources/textures/wall-masks/full.png",
 	.Door_Opening   = "resources/textures/wall-masks/door-opening.png",
 	.Window_Opening = "resources/textures/wall-masks/window-opening.png",
+	.Double_Window  = "resources/textures/wall-masks/Double_Window_Mask.png",
 }
 
 WALL_TYPE_MODEL_NAME_MAP :: [Wall_Type][Wall_Side]string {
@@ -255,8 +257,8 @@ load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.GenTextures(1, &wall_mask_array)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, wall_mask_array)
 
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP)
-	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
@@ -343,7 +345,7 @@ draw_wall :: proc(
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
-    models := get_models_context()
+	models := get_models_context()
 	position := glsl.vec3 {
 		f32(pos.x),
 		f32(pos.y) * constants.WALL_HEIGHT +
@@ -658,10 +660,7 @@ chunk_remove_south_west_north_east_wall :: proc(
 	chunk.dirty = true
 }
 
-chunk_draw_walls :: proc(
-	chunk: ^Chunk,
-	pos: glsl.ivec3,
-) {
+chunk_draw_walls :: proc(chunk: ^Chunk, pos: glsl.ivec3) {
 	if !chunk.initialized {
 		chunk.initialized = true
 		chunk.dirty = true
@@ -771,9 +770,9 @@ chunk_draw_walls :: proc(
 		chunk.num_indices = i32(len(indices))
 	}
 
-    if chunk.num_indices == 0 {
-        return
-    }
+	if chunk.num_indices == 0 {
+		return
+	}
 
 	gl.DrawElements(gl.TRIANGLES, chunk.num_indices, gl.UNSIGNED_INT, nil)
 

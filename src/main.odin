@@ -160,12 +160,13 @@ start :: proc() -> (ok: bool = false) {
 		world.update()
 
 		game.update_cutaways()
-		tools.update(delta_time)
 
-		game.draw_objects() or_return
 
 		// game.draw_object_tool()
 		world.draw()
+
+		tools.update(delta_time)
+		game.draw_objects() or_return
 
 		ui.draw(&ui_ctx)
 

@@ -23,6 +23,7 @@ FURNITURE_PANEL_ICONS :: []cstring {
 	"resources/textures/object_icons/Plank.Table.6Places.png",
 	"resources/textures/object_icons/Window.Wood.png",
 	"resources/textures/object_icons/Poutine.Painting.png",
+	"resources/textures/object_icons/Double_Window.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
@@ -52,6 +53,13 @@ FURNITURES :: []Furniture {
 		texture = game.POUTINE_PAINTING_TEXTURE,
 		placement = .Wall,
 		type = .Painting,
+	},
+	 {
+		icon = "resources/textures/object_icons/Double_Window.png",
+		model = game.DOUBLE_WINDOW_MODEL,
+		texture = game.DOUBLE_WINDOW_TEXTURE,
+		placement = .Wall,
+		type = .Window,
 	},
 }
 

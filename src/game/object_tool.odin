@@ -33,6 +33,7 @@ init_object_tool :: proc() {
 set_object_tool_model :: proc(model: string) {
 	ctx := get_object_tool_context()
 	ctx.object.model = model
+    ctx.object.size = get_object_size(model)
 }
 
 set_object_tool_texture :: proc(texture: string) {
@@ -174,7 +175,8 @@ update_wall_masks_on_object_placement :: proc(
 		   ctx.object.placement,
 	   ) {
 		if ctx.object.type == .Window {
-			set_wall_mask_from_object(ctx.object, .Window_Opening)
+			mask := window_model_to_wall_mask_map[ctx.object.model]
+			set_wall_mask_from_object(ctx.object, mask)
 		} else {
 			set_wall_mask_from_object(ctx.object, .Door_Opening)
 		}
@@ -186,23 +188,43 @@ set_wall_mask_from_object :: proc(obj: Object, mask: Wall_Mask_Texture) {
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
 	if obj.type == .Window {
-		axis: Wall_Axis
-		switch obj.orientation {
-		case .East, .West:
-			axis = .N_S
-		case .South, .North:
-			axis = .E_W
+		for x in 0 ..< obj.size.x {
+			tx := x
+			tz: i32 = 0
+			#partial switch obj.orientation {
+			case .East:
+				tx = 0
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = 0
+				tz = -x
+			}
+
+			tpos := obj.pos + {f32(tx), 0, f32(tz)}
+
+			tile_pos := world_pos_to_tile_pos(tpos)
+			wall_pos: glsl.ivec3 = {tile_pos.x, chunk_pos.y, tile_pos.y}
+			axis: Wall_Axis
+
+			switch obj.orientation {
+			case .East:
+				wall_pos.x += 1
+				axis = .N_S
+			case .West:
+				axis = .N_S
+			case .South:
+				axis = .E_W
+			case .North:
+				wall_pos.z += 1
+				axis = .E_W
+			}
+
+			w, _ := get_wall(wall_pos, axis)
+			w.mask = mask
+			set_wall(wall_pos, axis, w)
 		}
-		wall_pos := glsl.ivec3{tile_pos.x, chunk_pos.y, tile_pos.y}
-		#partial switch obj.orientation {
-		case .East:
-			wall_pos += {1, 0, 0}
-		case .North:
-			wall_pos += {0, 0, 1}
-		}
-		w, _ := get_wall(wall_pos, axis)
-		w.mask = mask
-		set_wall(wall_pos, axis, w)
 	}
 }
 
@@ -234,6 +256,7 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 
 	draw_object(&object) or_return
 
+    // log.info(object.model, object.size)
 	for x in 0 ..< object.size.x {
 		tx := x
 		for z in 0 ..< object.size.z {

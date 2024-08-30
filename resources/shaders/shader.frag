@@ -15,8 +15,12 @@ layout(location = 0) out vec4 color;
 
 void main() {
     vec4 tex = texture(texture_sampler, frag_texcoord.rgb);
-    vec4 mask_tex = texture(mask_sampler, frag_texcoord.rga);
-    // vec4 mask_tex = vec4(1);
+    vec4 mask_tex; 
+    if (frag_texcoord.r < -0.01 || frag_texcoord.r > 1.01) {
+        mask_tex = vec4(1);
+    } else {
+        mask_tex = texture(mask_sampler, frag_texcoord.rga);
+    }
     if (tex.a * mask_tex.a < 0.01) {
         discard;
     }
