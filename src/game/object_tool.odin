@@ -254,9 +254,6 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 	)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, objects_ctx.ubo)
 
-	draw_object(&object) or_return
-
-    // log.info(object.model, object.size)
 	for x in 0 ..< object.size.x {
 		tx := x
 		for z in 0 ..< object.size.z {
@@ -278,6 +275,8 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 			draw_object(&ctx.tile_marker) or_return
 		}
 	}
+
+	draw_object(&object) or_return
 
 	return true
 }

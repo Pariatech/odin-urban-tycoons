@@ -165,8 +165,8 @@ start :: proc() -> (ok: bool = false) {
 		// game.draw_object_tool()
 		world.draw()
 
-		tools.update(delta_time)
 		game.draw_objects() or_return
+		tools.update(delta_time)
 
 		ui.draw(&ui_ctx)
 
