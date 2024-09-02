@@ -9,10 +9,10 @@ import "../../camera"
 import "../../constants"
 import "../../cursor"
 import "../../floor"
+import "../../game"
 import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
-import "../../game"
 
 wall_tool_billboard: billboard.Key
 wall_tool_position: glsl.ivec2
@@ -64,7 +64,7 @@ update :: proc() {
 			revert_removing_rectangle()
 		} else {
 			revert_removing_line()
-        }
+		}
 	} else if keyboard.is_key_press(.Key_Left_Control) {
 		billboard.billboard_1x1_set(
 			wall_tool_billboard,
@@ -78,8 +78,8 @@ update :: proc() {
 		if keyboard.is_key_down(.Key_Left_Shift) {
 			revert_walls_rectangle()
 		} else {
-		    revert_walls_line()
-	    }
+			revert_walls_line()
+		}
 	}
 
 	if keyboard.is_key_release(.Key_Left_Shift) {
@@ -288,6 +288,10 @@ update_east_west_neighbors :: proc(pos: glsl.ivec3) {
 	update_north_south_wall(pos + {0, 0, 0})
 	update_north_south_wall(pos + {1, 0, -1})
 	update_north_south_wall(pos + {1, 0, 0})
+	update_north_west_south_east_wall(pos + {-1, 0, 0})
+	update_north_west_south_east_wall(pos + {1, 0, -1})
+	update_south_west_north_east_wall(pos + {-1, 0, -1})
+	update_south_west_north_east_wall(pos + {1, 0, 0})
 }
 
 update_north_south_neighbors :: proc(pos: glsl.ivec3) {
@@ -297,6 +301,10 @@ update_north_south_neighbors :: proc(pos: glsl.ivec3) {
 	update_east_west_wall(pos + {0, 0, 0})
 	update_east_west_wall(pos + {-1, 0, 1})
 	update_east_west_wall(pos + {0, 0, 1})
+	update_north_west_south_east_wall(pos + {-1, 0, 1})
+	update_north_west_south_east_wall(pos + {0, 0, -1})
+	update_south_west_north_east_wall(pos + {0, 0, 1})
+	update_south_west_north_east_wall(pos + {-1, 0, -1})
 }
 
 update_south_west_north_east_wall_and_neighbors :: proc(pos: glsl.ivec3) {
@@ -489,7 +497,9 @@ update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	left_type_part := game.Wall_Type_Part.End
-	if game.has_north_west_south_east_wall(pos + {-1, 0, 1}) {
+	if game.has_north_west_south_east_wall(pos + {-1, 0, 1}) ||
+	   game.has_north_south_wall(pos + {0, 0, 1}) ||
+	   game.has_east_west_wall(pos + {-1, 0, 1}) {
 		left_type_part = .Side
 	} else {
 		has_left := game.has_south_west_north_east_wall(pos + {0, 0, 1})
@@ -503,7 +513,9 @@ update_north_west_south_east_wall :: proc(pos: glsl.ivec3) {
 		}
 	}
 	right_type_part := game.Wall_Type_Part.End
-	if game.has_north_west_south_east_wall(pos + {1, 0, -1}) {
+	if game.has_north_west_south_east_wall(pos + {1, 0, -1}) ||
+	   game.has_north_south_wall(pos + {1, 0, -1}) ||
+	   game.has_east_west_wall(pos + {1, 0, 0}) {
 		right_type_part = .Side
 	} else {
 		has_left := game.has_south_west_north_east_wall(pos + {1, 0, 0})
@@ -536,7 +548,9 @@ update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 	}
 
 	left_type_part := game.Wall_Type_Part.End
-	if game.has_south_west_north_east_wall(pos + {-1, 0, -1}) {
+	if game.has_south_west_north_east_wall(pos + {-1, 0, -1}) ||
+	   game.has_north_south_wall(pos + {0, 0, -1}) ||
+	   game.has_east_west_wall(pos + {-1, 0, 0}) {
 		left_type_part = .Side
 	} else {
 		has_left := game.has_north_west_south_east_wall(pos + {-1, 0, 0})
@@ -550,7 +564,9 @@ update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 		}
 	}
 	right_type_part := game.Wall_Type_Part.End
-	if game.has_south_west_north_east_wall(pos + {1, 0, 1}) {
+	if game.has_south_west_north_east_wall(pos + {1, 0, 1}) ||
+	   game.has_north_south_wall(pos + {1, 0, 1}) ||
+	   game.has_east_west_wall(pos + {1, 0, 1}) {
 		right_type_part = .Side
 	} else {
 		has_left := game.has_north_west_south_east_wall(pos + {0, 0, 1})
@@ -566,7 +582,7 @@ update_south_west_north_east_wall :: proc(pos: glsl.ivec3) {
 
 	type_map := game.WALL_SIDE_TYPE_MAP
 	w.type = type_map[left_type_part][right_type_part]
-    // log.info(pos, w.type)
+	// log.info(pos, w.type)
 	game.set_south_west_north_east_wall(pos, w)
 }
 
@@ -587,16 +603,13 @@ set_south_west_north_east_wall :: proc(
 		return
 	}
 
-    if !terrain.is_tile_flat(pos.xz) {
+	if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
 	game.set_south_west_north_east_wall(
 		pos,
-		 {
-			type = .Side,
-			textures = {.Inside = texture, .Outside = texture},
-		},
+		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
 	)
 	update_south_west_north_east_wall_and_neighbors(pos)
 }
@@ -618,16 +631,13 @@ set_north_west_south_east_wall :: proc(
 		return
 	}
 
-    if !terrain.is_tile_flat(pos.xz) {
+	if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
 	game.set_north_west_south_east_wall(
 		pos,
-		 {
-			type = .Side,
-			textures = {.Inside = texture, .Outside = texture},
-		},
+		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
 	)
 
 	update_north_west_south_east_wall_and_neighbors(pos)
@@ -647,16 +657,13 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: game.Wall_Texture) {
 		return
 	}
 
-    if !terrain.is_tile_flat(pos.xz) {
+	if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
 	game.set_east_west_wall(
 		pos,
-		 {
-			type = .Side,
-			textures = {.Inside = texture, .Outside = texture},
-		},
+		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
 	)
 	update_east_west_wall_and_neighbors(pos)
 }
@@ -675,16 +682,13 @@ set_north_south_wall :: proc(pos: glsl.ivec3, texture: game.Wall_Texture) {
 		return
 	}
 
-    if !terrain.is_tile_flat(pos.xz) {
+	if !terrain.is_tile_flat(pos.xz) {
 		return
 	}
 
 	game.set_north_south_wall(
 		pos,
-		 {
-			type = .Side,
-			textures = {.Inside = texture, .Outside = texture},
-		},
+		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
 	)
 	update_north_south_wall_and_neighbors(pos)
 }
@@ -866,7 +870,7 @@ revert_removing_rectangle :: proc() {
 }
 
 removing_rectangle :: proc() {
-    revert_removing_rectangle()
+	revert_removing_rectangle()
 
 	previous_tool_position := wall_tool_position
 	cursor.on_tile_intersect(
