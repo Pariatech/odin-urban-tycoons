@@ -2,6 +2,8 @@ package game
 
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:slice"
+
 import gl "vendor:OpenGL"
 
 import "../camera"
@@ -26,6 +28,7 @@ Object_Draw :: struct {
 
 Object_Draw_Chunk :: struct {
 	draws: [dynamic]Object_Draw,
+	dirty: bool,
 }
 
 Object_Draws :: struct {
@@ -73,14 +76,14 @@ init_object_draws :: proc() -> bool {
 deinit_object_draws :: proc() {
 	ctx := get_object_draws_context()
 
-    delete(ctx.keys)
-    for &row in ctx.chunks {
-        for &col in row {
-            for chunk in col {
-                delete(chunk.draws)
-            }
-        }
-    }
+	delete(ctx.keys)
+	for &row in ctx.chunks {
+		for &col in row {
+			for chunk in col {
+				delete(chunk.draws)
+			}
+		}
+	}
 }
 
 draw_object :: proc(object: ^Object_Draw) -> bool {
@@ -109,9 +112,50 @@ draw_object :: proc(object: ^Object_Draw) -> bool {
 	return true
 }
 
+object_draws_sort :: proc(a: Object_Draw, b: Object_Draw) -> bool {
+	switch camera.rotation {
+	case .South_West:
+		return(
+			a.pos.x == b.pos.x && a.pos.z == b.pos.z && a.pos.y < b.pos.y ||
+			a.pos.x == b.pos.x && a.pos.z > b.pos.z ||
+			a.pos.x > b.pos.x \
+		)
+	case .South_East:
+		return(
+			a.pos.x == b.pos.x && a.pos.z == b.pos.z && a.pos.y < b.pos.y ||
+			a.pos.x == b.pos.x && a.pos.z > b.pos.z ||
+			a.pos.x < b.pos.x \
+		)
+	case .North_East:
+		return(
+			a.pos.x == b.pos.x && a.pos.z == b.pos.z && a.pos.y < b.pos.y ||
+			a.pos.x == b.pos.x && a.pos.z < b.pos.z ||
+			a.pos.x < b.pos.x \
+		)
+	case .North_West:
+		return(
+			a.pos.x == b.pos.x && a.pos.z == b.pos.z && a.pos.y < b.pos.y ||
+			a.pos.x == b.pos.x && a.pos.z < b.pos.z ||
+			a.pos.x > b.pos.x \
+		)
+	}
+	return true
+}
+
 draw_chunk :: proc(chunk: ^Object_Draw_Chunk) -> bool {
+	ctx := get_object_draws_context()
+
 	if len(chunk.draws) == 0 {
 		return true
+	}
+
+	if chunk.dirty {
+		slice.sort_by(chunk.draws[:], object_draws_sort)
+        for draw, i in chunk.draws {
+            key := &ctx.keys[draw.id]
+            key.index = i
+        }
+        chunk.dirty = false
 	}
 
 	for &object in chunk.draws {
@@ -155,6 +199,7 @@ create_object_draw :: proc(draw: Object_Draw) -> Object_Draw_Id {
 
 	chunk_pos := world_pos_to_chunk_pos(draw.pos)
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk.dirty = true
 
 	index := len(chunk.draws)
 	append(&chunk.draws, draw)
@@ -169,6 +214,7 @@ update_object_draw :: proc(update: Object_Draw) {
 	key := &ctx.keys[update.id]
 	chunk_pos := key.chunk_pos
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk.dirty = true
 
 	existing := &chunk.draws[key.index]
 	if existing.pos != update.pos {
@@ -183,6 +229,8 @@ update_object_draw :: proc(update: Object_Draw) {
 			}
 
 			chunk := &ctx.chunks[update_chunk_pos.y][update_chunk_pos.x][update_chunk_pos.z]
+			chunk.dirty = true
+
 			key.chunk_pos = update_chunk_pos
 			key.index = len(chunk.draws)
 			append(&chunk.draws, update)
@@ -198,6 +246,7 @@ delete_object_draw :: proc(id: Object_Draw_Id) {
 	key := &ctx.keys[id]
 	chunk_pos := key.chunk_pos
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk.dirty = true
 
 	unordered_remove(&chunk.draws, key.index)
 	if key.index < len(chunk.draws) {
