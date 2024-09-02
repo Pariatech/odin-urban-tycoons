@@ -1,0 +1,269 @@
+package game
+
+import "core:math"
+import "core:math/linalg/glsl"
+import gl "vendor:OpenGL"
+
+import "../camera"
+import c "../constants"
+import "../floor"
+
+Object_Draw_Id :: int
+
+Object_Draw_Key :: struct {
+	chunk_pos: glsl.ivec3,
+	index:     int,
+}
+
+Object_Draw :: struct {
+	id:        Object_Draw_Id,
+	pos:       glsl.vec3,
+	transform: glsl.mat4,
+	light:     glsl.vec3,
+	model:     string,
+	texture:   string,
+}
+
+Object_Draw_Chunk :: struct {
+	draws: [dynamic]Object_Draw,
+}
+
+Object_Draws :: struct {
+	keys:    map[Object_Draw_Id]Object_Draw_Key,
+	chunks:  [c.WORLD_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Draw_Chunk,
+	next_id: Object_Draw_Id,
+	ubo:     u32,
+	shader:  Shader,
+}
+
+OBJECT_SHADER :: Shader {
+	vertex   = "resources/shaders/object.vert",
+	fragment = "resources/shaders/object.frag",
+}
+
+init_object_draws :: proc() -> bool {
+	ctx := get_object_draws_context()
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+
+
+	// renderer.load_shader_program(
+	// 	&shader_program,
+	// 	OBJECT_VERTEX_SHADER_PATH,
+	// 	OBJECT_FRAGMENT_SHADER_PATH,
+	// ) or_return
+	ctx.shader = OBJECT_SHADER
+	init_shader(&ctx.shader) or_return
+
+	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
+	set_shader_uniform(&ctx.shader, "texture_sampler", i32(0))
+
+	gl.GenBuffers(1, &ctx.ubo)
+
+	gl.BindVertexArray(0)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+	gl.UseProgram(0)
+
+	return true
+}
+
+deinit_object_draws :: proc() {
+	ctx := get_object_draws_context()
+
+    delete(ctx.keys)
+    for &row in ctx.chunks {
+        for &col in row {
+            for chunk in col {
+                delete(chunk.draws)
+            }
+        }
+    }
+}
+
+draw_object :: proc(object: ^Object_Draw) -> bool {
+	// translate := glsl.mat4Translate(object.pos)
+	// rotation_radian := f32(object.orientation) * 0.5 * math.PI
+	// rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
+	// translate * rotation
+	uniform_object := Object_Uniform_Object {
+		mvp   = camera.view_proj * object.transform,
+		light = object.light,
+	}
+
+	gl.BufferData(
+		gl.UNIFORM_BUFFER,
+		size_of(Object_Uniform_Object),
+		&uniform_object,
+		gl.STATIC_DRAW,
+	)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+	bind_texture(object.texture) or_return
+
+	bind_model(object.model) or_return
+	draw_model(object.model)
+
+	return true
+}
+
+draw_chunk :: proc(chunk: ^Object_Draw_Chunk) -> bool {
+	if len(chunk.draws) == 0 {
+		return true
+	}
+
+	for &object in chunk.draws {
+		draw_object(&object) or_return
+	}
+
+	return true
+}
+
+draw_objects :: proc() -> bool {
+	ctx := get_object_draws_context()
+
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
+	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ctx.ubo)
+
+	// gl.Enable(gl.BLEND)
+	// gl.BlendEquation(gl.FUNC_ADD)
+	// gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	// gl.Disable(gl.MULTISAMPLE)
+
+	bind_shader(&ctx.shader)
+	// gl.UseProgram(shader_program)
+
+	for floor in 0 ..= floor.floor {
+		it := camera.make_visible_chunk_iterator()
+		for pos in it->next() {
+			draw_chunk(&ctx.chunks[floor][pos.x][pos.y]) or_return
+		}
+	}
+
+	return true
+}
+
+create_object_draw :: proc(draw: Object_Draw) -> Object_Draw_Id {
+	draw := draw
+	ctx := get_object_draws_context()
+	draw.id = ctx.next_id
+	ctx.next_id += 1
+
+	chunk_pos := world_pos_to_chunk_pos(draw.pos)
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+
+	index := len(chunk.draws)
+	append(&chunk.draws, draw)
+
+	ctx.keys[draw.id] = {chunk_pos, index}
+
+	return draw.id
+}
+
+update_object_draw :: proc(update: Object_Draw) {
+	ctx := get_object_draws_context()
+	key := &ctx.keys[update.id]
+	chunk_pos := key.chunk_pos
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+
+	existing := &chunk.draws[key.index]
+	if existing.pos != update.pos {
+		update_chunk_pos := world_pos_to_chunk_pos(update.pos)
+		if update_chunk_pos != chunk_pos {
+			// move object across chunks if needed
+			unordered_remove(&chunk.draws, key.index)
+			if key.index < len(chunk.draws) {
+				draw := chunk.draws[key.index]
+				moved_key := &ctx.keys[draw.id]
+				moved_key.index = key.index
+			}
+
+			chunk := &ctx.chunks[update_chunk_pos.y][update_chunk_pos.x][update_chunk_pos.z]
+			key.chunk_pos = update_chunk_pos
+			key.index = len(chunk.draws)
+			append(&chunk.draws, update)
+			return
+		}
+	}
+
+	existing^ = update
+}
+
+delete_object_draw :: proc(id: Object_Draw_Id) {
+	ctx := get_object_draws_context()
+	key := &ctx.keys[id]
+	chunk_pos := key.chunk_pos
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+
+	unordered_remove(&chunk.draws, key.index)
+	if key.index < len(chunk.draws) {
+		draw := chunk.draws[key.index]
+		moved_key := &ctx.keys[draw.id]
+		moved_key.index = key.index
+	}
+}
+
+object_draw_from_object :: proc(obj: Object) -> Object_Draw {
+	draw: Object_Draw
+	switch obj.orientation {
+	case .South:
+		switch camera.rotation {
+		case .South_West:
+			draw.pos = obj.pos + {0, 0, -f32(obj.size.z)}
+		case .South_East:
+			draw.pos = obj.pos + {f32(obj.size.x), 0, -f32(obj.size.z)}
+		case .North_East:
+			draw.pos = obj.pos + {f32(obj.size.x), 0, 0}
+		case .North_West:
+			draw.pos = obj.pos
+		}
+	case .East:
+		switch camera.rotation {
+		case .South_West:
+			draw.pos = obj.pos
+		case .South_East:
+			draw.pos = obj.pos + {f32(obj.size.x), 0, 0}
+		case .North_East:
+			draw.pos = obj.pos + {f32(obj.size.x), 0, f32(obj.size.z)}
+		case .North_West:
+			draw.pos = obj.pos + {0, 0, f32(obj.size.z)}
+		}
+	case .North:
+		switch camera.rotation {
+		case .South_West:
+			draw.pos = obj.pos + {-f32(obj.size.x), 0, 0}
+		case .South_East:
+			draw.pos = obj.pos
+		case .North_East:
+			draw.pos = obj.pos + {0, 0, f32(obj.size.z)}
+		case .North_West:
+			draw.pos = obj.pos + {-f32(obj.size.x), 0, f32(obj.size.z)}
+		}
+	case .West:
+		switch camera.rotation {
+		case .South_West:
+			draw.pos = obj.pos + {-f32(obj.size.x), 0, -f32(obj.size.z)}
+		case .South_East:
+			draw.pos = obj.pos + {0, 0, -f32(obj.size.z)}
+		case .North_East:
+			draw.pos = obj.pos
+		case .North_West:
+			draw.pos = obj.pos + {-f32(obj.size.x), 0, 0}
+		}
+	}
+
+	translate := glsl.mat4Translate(obj.pos)
+	rotation_radian := f32(obj.orientation) * 0.5 * math.PI
+	rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
+	draw.transform = translate * rotation
+
+	draw.model = obj.model
+	draw.texture = obj.texture
+	draw.light = obj.light
+
+	return draw
+}

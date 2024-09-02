@@ -124,6 +124,7 @@ Object :: struct {
 	orientation: Object_Orientation,
 	placement:   Object_Placement,
 	size:        glsl.ivec3,
+	draw_id:     Object_Draw_Id,
 }
 
 Object_Chunk :: struct {
@@ -140,47 +141,12 @@ Object_Uniform_Object :: struct {
 }
 
 
-OBJECT_SHADER :: Shader {
-	vertex   = "resources/shaders/object.vert",
-	fragment = "resources/shaders/object.frag",
-}
-
 Objects_Context :: struct {
 	chunks: Object_Chunks,
-	ubo:    u32,
-	shader: Shader,
 }
 
 
 init_objects :: proc() -> (ok: bool = true) {
-	ctx := get_game_context()
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
-
-
-	// renderer.load_shader_program(
-	// 	&shader_program,
-	// 	OBJECT_VERTEX_SHADER_PATH,
-	// 	OBJECT_FRAGMENT_SHADER_PATH,
-	// ) or_return
-	ctx.objects.shader = OBJECT_SHADER
-	init_shader(&ctx.objects.shader) or_return
-
-	// gl.Uniform1i(gl.GetUniformLocation(shader_program, "texture_sampler"), 0)
-	set_shader_uniform(&ctx.objects.shader, "texture_sampler", i32(0))
-
-	gl.GenBuffers(1, &ctx.objects.ubo)
-
-	gl.BindVertexArray(0)
-	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-	gl.UseProgram(0)
-
-
-	log.info(get_object_size(DOUBLE_WINDOW_MODEL))
-
 	return true
 }
 
@@ -270,71 +236,6 @@ sort_objects :: proc(a, b: Object) -> bool {
 	return false
 }
 
-draw_object :: proc(object: ^Object) -> bool {
-	ctx := get_game_context()
-
-	translate := glsl.mat4Translate(object.pos)
-	rotation_radian := f32(object.orientation) * 0.5 * math.PI
-	rotation := glsl.mat4Rotate({0, 1, 0}, rotation_radian)
-	uniform_object := Object_Uniform_Object {
-		mvp   = camera.view_proj * translate * rotation,
-		light = object.light,
-	}
-
-	gl.BufferData(
-		gl.UNIFORM_BUFFER,
-		size_of(Object_Uniform_Object),
-		&uniform_object,
-		gl.STATIC_DRAW,
-	)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	bind_texture(object.texture) or_return
-
-	bind_model(object.model) or_return
-	draw_model(object.model)
-
-	return true
-}
-
-draw_chunk :: proc(chunk: ^Object_Chunk) -> bool {
-	if len(chunk.objects) == 0 {
-		return true
-	}
-
-	for &object in chunk.objects {
-		draw_object(&object) or_return
-	}
-
-	return true
-}
-
-draw_objects :: proc() -> bool {
-	ctx := get_objects_context()
-
-	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
-	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ctx.ubo)
-
-	// gl.Enable(gl.BLEND)
-	// gl.BlendEquation(gl.FUNC_ADD)
-	// gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	// gl.Disable(gl.MULTISAMPLE)
-
-	bind_shader(&ctx.shader)
-	// gl.UseProgram(shader_program)
-
-	for floor in 0 ..= floor.floor {
-		it := camera.make_visible_chunk_iterator()
-		for pos in it->next() {
-			draw_chunk(&ctx.chunks[floor][pos.x][pos.y]) or_return
-		}
-	}
-
-	return true
-}
-
 world_pos_to_tile_pos :: proc(pos: glsl.vec3) -> (tile_pos: glsl.ivec2) {
 	tile_pos.x = i32(pos.x + 0.5)
 	tile_pos.y = i32(pos.z + 0.5)
@@ -351,6 +252,7 @@ world_pos_to_chunk_pos :: proc(pos: glsl.vec3) -> (chunk_pos: glsl.ivec3) {
 }
 
 add_object :: proc(obj: Object) -> bool {
+	obj := obj
 	ctx := get_objects_context()
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
@@ -375,6 +277,8 @@ add_object :: proc(obj: Object) -> bool {
 		obj.placement,
 		obj.orientation,
 	)
+
+	obj.draw_id = create_object_draw(object_draw_from_object(obj))
 
 	append(&chunk.objects, obj)
 

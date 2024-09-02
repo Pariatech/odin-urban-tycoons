@@ -117,6 +117,7 @@ start :: proc() -> (ok: bool = false) {
 
 
 	game.init_game() or_return
+    defer game.deinit_game()
 
 	should_close := false
 	current_time_ns := time.now()

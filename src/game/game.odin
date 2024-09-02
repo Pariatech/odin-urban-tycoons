@@ -6,6 +6,7 @@ Game_Context :: struct {
     objects: Objects_Context,
     shaders: Shaders_Context,
     object_tool: Object_Tool_Context,
+    object_draws: Object_Draws,
 }
 
 get_game_context :: proc() -> ^Game_Context {
@@ -32,8 +33,18 @@ get_object_tool_context :: proc() -> ^Object_Tool_Context {
     return &get_game_context().object_tool
 }
 
+get_object_draws_context :: proc() -> ^Object_Draws {
+    return &get_game_context().object_draws
+}
+
 init_game :: proc() -> bool {
+    init_object_draws() or_return
     init_object_tool()
     return true
+}
+
+deinit_game :: proc() {
+    deinit_object_draws()
+    deinit_object_tool()
 }
 

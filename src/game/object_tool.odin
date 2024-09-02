@@ -10,9 +10,11 @@ import "../floor"
 import "../mouse"
 
 Object_Tool_Context :: struct {
-	cursor_pos:  glsl.vec3,
-	object:      Object,
-	tile_marker: Object,
+	cursor_pos:     glsl.vec3,
+	object:         Object,
+	tile_marker:    Object,
+	object_draw_id: Object_Draw_Id,
+	tile_draw_ids:  [dynamic]Object_Draw_Id,
 }
 
 init_object_tool :: proc() {
@@ -28,12 +30,90 @@ init_object_tool :: proc() {
 	ctx.tile_marker.model = "Tile_Marker.Bake"
 	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
 	ctx.tile_marker.light = {1, 1, 1}
+
+	ctx.object_draw_id = create_object_draw(
+		object_draw_from_object(ctx.object),
+	)
+
+	create_object_tool_tile_marker_object_draws()
+}
+
+deinit_object_tool :: proc() {
+	ctx := get_object_tool_context()
+
+    delete(ctx.tile_draw_ids)
+}
+
+create_object_tool_tile_marker_object_draws :: proc() {
+	ctx := get_object_tool_context()
+    for id in ctx.tile_draw_ids {
+        delete_object_draw(id)
+    }
+    clear(&ctx.tile_draw_ids)
+
+	for x in 0 ..< ctx.object.size.x {
+		tx := x
+		for z in 0 ..< ctx.object.size.z {
+			tz := z
+			switch ctx.object.orientation {
+			case .South:
+				tz = -z
+			case .East:
+				tx = z
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = -z
+				tz = -x
+			}
+
+			ctx.tile_marker.pos = ctx.object.pos + {f32(tx), 0, f32(tz)}
+			append(
+				&ctx.tile_draw_ids,
+				create_object_draw(object_draw_from_object(ctx.tile_marker)),
+			)
+		}
+	}
+}
+
+update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
+	ctx := get_object_tool_context()
+	i: int = 0
+	for x in 0 ..< ctx.object.size.x {
+		tx := x
+		for z in 0 ..< ctx.object.size.z {
+			tz := z
+			switch ctx.object.orientation {
+			case .South:
+				tz = -z
+			case .East:
+				tx = z
+				tz = x
+			case .North:
+				tx = -x
+			case .West:
+				tx = -z
+				tz = -x
+			}
+
+			ctx.tile_marker.pos = ctx.object.pos + {f32(tx), 0, f32(tz)}
+
+			draw := object_draw_from_object(ctx.tile_marker)
+            draw.light = light
+			draw.id = ctx.tile_draw_ids[i]
+			update_object_draw(draw)
+			i += 1
+		}
+	}
 }
 
 set_object_tool_model :: proc(model: string) {
 	ctx := get_object_tool_context()
 	ctx.object.model = model
-    ctx.object.size = get_object_size(model)
+	ctx.object.size = get_object_size(model)
+
+	create_object_tool_tile_marker_object_draws()
 }
 
 set_object_tool_texture :: proc(texture: string) {
@@ -111,6 +191,7 @@ update_object_tool :: proc() {
 	}
 
 	update_wall_masks_on_object_placement(previous_pos, previous_orientation)
+
 	draw_object_tool(can_add)
 }
 
@@ -241,42 +322,11 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		object.pos += {0, 0.01, 0}
 	}
 
-	ctx.tile_marker.light = object.light
+	draw := object_draw_from_object(object)
+	draw.id = ctx.object_draw_id
+	update_object_draw(draw)
 
-	objects_ctx := get_objects_context()
-	bind_shader(&objects_ctx.shader)
-
-	gl.BindBuffer(gl.UNIFORM_BUFFER, objects_ctx.ubo)
-	set_shader_unifrom_block_binding(
-		&objects_ctx.shader,
-		"UniformBufferObject",
-		2,
-	)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, objects_ctx.ubo)
-
-	for x in 0 ..< object.size.x {
-		tx := x
-		for z in 0 ..< object.size.z {
-			tz := z
-			switch object.orientation {
-			case .South:
-				tz = -z
-			case .East:
-				tx = z
-				tz = x
-			case .North:
-				tx = -x
-			case .West:
-				tx = -z
-				tz = -x
-			}
-
-			ctx.tile_marker.pos = object.pos + {f32(tx), 0, f32(tz)}
-			draw_object(&ctx.tile_marker) or_return
-		}
-	}
-
-	draw_object(&object) or_return
+    update_object_tool_tile_marker_object_draws(object.light)
 
 	return true
 }
