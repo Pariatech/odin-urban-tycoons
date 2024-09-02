@@ -313,6 +313,7 @@ object_draw_from_object :: proc(obj: Object) -> Object_Draw {
 	draw.model = obj.model
 	draw.texture = obj.texture
 	draw.light = obj.light
+    draw.id = obj.draw_id
 
 	return draw
 }

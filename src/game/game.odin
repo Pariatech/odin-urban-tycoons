@@ -48,3 +48,7 @@ deinit_game :: proc() {
     deinit_object_tool()
 }
 
+update_game_on_camera_rotation :: proc() {
+    update_objects_on_camera_rotation()
+}
+

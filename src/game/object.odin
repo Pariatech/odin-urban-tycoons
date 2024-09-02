@@ -162,78 +162,18 @@ delete_objects :: proc() {
 	}
 }
 
-sort_objects :: proc(a, b: Object) -> bool {
-	// switch camera.rotation {
-	// case .South_West:
-	// 	if a.type == .Wall &&
-	// 	   b.type != .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return false
-	// 	}
-	// 	if a.type != .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return true
-	// 	}
-	// 	return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
-	// case .South_East:
-	// 	if a.type == .Wall &&
-	// 	   b.type != .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return a.orientation == .West
-	// 	}
-	// 	if a.type != .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return b.orientation == .South
-	// 	}
-	// 	if a.type == .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return a.orientation == .West
-	// 	}
-	// 	return a.pos.z > b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
-	// case .North_East:
-	// 	if a.type == .Wall &&
-	// 	   b.type != .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return true
-	// 	}
-	// 	if a.type != .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return false
-	// 	}
-	// 	return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x < b.pos.x)
-	// case .North_West:
-	// 	if a.type == .Wall &&
-	// 	   b.type != .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return a.orientation == .South
-	// 	}
-	// 	if a.type != .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return b.orientation == .West
-	// 	}
-	// 	if a.type == .Wall &&
-	// 	   b.type == .Wall &&
-	// 	   a.pos.x == b.pos.x &&
-	// 	   a.pos.z == b.pos.z {
-	// 		return a.orientation == .South
-	// 	}
-	// 	return a.pos.z < b.pos.z || (a.pos.z == b.pos.z && a.pos.x > b.pos.x)
-	// }
-	return false
+update_objects_on_camera_rotation :: proc() {
+	ctx := get_objects_context()
+
+	for &row in ctx.chunks {
+		for &col in row {
+			for &chunk in col {
+				for obj in chunk.objects {
+					update_object_draw(object_draw_from_object(obj))
+				}
+			}
+		}
+	}
 }
 
 world_pos_to_tile_pos :: proc(pos: glsl.vec3) -> (tile_pos: glsl.ivec2) {
@@ -413,48 +353,6 @@ can_add_object :: proc(
 	}
 
 	return true
-}
-
-on_add_object :: proc(
-	pos: glsl.vec3,
-	model: Object_Model,
-	orientation: Object_Orientation,
-) {
-	// type_map := TYPE_MAP
-	// type := type_map[model]
-	//
-	// if type != .Window && type != .Door {
-	// 	return
-	// }
-	//
-	// switch orientation {
-	// case .South, .North:
-	// 	pos := pos
-	// 	if orientation == .North {
-	// 		pos += {0, 0, 1}
-	// 	}
-	// 	if w, ok := wall.get_wall(pos, .E_W); ok {
-	// 		if type == .Window {
-	// 			w.mask = .Window_Opening
-	// 		} else {
-	// 			w.mask = .Door_Opening
-	// 		}
-	// 		wall.set_wall(pos, .E_W, w)
-	// 	}
-	// case .East, .West:
-	// 	pos := pos
-	// 	if orientation == .East {
-	// 		pos += {1, 0, 0}
-	// 	}
-	// 	if w, ok := wall.get_wall(pos, .N_S); ok {
-	// 		if type == .Window {
-	// 			w.mask = .Window_Opening
-	// 		} else {
-	// 			w.mask = .Door_Opening
-	// 		}
-	// 		wall.set_wall(pos, .N_S, w)
-	// 	}
-	// }
 }
 
 can_add_object_on_wall :: proc(

@@ -639,5 +639,5 @@ update_after_rotation :: proc(rotated: camera.Rotated) {
 	case .Clockwise:
 		billboard.update_after_clockwise_rotation()
 	}
-	game.update_after_rotation()
+	game.update_game_on_camera_rotation()
 }
