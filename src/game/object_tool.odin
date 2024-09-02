@@ -41,15 +41,15 @@ init_object_tool :: proc() {
 deinit_object_tool :: proc() {
 	ctx := get_object_tool_context()
 
-    delete(ctx.tile_draw_ids)
+	delete(ctx.tile_draw_ids)
 }
 
 create_object_tool_tile_marker_object_draws :: proc() {
 	ctx := get_object_tool_context()
-    for id in ctx.tile_draw_ids {
-        delete_object_draw(id)
-    }
-    clear(&ctx.tile_draw_ids)
+	for id in ctx.tile_draw_ids {
+		delete_object_draw(id)
+	}
+	clear(&ctx.tile_draw_ids)
 
 	for x in 0 ..< ctx.object.size.x {
 		tx := x
@@ -100,7 +100,7 @@ update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
 			ctx.tile_marker.pos = ctx.object.pos + {f32(tx), 0, f32(tz)}
 
 			draw := object_draw_from_object(ctx.tile_marker)
-            draw.light = light
+			draw.light = light
 			draw.id = ctx.tile_draw_ids[i]
 			update_object_draw(draw)
 			i += 1
@@ -268,44 +268,42 @@ set_wall_mask_from_object :: proc(obj: Object, mask: Wall_Mask_Texture) {
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
-	if obj.type == .Window {
-		for x in 0 ..< obj.size.x {
-			tx := x
-			tz: i32 = 0
-			#partial switch obj.orientation {
-			case .East:
-				tx = 0
-				tz = x
-			case .North:
-				tx = -x
-			case .West:
-				tx = 0
-				tz = -x
-			}
-
-			tpos := obj.pos + {f32(tx), 0, f32(tz)}
-
-			tile_pos := world_pos_to_tile_pos(tpos)
-			wall_pos: glsl.ivec3 = {tile_pos.x, chunk_pos.y, tile_pos.y}
-			axis: Wall_Axis
-
-			switch obj.orientation {
-			case .East:
-				wall_pos.x += 1
-				axis = .N_S
-			case .West:
-				axis = .N_S
-			case .South:
-				axis = .E_W
-			case .North:
-				wall_pos.z += 1
-				axis = .E_W
-			}
-
-			w, _ := get_wall(wall_pos, axis)
-			w.mask = mask
-			set_wall(wall_pos, axis, w)
+	for x in 0 ..< obj.size.x {
+		tx := x
+		tz: i32 = 0
+		#partial switch obj.orientation {
+		case .East:
+			tx = 0
+			tz = x
+		case .North:
+			tx = -x
+		case .West:
+			tx = 0
+			tz = -x
 		}
+
+		tpos := obj.pos + {f32(tx), 0, f32(tz)}
+
+		tile_pos := world_pos_to_tile_pos(tpos)
+		wall_pos: glsl.ivec3 = {tile_pos.x, chunk_pos.y, tile_pos.y}
+		axis: Wall_Axis
+
+		switch obj.orientation {
+		case .East:
+			wall_pos.x += 1
+			axis = .N_S
+		case .West:
+			axis = .N_S
+		case .South:
+			axis = .E_W
+		case .North:
+			wall_pos.z += 1
+			axis = .E_W
+		}
+
+		w, _ := get_wall(wall_pos, axis)
+		w.mask = mask
+		set_wall(wall_pos, axis, w)
 	}
 }
 
@@ -326,7 +324,7 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 	draw.id = ctx.object_draw_id
 	update_object_draw(draw)
 
-    update_object_tool_tile_marker_object_draws(object.light)
+	update_object_tool_tile_marker_object_draws(object.light)
 
 	return true
 }
