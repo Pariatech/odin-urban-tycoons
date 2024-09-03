@@ -28,6 +28,7 @@ Object_Type :: enum {
 	Table,
 	Painting,
 	Counter,
+	Computer,
 	// Carpet,
 	// Tree,
 	// Wall,
@@ -43,6 +44,7 @@ Object_Model :: enum {
 	Wood_Table_8Places,
 	// Poutine_Painting,
 	Wood_Counter,
+	Old_Computer,
 	// Small_Carpet,
 	// Tree,
 }
@@ -70,6 +72,7 @@ OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
 	.Table = {.Floor},
 	.Painting = {.Wall},
 	.Counter = {.Floor},
+	.Computer = {.Table},
 	// .Carpet = {.Floor},
 	// .Tree = {.Floor},
 	// .Wall = {.Floor},
@@ -88,6 +91,7 @@ OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
 	.Wood_Table_8Places  = .Table,
 	// .Poutine_Painting                    = .Painting,
 	.Wood_Counter        = .Counter,
+	.Old_Computer        = .Computer,
 	// .Small_Carpet                        = .Carpet,
 	// .Tree                                = .Tree,
 }
@@ -100,6 +104,7 @@ PLANK_TABLE_6PLACES_MODEL :: "Plank.Table.6Places.Bake"
 WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
 POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
 DOUBLE_WINDOW_MODEL :: "Double_Window.Bake"
+OLD_COMPUTER_MODEL :: "Old_Computer.Bake"
 
 WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
 WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
@@ -109,6 +114,7 @@ PLANK_TABLE_6PLACES_TEXTURE :: "objects/Table.6Places.Plank.png"
 WOOD_TABLE_8PLACES_TEXTURE :: "objects/Table.8Places.Wood.png"
 POUTINE_PAINTING_TEXTURE :: "objects/Poutine.Painting.Bake.png"
 DOUBLE_WINDOW_TEXTURE :: "objects/Double_Window.Bake.png"
+OLD_COMPUTER_TEXTURE :: "objects/Old_Computer.png"
 
 window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
 	WOOD_WINDOW_MODEL   = .Window_Opening,

@@ -164,6 +164,17 @@ init :: proc() {
 		},
 	)
 
+	game.add_object(
+		 {
+			pos = {5, 0.775, 1},
+			model = game.OLD_COMPUTER_MODEL,
+			texture = game.OLD_COMPUTER_TEXTURE,
+			orientation = .West,
+			placement = .Table,
+			light = {1, 1, 1},
+		},
+	)
+
 	for x in 0 ..< constants.WORLD_WIDTH {
 		for z in 1 ..= 3 {
 			tile.set_tile(
