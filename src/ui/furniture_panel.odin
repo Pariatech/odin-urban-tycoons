@@ -25,6 +25,7 @@ FURNITURE_PANEL_ICONS :: []cstring {
 	"resources/textures/object_icons/Poutine.Painting.png",
 	"resources/textures/object_icons/Double_Window.png",
 	"resources/textures/object_icons/Door_Wood.png",
+	"resources/textures/object_icons/Old_Computer.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
@@ -69,6 +70,13 @@ FURNITURES :: []Furniture {
 		placement = .Wall,
 		type = .Door,
 	},
+	 {
+		icon = "resources/textures/object_icons/Old_Computer.png",
+		model = game.OLD_COMPUTER_MODEL,
+		texture = game.OLD_COMPUTER_TEXTURE,
+		placement = .Table,
+		type = .Computer,
+	},
 }
 
 furniture_panel_icon_texture_array: u32
@@ -90,8 +98,8 @@ furniture_panel_body :: proc(
 			    {
 				   2 + f32(i / 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
 				   pos.y +
-				   FURNITURE_PANEL_PADDING +// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
-				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
+				   FURNITURE_PANEL_PADDING +
+				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
 			   },
 			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
 			   furniture_panel_icon_texture_array,

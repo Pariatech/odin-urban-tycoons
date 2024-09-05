@@ -35,6 +35,17 @@ Object_Type :: enum {
 	// Wall_Top,
 }
 
+Object_Type_Set :: bit_set[Object_Type]
+
+ALL_OBJECT_TYPES :: Object_Type_Set {
+	.Door,
+	.Window,
+	.Table,
+	.Counter,
+	.Painting,
+	.Computer,
+}
+
 Object_Model :: enum {
 	Wood_Door,
 	Wood_Window,
@@ -136,7 +147,7 @@ Object :: struct {
 Object_Chunk :: struct {
 	objects:       [dynamic]Object,
 	dirty:         bool,
-	placement_map: [c.CHUNK_WIDTH][c.CHUNK_DEPTH][Object_Placement][Object_Orientation]bool,
+	placement_map: [c.CHUNK_WIDTH][c.CHUNK_DEPTH][Object_Placement][Object_Orientation]Maybe(Object_Type),
 }
 
 Object_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Chunk
@@ -157,23 +168,35 @@ init_objects :: proc() -> (ok: bool = true) {
 }
 
 delete_objects :: proc() {
-	ctx := get_game_context()
+	ctx := get_objects_context()
 
-	for &row in ctx.objects.chunks {
-		for &col in row {
-			for &chunk in col {
+	for y in 0 ..< c.CHUNK_HEIGHT {
+		for x in 0 ..< c.WORLD_CHUNK_WIDTH {
+			for z in 0 ..< c.WORLD_CHUNK_DEPTH {
+				chunk := &ctx.chunks[y][x][z]
 				delete(chunk.objects)
 			}
 		}
 	}
+	// for &row in ctx.objects.chunks {
+	// 	for &col in row {
+	// 		for &chunk in col {
+	// 			delete(chunk.objects)
+	// 		}
+	// 	}
+	// }
 }
 
 update_objects_on_camera_rotation :: proc() {
 	ctx := get_objects_context()
 
-	for &row in ctx.chunks {
-		for &col in row {
-			for &chunk in col {
+	for y in 0 ..< c.CHUNK_HEIGHT {
+		for x in 0 ..< c.WORLD_CHUNK_WIDTH {
+			for z in 0 ..< c.WORLD_CHUNK_DEPTH {
+				chunk := &ctx.chunks[y][x][z]
+				// for &row in ctx.chunks {
+				// 	for &col in row {
+				// 		for &chunk in col {
 				for obj in chunk.objects {
 					update_object_draw(object_draw_from_object(obj))
 				}
@@ -222,7 +245,12 @@ add_object :: proc(obj: Object) -> bool {
 		obj.model,
 		obj.placement,
 		obj.orientation,
+		obj.type,
 	)
+
+    if obj.placement == .Table || obj.placement == .Counter {
+        obj.pos.y += 0.775
+    }
 
 	obj.draw_id = create_object_draw(object_draw_from_object(obj))
 
@@ -277,8 +305,10 @@ update_object_placement_map :: proc(
 	model: string,
 	placement: Object_Placement,
 	orientation: Object_Orientation,
+	type: Object_Type,
 ) {
 	obj_size := get_object_size(model)
+	log.info(type)
 
 	for x in 0 ..< obj_size.x {
 		tx := x
@@ -303,7 +333,7 @@ update_object_placement_map :: proc(
 			ctx := get_objects_context()
 			chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 			chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement][orientation] =
-				true
+				type
 		}
 	}
 }
@@ -356,6 +386,13 @@ can_add_object :: proc(
 		)
 	case .Counter:
 	case .Table:
+		return can_add_object_on_table(
+			pos,
+			tile_pos,
+			chunk_pos,
+			model,
+			orientation,
+		)
 	}
 
 	return true
@@ -508,10 +545,27 @@ can_add_object_on_floor :: proc(
 	return true
 }
 
+can_add_object_on_table :: proc(
+	pos: glsl.vec3,
+	tile_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
+	model: string,
+	orientation: Object_Orientation,
+) -> bool {
+	obj_size := get_object_size(model)
+
+    if !has_object_at(pos, .Floor, nil, {.Table}) {
+        return false
+    }
+
+	return !has_object_at(pos, .Table)
+}
+
 has_object_at :: proc(
 	pos: glsl.vec3,
 	placement: Object_Placement,
 	orientation: Object_Orientation = nil,
+	type_set: Object_Type_Set = ALL_OBJECT_TYPES,
 ) -> bool {
 	objects := get_objects_context()
 	chunk_pos := world_pos_to_chunk_pos(pos)
@@ -523,13 +577,17 @@ has_object_at :: proc(
 
 	if orientation == nil {
 		for orientation in orientations {
-			if orientation {
-				return true
+			if type, ok := orientation.?; ok {
+				if type in type_set {
+					return true
+				}
 			}
 		}
 	} else {
-		if orientations[orientation] {
-			return true
+		if type, ok := orientations[orientation].?; ok {
+			if type in type_set {
+				return true
+			}
 		}
 	}
 	// for k, v in chunk.objects {

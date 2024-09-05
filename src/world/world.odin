@@ -57,6 +57,7 @@ init :: proc() {
 			orientation = .South,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Counter,
 		},
 	)
 	game.add_object(
@@ -67,6 +68,7 @@ init :: proc() {
 			orientation = .South,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Counter,
 		},
 	)
 	game.add_object(
@@ -77,6 +79,7 @@ init :: proc() {
 			orientation = .South,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Counter,
 		},
 	)
 
@@ -88,6 +91,7 @@ init :: proc() {
 			orientation = .South,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 	game.add_object(
@@ -98,6 +102,7 @@ init :: proc() {
 			orientation = .South,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 
@@ -109,6 +114,7 @@ init :: proc() {
 			orientation = .East,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 	game.add_object(
@@ -119,6 +125,7 @@ init :: proc() {
 			orientation = .East,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 
@@ -130,6 +137,7 @@ init :: proc() {
 			orientation = .North,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 	game.add_object(
@@ -140,6 +148,7 @@ init :: proc() {
 			orientation = .North,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 
@@ -151,6 +160,7 @@ init :: proc() {
 			orientation = .West,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 	game.add_object(
@@ -161,17 +171,19 @@ init :: proc() {
 			orientation = .West,
 			placement = .Floor,
 			light = {1, 1, 1},
+			type = .Table,
 		},
 	)
 
 	game.add_object(
 		 {
-			pos = {5, 0.775, 1},
+			pos = {5, 0, 1},
 			model = game.OLD_COMPUTER_MODEL,
 			texture = game.OLD_COMPUTER_TEXTURE,
 			orientation = .West,
 			placement = .Table,
 			light = {1, 1, 1},
+			type = .Computer,
 		},
 	)
 

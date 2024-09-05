@@ -320,6 +320,10 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		object.pos += {0, 0.01, 0}
 	}
 
+    if object.placement == .Counter || object.placement == .Table {
+        object.pos.y += 0.775
+    }
+
 	draw := object_draw_from_object(object)
 	draw.id = ctx.object_draw_id
 	update_object_draw(draw)
