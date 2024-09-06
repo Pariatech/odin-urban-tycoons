@@ -15,7 +15,7 @@ Furniture :: struct {
 	icon:      cstring,
 	model:     string,
 	texture:   string,
-	placement: game.Object_Placement,
+	placement: game.Object_Placement_Set,
 	type:      game.Object_Type,
 }
 
@@ -26,6 +26,7 @@ FURNITURE_PANEL_ICONS :: []cstring {
 	"resources/textures/object_icons/Double_Window.png",
 	"resources/textures/object_icons/Door_Wood.png",
 	"resources/textures/object_icons/Old_Computer.png",
+	"resources/textures/object_icons/Plate.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
@@ -39,43 +40,50 @@ FURNITURES :: []Furniture {
 		icon = "resources/textures/object_icons/Plank.Table.6Places.png",
 		model = game.PLANK_TABLE_6PLACES_MODEL,
 		texture = game.PLANK_TABLE_6PLACES_TEXTURE,
-		placement = .Floor,
+		placement = {.Floor},
 		type = .Table,
 	},
 	 {
 		icon = "resources/textures/object_icons/Window.Wood.png",
 		model = game.WOOD_WINDOW_MODEL,
 		texture = game.WOOD_WINDOW_TEXTURE,
-		placement = .Wall,
+		placement = {.Wall},
 		type = .Window,
 	},
 	 {
 		icon = "resources/textures/object_icons/Poutine.Painting.png",
 		model = game.POUTINE_PAINTING_MODEL,
 		texture = game.POUTINE_PAINTING_TEXTURE,
-		placement = .Wall,
+		placement = {.Wall},
 		type = .Painting,
 	},
 	 {
 		icon = "resources/textures/object_icons/Double_Window.png",
 		model = game.DOUBLE_WINDOW_MODEL,
 		texture = game.DOUBLE_WINDOW_TEXTURE,
-		placement = .Wall,
+		placement = {.Wall},
 		type = .Window,
 	},
 	 {
 		icon = "resources/textures/object_icons/Door_Wood.png",
 		model = game.WOOD_DOOR_MODEL,
 		texture = game.WOOD_DOOR_TEXTURE,
-		placement = .Wall,
+		placement = {.Wall},
 		type = .Door,
 	},
 	 {
 		icon = "resources/textures/object_icons/Old_Computer.png",
 		model = game.OLD_COMPUTER_MODEL,
 		texture = game.OLD_COMPUTER_TEXTURE,
-		placement = .Table,
+		placement = {.Table},
 		type = .Computer,
+	},
+	 {
+		icon = "resources/textures/object_icons/Plate.png",
+		model = game.PLATE_MODEL,
+		texture = game.PLATE_TEXTURE,
+		placement = {.Floor, .Table, .Counter},
+		type = .Plate,
 	},
 }
 
@@ -99,8 +107,8 @@ furniture_panel_body :: proc(
 				   2 + f32(i / 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
 				   pos.y +
 				   FURNITURE_PANEL_PADDING +
-				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
-			   },
+				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
+			   },// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
 			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
 			   furniture_panel_icon_texture_array,
 			   int(i),
@@ -118,7 +126,7 @@ furniture_panel_body :: proc(
 			furnitures := FURNITURES
 			game.set_object_tool_model(furnitures[i].model)
 			game.set_object_tool_texture(furnitures[i].texture)
-			game.set_object_tool_placement(furnitures[i].placement)
+			game.set_object_tool_placement_set(furnitures[i].placement)
 			game.set_object_tool_type(furnitures[i].type)
 		}
 	}

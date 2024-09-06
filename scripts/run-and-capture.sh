@@ -24,7 +24,7 @@ y="$(get_property_value "Absolute upper-left Y" "$info")"
 width="$(get_property_value "Width" "$info")"
 height="$(get_property_value "Height" "$info")"
 
-ffmpeg -f x11grab -video_size "$width"x"$height" -vf format=yuv420p -framerate 60 -i :0.0+"$x","$y" -an -y output.mp4 &
+ffmpeg -f x11grab -video_size "$width"x"$height" -framerate 60 -i :0.0+"$x","$y" -an -y output.mp4 &
 ffmpeg_pid=$!
 
 while true; do

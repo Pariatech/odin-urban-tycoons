@@ -29,6 +29,7 @@ Object_Type :: enum {
 	Painting,
 	Counter,
 	Computer,
+    Plate,
 	// Carpet,
 	// Tree,
 	// Wall,
@@ -44,20 +45,7 @@ ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Counter,
 	.Painting,
 	.Computer,
-}
-
-Object_Model :: enum {
-	Wood_Door,
-	Wood_Window,
-	// Wood_Chair,
-	Wood_Table_6Places,
-	Plank_Table_6Places,
-	Wood_Table_8Places,
-	// Poutine_Painting,
-	Wood_Counter,
-	Old_Computer,
-	// Small_Carpet,
-	// Tree,
+    .Plate,
 }
 
 Object_Orientation :: enum {
@@ -76,37 +64,6 @@ Object_Placement :: enum {
 
 Object_Placement_Set :: bit_set[Object_Placement]
 
-OBJECT_TYPE_PLACEMENT_TABLE :: [Object_Type]Object_Placement_Set {
-	.Door = {.Wall},
-	.Window = {.Wall},
-	// .Chair = {.Floor},
-	.Table = {.Floor},
-	.Painting = {.Wall},
-	.Counter = {.Floor},
-	.Computer = {.Table},
-	// .Carpet = {.Floor},
-	// .Tree = {.Floor},
-	// .Wall = {.Floor},
-	// .Wall_Top = {.Wall},
-}
-
-OBJECT_MODEL_PLACEMENT_TABLE :: #partial [Object_Model]Object_Placement_Set{}
-
-OBJECT_TYPE_MAP :: [Object_Model]Object_Type {
-	.Wood_Door           = .Door,
-	.Wood_Window         = .Window,
-	// .Wood_Chair                          = .Chair,
-	// .Wood_Table_1x2                      = .Table,
-	.Wood_Table_6Places  = .Table,
-	.Plank_Table_6Places = .Table,
-	.Wood_Table_8Places  = .Table,
-	// .Poutine_Painting                    = .Painting,
-	.Wood_Counter        = .Counter,
-	.Old_Computer        = .Computer,
-	// .Small_Carpet                        = .Carpet,
-	// .Tree                                = .Tree,
-}
-
 WOOD_COUNTER_MODEL :: "Wood.Counter.Bake"
 WOOD_WINDOW_MODEL :: "Window.Wood.Bake"
 WOOD_DOOR_MODEL :: "Door.Wood.Bake"
@@ -116,6 +73,7 @@ WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
 POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
 DOUBLE_WINDOW_MODEL :: "Double_Window.Bake"
 OLD_COMPUTER_MODEL :: "Old_Computer.Bake"
+PLATE_MODEL :: "Plate.Bake"
 
 WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
 WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
@@ -126,6 +84,7 @@ WOOD_TABLE_8PLACES_TEXTURE :: "objects/Table.8Places.Wood.png"
 POUTINE_PAINTING_TEXTURE :: "objects/Poutine.Painting.Bake.png"
 DOUBLE_WINDOW_TEXTURE :: "objects/Double_Window.Bake.png"
 OLD_COMPUTER_TEXTURE :: "objects/Old_Computer.png"
+PLATE_TEXTURE :: "objects/Plate.png"
 
 window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
 	WOOD_WINDOW_MODEL   = .Window_Opening,
@@ -238,8 +197,6 @@ add_object :: proc(obj: Object) -> bool {
 
 	chunk.dirty = true
 
-	type_map := OBJECT_TYPE_MAP
-
 	update_object_placement_map(
 		obj.pos,
 		obj.model,
@@ -249,7 +206,7 @@ add_object :: proc(obj: Object) -> bool {
 	)
 
     if obj.placement == .Table || obj.placement == .Counter {
-        obj.pos.y += 0.775
+        obj.pos.y += 0.8
     }
 
 	obj.draw_id = create_object_draw(object_draw_from_object(obj))
@@ -385,6 +342,13 @@ can_add_object :: proc(
 			orientation,
 		)
 	case .Counter:
+		return can_add_object_on_counter(
+			pos,
+			tile_pos,
+			chunk_pos,
+			model,
+			orientation,
+		)
 	case .Table:
 		return can_add_object_on_table(
 			pos,
@@ -559,6 +523,22 @@ can_add_object_on_table :: proc(
     }
 
 	return !has_object_at(pos, .Table)
+}
+
+can_add_object_on_counter :: proc(
+	pos: glsl.vec3,
+	tile_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
+	model: string,
+	orientation: Object_Orientation,
+) -> bool {
+	obj_size := get_object_size(model)
+
+    if !has_object_at(pos, .Floor, nil, {.Counter}) {
+        return false
+    }
+
+	return !has_object_at(pos, .Counter)
 }
 
 has_object_at :: proc(

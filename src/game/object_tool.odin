@@ -11,6 +11,7 @@ import "../mouse"
 
 Object_Tool_Context :: struct {
 	cursor_pos:     glsl.vec3,
+	placement_set:  Object_Placement_Set,
 	object:         Object,
 	tile_marker:    Object,
 	object_draw_id: Object_Draw_Id,
@@ -30,6 +31,8 @@ init_object_tool :: proc() {
 	ctx.tile_marker.model = "Tile_Marker.Bake"
 	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
 	ctx.tile_marker.light = {1, 1, 1}
+
+    ctx.placement_set = {.Floor}
 
 	ctx.object_draw_id = create_object_draw(
 		object_draw_from_object(ctx.object),
@@ -121,9 +124,9 @@ set_object_tool_texture :: proc(texture: string) {
 	ctx.object.texture = texture
 }
 
-set_object_tool_placement :: proc(placement: Object_Placement) {
+set_object_tool_placement_set :: proc(placement: Object_Placement_Set) {
 	ctx := get_object_tool_context()
-	ctx.object.placement = placement
+	ctx.placement_set = placement
 }
 
 set_object_tool_type :: proc(type: Object_Type) {
@@ -174,25 +177,31 @@ update_object_tool :: proc() {
 		ctx.object.pos = ctx.cursor_pos
 	}
 
+	can_add: bool
+	for placement in ctx.placement_set {
+		ctx.object.placement = placement
+		can_add = can_add_object(
+			ctx.object.pos,
+			ctx.object.model,
+			ctx.object.type,
+			ctx.object.orientation,
+			ctx.object.placement,
+		)
 
-	can_add := can_add_object(
-		ctx.object.pos,
-		ctx.object.model,
-		ctx.object.type,
-		ctx.object.orientation,
-		ctx.object.placement,
-	)
-
-	if can_add {
-		ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
-		ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
-	} else if ctx.object.placement == .Wall && mouse.is_button_up(.Left) {
-		snap_wall_object()
+		if can_add {
+			ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
+			ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+			break
+		} else if ctx.object.placement == .Wall && mouse.is_button_up(.Left) {
+			snap_wall_object()
+			break
+		}
 	}
 
 	update_wall_masks_on_object_placement(previous_pos, previous_orientation)
 
 	draw_object_tool(can_add)
+
 }
 
 snap_wall_object :: proc() {
@@ -320,9 +329,9 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		object.pos += {0, 0.01, 0}
 	}
 
-    if object.placement == .Counter || object.placement == .Table {
-        object.pos.y += 0.775
-    }
+	if object.placement == .Counter || object.placement == .Table {
+		object.pos.y += 0.8
+	}
 
 	draw := object_draw_from_object(object)
 	draw.id = ctx.object_draw_id
