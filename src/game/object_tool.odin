@@ -10,12 +10,13 @@ import "../floor"
 import "../mouse"
 
 Object_Tool_Context :: struct {
-	cursor_pos:     glsl.vec3,
-	placement_set:  Object_Placement_Set,
-	object:         Object,
-	tile_marker:    Object,
-	object_draw_id: Object_Draw_Id,
-	tile_draw_ids:  [dynamic]Object_Draw_Id,
+	cursor_pos:                   glsl.vec3,
+	placement_set:                Object_Placement_Set,
+	object:                       Object,
+	tile_marker:                  Object,
+	object_draw_id:               Object_Draw_Id,
+	tile_draw_ids:                [dynamic]Object_Draw_Id,
+	previous_object_under_cursor: Maybe(Object_Id),
 }
 
 init_object_tool :: proc() {
@@ -32,7 +33,7 @@ init_object_tool :: proc() {
 	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
 	ctx.tile_marker.light = {1, 1, 1}
 
-    ctx.placement_set = {.Floor}
+	ctx.placement_set = {.Floor}
 
 	ctx.object_draw_id = create_object_draw(
 		object_draw_from_object(ctx.object),
@@ -143,6 +144,31 @@ update_object_tool :: proc() {
 		floor.previous_floor,
 		floor.floor,
 	)
+
+
+	if object_under_cursor, ok := get_object_under_cursor(); ok {
+		if previous_object_under_cursor, ok := ctx.previous_object_under_cursor.?;
+		   ok && previous_object_under_cursor != object_under_cursor {
+			if previous_obj, ok := get_object_by_id(
+				previous_object_under_cursor,
+			); ok {
+				previous_obj.light = {1, 1, 1}
+				update_object_draw(object_draw_from_object(previous_obj))
+			}
+		}
+		if object, ok := get_object_by_id(object_under_cursor); ok {
+			object.light = {0, 1, 0}
+			update_object_draw(object_draw_from_object(object))
+			ctx.previous_object_under_cursor = object_under_cursor
+		}
+	} else if object_under_cursor, ok := ctx.previous_object_under_cursor.?;
+	   ok {
+		if object, ok := get_object_by_id(object_under_cursor); ok {
+			object.light = {1, 1, 1}
+			update_object_draw(object_draw_from_object(object))
+			ctx.previous_object_under_cursor = nil
+		}
+	}
 
 	if mouse.is_button_down(.Left) {
 		mouse.set_cursor(.Rotate)

@@ -33,8 +33,8 @@ Object_Draw_Chunk :: struct {
 
 Object_Draws :: struct {
 	keys:    map[Object_Draw_Id]Object_Draw_Key,
-	chunks:  [c.WORLD_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Draw_Chunk,
 	next_id: Object_Draw_Id,
+	chunks:  [c.WORLD_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Draw_Chunk,
 	ubo:     u32,
 	shader:  Shader,
 }

@@ -24,6 +24,8 @@ Model :: struct {
 	uploaded:      bool,
 	vbo, ebo, vao: u32,
 	size:          glsl.vec3,
+	min:           glsl.vec3,
+	max:           glsl.vec3,
 }
 
 Models_Context :: struct {
@@ -107,6 +109,8 @@ load_models :: proc() -> (ok: bool) {
 			vertices = vertices,
 			indices  = indices,
 			size     = max - min,
+			min      = min,
+			max      = max,
 		}
 	}
 

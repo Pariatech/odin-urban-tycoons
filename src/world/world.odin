@@ -142,7 +142,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {8, 0, 7},
+			pos = {9, 0, 7},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .North,
@@ -165,7 +165,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {8, 0, 10},
+			pos = {9, 0, 11},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .West,

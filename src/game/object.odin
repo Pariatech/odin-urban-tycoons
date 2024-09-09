@@ -16,6 +16,7 @@ import stbi "vendor:stb/image"
 
 import "../camera"
 import c "../constants"
+import "../cursor"
 import "../floor"
 import "../renderer"
 import "../terrain"
@@ -29,7 +30,7 @@ Object_Type :: enum {
 	Painting,
 	Counter,
 	Computer,
-    Plate,
+	Plate,
 	// Carpet,
 	// Tree,
 	// Wall,
@@ -45,7 +46,7 @@ ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Counter,
 	.Painting,
 	.Computer,
-    .Plate,
+	.Plate,
 }
 
 Object_Orientation :: enum {
@@ -91,22 +92,37 @@ window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
 	DOUBLE_WINDOW_MODEL = .Double_Window,
 }
 
+Box :: struct {
+	min: glsl.vec3,
+	max: glsl.vec3,
+}
+
+Object_Id :: int
+
+Object_Key :: struct {
+	chunk_pos: glsl.ivec3,
+	index:     int,
+}
+
 Object :: struct {
-	pos:         glsl.vec3,
-	light:       glsl.vec3,
-	model:       string,
-	texture:     string,
-	type:        Object_Type,
-	orientation: Object_Orientation,
-	placement:   Object_Placement,
-	size:        glsl.ivec3,
-	draw_id:     Object_Draw_Id,
+	id:           Object_Id,
+	pos:          glsl.vec3,
+	light:        glsl.vec3,
+	model:        string,
+	texture:      string,
+	type:         Object_Type,
+	orientation:  Object_Orientation,
+	placement:    Object_Placement,
+	size:         glsl.ivec3,
+	draw_id:      Object_Draw_Id,
+	bounding_box: Box,
 }
 
 Object_Chunk :: struct {
-	objects:       [dynamic]Object,
-	dirty:         bool,
-	placement_map: [c.CHUNK_WIDTH][c.CHUNK_DEPTH][Object_Placement][Object_Orientation]Maybe(Object_Type),
+	objects:        [dynamic]Object,
+	dirty:          bool,
+	placement_map:  [c.CHUNK_WIDTH][c.CHUNK_DEPTH][Object_Placement][Object_Orientation]Maybe(Object_Type),
+	objects_inside: [dynamic]Object_Id,
 }
 
 Object_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Object_Chunk
@@ -118,7 +134,9 @@ Object_Uniform_Object :: struct {
 
 
 Objects_Context :: struct {
-	chunks: Object_Chunks,
+	chunks:  Object_Chunks,
+	keys:    map[Object_Id]Object_Key,
+	next_id: Object_Id,
 }
 
 
@@ -134,9 +152,12 @@ delete_objects :: proc() {
 			for z in 0 ..< c.WORLD_CHUNK_DEPTH {
 				chunk := &ctx.chunks[y][x][z]
 				delete(chunk.objects)
+				delete(chunk.objects_inside)
 			}
 		}
 	}
+
+	delete(ctx.keys)
 	// for &row in ctx.objects.chunks {
 	// 	for &col in row {
 	// 		for &chunk in col {
@@ -179,11 +200,29 @@ world_pos_to_chunk_pos :: proc(pos: glsl.vec3) -> (chunk_pos: glsl.ivec3) {
 	return
 }
 
-add_object :: proc(obj: Object) -> bool {
+add_object_inside_chunk :: proc(obj: Object) {
+	ctx := get_objects_context()
+
+	chunk_pos := world_pos_to_chunk_pos(obj.pos)
+	chunk_min_x := i32((obj.bounding_box.min.x + 0.5) / c.CHUNK_WIDTH)
+	chunk_max_x := i32((obj.bounding_box.max.x - 0.5) / c.CHUNK_WIDTH)
+	chunk_min_z := i32((obj.bounding_box.min.z + 0.5) / c.CHUNK_DEPTH)
+	chunk_max_z := i32((obj.bounding_box.max.z - 0.5) / c.CHUNK_DEPTH)
+	for x in chunk_min_x ..= chunk_max_x {
+		for z in chunk_min_z ..= chunk_max_z {
+			chunk := &ctx.chunks[chunk_pos.y][x][z]
+			append(&chunk.objects_inside, obj.id)
+		}
+	}
+}
+
+add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 	obj := obj
 	ctx := get_objects_context()
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
+
+	calculate_object_bounding_box(&obj)
 
 	can_add_object(
 		obj.pos,
@@ -195,6 +234,16 @@ add_object :: proc(obj: Object) -> bool {
 
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 
+	id = ctx.next_id
+	obj.id = id
+	ctx.next_id += 1
+	ctx.keys[id] = {
+		chunk_pos = chunk_pos,
+		index     = len(chunk.objects),
+	}
+
+	add_object_inside_chunk(obj)
+
 	chunk.dirty = true
 
 	update_object_placement_map(
@@ -205,9 +254,9 @@ add_object :: proc(obj: Object) -> bool {
 		obj.type,
 	)
 
-    if obj.placement == .Table || obj.placement == .Counter {
-        obj.pos.y += 0.8
-    }
+	if obj.placement == .Table || obj.placement == .Counter {
+		obj.pos.y += 0.8
+	}
 
 	obj.draw_id = create_object_draw(object_draw_from_object(obj))
 
@@ -254,7 +303,7 @@ add_object :: proc(obj: Object) -> bool {
 		}
 	}
 
-	return true
+	return
 }
 
 update_object_placement_map :: proc(
@@ -304,6 +353,62 @@ get_object_size :: proc(model: string) -> glsl.ivec3 {
 			i32,
 		),
 	)
+}
+
+calculate_object_bounding_box :: proc(object: ^Object) {
+	models := get_models_context()
+	object_model := models.models[object.model]
+
+
+	rotation: glsl.mat4
+	switch object.orientation {
+	case .South:
+		rotation = glsl.identity(glsl.mat4)
+	case .East:
+		rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * glsl.PI)
+	case .North:
+		rotation = glsl.mat4Rotate({0, 1, 0}, 1.0 * glsl.PI)
+	case .West:
+		rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * glsl.PI)
+	}
+
+	t_min := glsl.vec4 {
+		object_model.min.x,
+		object_model.min.y,
+		object_model.min.z,
+		1,
+	}
+	t_max := glsl.vec4 {
+		object_model.max.x,
+		object_model.max.y,
+		object_model.max.z,
+		1,
+	}
+
+	t_min *= rotation
+	t_max *= rotation
+
+	min := glsl.vec3 {
+		math.min(t_min.x, t_max.x),
+		t_min.y,
+		math.min(t_min.z, t_max.z),
+	}
+
+	max := glsl.vec3 {
+		math.max(t_min.x, t_max.x),
+		t_max.y,
+		math.max(t_min.z, t_max.z),
+	}
+
+	min += object.pos
+	max += object.pos
+
+	log.info(object.pos, object.model, min, max)
+
+	object.bounding_box = {
+		min = min,
+		max = max,
+	}
 }
 
 can_add_object :: proc(
@@ -518,9 +623,9 @@ can_add_object_on_table :: proc(
 ) -> bool {
 	obj_size := get_object_size(model)
 
-    if !has_object_at(pos, .Floor, nil, {.Table}) {
-        return false
-    }
+	if !has_object_at(pos, .Floor, nil, {.Table}) {
+		return false
+	}
 
 	return !has_object_at(pos, .Table)
 }
@@ -534,9 +639,9 @@ can_add_object_on_counter :: proc(
 ) -> bool {
 	obj_size := get_object_size(model)
 
-    if !has_object_at(pos, .Floor, nil, {.Counter}) {
-        return false
-    }
+	if !has_object_at(pos, .Floor, nil, {.Counter}) {
+		return false
+	}
 
 	return !has_object_at(pos, .Counter)
 }
@@ -578,6 +683,189 @@ has_object_at :: proc(
 	// }
 
 	return false
+}
+
+Ray_2D :: struct {
+	origin:    glsl.vec2,
+	direction: glsl.vec2,
+}
+
+Rect :: struct {
+	min: glsl.vec2,
+	max: glsl.vec2,
+}
+
+Ray_Walker_2D :: struct {
+	ray:          Ray_2D,
+	current_tile: glsl.vec2,
+	step:         glsl.vec2,
+	t_max:        glsl.vec2,
+	t_delta:      glsl.vec2,
+	tile_size:    f32,
+	rect:         Rect,
+}
+
+intersect_ray_with_rect :: proc(ray: Ray_2D, rect: Rect) -> (glsl.vec2, bool) {
+	t_min := f32(0.0)
+	t_max := math.inf_f32(1)
+
+	for axis in 0 ..= 1 {
+		origin := ray.origin[axis]
+		direction := ray.direction[axis]
+		min_bound := rect.min[axis]
+		max_bound := rect.max[axis]
+
+		if direction != 0 {
+			t0 := (min_bound - origin) / direction
+			t1 := (max_bound - origin) / direction
+
+			if t0 > t1 {
+				t0, t1 = t1, t0
+			}
+
+			t_min = math.max(t_min, t0)
+			t_max = math.min(t_max, t1)
+
+			if t_max < t_min {
+				return {}, false // No intersection
+			}
+		} else if origin < min_bound || origin > max_bound {
+			return {}, false // Parallel and outside
+		}
+	}
+
+	return ray.origin + ray.direction * t_min, true
+}
+
+init_ray_walker :: proc(
+	ray: Ray_2D,
+	tile_size: f32,
+	rect: Rect,
+) -> (
+	walker: Ray_Walker_2D,
+	ok: bool = true,
+) {
+	walker.ray = ray
+	walker.tile_size = tile_size
+	walker.rect = rect
+	walker.ray.origin = intersect_ray_with_rect(ray, rect) or_return
+
+	walker.current_tile = glsl.vec2 {
+		math.floor(walker.ray.origin.x / tile_size),
+		math.floor(walker.ray.origin.y / tile_size),
+	}
+
+
+	walker.step = glsl.vec2 {
+		walker.ray.direction.x > 0 ? 1 : -1,
+		walker.ray.direction.y > 0 ? 1 : -1,
+	}
+
+	walker.t_max = glsl.vec2 {
+		((walker.current_tile.x + (walker.step.x > 0 ? 1 : 0)) * tile_size -
+			ray.origin.x) /
+		ray.direction.x,
+		((walker.current_tile.y + (walker.step.y > 0 ? 1 : 0)) * tile_size -
+			ray.origin.y) /
+		ray.direction.y,
+	}
+
+	walker.t_delta = glsl.vec2 {
+		tile_size / math.abs(walker.ray.direction.x),
+		tile_size / math.abs(walker.ray.direction.y),
+	}
+
+	return
+}
+
+ray_walker_next :: proc(
+	ray_walker: ^Ray_Walker_2D,
+) -> (
+	current_tile: glsl.vec2,
+	ok: bool = true,
+) {
+	current_pos := glsl.vec2 {
+		ray_walker.current_tile.x * ray_walker.tile_size,
+		ray_walker.current_tile.y * ray_walker.tile_size,
+	}
+
+	current_tile = ray_walker.current_tile
+	if current_pos.x < ray_walker.rect.min.x ||
+	   current_pos.x > ray_walker.rect.max.x ||
+	   current_pos.y < ray_walker.rect.min.y ||
+	   current_pos.y > ray_walker.rect.max.y {
+		return current_tile, false
+	}
+
+	if ray_walker.t_max.x < ray_walker.t_max.y {
+		ray_walker.current_tile.x += ray_walker.step.x
+		ray_walker.t_max.x += ray_walker.t_delta.x
+	} else {
+		ray_walker.current_tile.y += ray_walker.step.y
+		ray_walker.t_max.y += ray_walker.t_delta.y
+	}
+
+	return
+}
+
+ray_intersect_box :: proc(ray: cursor.Ray, box: Box) -> bool {
+	t_min, t_max := math.inf_f32(-1), math.inf_f32(1)
+
+	for axis in 0 ..= 2 {
+		inv_dir := 1.0 / ray.direction[axis]
+		t0 := (box.min[axis] - ray.origin[axis]) * inv_dir
+		t1 := (box.max[axis] - ray.origin[axis]) * inv_dir
+
+		if t0 > t1 {
+			t0, t1 = t1, t0
+		}
+
+		t_min = math.max(t_min, t0)
+		t_max = math.min(t_max, t1)
+
+		if t_max < t_min {
+			return false
+		}
+	}
+
+	return true
+}
+
+get_object_by_id :: proc(id: Object_Id) -> (obj: Object, ok: bool = true) {
+	objects := get_objects_context()
+	key := objects.keys[id] or_return
+
+	chunk := objects.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z]
+	return chunk.objects[key.index], true
+}
+
+get_object_under_cursor :: proc() -> (object_id: Object_Id, ok: bool = true) {
+	objects := get_objects_context()
+	ray := Ray_2D {
+		origin    = cursor.ray.origin.xz,
+		direction = cursor.ray.direction.xz,
+	}
+
+	rect: Rect
+	rect.min.x = f32(camera.visible_chunks_start.x) * c.CHUNK_WIDTH
+	rect.min.y = f32(camera.visible_chunks_start.y) * c.CHUNK_DEPTH
+	rect.max.x = f32(camera.visible_chunks_end.x) * c.CHUNK_WIDTH
+	rect.max.y = f32(camera.visible_chunks_end.y) * c.CHUNK_DEPTH
+
+	chunk_ray_walker := init_ray_walker(ray, c.CHUNK_WIDTH, rect) or_return
+
+	for pos in ray_walker_next(&chunk_ray_walker) {
+		chunk := &objects.chunks[floor.floor][i32(pos.x)][i32(pos.y)]
+		for id, i in chunk.objects_inside {
+			if obj, ok := get_object_by_id(id); ok {
+				if ray_intersect_box(cursor.ray, obj.bounding_box) {
+					return id, true
+				}
+			}
+		}
+	}
+
+	return 0, false
 }
 
 @(test)
