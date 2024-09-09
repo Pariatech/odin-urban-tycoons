@@ -222,6 +222,10 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
+	if obj.placement == .Table || obj.placement == .Counter {
+		obj.pos.y += 0.8
+	}
+
 	calculate_object_bounding_box(&obj)
 
 	can_add_object(
@@ -253,10 +257,6 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 		obj.orientation,
 		obj.type,
 	)
-
-	if obj.placement == .Table || obj.placement == .Counter {
-		obj.pos.y += 0.8
-	}
 
 	obj.draw_id = create_object_draw(object_draw_from_object(obj))
 
@@ -314,7 +314,6 @@ update_object_placement_map :: proc(
 	type: Object_Type,
 ) {
 	obj_size := get_object_size(model)
-	log.info(type)
 
 	for x in 0 ..< obj_size.x {
 		tx := x
@@ -402,8 +401,6 @@ calculate_object_bounding_box :: proc(object: ^Object) {
 
 	min += object.pos
 	max += object.pos
-
-	log.info(object.pos, object.model, min, max)
 
 	object.bounding_box = {
 		min = min,
@@ -745,14 +742,23 @@ init_ray_walker :: proc(
 	walker: Ray_Walker_2D,
 	ok: bool = true,
 ) {
+    ray := ray
+    ray.direction = glsl.normalize(ray.direction)
 	walker.ray = ray
 	walker.tile_size = tile_size
 	walker.rect = rect
-	walker.ray.origin = intersect_ray_with_rect(ray, rect) or_return
+	if ray.origin.x < rect.min.x ||
+	   ray.origin.x > rect.max.x ||
+	   ray.origin.y < rect.min.y ||
+	   ray.origin.y > rect.max.y {
+		walker.ray.origin = intersect_ray_with_rect(ray, rect) or_return
+	} else {
+		walker.ray = ray
+	}
 
 	walker.current_tile = glsl.vec2 {
-		math.floor(walker.ray.origin.x / tile_size),
-		math.floor(walker.ray.origin.y / tile_size),
+		math.trunc(walker.ray.origin.x / tile_size),
+		math.trunc(walker.ray.origin.y / tile_size),
 	}
 
 
@@ -854,18 +860,24 @@ get_object_under_cursor :: proc() -> (object_id: Object_Id, ok: bool = true) {
 
 	chunk_ray_walker := init_ray_walker(ray, c.CHUNK_WIDTH, rect) or_return
 
+	object_under_placement: Object_Placement
+	object_under_id: Maybe(Object_Id)
 	for pos in ray_walker_next(&chunk_ray_walker) {
 		chunk := &objects.chunks[floor.floor][i32(pos.x)][i32(pos.y)]
 		for id, i in chunk.objects_inside {
 			if obj, ok := get_object_by_id(id); ok {
 				if ray_intersect_box(cursor.ray, obj.bounding_box) {
-					return id, true
+					object_under_id = id
+					if obj.placement != .Floor {
+						return object_under_id.?, true
+					}
 				}
 			}
 		}
 	}
 
-	return 0, false
+	object_id = object_under_id.? or_return
+	return
 }
 
 @(test)
