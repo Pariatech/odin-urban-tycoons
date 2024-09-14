@@ -1,27 +1,32 @@
 package game
 
 import "core:log"
+import "core:math/linalg"
 import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
 import "../cursor"
 import "../floor"
+import "../keyboard"
 import "../mouse"
 
 Object_Tool_Mode :: enum {
 	Pick,
 	Place,
 	Move,
+	Rotate,
 }
 
 Object_Tool_Context :: struct {
 	cursor_pos:                   glsl.vec3,
-	placement_set:                Object_Placement_Set,
-	object:                       Maybe(Object),
+	pos_offset:                   glsl.vec3,
+	object:                       Object,
+	original_object:              Object,
 	tile_marker:                  Object,
 	tile_draw_ids:                [dynamic]Object_Draw_Id,
 	previous_object_under_cursor: Maybe(Object_Id),
+	previous_mode:                Object_Tool_Mode,
 	mode:                         Object_Tool_Mode,
 }
 
@@ -39,8 +44,6 @@ init_object_tool :: proc() {
 	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
 	ctx.tile_marker.light = {1, 1, 1}
 
-	ctx.placement_set = {.Floor}
-
 	// ctx.object_draw_id = create_object_draw(
 	// 	object_draw_from_object(ctx.object),
 	// )
@@ -54,111 +57,71 @@ deinit_object_tool :: proc() {
 	delete(ctx.tile_draw_ids)
 }
 
+clear_object_tool_tile_marker_object_draws :: proc() {
+	ctx := get_object_tool_context()
+
+	for id in ctx.tile_draw_ids {
+		delete_object_draw(id)
+	}
+
+	clear(&ctx.tile_draw_ids)
+}
+
 create_object_tool_tile_marker_object_draws :: proc() {
 	ctx := get_object_tool_context()
 
-	if object, ok := ctx.object.?; ok {
-		for id in ctx.tile_draw_ids {
-			delete_object_draw(id)
-		}
-		clear(&ctx.tile_draw_ids)
+	clear_object_tool_tile_marker_object_draws()
 
-		for x in 0 ..< object.size.x {
-			tx := x
-			for z in 0 ..< object.size.z {
-				tz := z
-				switch object.orientation {
-				case .South:
-					tz = -z
-				case .East:
-					tx = z
-					tz = x
-				case .North:
-					tx = -x
-				case .West:
-					tx = -z
-					tz = -x
-				}
-
-				ctx.tile_marker.pos = object.pos + {f32(tx), 0, f32(tz)}
-				append(
-					&ctx.tile_draw_ids,
-					create_object_draw(
-						object_draw_from_object(ctx.tile_marker),
-					),
-				)
-			}
-		}
+	it := Object_Tiles_Iterator {
+		object = ctx.object,
+	}
+	for pos in next_object_tile_pos(&it) {
+		ctx.tile_marker.pos = pos
+		append(
+			&ctx.tile_draw_ids,
+			create_object_draw(object_draw_from_object(ctx.tile_marker)),
+		)
 	}
 }
 
 update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
 	ctx := get_object_tool_context()
 
-	if object, ok := ctx.object.?; ok {
-		i: int = 0
-		for x in 0 ..< object.size.x {
-			tx := x
-			for z in 0 ..< object.size.z {
-				tz := z
-				switch object.orientation {
-				case .South:
-					tz = -z
-				case .East:
-					tx = z
-					tz = x
-				case .North:
-					tx = -x
-				case .West:
-					tx = -z
-					tz = -x
-				}
-
-				ctx.tile_marker.pos = object.pos + {f32(tx), 0, f32(tz)}
-
-				draw := object_draw_from_object(ctx.tile_marker)
-				draw.light = light
-				draw.id = ctx.tile_draw_ids[i]
-				update_object_draw(draw)
-				i += 1
-			}
-		}
+	it := make_object_tiles_iterator(ctx.object)
+	for pos, i in next_object_tile_pos(&it) {
+		ctx.tile_marker.pos = pos
+		draw := object_draw_from_object(ctx.tile_marker)
+		draw.light = light
+		draw.id = ctx.tile_draw_ids[i]
+		update_object_draw(draw)
 	}
 }
 
-set_object_tool_model :: proc(model: string) {
+set_object_tool_object :: proc(object: Object) -> (ok: bool = true) {
+	object := object
 	ctx := get_object_tool_context()
-	if object, ok := &ctx.object.?; ok {
-		object.model = model
-		object.size = get_object_size(model)
-
-		object.draw_id = create_object_draw(object_draw_from_object(object^))
-
-		create_object_tool_tile_marker_object_draws()
+	if ctx.mode == .Move || ctx.mode == .Rotate {
+		return false
 	}
-}
 
-set_object_tool_texture :: proc(texture: string) {
-	ctx := get_object_tool_context()
-	if object, ok := &ctx.object.?; ok {
-		object.texture = texture
+	if ctx.mode == .Place {
+		object.draw_id = ctx.object.draw_id
+		update_object_draw(object_draw_from_object(object))
+	} else {
+		object.draw_id = create_object_draw(object_draw_from_object(object))
 	}
+
+	ctx.mode = .Place
+	ctx.object = object
+	ctx.pos_offset = {}
+
+	create_object_tool_tile_marker_object_draws()
+	return
 }
 
-set_object_tool_placement_set :: proc(placement: Object_Placement_Set) {
+object_tool_pick_object :: proc() {
 	ctx := get_object_tool_context()
-	ctx.placement_set = placement
-}
 
-set_object_tool_type :: proc(type: Object_Type) {
-	ctx := get_object_tool_context()
-	if object, ok := &ctx.object.?; ok {
-		object.type = type
-	}
-}
-
-object_tool_handle_object_under_cursor :: proc() {
-	ctx := get_object_tool_context()
 	if object_under_cursor, ok := get_object_under_cursor(); ok {
 		if previous_object_under_cursor, ok := ctx.previous_object_under_cursor.?;
 		   ok && previous_object_under_cursor != object_under_cursor {
@@ -166,89 +129,166 @@ object_tool_handle_object_under_cursor :: proc() {
 				previous_object_under_cursor,
 			); ok {
 				mouse.set_cursor(.Arrow)
-				// previous_obj.light = {1, 1, 1}
+				previous_obj.light = {1, 1, 1}
 				update_object_draw(object_draw_from_object(previous_obj))
 			}
 		}
 		if object, ok := get_object_by_id(object_under_cursor); ok {
-			mouse.set_cursor(.Hand)
-			// object.light = {0, 1, 0}
-			update_object_draw(object_draw_from_object(object))
-			ctx.previous_object_under_cursor = object_under_cursor
+			if mouse.is_button_press(.Left) {
+				ctx.previous_mode = ctx.mode
+				ctx.mode = .Rotate
+				mouse.set_cursor(.Rotate)
+				ctx.object = object
+				ctx.original_object = object
+				cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
+				object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
+				ctx.pos_offset =  {
+					f32(cursor_tile_pos.x - object_tile_pos.x),
+					0,
+					f32(cursor_tile_pos.y - object_tile_pos.y),
+				}
+				delete_object_by_id(object_under_cursor)
+				ctx.object.draw_id = create_object_draw(
+					object_draw_from_object(object),
+				)
+				create_object_tool_tile_marker_object_draws()
+				ctx.previous_object_under_cursor = nil
+			} else {
+				mouse.set_cursor(.Hand)
+				object.light = {1.5, 1.5, 1.5}
+				update_object_draw(object_draw_from_object(object))
+				ctx.previous_object_under_cursor = object_under_cursor
+			}
 		}
 	} else if object_under_cursor, ok := ctx.previous_object_under_cursor.?;
 	   ok {
 		if object, ok := get_object_by_id(object_under_cursor); ok {
 			mouse.set_cursor(.Arrow)
-			// object.light = {1, 1, 1}
+			object.light = {1, 1, 1}
 			update_object_draw(object_draw_from_object(object))
-			ctx.previous_object_under_cursor = nil
+			// ctx.previous_object_under_cursor = nil
+		}
+	}
+}
+
+object_tool_place_object :: proc() {
+	ctx := get_object_tool_context()
+
+	if keyboard.is_key_press(.Key_Escape) {
+		ctx.previous_mode = ctx.mode
+		ctx.mode = .Pick
+	} else if mouse.is_button_press(.Left) {
+		ctx.previous_mode = .Place
+		ctx.mode = .Rotate
+		mouse.set_cursor(.Rotate)
+	} else {
+		ctx.object.pos = ctx.cursor_pos - ctx.pos_offset
+	}
+}
+
+object_tool_move_object :: proc() {
+	ctx := get_object_tool_context()
+
+	if keyboard.is_key_press(.Key_Escape) {
+		ctx.previous_mode = ctx.mode
+		ctx.mode = .Pick
+		add_object(ctx.original_object)
+	} else if mouse.is_button_press(.Left) {
+		ctx.previous_mode = ctx.mode
+		ctx.mode = .Rotate
+		mouse.set_cursor(.Rotate)
+	} else {
+		ctx.object.pos = ctx.cursor_pos - ctx.pos_offset
+	}
+}
+
+object_tool_rotate_object :: proc() {
+	ctx := get_object_tool_context()
+
+	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
+	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
+	outside_tile := glsl.abs(dx) > 0.5 || glsl.abs(dz) > 0.5
+	if keyboard.is_key_press(.Key_Escape) {
+		if ctx.previous_mode == .Move {
+			add_object(ctx.original_object)
+		}
+		ctx.previous_mode = ctx.mode
+		ctx.mode = .Pick
+	} else if mouse.is_button_down(.Left) {
+		if outside_tile {
+			if glsl.abs(dx) > glsl.abs(dz) {
+				if dx > 0 {
+					ctx.object.orientation = .East
+				} else {
+					ctx.object.orientation = .West
+				}
+			} else {
+				if dz > 0 {
+					ctx.object.orientation = .North
+				} else {
+					ctx.object.orientation = .South
+				}
+			}
+		}
+	} else {
+		if ctx.previous_mode == .Pick && !outside_tile {
+			ctx.previous_mode = ctx.mode
+			ctx.mode = .Move
+			mouse.set_cursor(.Hand_Closed)
+		} else {
+			ctx.previous_mode = ctx.mode
+			ctx.mode = .Pick
+			id, _ := add_object(ctx.object)
+            delete_object_draw(ctx.object.draw_id)
+	        clear_object_tool_tile_marker_object_draws()
+            ctx.object = {}
+            ctx.previous_object_under_cursor = id
+			mouse.set_cursor(.Arrow)
 		}
 	}
 }
 
 update_object_tool :: proc() {
 	ctx := get_object_tool_context()
+
+	previous_pos := ctx.object.pos
+	previous_orientation := ctx.object.orientation
+
 	cursor.on_tile_intersect(
 		object_tool_on_intersect,
 		floor.previous_floor,
 		floor.floor,
 	)
 
-	object_tool_handle_object_under_cursor()
+	switch ctx.mode {
+	case .Pick:
+		object_tool_pick_object()
+	case .Place:
+		object_tool_place_object()
+	case .Move:
+		object_tool_move_object()
+	case .Rotate:
+		object_tool_rotate_object()
+	}
 
-	if object, ok := &ctx.object.?; ok {
-		previous_pos := object.pos
-		previous_orientation := object.orientation
-		if mouse.is_button_down(.Left) {
-			mouse.set_cursor(.Rotate)
-
-			dx := ctx.cursor_pos.x - object.pos.x
-			dz := ctx.cursor_pos.z - object.pos.z
-
-			if glsl.abs(dx) > 0.5 || glsl.abs(dz) > 0.5 {
-				if glsl.abs(dx) > glsl.abs(dz) {
-					if dx > 0 {
-						object.orientation = .East
-					} else {
-						object.orientation = .West
-					}
-				} else {
-					if dz > 0 {
-						object.orientation = .North
-					} else {
-						object.orientation = .South
-					}
-				}
-			}
-		} else if mouse.is_button_release(.Left) {
-			mouse.set_cursor(.Arrow)
-			obj := object^
-			obj.pos.x = glsl.floor(obj.pos.x + 0.5)
-			obj.pos.z = glsl.floor(obj.pos.z + 0.5)
-			obj.light = glsl.vec3{1, 1, 1}
-			add_object(obj)
-		} else {
-			mouse.set_cursor(.Arrow)
-			object.pos = ctx.cursor_pos
-		}
-
+	if ctx.mode != .Pick {
 		can_add: bool
-		for placement in ctx.placement_set {
-			object.placement = placement
+		for placement in ctx.object.placement_set {
+			ctx.object.placement = placement
 			can_add = can_add_object(
-				object.pos,
-				object.model,
-				object.type,
-				object.orientation,
-				object.placement,
+				ctx.object.pos,
+				ctx.object.model,
+				ctx.object.type,
+				ctx.object.orientation,
+				ctx.object.placement,
 			)
 
 			if can_add {
-				object.pos.x = glsl.floor(object.pos.x + 0.5)
-				object.pos.z = glsl.floor(object.pos.z + 0.5)
+				ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
+				ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
 				break
-			} else if object.placement == .Wall && mouse.is_button_up(.Left) {
+			} else if ctx.object.placement == .Wall &&
+			   mouse.is_button_up(.Left) {
 				snap_wall_object()
 				break
 			}
@@ -266,23 +306,21 @@ update_object_tool :: proc() {
 snap_wall_object :: proc() {
 	ctx := get_object_tool_context()
 
-	for i in 0 ..< len(Object_Orientation) - 1 {
-		if object, ok := &ctx.object.?; ok {
-			obj := object^
-			obj.orientation = Object_Orientation(
-				(int(obj.orientation) + i) % len(Object_Orientation),
-			)
+	for i in 0 ..< len(Object_Orientation) {
+		obj := ctx.object
+		obj.orientation = Object_Orientation(
+			(int(obj.orientation) + i) % len(Object_Orientation),
+		)
 
-			if can_add_object(
-				   obj.pos,
-				   obj.model,
-				   obj.type,
-				   obj.orientation,
-				   obj.placement,
-			   ) {
-				object.orientation = obj.orientation
-				break
-			}
+		if can_add_object(
+			   obj.pos,
+			   obj.model,
+			   obj.type,
+			   obj.orientation,
+			   obj.placement,
+		   ) {
+			ctx.object.orientation = obj.orientation
+			break
 		}
 	}
 }
@@ -293,45 +331,43 @@ update_wall_masks_on_object_placement :: proc(
 ) {
 	ctx := get_object_tool_context()
 
-	if object, ok := ctx.object.?; ok {
-		if object.type != .Window && object.type != .Door {
-			return
-		}
+	if ctx.object.type != .Window && ctx.object.type != .Door {
+		return
+	}
 
-		previous_tile_pos := world_pos_to_tile_pos(previous_pos)
-		current_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
-		if previous_tile_pos == current_tile_pos &&
-		   object.orientation == previous_orientation {
-			return
-		}
+	previous_tile_pos := world_pos_to_tile_pos(previous_pos)
+	current_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
+	if previous_tile_pos == current_tile_pos &&
+	   ctx.object.orientation == previous_orientation {
+		return
+	}
 
-		previous_obj := object
-		previous_obj.pos = previous_pos
-		previous_obj.orientation = previous_orientation
+	previous_obj := ctx.object
+	previous_obj.pos = previous_pos
+	previous_obj.orientation = previous_orientation
 
-		if can_add_object(
-			   previous_pos,
-			   object.model,
-			   object.type,
-			   previous_orientation,
-			   object.placement,
-		   ) {
-			set_wall_mask_from_object(previous_obj, .Full_Mask)
-		}
+	if can_add_object(
+		   previous_pos,
+		   ctx.object.model,
+		   ctx.object.type,
+		   previous_orientation,
+		   ctx.object.placement,
+	   ) {
+		set_wall_mask_from_object(previous_obj, .Full_Mask)
+	}
 
-		if can_add_object(
-			   object.pos,
-			   object.model,
-			   object.type,
-			   object.orientation,
-			   object.placement,
-		   ) {
-			if object.type == .Window {
-				mask := window_model_to_wall_mask_map[object.model]
-				set_wall_mask_from_object(object, mask)
-			} else {
-				set_wall_mask_from_object(object, .Door_Opening)
-			}
+	if can_add_object(
+		   ctx.object.pos,
+		   ctx.object.model,
+		   ctx.object.type,
+		   ctx.object.orientation,
+		   ctx.object.placement,
+	   ) {
+		if ctx.object.type == .Window {
+			mask := window_model_to_wall_mask_map[ctx.object.model]
+			set_wall_mask_from_object(ctx.object, mask)
+		} else {
+			set_wall_mask_from_object(ctx.object, .Door_Opening)
 		}
 	}
 }
@@ -386,21 +422,23 @@ object_tool_on_intersect :: proc(intersect: glsl.vec3) {
 
 draw_object_tool :: proc(can_add: bool) -> bool {
 	ctx := get_object_tool_context()
-	if object, ok := &ctx.object.?; ok {
-		if !can_add {
-			object.light = {0.8, 0.2, 0.2}
-			object.pos += {0, 0.01, 0}
-		}
+	object := ctx.object
 
-		if object.placement == .Counter || object.placement == .Table {
-			object.pos.y += 0.8
-		}
-
-		draw := object_draw_from_object(object^)
-		update_object_draw(draw)
-
-		update_object_tool_tile_marker_object_draws(object.light)
+	if !can_add {
+		object.light = {0.8, 0.2, 0.2}
+		object.pos += {0, 0.01, 0}
+	} else {
+		object.light = {1, 1, 1}
 	}
+
+	if object.placement == .Counter || object.placement == .Table {
+		object.pos.y += 0.8
+	}
+
+	draw := object_draw_from_object(object)
+	update_object_draw(draw)
+
+	update_object_tool_tile_marker_object_draws(object.light)
 
 	return true
 }

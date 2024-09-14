@@ -105,17 +105,18 @@ Object_Key :: struct {
 }
 
 Object :: struct {
-	id:           Object_Id,
-	pos:          glsl.vec3,
-	light:        glsl.vec3,
-	model:        string,
-	texture:      string,
-	type:         Object_Type,
-	orientation:  Object_Orientation,
-	placement:    Object_Placement,
-	size:         glsl.ivec3,
-	draw_id:      Object_Draw_Id,
-	bounding_box: Box,
+	id:            Object_Id,
+	pos:           glsl.vec3,
+	light:         glsl.vec3,
+	model:         string,
+	texture:       string,
+	type:          Object_Type,
+	orientation:   Object_Orientation,
+	placement:     Object_Placement,
+	placement_set: Object_Placement_Set,
+	size:          glsl.ivec3,
+	draw_id:       Object_Draw_Id,
+	bounding_box:  Box,
 }
 
 Object_Chunk :: struct {
@@ -204,14 +205,42 @@ add_object_inside_chunk :: proc(obj: Object) {
 	ctx := get_objects_context()
 
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
-	chunk_min_x := i32((obj.bounding_box.min.x + 0.5) / c.CHUNK_WIDTH)
-	chunk_max_x := i32((obj.bounding_box.max.x - 0.5) / c.CHUNK_WIDTH)
-	chunk_min_z := i32((obj.bounding_box.min.z + 0.5) / c.CHUNK_DEPTH)
-	chunk_max_z := i32((obj.bounding_box.max.z - 0.5) / c.CHUNK_DEPTH)
+	// chunk_min_x := i32((obj.bounding_box.min.x + 0.5) / c.CHUNK_WIDTH)
+	// chunk_max_x := i32((obj.bounding_box.max.x - 0.5) / c.CHUNK_WIDTH)
+	// chunk_min_z := i32((obj.bounding_box.min.z + 0.5) / c.CHUNK_DEPTH)
+	// chunk_max_z := i32((obj.bounding_box.max.z - 0.5) / c.CHUNK_DEPTH)
+	chunk_min_x := i32((obj.bounding_box.min.x) / c.CHUNK_WIDTH)
+	chunk_max_x := i32((obj.bounding_box.max.x) / c.CHUNK_WIDTH)
+	chunk_min_z := i32((obj.bounding_box.min.z) / c.CHUNK_DEPTH)
+	chunk_max_z := i32((obj.bounding_box.max.z) / c.CHUNK_DEPTH)
 	for x in chunk_min_x ..= chunk_max_x {
 		for z in chunk_min_z ..= chunk_max_z {
 			chunk := &ctx.chunks[chunk_pos.y][x][z]
 			append(&chunk.objects_inside, obj.id)
+		}
+	}
+}
+
+remove_object_inside_chunk :: proc(obj: Object) {
+	ctx := get_objects_context()
+
+	chunk_pos := world_pos_to_chunk_pos(obj.pos)
+	// chunk_min_x := i32((obj.bounding_box.min.x + 0.5) / c.CHUNK_WIDTH)
+	// chunk_max_x := i32((obj.bounding_box.max.x - 0.5) / c.CHUNK_WIDTH)
+	// chunk_min_z := i32((obj.bounding_box.min.z + 0.5) / c.CHUNK_DEPTH)
+	// chunk_max_z := i32((obj.bounding_box.max.z - 0.5) / c.CHUNK_DEPTH)
+	chunk_min_x := i32((obj.bounding_box.min.x) / c.CHUNK_WIDTH)
+	chunk_max_x := i32((obj.bounding_box.max.x) / c.CHUNK_WIDTH)
+	chunk_min_z := i32((obj.bounding_box.min.z) / c.CHUNK_DEPTH)
+	chunk_max_z := i32((obj.bounding_box.max.z) / c.CHUNK_DEPTH)
+	for x in chunk_min_x ..= chunk_max_x {
+		for z in chunk_min_z ..= chunk_max_z {
+			chunk := &ctx.chunks[chunk_pos.y][x][z]
+			for obj_id, i in chunk.objects_inside {
+				if obj_id == obj.id {
+					unordered_remove(&chunk.objects_inside, i)
+				}
+			}
 		}
 	}
 }
@@ -306,6 +335,55 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 	return
 }
 
+Object_Tiles_Iterator :: struct {
+	object: Object,
+	xz:     glsl.ivec2,
+	i:      int,
+}
+
+make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
+	return {object = object}
+}
+
+next_object_tile_pos :: proc(
+	it: ^Object_Tiles_Iterator,
+) -> (
+	glsl.vec3,
+	int,
+	bool,
+) {
+	if it.xz.y >= it.object.size.z {
+		return {}, 0, false
+	}
+
+	t_x := it.xz.x
+	t_z := it.xz.y
+
+	switch it.object.orientation {
+	case .South:
+		t_z = -it.xz.y
+	case .East:
+		t_x = it.xz.y
+		t_z = it.xz.x
+	case .North:
+		t_x = -it.xz.x
+	case .West:
+		t_x = -it.xz.y
+		t_z = -it.xz.x
+	}
+
+	it.xz.x += 1
+	if it.xz.x >= it.object.size.x {
+		it.xz.x = 0
+		it.xz.y += 1
+	}
+
+	i := it.i
+	it.i += 1
+
+	return it.object.pos + {f32(t_x), 0, f32(t_z)}, i, true
+}
+
 update_object_placement_map :: proc(
 	pos: glsl.vec3,
 	model: string,
@@ -315,31 +393,21 @@ update_object_placement_map :: proc(
 ) {
 	obj_size := get_object_size(model)
 
-	for x in 0 ..< obj_size.x {
-		tx := x
-		for z in 0 ..< obj_size.z {
-			tz := z
-			switch orientation {
-			case .South:
-				tz = -z
-			case .East:
-				tx = z
-				tz = x
-			case .North:
-				tx = -x
-			case .West:
-				tx = -z
-				tz = -x
-			}
+	it := Object_Tiles_Iterator {
+		object =  {
+			pos = pos,
+			size = get_object_size(model),
+			orientation = orientation,
+		},
+	}
 
-			pos := pos + {f32(tx), 0, f32(tz)}
-			tile_pos := world_pos_to_tile_pos(pos)
-			chunk_pos := world_pos_to_chunk_pos(pos)
-			ctx := get_objects_context()
-			chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
-			chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement][orientation] =
-				type
-		}
+	for pos in next_object_tile_pos(&it) {
+		tile_pos := world_pos_to_tile_pos(pos)
+		chunk_pos := world_pos_to_chunk_pos(pos)
+		ctx := get_objects_context()
+		chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement][orientation] =
+			type
 	}
 }
 
@@ -742,8 +810,8 @@ init_ray_walker :: proc(
 	walker: Ray_Walker_2D,
 	ok: bool = true,
 ) {
-    ray := ray
-    ray.direction = glsl.normalize(ray.direction)
+	ray := ray
+	ray.direction = glsl.normalize(ray.direction)
 	walker.ray = ray
 	walker.tile_size = tile_size
 	walker.rect = rect
@@ -797,9 +865,9 @@ ray_walker_next :: proc(
 
 	current_tile = ray_walker.current_tile
 	if current_pos.x < ray_walker.rect.min.x ||
-	   current_pos.x > ray_walker.rect.max.x ||
+	   current_pos.x >= ray_walker.rect.max.x ||
 	   current_pos.y < ray_walker.rect.min.y ||
-	   current_pos.y > ray_walker.rect.max.y {
+	   current_pos.y >= ray_walker.rect.max.y {
 		return current_tile, false
 	}
 
@@ -843,6 +911,36 @@ get_object_by_id :: proc(id: Object_Id) -> (obj: Object, ok: bool = true) {
 
 	chunk := objects.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z]
 	return chunk.objects[key.index], true
+}
+
+delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
+	objects := get_objects_context()
+	key := objects.keys[id] or_return
+
+	chunk := &objects.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z]
+	object := chunk.objects[key.index]
+
+	old_chunk_pos := glsl.ivec3{-1, -1, -1}
+	it := make_object_tiles_iterator(object)
+	for pos in next_object_tile_pos(&it) {
+		chunk_pos := world_pos_to_chunk_pos(pos)
+		tile_pos := world_pos_to_tile_pos(pos)
+		chunk := &objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][object.placement][object.orientation] =
+			nil
+	}
+
+	remove_object_inside_chunk(object)
+
+	delete_object_draw(object.draw_id)
+
+	unordered_remove(&chunk.objects, key.index)
+
+	if key.index < len(chunk.objects) {
+		moved_id := chunk.objects[key.index].id
+		objects.keys[moved_id] = {key.chunk_pos, key.index}
+	}
+	return
 }
 
 get_object_under_cursor :: proc() -> (object_id: Object_Id, ok: bool = true) {

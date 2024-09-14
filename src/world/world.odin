@@ -58,6 +58,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Counter,
+			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -69,6 +71,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Counter,
+			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -80,6 +84,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Counter,
+			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 
@@ -92,6 +98,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -103,6 +111,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 
@@ -115,6 +125,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -126,6 +138,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 
@@ -138,6 +152,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -149,6 +165,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 
@@ -161,6 +179,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 	game.add_object(
@@ -172,6 +192,8 @@ init :: proc() {
 			placement = .Floor,
 			light = {1, 1, 1},
 			type = .Table,
+			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
+			placement_set = {.Floor},
 		},
 	)
 
@@ -184,6 +206,8 @@ init :: proc() {
 			placement = .Table,
 			light = {1, 1, 1},
 			type = .Computer,
+			size = game.get_object_size(game.OLD_COMPUTER_MODEL),
+			placement_set = {.Table},
 		},
 	)
 
@@ -412,6 +436,8 @@ add_house_floor_walls :: proc(
 				orientation = .West,
 				placement = .Wall,
 				light = {1, 1, 1},
+				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
+				placement_set = {.Wall},
 			},
 		)
 	} else {
@@ -427,6 +453,8 @@ add_house_floor_walls :: proc(
 				orientation = .West,
 				placement = .Wall,
 				light = {1, 1, 1},
+				size = game.get_object_size(game.WOOD_DOOR_MODEL),
+				placement_set = {.Wall},
 			},
 		)
 	}
@@ -472,6 +500,8 @@ add_house_floor_walls :: proc(
 				orientation = .West,
 				placement = .Wall,
 				light = {1, 1, 1},
+				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
+				placement_set = {.Wall},
 			},
 		)
 	}
@@ -518,6 +548,8 @@ add_house_floor_walls :: proc(
 				orientation = .South,
 				placement = .Wall,
 				light = {1, 1, 1},
+				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
+				placement_set = {.Wall},
 			},
 		)
 	}
@@ -564,6 +596,8 @@ add_house_floor_walls :: proc(
 				orientation = .South,
 				placement = .Wall,
 				light = {1, 1, 1},
+				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
+				placement_set = {.Wall},
 			},
 		)
 	}

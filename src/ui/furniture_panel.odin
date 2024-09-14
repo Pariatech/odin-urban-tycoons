@@ -124,10 +124,14 @@ furniture_panel_body :: proc(
 		   ) {
 			// furniture_tool.place_furniture(i)
 			furnitures := FURNITURES
-			game.set_object_tool_model(furnitures[i].model)
-			game.set_object_tool_texture(furnitures[i].texture)
-			game.set_object_tool_placement_set(furnitures[i].placement)
-			game.set_object_tool_type(furnitures[i].type)
+            game.set_object_tool_object({
+                model = furnitures[i].model,
+                texture = furnitures[i].texture,
+                type = furnitures[i].type,
+                size = game.get_object_size(furnitures[i].model),
+                light = {1, 1, 1},
+                placement_set = furnitures[i].placement,
+            })
 		}
 	}
 }
