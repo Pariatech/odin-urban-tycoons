@@ -57,6 +57,10 @@ init :: proc() {
 	glfw.SetCursorPosCallback(window.handle, pos_callback)
 }
 
+set_pos :: proc(pos: glsl.vec2) {
+    glfw.SetCursorPos(window.handle, f64(pos.x), f64(pos.y))
+}
+
 update :: proc() {
 	update_ray()
     previous_pos = pos
