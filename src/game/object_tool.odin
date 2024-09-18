@@ -205,6 +205,8 @@ object_tool_move_object :: proc() {
 object_tool_rotate_object :: proc() {
 	ctx := get_object_tool_context()
 
+    previous_orientation := ctx.object.orientation
+
 	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
 	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
 	outside_tile := glsl.abs(dx) > 0.5 || glsl.abs(dz) > 0.5
@@ -225,7 +227,7 @@ object_tool_rotate_object :: proc() {
 							ctx.pos_offset =  {
 								ctx.pos_offset.z,
 								ctx.pos_offset.y,
-								ctx.pos_offset.x,
+								-ctx.pos_offset.x,
 							}
 						case .East:
 							ctx.pos_offset =  {
@@ -237,7 +239,7 @@ object_tool_rotate_object :: proc() {
 							ctx.pos_offset =  {
 								-ctx.pos_offset.z,
 								ctx.pos_offset.y,
-								-ctx.pos_offset.x,
+								ctx.pos_offset.x,
 							}
 						}
 
@@ -281,13 +283,13 @@ object_tool_rotate_object :: proc() {
 						#partial switch ctx.object.orientation {
 						case .East:
 							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
+								ctx.pos_offset.z,
 								ctx.pos_offset.y,
 								-ctx.pos_offset.x,
 							}
 						case .North:
 							ctx.pos_offset =  {
-								ctx.pos_offset.x,
+								-ctx.pos_offset.x,
 								ctx.pos_offset.y,
 								-ctx.pos_offset.z,
 							}
@@ -309,7 +311,7 @@ object_tool_rotate_object :: proc() {
 						#partial switch ctx.object.orientation {
 						case .South:
 							ctx.pos_offset =  {
-								ctx.pos_offset.x,
+								-ctx.pos_offset.x,
 								ctx.pos_offset.y,
 								-ctx.pos_offset.z,
 							}
@@ -321,7 +323,7 @@ object_tool_rotate_object :: proc() {
 							}
 						case .West:
 							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
+								ctx.pos_offset.z,
 								ctx.pos_offset.y,
 								-ctx.pos_offset.x,
 							}
@@ -351,6 +353,10 @@ object_tool_rotate_object :: proc() {
 			mouse.set_cursor(.Arrow)
 		}
 	}
+
+    if previous_orientation != ctx.object.orientation {
+        log.info(previous_orientation, ctx.object.orientation)
+    }
 }
 
 update_object_tool :: proc() {
