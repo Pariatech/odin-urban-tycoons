@@ -143,7 +143,7 @@ object_tool_pick_object :: proc() {
 				ctx.original_object = object
 				cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
 				object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
-				// ctx.object.size
+
 				ctx.pos_offset =  {
 					f32(cursor_tile_pos.x - object_tile_pos.x),
 					0,
@@ -195,6 +195,10 @@ object_tool_pick_object :: proc() {
 						-f32(ctx.object.size.z) + 1,
 						0,
 					)
+				}
+
+				if object.placement == .Table || object.placement == .Counter {
+					ctx.object.pos.y -= 0.8
 				}
 
 				delete_object_by_id(object_under_cursor)
@@ -260,7 +264,7 @@ object_tool_rotate_object :: proc() {
 
 	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
 	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
-	outside_tile := glsl.abs(dx) > 0.5 || glsl.abs(dz) > 0.5
+	outside_tile := glsl.abs(dx) > 1.5 || glsl.abs(dz) > 1.5
 	if keyboard.is_key_press(.Key_Escape) {
 		if ctx.previous_mode == .Move {
 			add_object(ctx.original_object)
@@ -273,6 +277,7 @@ object_tool_rotate_object :: proc() {
 			if glsl.abs(dx) > glsl.abs(dz) {
 				if dx > 0 {
 					if ctx.pos_offset != 0 {
+						// log.info("uh??")
 						#partial switch ctx.object.orientation {
 						case .South:
 							ctx.pos_offset =  {
@@ -303,17 +308,11 @@ object_tool_rotate_object :: proc() {
 					if ctx.pos_offset != 0 {
 						#partial switch ctx.object.orientation {
 						case .North:
-							ctx.pos_offset = {
+							ctx.pos_offset =  {
 								ctx.pos_offset.z,
-								// ctx.pos_offset.z - (ctx.pos_offset.x + ctx.pos_offset.z),
 								ctx.pos_offset.y,
 								-ctx.pos_offset.x,
 							}
-						// ctx.pos_offset =  {
-						// 	-ctx.pos_offset.x + ctx.pos_offset.z,
-						// 	ctx.pos_offset.y,
-						// 	ctx.pos_offset.x + ctx.pos_offset.z,
-						// }
 						case .West:
 							ctx.pos_offset =  {
 								-ctx.pos_offset.x,
