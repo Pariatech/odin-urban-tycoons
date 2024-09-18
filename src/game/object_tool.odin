@@ -1,6 +1,7 @@
 package game
 
 import "core:log"
+import "core:math"
 import "core:math/linalg"
 import "core:math/linalg/glsl"
 
@@ -142,11 +143,60 @@ object_tool_pick_object :: proc() {
 				ctx.original_object = object
 				cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
 				object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
+				// ctx.object.size
 				ctx.pos_offset =  {
 					f32(cursor_tile_pos.x - object_tile_pos.x),
 					0,
 					f32(cursor_tile_pos.y - object_tile_pos.y),
 				}
+
+				switch ctx.object.orientation {
+				case .South:
+					ctx.pos_offset.x = math.clamp(
+						ctx.pos_offset.x,
+						0,
+						f32(ctx.object.size.x) - 1,
+					)
+					ctx.pos_offset.z = math.clamp(
+						ctx.pos_offset.z,
+						-f32(ctx.object.size.z) + 1,
+						0,
+					)
+				case .East:
+					ctx.pos_offset.x = math.clamp(
+						ctx.pos_offset.x,
+						0,
+						f32(ctx.object.size.x) - 1,
+					)
+					ctx.pos_offset.z = math.clamp(
+						ctx.pos_offset.z,
+						0,
+						f32(ctx.object.size.z) - 1,
+					)
+				case .North:
+					ctx.pos_offset.x = math.clamp(
+						ctx.pos_offset.x,
+						-f32(ctx.object.size.x) + 1,
+						0,
+					)
+					ctx.pos_offset.z = math.clamp(
+						ctx.pos_offset.z,
+						0,
+						f32(ctx.object.size.z) - 1,
+					)
+				case .West:
+					ctx.pos_offset.x = math.clamp(
+						ctx.pos_offset.x,
+						-f32(ctx.object.size.x) + 1,
+						0,
+					)
+					ctx.pos_offset.z = math.clamp(
+						ctx.pos_offset.z,
+						-f32(ctx.object.size.z) + 1,
+						0,
+					)
+				}
+
 				delete_object_by_id(object_under_cursor)
 				ctx.object.draw_id = create_object_draw(
 					object_draw_from_object(object),
@@ -205,7 +255,8 @@ object_tool_move_object :: proc() {
 object_tool_rotate_object :: proc() {
 	ctx := get_object_tool_context()
 
-    previous_orientation := ctx.object.orientation
+	previous_offset_pos := ctx.pos_offset
+	previous_orientation := ctx.object.orientation
 
 	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
 	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
@@ -252,11 +303,17 @@ object_tool_rotate_object :: proc() {
 					if ctx.pos_offset != 0 {
 						#partial switch ctx.object.orientation {
 						case .North:
-							ctx.pos_offset =  {
+							ctx.pos_offset = {
 								ctx.pos_offset.z,
+								// ctx.pos_offset.z - (ctx.pos_offset.x + ctx.pos_offset.z),
 								ctx.pos_offset.y,
 								-ctx.pos_offset.x,
 							}
+						// ctx.pos_offset =  {
+						// 	-ctx.pos_offset.x + ctx.pos_offset.z,
+						// 	ctx.pos_offset.y,
+						// 	ctx.pos_offset.x + ctx.pos_offset.z,
+						// }
 						case .West:
 							ctx.pos_offset =  {
 								-ctx.pos_offset.x,
@@ -354,9 +411,14 @@ object_tool_rotate_object :: proc() {
 		}
 	}
 
-    if previous_orientation != ctx.object.orientation {
-        log.info(previous_orientation, ctx.object.orientation)
-    }
+	if previous_orientation != ctx.object.orientation {
+		log.info(
+			previous_offset_pos,
+			ctx.pos_offset,
+			previous_orientation,
+			ctx.object.orientation,
+		)
+	}
 }
 
 update_object_tool :: proc() {
