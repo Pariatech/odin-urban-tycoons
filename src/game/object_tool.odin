@@ -16,12 +16,11 @@ Object_Tool_Mode :: enum {
 	Pick,
 	Place,
 	Move,
-	Rotate,
 }
 
 Object_Tool_Context :: struct {
 	cursor_pos:                   glsl.vec3,
-	pos_offset:                   glsl.vec3,
+	pivot_pos:                    glsl.vec3,
 	object:                       Object,
 	original_object:              Object,
 	tile_marker:                  Object,
@@ -103,7 +102,7 @@ update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
 set_object_tool_object :: proc(object: Object) -> (ok: bool = true) {
 	object := object
 	ctx := get_object_tool_context()
-	if ctx.mode == .Move || ctx.mode == .Rotate {
+	if ctx.mode == .Move {
 		return false
 	}
 
@@ -116,7 +115,6 @@ set_object_tool_object :: proc(object: Object) -> (ok: bool = true) {
 
 	ctx.mode = .Place
 	ctx.object = object
-	ctx.pos_offset = {}
 
 	create_object_tool_tile_marker_object_draws()
 	return
@@ -139,65 +137,12 @@ object_tool_pick_object :: proc() {
 		if object, ok := get_object_by_id(object_under_cursor); ok {
 			if mouse.is_button_press(.Left) {
 				ctx.previous_mode = ctx.mode
-				ctx.mode = .Rotate
-				mouse.set_cursor(.Rotate)
+				ctx.mode = .Move
+				mouse.set_cursor(.Hand_Closed)
 				ctx.object = object
 				ctx.original_object = object
 				cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
 				object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
-
-				ctx.pos_offset =  {
-					f32(cursor_tile_pos.x - object_tile_pos.x),
-					0,
-					f32(cursor_tile_pos.y - object_tile_pos.y),
-				}
-
-				switch ctx.object.orientation {
-				case .South:
-					ctx.pos_offset.x = math.clamp(
-						ctx.pos_offset.x,
-						0,
-						f32(ctx.object.size.x) - 1,
-					)
-					ctx.pos_offset.z = math.clamp(
-						ctx.pos_offset.z,
-						-f32(ctx.object.size.z) + 1,
-						0,
-					)
-				case .East:
-					ctx.pos_offset.x = math.clamp(
-						ctx.pos_offset.x,
-						0,
-						f32(ctx.object.size.x) - 1,
-					)
-					ctx.pos_offset.z = math.clamp(
-						ctx.pos_offset.z,
-						0,
-						f32(ctx.object.size.z) - 1,
-					)
-				case .North:
-					ctx.pos_offset.x = math.clamp(
-						ctx.pos_offset.x,
-						-f32(ctx.object.size.x) + 1,
-						0,
-					)
-					ctx.pos_offset.z = math.clamp(
-						ctx.pos_offset.z,
-						0,
-						f32(ctx.object.size.z) - 1,
-					)
-				case .West:
-					ctx.pos_offset.x = math.clamp(
-						ctx.pos_offset.x,
-						-f32(ctx.object.size.x) + 1,
-						0,
-					)
-					ctx.pos_offset.z = math.clamp(
-						ctx.pos_offset.z,
-						-f32(ctx.object.size.z) + 1,
-						0,
-					)
-				}
 
 				if object.placement == .Table || object.placement == .Counter {
 					ctx.object.pos.y -= 0.8
@@ -234,11 +179,21 @@ object_tool_place_object :: proc() {
 		ctx.previous_mode = ctx.mode
 		ctx.mode = .Pick
 	} else if mouse.is_button_press(.Left) {
-		ctx.previous_mode = .Place
-		ctx.mode = .Rotate
-		mouse.set_cursor(.Rotate)
+		ctx.previous_mode = ctx.mode
+		ctx.mode = .Pick
+		id, _ := add_object(ctx.object)
+		delete_object_draw(ctx.object.draw_id)
+		clear_object_tool_tile_marker_object_draws()
+		ctx.object = {}
+		ctx.previous_object_under_cursor = id
+		mouse.set_cursor(.Arrow)
 	} else {
-		ctx.object.pos = ctx.cursor_pos - ctx.pos_offset
+		if keyboard.is_key_press(.Key_R) {
+			ctx.object.orientation = Object_Orientation(
+				(int(ctx.object.orientation) + 1) % len(Object_Orientation),
+			)
+		}
+		ctx.object.pos = ctx.cursor_pos
 	}
 }
 
@@ -251,173 +206,20 @@ object_tool_move_object :: proc() {
 		add_object(ctx.original_object)
 	} else if mouse.is_button_press(.Left) {
 		ctx.previous_mode = ctx.mode
-		ctx.mode = .Rotate
-		mouse.set_cursor(.Rotate)
-	} else {
-		ctx.object.pos = ctx.cursor_pos - ctx.pos_offset
-	}
-}
-
-object_tool_rotate_object :: proc() {
-	ctx := get_object_tool_context()
-
-	previous_offset_pos := ctx.pos_offset
-	previous_orientation := ctx.object.orientation
-
-	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
-	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
-	outside_tile := glsl.abs(dx) > .5 || glsl.abs(dz) > .5
-	if keyboard.is_key_press(.Key_Escape) {
-		if ctx.previous_mode == .Move {
-			add_object(ctx.original_object)
-		}
-		ctx.previous_mode = ctx.mode
 		ctx.mode = .Pick
-	} else if mouse.is_button_down(.Left) {
-		if outside_tile {
-			pivot := ctx.object.pos + ctx.pos_offset
-			if glsl.abs(dx) > glsl.abs(dz) {
-				if dx > 0 {
-					if ctx.pos_offset != 0 {
-						#partial switch ctx.object.orientation {
-						case .South:
-							ctx.pos_offset =  {
-								ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.x,
-							}
-						case .East:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.x,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.z,
-							}
-						case .North:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								ctx.pos_offset.x,
-							}
-						}
-
-						ctx.object.pos = pivot - ctx.pos_offset
-						ctx.object.orientation = .West
-					} else {
-						ctx.object.orientation = .East
-					}
-				} else {
-					if ctx.pos_offset != 0 {
-						#partial switch ctx.object.orientation {
-						case .North:
-							ctx.pos_offset =  {
-								ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.x,
-							}
-						case .West:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.x,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.z,
-							}
-						case .South:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								ctx.pos_offset.x,
-							}
-						}
-
-						ctx.object.pos = pivot - ctx.pos_offset
-						ctx.object.orientation = .East
-					} else {
-						ctx.object.orientation = .West
-					}
-				}
-			} else {
-				if dz > 0 {
-					if ctx.pos_offset != 0 {
-						#partial switch ctx.object.orientation {
-						case .East:
-							ctx.pos_offset =  {
-								ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.x,
-							}
-						case .North:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.x,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.z,
-							}
-						case .West:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								ctx.pos_offset.x,
-							}
-						}
-
-						ctx.object.pos = pivot - ctx.pos_offset
-						ctx.object.orientation = .South
-					} else {
-						ctx.object.orientation = .North
-					}
-				} else {
-					if ctx.pos_offset != 0 {
-						#partial switch ctx.object.orientation {
-						case .South:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.x,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.z,
-							}
-						case .East:
-							ctx.pos_offset =  {
-								-ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								ctx.pos_offset.x,
-							}
-						case .West:
-							ctx.pos_offset =  {
-								ctx.pos_offset.z,
-								ctx.pos_offset.y,
-								-ctx.pos_offset.x,
-							}
-						}
-
-						ctx.object.pos = pivot - ctx.pos_offset
-						ctx.object.orientation = .North
-					} else {
-						ctx.object.orientation = .South
-					}
-				}
-			}
-		}
+		id, _ := add_object(ctx.object)
+		delete_object_draw(ctx.object.draw_id)
+		clear_object_tool_tile_marker_object_draws()
+		ctx.object = {}
+		ctx.previous_object_under_cursor = id
+		mouse.set_cursor(.Arrow)
 	} else {
-		if ctx.previous_mode == .Pick && !outside_tile {
-			ctx.previous_mode = ctx.mode
-			ctx.mode = .Move
-			mouse.set_cursor(.Hand_Closed)
-		} else {
-			ctx.previous_mode = ctx.mode
-			ctx.mode = .Pick
-			id, _ := add_object(ctx.object)
-			delete_object_draw(ctx.object.draw_id)
-			clear_object_tool_tile_marker_object_draws()
-			ctx.object = {}
-			ctx.previous_object_under_cursor = id
-			mouse.set_cursor(.Arrow)
+		if keyboard.is_key_press(.Key_R) {
+			ctx.object.orientation = Object_Orientation(
+				(int(ctx.object.orientation) + 1) % len(Object_Orientation),
+			)
 		}
-	}
-
-	if previous_orientation != ctx.object.orientation {
-		log.info(
-			previous_offset_pos,
-			ctx.pos_offset,
-			previous_orientation,
-			ctx.object.orientation,
-		)
+		ctx.object.pos = ctx.cursor_pos
 	}
 }
 
@@ -440,8 +242,6 @@ update_object_tool :: proc() {
 		object_tool_place_object()
 	case .Move:
 		object_tool_move_object()
-	case .Rotate:
-		object_tool_rotate_object()
 	}
 
 	if ctx.mode != .Pick {
@@ -451,7 +251,7 @@ update_object_tool :: proc() {
 			can_add = can_add_object(ctx.object)
 
 			if can_add {
-                clamp_object(&ctx.object)
+				clamp_object(&ctx.object)
 				break
 			} else if ctx.object.placement == .Wall &&
 			   mouse.is_button_up(.Left) {

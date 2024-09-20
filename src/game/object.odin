@@ -332,20 +332,30 @@ Object_Tiles_Iterator :: struct {
 }
 
 clamp_object :: proc(object: ^Object) {
+	rotated_size := object.size
+	if object.orientation == .East || object.orientation == .West {
+		rotated_size.xz = object.size.zx
+	}
+
 	object.pos.x =
-		math.floor(object.pos.x + f32(object.size.x % 2) / 2) +
-		f32((object.size.x + 1) % 2) / 2
+		math.floor(object.pos.x + f32(rotated_size.x % 2) / 2) +
+		f32((rotated_size.x + 1) % 2) / 2
 	object.pos.z =
-		math.floor(object.pos.z + f32(object.size.z % 2) / 2) +
-		f32((object.size.z + 1) % 2) / 2
+		math.floor(object.pos.z + f32(rotated_size.z % 2) / 2) +
+		f32((rotated_size.z + 1) % 2) / 2
 }
 
 make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
 	object := object
 	clamp_object(&object)
 
+	rotated_size := object.size
+	if object.orientation == .East || object.orientation == .West {
+		rotated_size.xz = object.size.zx
+	}
+
 	start := glsl.ivec2{i32(object.pos.x), i32(object.pos.z)}
-	end := start + object.size.xz
+	end := start + rotated_size.xz
 	return {object = object, start = start, end = end, xz = start}
 }
 
