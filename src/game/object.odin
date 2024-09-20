@@ -273,13 +273,7 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 
 	chunk.dirty = true
 
-	update_object_placement_map(
-		obj.pos,
-		obj.model,
-		obj.placement,
-		obj.orientation,
-		obj.type,
-	)
+	update_object_placement_map(obj)
 
 	obj.draw_id = create_object_draw(object_draw_from_object(obj))
 
@@ -337,15 +331,21 @@ Object_Tiles_Iterator :: struct {
 	i:      int,
 }
 
+clamp_object :: proc(object: ^Object) {
+	object.pos.x =
+		math.floor(object.pos.x + f32(object.size.x % 2) / 2) +
+		f32((object.size.x + 1) % 2) / 2
+	object.pos.z =
+		math.floor(object.pos.z + f32(object.size.z % 2) / 2) +
+		f32((object.size.z + 1) % 2) / 2
+}
+
 make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
-	start := glsl.ivec2 {
-		i32(object.pos.x + 0.5) - object.size.x / 2,
-		i32(object.pos.z + 0.5) - object.size.z / 2,
-	}
-	end := glsl.ivec2 {
-		i32(object.pos.x + 0.5) + object.size.x / 2,
-		i32(object.pos.z + 0.5) + object.size.z / 2,
-	}
+	object := object
+	clamp_object(&object)
+
+	start := glsl.ivec2{i32(object.pos.x), i32(object.pos.z)}
+	end := start + object.size.xz
 	return {object = object, start = start, end = end, xz = start}
 }
 
@@ -356,7 +356,7 @@ next_object_tile_pos :: proc(
 	int,
 	bool,
 ) {
-	if it.xz.x >= it.end.x && it.xz.y >= it.end.y {
+	if it.xz.y >= it.end.y {
 		return {}, 0, false
 	}
 
@@ -373,30 +373,16 @@ next_object_tile_pos :: proc(
 	return {f32(xz.x), it.object.pos.y, f32(xz.y)}, i, true
 }
 
-update_object_placement_map :: proc(
-	pos: glsl.vec3,
-	model: string,
-	placement: Object_Placement,
-	orientation: Object_Orientation,
-	type: Object_Type,
-) {
-	obj_size := get_object_size(model)
-
-	it := Object_Tiles_Iterator {
-		object =  {
-			pos = pos,
-			size = get_object_size(model),
-			orientation = orientation,
-		},
-	}
-
+update_object_placement_map :: proc(obj: Object) {
+	it := make_object_tiles_iterator(obj)
+	log.info(it)
 	for pos in next_object_tile_pos(&it) {
 		tile_pos := world_pos_to_tile_pos(pos)
 		chunk_pos := world_pos_to_chunk_pos(pos)
 		ctx := get_objects_context()
 		chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
-		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][placement][orientation] =
-			type
+		chunk.placement_map[tile_pos.x % c.CHUNK_WIDTH][tile_pos.y % c.CHUNK_DEPTH][obj.placement][obj.orientation] =
+			obj.type
 	}
 }
 
@@ -562,63 +548,76 @@ can_add_object_on_floor :: proc(obj: Object) -> bool {
 	tile_pos := world_pos_to_tile_pos(obj.pos)
 	chunk_pos := world_pos_to_chunk_pos(obj.pos)
 
-	for x in 0 ..< obj.size.x {
-		x := x
-		wall_x := x
-		for z in 0 ..< obj.size.z {
-			z := z
-			wall_z := z
-			switch obj.orientation {
-			case .South:
-				z = -z
-				wall_z = z + 1
-			case .East:
-				tmp := x
-				x = z
-				z = tmp
-				wall_x = x
-			case .North:
-				x = -x
-				wall_x = x + 1
-			case .West:
-				tmp := x
-				x = -z
-				z = -tmp
-				wall_x = x + 1
-				wall_z = z + 1
-			}
-			if has_object_at(obj.pos + {f32(x), 0, f32(z)}, .Floor) {
-				return false
-			}
-
-			if x != 0 &&
-			   has_north_south_wall(
-				   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
-			   ) {
-				return false
-			}
-
-			if z != 0 &&
-			   has_east_west_wall(
-				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
-			   ) {
-				return false
-			}
-
-			if has_north_west_south_east_wall(
-				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-			   ) ||
-			   has_north_west_south_east_wall(
-				   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-			   ) {
-				return false
-			}
-
-			if !terrain.is_tile_flat(tile_pos + {x, z}) {
-				return false
-			}
+	ctx := get_objects_context()
+	it := make_object_tiles_iterator(obj)
+	log.info(it)
+	for pos in next_object_tile_pos(&it) {
+		log.info(pos)
+		// tile_pos := world_pos_to_tile_pos(pos)
+		// chunk_pos := world_pos_to_chunk_pos(pos)
+		// chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+		if has_object_at(pos, .Floor) {
+			return false
 		}
 	}
+
+	// for x in 0 ..< obj.size.x {
+	// 	x := x
+	// 	wall_x := x
+	// 	for z in 0 ..< obj.size.z {
+	// 		z := z
+	// 		wall_z := z
+	// 		switch obj.orientation {
+	// 		case .South:
+	// 			z = -z
+	// 			wall_z = z + 1
+	// 		case .East:
+	// 			tmp := x
+	// 			x = z
+	// 			z = tmp
+	// 			wall_x = x
+	// 		case .North:
+	// 			x = -x
+	// 			wall_x = x + 1
+	// 		case .West:
+	// 			tmp := x
+	// 			x = -z
+	// 			z = -tmp
+	// 			wall_x = x + 1
+	// 			wall_z = z + 1
+	// 		}
+	// 		if has_object_at(obj.pos + {f32(x), 0, f32(z)}, .Floor) {
+	// 			return false
+	// 		}
+	//
+	// 		if x != 0 &&
+	// 		   has_north_south_wall(
+	// 			   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
+	// 		   ) {
+	// 			return false
+	// 		}
+	//
+	// 		if z != 0 &&
+	// 		   has_east_west_wall(
+	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
+	// 		   ) {
+	// 			return false
+	// 		}
+	//
+	// 		if has_north_west_south_east_wall(
+	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+	// 		   ) ||
+	// 		   has_north_west_south_east_wall(
+	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
+	// 		   ) {
+	// 			return false
+	// 		}
+	//
+	// 		if !terrain.is_tile_flat(tile_pos + {x, z}) {
+	// 			return false
+	// 		}
+	// 	}
+	// }
 
 	return true
 }

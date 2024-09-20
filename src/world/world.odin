@@ -91,7 +91,7 @@ init :: proc() {
 
 	game.add_object(
 		 {
-			pos = {5, 0, 1},
+			pos = {5, 0, 1.5},
 			model = game.PLANK_TABLE_6PLACES_MODEL,
 			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
 			orientation = .South,
@@ -104,7 +104,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {8, 0, 1},
+			pos = {8.5, 0, 1.5},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .South,
@@ -118,7 +118,7 @@ init :: proc() {
 
 	game.add_object(
 		 {
-			pos = {5, 0, 4},
+			pos = {5.5, 0, 4},
 			model = game.PLANK_TABLE_6PLACES_MODEL,
 			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
 			orientation = .East,
@@ -131,7 +131,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {8, 0, 4},
+			pos = {8.5, 0, 4.5},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .East,
@@ -145,7 +145,7 @@ init :: proc() {
 
 	game.add_object(
 		 {
-			pos = {5, 0, 7},
+			pos = {5, 0, 7.5},
 			model = game.PLANK_TABLE_6PLACES_MODEL,
 			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
 			orientation = .North,
@@ -158,7 +158,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {9, 0, 7},
+			pos = {9.5, 0, 7.5},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .North,
@@ -172,7 +172,7 @@ init :: proc() {
 
 	game.add_object(
 		 {
-			pos = {5, 0, 10},
+			pos = {5.5, 0, 10},
 			model = game.PLANK_TABLE_6PLACES_MODEL,
 			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
 			orientation = .West,
@@ -185,7 +185,7 @@ init :: proc() {
 	)
 	game.add_object(
 		 {
-			pos = {9, 0, 11},
+			pos = {9.5, 0, 11.5},
 			model = game.WOOD_TABLE_8PLACES_MODEL,
 			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
 			orientation = .West,

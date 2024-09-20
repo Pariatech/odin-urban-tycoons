@@ -451,17 +451,7 @@ update_object_tool :: proc() {
 			can_add = can_add_object(ctx.object)
 
 			if can_add {
-				ctx.object.pos.x =
-					math.trunc(
-						ctx.object.pos.x + f32(ctx.object.size.x % 2) / 2,
-					) +
-					f32((ctx.object.size.x + 1) % 2) / 2
-				// log.info(ctx.object.size.z)
-				ctx.object.pos.z =
-					math.trunc(
-						ctx.object.pos.z + f32(ctx.object.size.z % 2) / 2,
-					) +
-					f32((ctx.object.size.z + 1) % 2) / 2
+                clamp_object(&ctx.object)
 				break
 			} else if ctx.object.placement == .Wall &&
 			   mouse.is_button_up(.Left) {
