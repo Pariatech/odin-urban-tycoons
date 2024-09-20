@@ -331,12 +331,22 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 
 Object_Tiles_Iterator :: struct {
 	object: Object,
+	start:  glsl.ivec2,
+	end:    glsl.ivec2,
 	xz:     glsl.ivec2,
 	i:      int,
 }
 
 make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
-	return {object = object}
+	start := glsl.ivec2 {
+		i32(object.pos.x + 0.5) - object.size.x / 2,
+		i32(object.pos.z + 0.5) - object.size.z / 2,
+	}
+	end := glsl.ivec2 {
+		i32(object.pos.x + 0.5) + object.size.x / 2,
+		i32(object.pos.z + 0.5) + object.size.z / 2,
+	}
+	return {object = object, start = start, end = end, xz = start}
 }
 
 next_object_tile_pos :: proc(
@@ -346,36 +356,21 @@ next_object_tile_pos :: proc(
 	int,
 	bool,
 ) {
-	if it.xz.y >= it.object.size.z {
+	if it.xz.x >= it.end.x && it.xz.y >= it.end.y {
 		return {}, 0, false
 	}
 
-	t_x := it.xz.x
-	t_z := it.xz.y
-
-	switch it.object.orientation {
-	case .South:
-		t_z = -it.xz.y
-	case .East:
-		t_x = it.xz.y
-		t_z = it.xz.x
-	case .North:
-		t_x = -it.xz.x
-	case .West:
-		t_x = -it.xz.y
-		t_z = -it.xz.x
-	}
-
+	xz := it.xz
 	it.xz.x += 1
-	if it.xz.x >= it.object.size.x {
-		it.xz.x = 0
+	if it.xz.x >= it.end.x {
+		it.xz.x = it.start.x
 		it.xz.y += 1
 	}
 
 	i := it.i
 	it.i += 1
 
-	return it.object.pos + {f32(t_x), 0, f32(t_z)}, i, true
+	return {f32(xz.x), it.object.pos.y, f32(xz.y)}, i, true
 }
 
 update_object_placement_map :: proc(

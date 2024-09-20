@@ -73,10 +73,10 @@ create_object_tool_tile_marker_object_draws :: proc() {
 
 	clear_object_tool_tile_marker_object_draws()
 
-	it := Object_Tiles_Iterator {
-		object = ctx.object,
-	}
+	it := make_object_tiles_iterator(ctx.object)
+	log.info(it)
 	for pos in next_object_tile_pos(&it) {
+		log.info(pos)
 		ctx.tile_marker.pos = pos
 		append(
 			&ctx.tile_draw_ids,
@@ -89,7 +89,9 @@ update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
 	ctx := get_object_tool_context()
 
 	it := make_object_tiles_iterator(ctx.object)
+	log.info(it)
 	for pos, i in next_object_tile_pos(&it) {
+		log.info(pos)
 		ctx.tile_marker.pos = pos
 		draw := object_draw_from_object(ctx.tile_marker)
 		draw.light = light
@@ -449,8 +451,17 @@ update_object_tool :: proc() {
 			can_add = can_add_object(ctx.object)
 
 			if can_add {
-				ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
-				ctx.object.pos.z = glsl.floor(ctx.object.pos.z + 0.5)
+				ctx.object.pos.x =
+					math.trunc(
+						ctx.object.pos.x + f32(ctx.object.size.x % 2) / 2,
+					) +
+					f32((ctx.object.size.x + 1) % 2) / 2
+				// log.info(ctx.object.size.z)
+				ctx.object.pos.z =
+					math.trunc(
+						ctx.object.pos.z + f32(ctx.object.size.z % 2) / 2,
+					) +
+					f32((ctx.object.size.z + 1) % 2) / 2
 				break
 			} else if ctx.object.placement == .Wall &&
 			   mouse.is_button_up(.Left) {
