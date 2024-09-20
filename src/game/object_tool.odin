@@ -264,7 +264,7 @@ object_tool_rotate_object :: proc() {
 
 	dx := ctx.cursor_pos.x - (ctx.object.pos.x + ctx.pos_offset.x)
 	dz := ctx.cursor_pos.z - (ctx.object.pos.z + ctx.pos_offset.z)
-	outside_tile := glsl.abs(dx) > 1.5 || glsl.abs(dz) > 1.5
+	outside_tile := glsl.abs(dx) > .5 || glsl.abs(dz) > .5
 	if keyboard.is_key_press(.Key_Escape) {
 		if ctx.previous_mode == .Move {
 			add_object(ctx.original_object)
@@ -277,7 +277,6 @@ object_tool_rotate_object :: proc() {
 			if glsl.abs(dx) > glsl.abs(dz) {
 				if dx > 0 {
 					if ctx.pos_offset != 0 {
-						// log.info("uh??")
 						#partial switch ctx.object.orientation {
 						case .South:
 							ctx.pos_offset =  {
@@ -447,13 +446,7 @@ update_object_tool :: proc() {
 		can_add: bool
 		for placement in ctx.object.placement_set {
 			ctx.object.placement = placement
-			can_add = can_add_object(
-				ctx.object.pos,
-				ctx.object.model,
-				ctx.object.type,
-				ctx.object.orientation,
-				ctx.object.placement,
-			)
+			can_add = can_add_object(ctx.object)
 
 			if can_add {
 				ctx.object.pos.x = glsl.floor(ctx.object.pos.x + 0.5)
@@ -484,13 +477,7 @@ snap_wall_object :: proc() {
 			(int(obj.orientation) + i) % len(Object_Orientation),
 		)
 
-		if can_add_object(
-			   obj.pos,
-			   obj.model,
-			   obj.type,
-			   obj.orientation,
-			   obj.placement,
-		   ) {
+		if can_add_object(obj) {
 			ctx.object.orientation = obj.orientation
 			break
 		}
@@ -518,23 +505,11 @@ update_wall_masks_on_object_placement :: proc(
 	previous_obj.pos = previous_pos
 	previous_obj.orientation = previous_orientation
 
-	if can_add_object(
-		   previous_pos,
-		   ctx.object.model,
-		   ctx.object.type,
-		   previous_orientation,
-		   ctx.object.placement,
-	   ) {
+	if can_add_object(previous_obj) {
 		set_wall_mask_from_object(previous_obj, .Full_Mask)
 	}
 
-	if can_add_object(
-		   ctx.object.pos,
-		   ctx.object.model,
-		   ctx.object.type,
-		   ctx.object.orientation,
-		   ctx.object.placement,
-	   ) {
+	if can_add_object(ctx.object) {
 		if ctx.object.type == .Window {
 			mask := window_model_to_wall_mask_map[ctx.object.model]
 			set_wall_mask_from_object(ctx.object, mask)
