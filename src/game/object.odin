@@ -31,6 +31,7 @@ Object_Type :: enum {
 	Counter,
 	Computer,
 	Plate,
+	Couch,
 	// Carpet,
 	// Tree,
 	// Wall,
@@ -47,6 +48,7 @@ ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Painting,
 	.Computer,
 	.Plate,
+    .Couch,
 }
 
 Object_Orientation :: enum {
@@ -75,6 +77,7 @@ POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
 DOUBLE_WINDOW_MODEL :: "Double_Window.Bake"
 OLD_COMPUTER_MODEL :: "Old_Computer.Bake"
 PLATE_MODEL :: "Plate.Bake"
+L_COUCH_MODEL :: "L_Couch.Bake"
 
 WOOD_COUNTER_TEXTURE :: "objects/Wood.Counter.png"
 WOOD_WINDOW_TEXTURE :: "objects/Wood.Window.png"
@@ -86,6 +89,7 @@ POUTINE_PAINTING_TEXTURE :: "objects/Poutine.Painting.Bake.png"
 DOUBLE_WINDOW_TEXTURE :: "objects/Double_Window.Bake.png"
 OLD_COMPUTER_TEXTURE :: "objects/Old_Computer.png"
 PLATE_TEXTURE :: "objects/Plate.png"
+L_COUCH_TEXTURE :: "objects/L_Couch.Bake.png"
 
 window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
 	WOOD_WINDOW_MODEL   = .Window_Opening,
@@ -354,7 +358,10 @@ make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
 		rotated_size.xz = object.size.zx
 	}
 
-	start := glsl.ivec2{i32(object.pos.x), i32(object.pos.z)}
+	start := glsl.ivec2 {
+		i32(object.pos.x) - (rotated_size.x - 1) / 2,
+		i32(object.pos.z) - (rotated_size.z - 1) / 2,
+	}
 	end := start + rotated_size.xz
 	return {object = object, start = start, end = end, xz = start}
 }
@@ -385,7 +392,6 @@ next_object_tile_pos :: proc(
 
 update_object_placement_map :: proc(obj: Object) {
 	it := make_object_tiles_iterator(obj)
-	log.info(it)
 	for pos in next_object_tile_pos(&it) {
 		tile_pos := world_pos_to_tile_pos(pos)
 		chunk_pos := world_pos_to_chunk_pos(pos)
@@ -401,7 +407,10 @@ get_object_size :: proc(model: string) -> glsl.ivec3 {
 	object_model := models.models[model]
 	return glsl.ivec3(
 		linalg.array_cast(
-			linalg.ceil(object_model.size - {0.01, 0.01, 0.01}),
+			glsl.max(
+				linalg.floor(object_model.size + {0.01, 0.01, 0.01}),
+				glsl.vec3{1, 1, 1},
+			),
 			i32,
 		),
 	)
@@ -560,13 +569,12 @@ can_add_object_on_floor :: proc(obj: Object) -> bool {
 
 	ctx := get_objects_context()
 	it := make_object_tiles_iterator(obj)
-	log.info(it)
 	for pos in next_object_tile_pos(&it) {
-		log.info(pos)
 		// tile_pos := world_pos_to_tile_pos(pos)
 		// chunk_pos := world_pos_to_chunk_pos(pos)
 		// chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 		if has_object_at(pos, .Floor) {
+		    log.info("collision!")
 			return false
 		}
 	}

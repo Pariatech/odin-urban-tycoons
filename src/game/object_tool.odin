@@ -73,9 +73,7 @@ create_object_tool_tile_marker_object_draws :: proc() {
 	clear_object_tool_tile_marker_object_draws()
 
 	it := make_object_tiles_iterator(ctx.object)
-	log.info(it)
 	for pos in next_object_tile_pos(&it) {
-		log.info(pos)
 		ctx.tile_marker.pos = pos
 		append(
 			&ctx.tile_draw_ids,
@@ -88,9 +86,7 @@ update_object_tool_tile_marker_object_draws :: proc(light: glsl.vec3) {
 	ctx := get_object_tool_context()
 
 	it := make_object_tiles_iterator(ctx.object)
-	log.info(it)
 	for pos, i in next_object_tile_pos(&it) {
-		log.info(pos)
 		ctx.tile_marker.pos = pos
 		draw := object_draw_from_object(ctx.tile_marker)
 		draw.light = light

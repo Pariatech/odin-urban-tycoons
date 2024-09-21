@@ -27,6 +27,7 @@ FURNITURE_PANEL_ICONS :: []cstring {
 	"resources/textures/object_icons/Door_Wood.png",
 	"resources/textures/object_icons/Old_Computer.png",
 	"resources/textures/object_icons/Plate.png",
+	"resources/textures/object_icons/L_Couch.png",
 	// .Chair    = "resources/textures/object_icons/Chair.png",
 	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
 	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
@@ -84,6 +85,13 @@ FURNITURES :: []Furniture {
 		texture = game.PLATE_TEXTURE,
 		placement = {.Floor, .Table, .Counter},
 		type = .Plate,
+	},
+	 {
+		icon = "resources/textures/object_icons/L_Couch.png",
+		model = game.L_COUCH_MODEL,
+		texture = game.L_COUCH_TEXTURE,
+		placement = {.Floor},
+		type = .Couch,
 	},
 }
 
