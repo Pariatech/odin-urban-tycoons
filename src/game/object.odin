@@ -48,7 +48,7 @@ ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Painting,
 	.Computer,
 	.Plate,
-    .Couch,
+	.Couch,
 }
 
 Object_Orientation :: enum {
@@ -564,78 +564,39 @@ can_add_object_on_wall :: proc(obj: Object) -> bool {
 }
 
 can_add_object_on_floor :: proc(obj: Object) -> bool {
-	tile_pos := world_pos_to_tile_pos(obj.pos)
-	chunk_pos := world_pos_to_chunk_pos(obj.pos)
-
 	ctx := get_objects_context()
 	it := make_object_tiles_iterator(obj)
 	for pos in next_object_tile_pos(&it) {
-		// tile_pos := world_pos_to_tile_pos(pos)
-		// chunk_pos := world_pos_to_chunk_pos(pos)
-		// chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+		tile_pos := world_pos_to_tile_pos(pos)
+		chunk_pos := world_pos_to_chunk_pos(pos)
+
 		if has_object_at(pos, .Floor) {
-		    log.info("collision!")
+			return false
+		}
+
+		if pos.x != f32(it.start.x) &&
+		   has_north_south_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+			return false
+		}
+
+		if pos.z != f32(it.start.y) &&
+		   has_east_west_wall({tile_pos.x, chunk_pos.y, tile_pos.y}) {
+			return false
+		}
+
+		if has_north_west_south_east_wall(
+			   {tile_pos.x, chunk_pos.y, tile_pos.y},
+		   ) ||
+		   has_north_west_south_east_wall(
+			   {tile_pos.x, chunk_pos.y, tile_pos.y},
+		   ) {
+			return false
+		}
+
+		if !terrain.is_tile_flat(tile_pos) {
 			return false
 		}
 	}
-
-	// for x in 0 ..< obj.size.x {
-	// 	x := x
-	// 	wall_x := x
-	// 	for z in 0 ..< obj.size.z {
-	// 		z := z
-	// 		wall_z := z
-	// 		switch obj.orientation {
-	// 		case .South:
-	// 			z = -z
-	// 			wall_z = z + 1
-	// 		case .East:
-	// 			tmp := x
-	// 			x = z
-	// 			z = tmp
-	// 			wall_x = x
-	// 		case .North:
-	// 			x = -x
-	// 			wall_x = x + 1
-	// 		case .West:
-	// 			tmp := x
-	// 			x = -z
-	// 			z = -tmp
-	// 			wall_x = x + 1
-	// 			wall_z = z + 1
-	// 		}
-	// 		if has_object_at(obj.pos + {f32(x), 0, f32(z)}, .Floor) {
-	// 			return false
-	// 		}
-	//
-	// 		if x != 0 &&
-	// 		   has_north_south_wall(
-	// 			   {tile_pos.x + wall_x, chunk_pos.y, tile_pos.y + z},
-	// 		   ) {
-	// 			return false
-	// 		}
-	//
-	// 		if z != 0 &&
-	// 		   has_east_west_wall(
-	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + wall_z},
-	// 		   ) {
-	// 			return false
-	// 		}
-	//
-	// 		if has_north_west_south_east_wall(
-	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-	// 		   ) ||
-	// 		   has_north_west_south_east_wall(
-	// 			   {tile_pos.x + x, chunk_pos.y, tile_pos.y + z},
-	// 		   ) {
-	// 			return false
-	// 		}
-	//
-	// 		if !terrain.is_tile_flat(tile_pos + {x, z}) {
-	// 			return false
-	// 		}
-	// 	}
-	// }
 
 	return true
 }

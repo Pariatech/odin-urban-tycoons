@@ -133,23 +133,39 @@ object_tool_pick_object :: proc() {
 		if object, ok := get_object_by_id(object_under_cursor); ok {
 			if mouse.is_button_press(.Left) {
 				ctx.previous_mode = ctx.mode
-				ctx.mode = .Move
-				mouse.set_cursor(.Hand_Closed)
-				ctx.object = object
-				ctx.original_object = object
-				cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
-				object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
+				if keyboard.is_key_down(.Key_Left_Shift) {
+					ctx.mode = .Place
+					ctx.object = object
 
-				if object.placement == .Table || object.placement == .Counter {
-					ctx.object.pos.y -= 0.8
+					if object.placement == .Table ||
+					   object.placement == .Counter {
+						ctx.object.pos.y -= 0.8
+					}
+
+					ctx.object.draw_id = create_object_draw(
+						object_draw_from_object(object),
+					)
+					create_object_tool_tile_marker_object_draws()
+				} else {
+					ctx.mode = .Move
+					mouse.set_cursor(.Hand_Closed)
+					ctx.object = object
+					ctx.original_object = object
+					cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
+					object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
+
+					if object.placement == .Table ||
+					   object.placement == .Counter {
+						ctx.object.pos.y -= 0.8
+					}
+
+					delete_object_by_id(object_under_cursor)
+					ctx.object.draw_id = create_object_draw(
+						object_draw_from_object(object),
+					)
+					create_object_tool_tile_marker_object_draws()
+					ctx.previous_object_under_cursor = nil
 				}
-
-				delete_object_by_id(object_under_cursor)
-				ctx.object.draw_id = create_object_draw(
-					object_draw_from_object(object),
-				)
-				create_object_tool_tile_marker_object_draws()
-				ctx.previous_object_under_cursor = nil
 			} else {
 				mouse.set_cursor(.Hand)
 				object.light = {1.5, 1.5, 1.5}
@@ -174,15 +190,20 @@ object_tool_place_object :: proc() {
 	if keyboard.is_key_press(.Key_Escape) {
 		ctx.previous_mode = ctx.mode
 		ctx.mode = .Pick
-	} else if mouse.is_button_press(.Left) {
-		ctx.previous_mode = ctx.mode
-		ctx.mode = .Pick
-		id, _ := add_object(ctx.object)
 		delete_object_draw(ctx.object.draw_id)
 		clear_object_tool_tile_marker_object_draws()
-		ctx.object = {}
-		ctx.previous_object_under_cursor = id
-		mouse.set_cursor(.Arrow)
+	} else if mouse.is_button_press(.Left) {
+		id, _ := add_object(ctx.object)
+
+		if !keyboard.is_key_down(.Key_Left_Shift) {
+			ctx.previous_mode = ctx.mode
+			ctx.mode = .Pick
+			delete_object_draw(ctx.object.draw_id)
+			clear_object_tool_tile_marker_object_draws()
+			ctx.object = {}
+			ctx.previous_object_under_cursor = id
+			mouse.set_cursor(.Arrow)
+		}
 	} else {
 		if keyboard.is_key_press(.Key_R) {
 			ctx.object.orientation = Object_Orientation(
@@ -200,15 +221,22 @@ object_tool_move_object :: proc() {
 		ctx.previous_mode = ctx.mode
 		ctx.mode = .Pick
 		add_object(ctx.original_object)
-	} else if mouse.is_button_press(.Left) {
-		ctx.previous_mode = ctx.mode
-		ctx.mode = .Pick
-		id, _ := add_object(ctx.object)
 		delete_object_draw(ctx.object.draw_id)
 		clear_object_tool_tile_marker_object_draws()
-		ctx.object = {}
-		ctx.previous_object_under_cursor = id
-		mouse.set_cursor(.Arrow)
+	} else if mouse.is_button_press(.Left) {
+		id, _ := add_object(ctx.object)
+
+		ctx.previous_mode = ctx.mode
+		if keyboard.is_key_down(.Key_Left_Shift) {
+			ctx.mode = .Place
+		} else {
+			ctx.mode = .Pick
+			delete_object_draw(ctx.object.draw_id)
+			clear_object_tool_tile_marker_object_draws()
+			ctx.object = {}
+			ctx.previous_object_under_cursor = id
+			mouse.set_cursor(.Arrow)
+		}
 	} else {
 		if keyboard.is_key_press(.Key_R) {
 			ctx.object.orientation = Object_Orientation(
