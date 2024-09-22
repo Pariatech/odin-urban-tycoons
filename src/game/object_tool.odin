@@ -127,7 +127,7 @@ object_tool_pick_object :: proc() {
 			); ok {
 				mouse.set_cursor(.Arrow)
 				previous_obj.light = {1, 1, 1}
-				update_object_draw(object_draw_from_object(previous_obj))
+				update_object_draw(object_draw_from_object(previous_obj^))
 			}
 		}
 		if object, ok := get_object_by_id(object_under_cursor); ok {
@@ -135,7 +135,7 @@ object_tool_pick_object :: proc() {
 				ctx.previous_mode = ctx.mode
 				if keyboard.is_key_down(.Key_Left_Shift) {
 					ctx.mode = .Place
-					ctx.object = object
+					ctx.object = object^
 
 					if object.placement == .Table ||
 					   object.placement == .Counter {
@@ -143,14 +143,14 @@ object_tool_pick_object :: proc() {
 					}
 
 					ctx.object.draw_id = create_object_draw(
-						object_draw_from_object(object),
+						object_draw_from_object(object^),
 					)
 					create_object_tool_tile_marker_object_draws()
 				} else {
 					ctx.mode = .Move
 					mouse.set_cursor(.Hand_Closed)
-					ctx.object = object
-					ctx.original_object = object
+					ctx.object = object^
+					ctx.original_object = object^
 					cursor_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
 					object_tile_pos := world_pos_to_tile_pos(ctx.object.pos)
 
@@ -161,7 +161,7 @@ object_tool_pick_object :: proc() {
 
 					delete_object_by_id(object_under_cursor)
 					ctx.object.draw_id = create_object_draw(
-						object_draw_from_object(object),
+						object_draw_from_object(object^),
 					)
 					create_object_tool_tile_marker_object_draws()
 					ctx.previous_object_under_cursor = nil
@@ -169,7 +169,7 @@ object_tool_pick_object :: proc() {
 			} else {
 				mouse.set_cursor(.Hand)
 				object.light = {1.5, 1.5, 1.5}
-				update_object_draw(object_draw_from_object(object))
+				update_object_draw(object_draw_from_object(object^))
 				ctx.previous_object_under_cursor = object_under_cursor
 			}
 		}
@@ -178,7 +178,7 @@ object_tool_pick_object :: proc() {
 		if object, ok := get_object_by_id(object_under_cursor); ok {
 			mouse.set_cursor(.Arrow)
 			object.light = {1, 1, 1}
-			update_object_draw(object_draw_from_object(object))
+			update_object_draw(object_draw_from_object(object^))
 			// ctx.previous_object_under_cursor = nil
 		}
 	}

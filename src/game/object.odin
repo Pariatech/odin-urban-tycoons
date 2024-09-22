@@ -58,6 +58,10 @@ Object_Orientation :: enum {
 	East,
 }
 
+Object_Orientation_Set :: bit_set[Object_Orientation]
+
+ALL_OBJECT_ORIENTATIONS :: Object_Orientation_Set{.South, .West, .North, .East}
+
 Object_Placement :: enum {
 	Floor,
 	Wall,
@@ -66,6 +70,7 @@ Object_Placement :: enum {
 }
 
 Object_Placement_Set :: bit_set[Object_Placement]
+ALL_OBJECT_PLACEMENTS :: Object_Placement_Set{.Floor, .Wall, .Counter, .Table}
 
 WOOD_COUNTER_MODEL :: "Wood.Counter.Bake"
 WOOD_WINDOW_MODEL :: "Window.Wood.Bake"
@@ -121,6 +126,7 @@ Object :: struct {
 	size:          glsl.ivec3,
 	draw_id:       Object_Draw_Id,
 	bounding_box:  Box,
+	children:      [dynamic]Object_Id,
 }
 
 Object_Chunk :: struct {
@@ -156,6 +162,9 @@ delete_objects :: proc() {
 		for x in 0 ..< c.WORLD_CHUNK_WIDTH {
 			for z in 0 ..< c.WORLD_CHUNK_DEPTH {
 				chunk := &ctx.chunks[y][x][z]
+				for &obj in chunk.objects {
+					delete(obj.children)
+				}
 				delete(chunk.objects)
 				delete(chunk.objects_inside)
 			}
@@ -249,6 +258,15 @@ remove_object_inside_chunk :: proc(obj: Object) {
 	}
 }
 
+add_object_to_parent :: proc(obj: Object) {
+	parent, ok := get_object_at(obj.pos, type_set = {.Table, .Counter})
+	if !ok {
+		return
+	}
+
+	append(&parent.children, obj.id)
+}
+
 add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 	obj := obj
 	ctx := get_objects_context()
@@ -272,6 +290,8 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 		chunk_pos = chunk_pos,
 		index     = len(chunk.objects),
 	}
+
+	add_object_to_parent(obj)
 
 	add_object_inside_chunk(obj)
 
@@ -617,6 +637,35 @@ can_add_object_on_counter :: proc(obj: Object) -> bool {
 	return !has_object_at(obj.pos, .Counter)
 }
 
+get_object_at :: proc(
+	pos: glsl.vec3,
+	placement_set: Object_Placement_Set = ALL_OBJECT_PLACEMENTS,
+	orientation_set: Object_Orientation_Set = ALL_OBJECT_ORIENTATIONS,
+	type_set: Object_Type_Set = ALL_OBJECT_TYPES,
+) -> (
+	^Object,
+	bool,
+) {
+	objects := get_objects_context()
+	chunk_pos := world_pos_to_chunk_pos(pos)
+	tile_pos := world_pos_to_tile_pos(pos)
+	chunk := &objects.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	for obj_inside_id in chunk.objects_inside {
+		obj_inside, _ := get_object_by_id(obj_inside_id)
+		if obj_inside.bounding_box.min.x <= pos.x &&
+		   obj_inside.bounding_box.min.z <= pos.z &&
+		   pos.x < obj_inside.bounding_box.max.x &&
+		   pos.z < obj_inside.bounding_box.max.z &&
+		   obj_inside.placement in placement_set &&
+		   obj_inside.orientation in orientation_set &&
+		   obj_inside.type in type_set {
+			return obj_inside, true
+		}
+	}
+
+	return {}, false
+}
+
 has_object_at :: proc(
 	pos: glsl.vec3,
 	placement: Object_Placement,
@@ -811,12 +860,12 @@ ray_intersect_box :: proc(ray: cursor.Ray, box: Box) -> bool {
 	return true
 }
 
-get_object_by_id :: proc(id: Object_Id) -> (obj: Object, ok: bool = true) {
+get_object_by_id :: proc(id: Object_Id) -> (obj: ^Object, ok: bool = true) {
 	objects := get_objects_context()
 	key := objects.keys[id] or_return
 
 	chunk := objects.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z]
-	return chunk.objects[key.index], true
+	return &chunk.objects[key.index], true
 }
 
 delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
