@@ -871,6 +871,12 @@ get_object_by_id :: proc(id: Object_Id) -> (obj: ^Object, ok: bool = true) {
 	return &chunk.objects[key.index], true
 }
 
+rotate_object :: proc(object: ^Object) {
+	object.orientation = Object_Orientation(
+		(int(object.orientation) + 1) % len(Object_Orientation),
+	)
+}
+
 delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 	objects := get_objects_context()
 	key := objects.keys[id] or_return
@@ -904,8 +910,6 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 			}
 		}
 	}
-
-	// clear(&object.children)
 
 	unordered_remove(&chunk.objects, key.index)
 

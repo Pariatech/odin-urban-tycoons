@@ -225,10 +225,9 @@ object_tool_place_object :: proc() {
 		}
 	} else {
 		if keyboard.is_key_press(.Key_R) {
-			ctx.objects[0].orientation = Object_Orientation(
-				(int(ctx.objects[0].orientation) + 1) %
-				len(Object_Orientation),
-			)
+			for &object in ctx.objects {
+				rotate_object(&object)
+			}
 		}
 		ctx.objects[0].pos = ctx.cursor_pos
 	}
@@ -265,17 +264,20 @@ object_tool_move_object :: proc() {
 			mouse.set_cursor(.Arrow)
 		}
 	} else {
+		root_pos := ctx.objects[0].pos
 		if keyboard.is_key_press(.Key_R) {
-			ctx.objects[0].orientation = Object_Orientation(
-				(int(ctx.objects[0].orientation) + 1) %
-				len(Object_Orientation),
-			)
+			for &object in ctx.objects {
+				rotate_object(&object)
+				t_pos := object.pos - root_pos
+				rotate_pos := t_pos.zyx
+				rotate_pos.z *= -1
+				object.pos = root_pos + rotate_pos
+			}
 		}
 
-		previous_pos := ctx.objects[0].pos
 		new_pos := ctx.cursor_pos
 		for &obj in ctx.objects {
-			obj.pos += new_pos - previous_pos
+			obj.pos += new_pos - root_pos
 		}
 	}
 }
