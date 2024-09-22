@@ -126,6 +126,7 @@ Object :: struct {
 	size:          glsl.ivec3,
 	draw_id:       Object_Draw_Id,
 	bounding_box:  Box,
+	parent:        Maybe(Object_Id),
 	children:      [dynamic]Object_Id,
 }
 
@@ -258,11 +259,13 @@ remove_object_inside_chunk :: proc(obj: Object) {
 	}
 }
 
-add_object_to_parent :: proc(obj: Object) {
+add_object_to_parent :: proc(obj: ^Object) {
 	parent, ok := get_object_at(obj.pos, type_set = {.Table, .Counter})
 	if !ok {
 		return
 	}
+
+	obj.parent = parent.id
 
 	append(&parent.children, obj.id)
 }
@@ -291,7 +294,7 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 		index     = len(chunk.objects),
 	}
 
-	add_object_to_parent(obj)
+	add_object_to_parent(&obj)
 
 	add_object_inside_chunk(obj)
 
@@ -889,12 +892,28 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 
 	delete_object_draw(object.draw_id)
 
+	for child in object.children {
+		delete_object_by_id(child)
+	}
+
+	if parent_id, ok := object.parent.?; ok {
+		parent, _ := get_object_by_id(parent_id)
+		for child_id, i in parent.children {
+			if child_id == id {
+				unordered_remove(&parent.children, i)
+			}
+		}
+	}
+
+	// clear(&object.children)
+
 	unordered_remove(&chunk.objects, key.index)
 
 	if key.index < len(chunk.objects) {
 		moved_id := chunk.objects[key.index].id
 		objects.keys[moved_id] = {key.chunk_pos, key.index}
 	}
+
 	return
 }
 
