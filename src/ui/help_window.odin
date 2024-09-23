@@ -48,13 +48,14 @@ Ctrl Left Click:        Remove Paint
 Shift Left Click:       Paint Fill
 Ctrl Shift Left Click:  Fill Remove
 
----- Door Tool [5] ----
-Left Click:         Place
+---- Furniture Tool ----
+Left Click:         Pick/Place
 Ctrl Left Click:    Remove
+R:                  Rotate
 
----- Window Tool [6] ----
-Left Click:         Place
-Ctrl Left Click:    Remove
+Have fun!
+ 
+ 
 `
 
 HELP_WINDOW_BODY_WIDTH :: 500

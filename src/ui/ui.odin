@@ -25,8 +25,6 @@ MENU_ICON_TEXTURES :: [Menu_Icon]cstring {
 	.Wall = "resources/icons/wall.png",
 	.Floor = "resources/icons/floor.png",
 	.Paint = "resources/icons/paint_brush.png",
-	.Door = "resources/icons/door.png",
-	.Window = "resources/icons/window.png",
 	.Furniture = "resources/icons/furniture.png",
     .Undo = "resources/icons/undo.png",
     .Redo = "resources/icons/redo.png",
@@ -56,8 +54,6 @@ Menu_Icon :: enum (int) {
 	Wall,
 	Floor,
 	Paint,
-	Door,
-	Window,
 	Furniture,
 }
 
@@ -172,12 +168,6 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Paint:
 		floor_panel_ctx.opened = false
 		tools.open_paint_tool()
-	case .Door:
-		floor_panel_ctx.opened = false
-		tools.open_door_tool()
-	case .Window:
-		floor_panel_ctx.opened = false
-		tools.open_window_tool()
 	case .Furniture:
 		floor_panel_ctx.opened = false
 		tools.open_furniture_tool()
