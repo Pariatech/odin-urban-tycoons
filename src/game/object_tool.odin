@@ -289,7 +289,7 @@ update_object_tool :: proc() {
 	previous_orientation: Object_Orientation
 	if len(ctx.objects) > 0 {
 		previous_pos = ctx.objects[0].pos
-		previous_orientation := ctx.objects[0].orientation
+		previous_orientation = ctx.objects[0].orientation
 	}
 
 	cursor.on_tile_intersect(
@@ -319,9 +319,7 @@ update_object_tool :: proc() {
 				clamp_object(&root)
 				new_pos := root.pos
 				for &obj in ctx.objects {
-					// log.info(new_pos - previous_pos)
 					obj.pos += new_pos - previous_pos
-					// obj.pos += previous_pos - new_pos
 				}
 				break
 			} else if ctx.objects[0].placement == .Wall &&
@@ -331,10 +329,12 @@ update_object_tool :: proc() {
 			}
 		}
 
-		update_wall_masks_on_object_placement(
-			previous_pos,
-			previous_orientation,
-		)
+		if previous_pos != ctx.objects[0].pos {
+			update_wall_masks_on_object_placement(
+				previous_pos,
+				previous_orientation,
+			)
+		}
 
 		draw_object_tool(can_add)
 	}
@@ -366,13 +366,6 @@ update_wall_masks_on_object_placement :: proc(
 		return
 	}
 
-	previous_tile_pos := world_pos_to_tile_pos(previous_pos)
-	current_tile_pos := world_pos_to_tile_pos(ctx.cursor_pos)
-	if previous_tile_pos == current_tile_pos &&
-	   ctx.objects[0].orientation == previous_orientation {
-		return
-	}
-
 	previous_obj := ctx.objects[0]
 	previous_obj.pos = previous_pos
 	previous_obj.orientation = previous_orientation
@@ -392,29 +385,12 @@ update_wall_masks_on_object_placement :: proc(
 }
 
 set_wall_mask_from_object :: proc(obj: Object, mask: Wall_Mask_Texture) {
-	tile_pos := world_pos_to_tile_pos(obj.pos)
-	chunk_pos := world_pos_to_chunk_pos(obj.pos)
-
-	for x in 0 ..< obj.size.x {
-		tx := x
-		tz: i32 = 0
-		#partial switch obj.orientation {
-		case .East:
-			tx = 0
-			tz = x
-		case .North:
-			tx = -x
-		case .West:
-			tx = 0
-			tz = -x
-		}
-
-		tpos := obj.pos + {f32(tx), 0, f32(tz)}
-
-		tile_pos := world_pos_to_tile_pos(tpos)
+	it := make_object_tiles_iterator(obj)
+	for pos in next_object_tile_pos(&it) {
+		tile_pos := world_pos_to_tile_pos(pos)
+		chunk_pos := world_pos_to_chunk_pos(pos)
 		wall_pos: glsl.ivec3 = {tile_pos.x, chunk_pos.y, tile_pos.y}
 		axis: Wall_Axis
-
 		switch obj.orientation {
 		case .East:
 			wall_pos.x += 1

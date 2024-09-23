@@ -518,24 +518,10 @@ can_add_object :: proc(obj: Object) -> bool {
 }
 
 can_add_object_on_wall :: proc(obj: Object) -> bool {
-	for x in 0 ..< obj.size.x {
-		tx := x
-		tz: i32 = 0
-		#partial switch obj.orientation {
-		case .East:
-			tx = 0
-			tz = x
-		case .North:
-			tx = -x
-		case .West:
-			tx = 0
-			tz = -x
-		}
-
-		tpos := obj.pos + {f32(tx), 0, f32(tz)}
-
-		tile_pos := world_pos_to_tile_pos(tpos)
-		chunk_pos := world_pos_to_chunk_pos(tpos)
+	it := make_object_tiles_iterator(obj)
+	for pos in next_object_tile_pos(&it) {
+		tile_pos := world_pos_to_tile_pos(pos)
+		chunk_pos := world_pos_to_chunk_pos(pos)
 		switch obj.orientation {
 		case .East:
 			if !has_north_south_wall(
@@ -557,26 +543,26 @@ can_add_object_on_wall :: proc(obj: Object) -> bool {
 			}
 		}
 
-		if has_object_at(tpos, .Wall, obj.orientation) {
+		if has_object_at(pos, .Wall, obj.orientation) {
 			return false
 		}
 
 		if obj.type == .Window || obj.type == .Door {
 			switch obj.orientation {
 			case .South:
-				if has_object_at(tpos + {0, 0, -1}, .Wall, .North) {
+				if has_object_at(pos + {0, 0, -1}, .Wall, .North) {
 					return false
 				}
 			case .East:
-				if has_object_at(tpos + {1, 0, 0}, .Wall, .West) {
+				if has_object_at(pos + {1, 0, 0}, .Wall, .West) {
 					return false
 				}
 			case .North:
-				if has_object_at(tpos + {0, 0, 1}, .Wall, .South) {
+				if has_object_at(pos + {0, 0, 1}, .Wall, .South) {
 					return false
 				}
 			case .West:
-				if has_object_at(tpos + {-1, 0, 0}, .Wall, .East) {
+				if has_object_at(pos + {-1, 0, 0}, .Wall, .East) {
 					return false
 				}
 			}
