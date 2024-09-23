@@ -294,6 +294,8 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 		index     = len(chunk.objects),
 	}
 
+    obj.children = {}
+
 	add_object_to_parent(&obj)
 
 	add_object_inside_chunk(obj)
@@ -888,9 +890,7 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 	}
 
 	if parent_id, ok := object.parent.?; ok {
-	    log.info(parent_id)
 		parent, _ := get_object_by_id(parent_id)
-	    log.info(parent)
 		for child_id, i in parent.children {
 			if child_id == id {
 				unordered_remove(&parent.children, i)

@@ -138,8 +138,8 @@ object_tool_pick_object :: proc() {
 				ctx.previous_mode = ctx.mode
 				if keyboard.is_key_down(.Key_Left_Control) {
 					delete_object_by_id(object_under_cursor)
-                    ctx.previous_object_under_cursor = nil
-			        mouse.set_cursor(.Arrow)
+					ctx.previous_object_under_cursor = nil
+					mouse.set_cursor(.Arrow)
 				} else if keyboard.is_key_down(.Key_Left_Shift) {
 					ctx.mode = .Place
 					append(&ctx.objects, object)
@@ -219,6 +219,7 @@ object_tool_place_object :: proc() {
 		ctx.mode = .Pick
 		delete_object_draw(ctx.objects[0].draw_id)
 		clear_object_tool_tile_marker_object_draws()
+		clear(&ctx.objects)
 	} else if mouse.is_button_press(.Left) {
 		id, _ := add_object(ctx.objects[0])
 
@@ -248,9 +249,15 @@ object_tool_move_object :: proc() {
 	if keyboard.is_key_press(.Key_Escape) {
 		ctx.previous_mode = ctx.mode
 		ctx.mode = .Pick
-		add_object(ctx.original_objects[0])
-		delete_object_draw(ctx.objects[0].draw_id)
+		for obj in ctx.original_objects {
+			add_object(obj)
+		}
+        for obj in ctx.objects {
+			delete_object_draw(obj.draw_id)
+        }
 		clear_object_tool_tile_marker_object_draws()
+		clear(&ctx.objects)
+		clear(&ctx.original_objects)
 	} else if mouse.is_button_press(.Left) {
 
 		for &obj in ctx.objects {
@@ -272,6 +279,8 @@ object_tool_move_object :: proc() {
 			clear(&ctx.objects)
 			mouse.set_cursor(.Arrow)
 		}
+
+		clear(&ctx.original_objects)
 	} else {
 		root_pos := ctx.objects[0].pos
 		if keyboard.is_key_press(.Key_R) {
