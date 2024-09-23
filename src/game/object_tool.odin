@@ -136,7 +136,9 @@ object_tool_pick_object :: proc() {
 			object := object_ptr^
 			if mouse.is_button_press(.Left) {
 				ctx.previous_mode = ctx.mode
-				if keyboard.is_key_down(.Key_Left_Shift) {
+                if keyboard.is_key_down(.Key_Left_Control) {
+					delete_object_by_id(object_under_cursor)
+                } else if keyboard.is_key_down(.Key_Left_Shift) {
 					ctx.mode = .Place
 					append(&ctx.objects, object)
 
