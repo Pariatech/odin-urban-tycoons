@@ -870,7 +870,6 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 	chunk := &objects.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z]
 	object := chunk.objects[key.index]
 
-	old_chunk_pos := glsl.ivec3{-1, -1, -1}
 	it := make_object_tiles_iterator(object)
 	for pos in next_object_tile_pos(&it) {
 		chunk_pos := world_pos_to_chunk_pos(pos)
@@ -889,13 +888,18 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 	}
 
 	if parent_id, ok := object.parent.?; ok {
+	    log.info(parent_id)
 		parent, _ := get_object_by_id(parent_id)
+	    log.info(parent)
 		for child_id, i in parent.children {
 			if child_id == id {
 				unordered_remove(&parent.children, i)
+                break
 			}
 		}
 	}
+
+    delete(object.children)
 
 	unordered_remove(&chunk.objects, key.index)
 

@@ -136,9 +136,11 @@ object_tool_pick_object :: proc() {
 			object := object_ptr^
 			if mouse.is_button_press(.Left) {
 				ctx.previous_mode = ctx.mode
-                if keyboard.is_key_down(.Key_Left_Control) {
+				if keyboard.is_key_down(.Key_Left_Control) {
 					delete_object_by_id(object_under_cursor)
-                } else if keyboard.is_key_down(.Key_Left_Shift) {
+                    ctx.previous_object_under_cursor = nil
+			        mouse.set_cursor(.Arrow)
+				} else if keyboard.is_key_down(.Key_Left_Shift) {
 					ctx.mode = .Place
 					append(&ctx.objects, object)
 
@@ -187,8 +189,13 @@ object_tool_pick_object :: proc() {
 					ctx.previous_object_under_cursor = nil
 				}
 			} else {
-				mouse.set_cursor(.Hand)
-				object.light = {1.5, 1.5, 1.5}
+				if keyboard.is_key_down(.Key_Left_Control) {
+					mouse.set_cursor(.Cross)
+					object.light = {0.8, 0.2, 0.2}
+				} else {
+					mouse.set_cursor(.Hand)
+					object.light = {1.5, 1.5, 1.5}
+				}
 				update_object_draw(object_draw_from_object(object))
 				ctx.previous_object_under_cursor = object_under_cursor
 			}

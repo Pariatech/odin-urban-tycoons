@@ -32,6 +32,7 @@ Cursor :: enum {
 	Hand,
 	Hand_Closed,
     Rotate,
+    Cross, 
 }
 
 @(private)
@@ -51,6 +52,7 @@ CURSOR_PATHS :: [Cursor]cstring {
 	.Hand  = "resources/cursors/hand.png",
 	.Hand_Closed  = "resources/cursors/hand-closed.png",
 	.Rotate  = "resources/cursors/rotate.png",
+	.Cross  = "resources/cursors/cross.png",
 }
 
 CURSOR_HOTSPOTS :: [Cursor]glsl.ivec2 {
@@ -58,6 +60,7 @@ CURSOR_HOTSPOTS :: [Cursor]glsl.ivec2 {
 	.Hand  = {24, 24},
 	.Hand_Closed  = {24, 24},
 	.Rotate  = {24, 24},
+	.Cross  = {24, 24},
 }
 
 get_scroll :: proc() -> glsl.dvec2 {
