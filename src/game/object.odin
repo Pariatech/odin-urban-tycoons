@@ -25,7 +25,7 @@ import "../terrain"
 Object_Type :: enum {
 	Door,
 	Window,
-	// Chair,
+	Chair,
 	Table,
 	Painting,
 	Counter,
@@ -43,6 +43,7 @@ Object_Type_Set :: bit_set[Object_Type]
 ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Door,
 	.Window,
+    .Chair,
 	.Table,
 	.Counter,
 	.Painting,

@@ -115,7 +115,6 @@ start :: proc() -> (ok: bool = false) {
 	defer game.delete_textures()
 	defer game.delete_objects()
 
-
 	game.init_game() or_return
     defer game.deinit_game()
 
