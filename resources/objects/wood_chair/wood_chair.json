@@ -2,8 +2,8 @@
     "name": "Wood Chair",
     "category": "Chair",
     "model": "resources/objects/wood_chair/wood_chair.glb",
-    "icon": "resources/objects/wood_chair_icon.png",
-    "texture": "resources/objects/wood_chair.png",
+    "icon": "resources/objects/wood_chair/wood_chair_icon.png",
+    "texture": "resources/objects/wood_chair/wood_chair.png",
     "placement_set": [
         "Floor"
     ]

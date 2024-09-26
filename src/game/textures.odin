@@ -63,16 +63,13 @@ bind_texture :: proc(path: string) -> bool {
 		stbi.set_flip_vertically_on_load(0)
 		stbi.set_flip_vertically_on_load_thread(false)
 
-		full_path := strings.join({TEXTURES_PATH, path}, "/")
-		defer delete(full_path)
+		// full_path := strings.join({TEXTURES_PATH, path}, "/")
+		// defer delete(full_path)
 		w, h: i32
-		pixels := stbi.load(
-			strings.unsafe_string_to_cstring(full_path),
-			&w,
-			&h,
-			nil,
-			4,
-		)
+
+		cpath := strings.clone_to_cstring(path)
+		defer delete(cpath)
+		pixels := stbi.load(cpath, &w, &h, nil, 4)
 		defer stbi.image_free(pixels)
 
 		if pixels == nil {

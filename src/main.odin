@@ -101,9 +101,6 @@ start :: proc() -> (ok: bool = false) {
 
 	game.init_objects() or_return
 
-	ui.init(&ui_ctx) or_return
-	defer ui.deinit(&ui_ctx)
-
 	floor_tool.init()
 	terrain_tool.init()
 
@@ -117,6 +114,9 @@ start :: proc() -> (ok: bool = false) {
 
 	game.init_game() or_return
     defer game.deinit_game()
+
+	ui.init(&ui_ctx) or_return
+	defer ui.deinit(&ui_ctx)
 
 	should_close := false
 	current_time_ns := time.now()

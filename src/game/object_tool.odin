@@ -41,7 +41,7 @@ init_object_tool :: proc() {
 	// ctx.object.orientation = .North
 
 	ctx.tile_marker.model = "Tile_Marker.Bake"
-	ctx.tile_marker.texture = "objects/Tile_Marker.Bake.png"
+	ctx.tile_marker.texture = "resources/textures/objects/Tile_Marker.Bake.png"
 	ctx.tile_marker.light = {1, 1, 1}
 
 	// ctx.object_draw_id = create_object_draw(

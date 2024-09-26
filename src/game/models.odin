@@ -117,6 +117,94 @@ load_models :: proc() -> (ok: bool) {
 	return true
 }
 
+load_model_file :: proc(path: string) -> bool {
+	ctx := get_models_context()
+	options: cgltf.options
+	cpath := strings.clone_to_cstring(path)
+	defer delete(cpath)
+	data, result := cgltf.parse_file(options, cpath)
+	if result != .success {
+		log.error("Failed to parse models file!", result)
+		return false
+	}
+	result = cgltf.load_buffers(options, data, MODELS_PATH)
+	if result != .success {
+		log.error("Failed to load models buffers!")
+		return false
+	}
+	defer cgltf.free(data)
+
+	indices: [dynamic]Model_Index
+	vertices: [dynamic]Model_Vertex
+	min := glsl.vec3{math.F32_MAX, math.F32_MAX, math.F32_MAX}
+	max := glsl.vec3{math.F32_MIN, math.F32_MIN, math.F32_MIN}
+
+	for node in data.scene.nodes {
+		mesh := node.mesh
+		primitive := mesh.primitives[0]
+
+		// indices:= make([dynamic]Model_Index)
+		// vertices:= make([dynamic]Model_Vertex)
+		if primitive.indices != nil {
+			accessor := primitive.indices
+			for i in 0 ..< accessor.count {
+				index := cgltf.accessor_read_index(accessor, i)
+				append(&indices, u32(index))
+			}
+		}
+
+		for attribute in primitive.attributes {
+			if attribute.type == .position {
+				accessor := attribute.data
+				for i in 0 ..< accessor.count {
+					if i >= len(vertices) {
+						append(&vertices, Model_Vertex{})
+					}
+					_ = cgltf.accessor_read_float(
+						accessor,
+						i,
+						raw_data(&vertices[i].pos),
+						3,
+					)
+					vertices[i].pos.x *= -1
+					min.x = glsl.min(min.x, vertices[i].pos.x)
+					min.y = glsl.min(min.y, vertices[i].pos.y)
+					min.z = glsl.min(min.z, vertices[i].pos.z)
+					max.x = glsl.max(max.x, vertices[i].pos.x)
+					max.y = glsl.max(max.y, vertices[i].pos.y)
+					max.z = glsl.max(max.z, vertices[i].pos.z)
+				}
+			}
+			if attribute.type == .texcoord {
+				accessor := attribute.data
+				for i in 0 ..< accessor.count {
+					if i >= len(vertices) {
+						append(&vertices, Model_Vertex{})
+					}
+					_ = cgltf.accessor_read_float(
+						accessor,
+						i,
+						raw_data(&vertices[i].texcoords),
+						2,
+					)
+				}
+			}
+		}
+	}
+
+	ctx.models[path] = {
+		name     = path,
+		vertices = vertices,
+		indices  = indices,
+		size     = max - min,
+		min      = min,
+		max      = max,
+	}
+
+	return true
+
+}
+
 free_models :: proc() {
 	ctx := get_models_context()
 	for k, v in ctx.models {
@@ -131,8 +219,13 @@ bind_model :: proc(model_name: string) -> bool {
 	ctx := get_models_context()
 	model, ok := &ctx.models[model_name]
 	if !ok {
-		log.error("Model ", model_name, "isn't loaded!")
-		return false
+		if strings.ends_with(model_name, ".glb") {
+			load_model_file(strings.clone(model_name)) or_return
+			model, _ = &ctx.models[model_name]
+		} else {
+		    log.error("Model ", model_name, "isn't loaded!")
+		    return false
+        }
 	}
 	using model
 

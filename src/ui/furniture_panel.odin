@@ -1,9 +1,10 @@
 package ui
 
 import "core:math/linalg/glsl"
+import "core:strings"
 
 import "../billboard"
-import "../game"
+import g "../game"
 import "../tools"
 import "../tools/furniture_tool"
 import "../window"
@@ -15,8 +16,8 @@ Furniture :: struct {
 	icon:      cstring,
 	model:     string,
 	texture:   string,
-	placement: game.Object_Placement_Set,
-	type:      game.Object_Type,
+	placement: g.Object_Placement_Set,
+	type:      g.Object_Type,
 }
 
 FURNITURE_PANEL_ICONS :: []cstring {
@@ -39,71 +40,72 @@ FURNITURE_PANEL_ICONS :: []cstring {
 FURNITURES :: []Furniture {
 	 {
 		icon = "resources/textures/object_icons/Plank.Table.6Places.png",
-		model = game.PLANK_TABLE_6PLACES_MODEL,
-		texture = game.PLANK_TABLE_6PLACES_TEXTURE,
+		model = g.PLANK_TABLE_6PLACES_MODEL,
+		texture = g.PLANK_TABLE_6PLACES_TEXTURE,
 		placement = {.Floor},
 		type = .Table,
 	},
 	 {
 		icon = "resources/textures/object_icons/Window.Wood.png",
-		model = game.WOOD_WINDOW_MODEL,
-		texture = game.WOOD_WINDOW_TEXTURE,
+		model = g.WOOD_WINDOW_MODEL,
+		texture = g.WOOD_WINDOW_TEXTURE,
 		placement = {.Wall},
 		type = .Window,
 	},
 	 {
 		icon = "resources/textures/object_icons/Poutine.Painting.png",
-		model = game.POUTINE_PAINTING_MODEL,
-		texture = game.POUTINE_PAINTING_TEXTURE,
+		model = g.POUTINE_PAINTING_MODEL,
+		texture = g.POUTINE_PAINTING_TEXTURE,
 		placement = {.Wall},
 		type = .Painting,
 	},
 	 {
 		icon = "resources/textures/object_icons/Double_Window.png",
-		model = game.DOUBLE_WINDOW_MODEL,
-		texture = game.DOUBLE_WINDOW_TEXTURE,
+		model = g.DOUBLE_WINDOW_MODEL,
+		texture = g.DOUBLE_WINDOW_TEXTURE,
 		placement = {.Wall},
 		type = .Window,
 	},
 	 {
 		icon = "resources/textures/object_icons/Door_Wood.png",
-		model = game.WOOD_DOOR_MODEL,
-		texture = game.WOOD_DOOR_TEXTURE,
+		model = g.WOOD_DOOR_MODEL,
+		texture = g.WOOD_DOOR_TEXTURE,
 		placement = {.Wall},
 		type = .Door,
 	},
 	 {
 		icon = "resources/textures/object_icons/Old_Computer.png",
-		model = game.OLD_COMPUTER_MODEL,
-		texture = game.OLD_COMPUTER_TEXTURE,
+		model = g.OLD_COMPUTER_MODEL,
+		texture = g.OLD_COMPUTER_TEXTURE,
 		placement = {.Table},
 		type = .Computer,
 	},
 	 {
 		icon = "resources/textures/object_icons/Plate.png",
-		model = game.PLATE_MODEL,
-		texture = game.PLATE_TEXTURE,
+		model = g.PLATE_MODEL,
+		texture = g.PLATE_TEXTURE,
 		placement = {.Floor, .Table, .Counter},
 		type = .Plate,
 	},
 	 {
 		icon = "resources/textures/object_icons/L_Couch.png",
-		model = game.L_COUCH_MODEL,
-		texture = game.L_COUCH_TEXTURE,
+		model = g.L_COUCH_MODEL,
+		texture = g.L_COUCH_TEXTURE,
 		placement = {.Floor},
 		type = .Couch,
 	},
 }
 
-furniture_panel_icon_texture_array: u32
+furniture_panel_icon_texture_arrays: []u32
 
 furniture_panel_body :: proc(
 	using ctx: ^Context,
 	pos: glsl.vec2,
 	size: glsl.vec2,
 ) {
-	icons := FURNITURE_PANEL_ICONS
-	for icon, i in icons {
+	game: ^g.Game_Context = cast(^g.Game_Context)context.user_ptr
+
+	for blueprint, i in game.object_blueprints {
 		border_width := f32(BORDER_WIDTH)
 		// if furniture_tool.type == i && furniture_tool.state == .Moving {
 		// 	border_width *= 2
@@ -116,9 +118,9 @@ furniture_panel_body :: proc(
 				   pos.y +
 				   FURNITURE_PANEL_PADDING +
 				   f32(i % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
-			   },// 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
+			   }, // 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
 			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
-			   furniture_panel_icon_texture_array,
+			   furniture_panel_icon_texture_arrays[i],
 			   int(i),
 			   top_padding = 0,
 			   bottom_padding = 0,
@@ -132,14 +134,16 @@ furniture_panel_body :: proc(
 		   ) {
 			// furniture_tool.place_furniture(i)
 			furnitures := FURNITURES
-            game.set_object_tool_object({
-                model = furnitures[i].model,
-                texture = furnitures[i].texture,
-                type = furnitures[i].type,
-                size = game.get_object_size(furnitures[i].model),
-                light = {1, 1, 1},
-                placement_set = furnitures[i].placement,
-            })
+			g.set_object_tool_object(
+				 {
+					model = blueprint.model,
+					texture = blueprint.texture,
+					type = blueprint.category,
+					size = g.get_object_size(blueprint.model),
+					light = {1, 1, 1},
+					placement_set = blueprint.placement_set,
+				},
+			)
 		}
 	}
 }
@@ -156,13 +160,19 @@ furniture_panel :: proc(using ctx: ^Context) {
 	}
 }
 
-init_furniture_panel :: proc() -> bool {
-	icons := FURNITURE_PANEL_ICONS
-
-	init_icon_texture_array(
-		&furniture_panel_icon_texture_array,
-		icons,
-	) or_return
+init_furniture_panel :: proc(
+	game: ^g.Game_Context = cast(^g.Game_Context)context.user_ptr,
+) -> bool {
+	furniture_panel_icon_texture_arrays = make(
+		[]u32,
+		len(game.object_blueprints),
+	)
+	for blueprint, i in game.object_blueprints {
+		init_icon_texture_array(
+			&furniture_panel_icon_texture_arrays[i],
+			{strings.unsafe_string_to_cstring(blueprint.icon)},
+		) or_return
+	}
 
 	return true
 }
