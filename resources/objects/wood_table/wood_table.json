@@ -1,0 +1,15 @@
+{
+    "name": "Wood Table",
+    "category": "Table",
+    "model": "resources/objects/wood_table/wood_table.glb",
+    "icon": "resources/objects/wood_table/wood_table_icon.png",
+    "texture": "resources/objects/wood_table/wood_table.png",
+    "placement_set": [
+        "Floor"
+    ],
+    "size": [
+        1,
+        1,
+        2
+    ]
+}
