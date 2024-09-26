@@ -139,7 +139,7 @@ furniture_panel_body :: proc(
 					model = blueprint.model,
 					texture = blueprint.texture,
 					type = blueprint.category,
-					size = g.get_object_size(blueprint.model),
+					size = blueprint.size,
 					light = {1, 1, 1},
 					placement_set = blueprint.placement_set,
 				},

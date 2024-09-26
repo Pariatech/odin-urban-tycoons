@@ -3,6 +3,7 @@ package game
 import "core:encoding/json"
 import "core:fmt"
 import "core:log"
+import "core:math/linalg/glsl"
 import "core:os"
 import "core:path/filepath"
 
@@ -13,6 +14,7 @@ Object_Blueprint_JSON :: struct {
 	icon:          string,
 	texture:       string,
 	placement_set: [dynamic]string,
+	size:          glsl.ivec3,
 }
 
 Object_Blueprint :: struct {
@@ -22,6 +24,7 @@ Object_Blueprint :: struct {
 	icon:          string,
 	texture:       string,
 	placement_set: Object_Placement_Set,
+	size:          glsl.ivec3,
 }
 
 Object_Blueprints :: [dynamic]Object_Blueprint
@@ -44,7 +47,7 @@ deload_object_blueprints :: proc(
 	delete(game.object_blueprints)
 }
 
-@(private="file")
+@(private = "file")
 read_object_blueprints_dir :: proc(
 	path: string,
 	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
@@ -62,13 +65,13 @@ read_object_blueprints_dir :: proc(
 	}
 
 	file_infos, err1 := os.read_dir(dir, 0)
-    defer delete(file_infos)
+	defer delete(file_infos)
 	if err1 != nil {
 		log.fatal("Failed to read", path)
 	}
 
 	for file_info in file_infos {
-        defer delete(file_info.fullpath)
+		defer delete(file_info.fullpath)
 		if file_info.is_dir {
 			read_object_blueprints_dir(file_info.fullpath) or_return
 		} else if filepath.ext(file_info.name) == ".json" {
@@ -78,7 +81,7 @@ read_object_blueprints_dir :: proc(
 	return true
 }
 
-@(private="file")
+@(private = "file")
 read_object_blueprint_json :: proc(
 	path: string,
 	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
@@ -105,7 +108,7 @@ read_object_blueprint_json :: proc(
 	return true
 }
 
-@(private="file")
+@(private = "file")
 delete_object_blueprint_from_json :: proc(
 	blueprint_json: Object_Blueprint_JSON,
 ) {
@@ -116,7 +119,7 @@ delete_object_blueprint_from_json :: proc(
 	delete(blueprint_json.placement_set)
 }
 
-@(private="file")
+@(private = "file")
 object_blueprint_from_json_to_object_blueprint :: proc(
 	blueprint_json: Object_Blueprint_JSON,
 ) -> (
@@ -131,6 +134,7 @@ object_blueprint_from_json_to_object_blueprint :: proc(
 	blueprint.model = blueprint_json.model
 	blueprint.icon = blueprint_json.icon
 	blueprint.texture = blueprint_json.texture
+    blueprint.size = blueprint_json.size
 	for &placement in blueprint_json.placement_set {
 		placement_enum := fmt.string_to_enum_value(
 			Object_Placement,
