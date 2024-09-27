@@ -151,11 +151,11 @@ draw_chunk :: proc(chunk: ^Object_Draw_Chunk) -> bool {
 
 	if chunk.dirty {
 		slice.sort_by(chunk.draws[:], object_draws_sort)
-        for draw, i in chunk.draws {
-            key := &ctx.keys[draw.id]
-            key.index = i
-        }
-        chunk.dirty = false
+		for draw, i in chunk.draws {
+			key := &ctx.keys[draw.id]
+			key.index = i
+		}
+		chunk.dirty = false
 	}
 
 	for &object in chunk.draws {
@@ -256,52 +256,33 @@ delete_object_draw :: proc(id: Object_Draw_Id) {
 	}
 }
 
-object_draw_from_object :: proc(obj: Object) -> Object_Draw {
+object_draw_from_object :: proc(
+	obj: Object,
+	cursor: bool = false,
+) -> Object_Draw {
 	draw: Object_Draw
 	switch obj.orientation {
-	case .South:
+	case .South, .North:
 		switch camera.rotation {
 		case .South_West:
-			draw.pos = obj.pos + {0, 0, -f32(obj.size.z)}
+			draw.pos = obj.pos + {f32(obj.size.x) / 2, 0, f32(obj.size.z) / 2}
 		case .South_East:
-			draw.pos = obj.pos + {f32(obj.size.x), 0, -f32(obj.size.z)}
+			draw.pos = obj.pos + {-f32(obj.size.x) / 2, 0, f32(obj.size.z) / 2}
 		case .North_East:
-			draw.pos = obj.pos + {f32(obj.size.x), 0, 0}
+			draw.pos = obj.pos + {-f32(obj.size.x), 0, -f32(obj.size.z) / 2}
 		case .North_West:
-			draw.pos = obj.pos
+			draw.pos = obj.pos + {f32(obj.size.x), 0, -f32(obj.size.z) / 2}
 		}
-	case .East:
+	case .East, .West:
 		switch camera.rotation {
 		case .South_West:
-			draw.pos = obj.pos
+			draw.pos = obj.pos + {f32(obj.size.z) / 2, 0, f32(obj.size.x) / 2}
 		case .South_East:
-			draw.pos = obj.pos + {f32(obj.size.x), 0, 0}
+			draw.pos = obj.pos + {-f32(obj.size.z) / 2, 0, f32(obj.size.x) / 2}
 		case .North_East:
-			draw.pos = obj.pos + {f32(obj.size.x), 0, f32(obj.size.z)}
+			draw.pos = obj.pos + {-f32(obj.size.z), 0, -f32(obj.size.x) / 2}
 		case .North_West:
-			draw.pos = obj.pos + {0, 0, f32(obj.size.z)}
-		}
-	case .North:
-		switch camera.rotation {
-		case .South_West:
-			draw.pos = obj.pos + {-f32(obj.size.x), 0, 0}
-		case .South_East:
-			draw.pos = obj.pos
-		case .North_East:
-			draw.pos = obj.pos + {0, 0, f32(obj.size.z)}
-		case .North_West:
-			draw.pos = obj.pos + {-f32(obj.size.x), 0, f32(obj.size.z)}
-		}
-	case .West:
-		switch camera.rotation {
-		case .South_West:
-			draw.pos = obj.pos + {-f32(obj.size.x), 0, -f32(obj.size.z)}
-		case .South_East:
-			draw.pos = obj.pos + {0, 0, -f32(obj.size.z)}
-		case .North_East:
-			draw.pos = obj.pos
-		case .North_West:
-			draw.pos = obj.pos + {-f32(obj.size.x), 0, 0}
+			draw.pos = obj.pos + {f32(obj.size.z), 0, -f32(obj.size.x) / 2}
 		}
 	}
 
@@ -313,7 +294,7 @@ object_draw_from_object :: proc(obj: Object) -> Object_Draw {
 	draw.model = obj.model
 	draw.texture = obj.texture
 	draw.light = obj.light
-    draw.id = obj.draw_id
+	draw.id = obj.draw_id
 
 	return draw
 }
