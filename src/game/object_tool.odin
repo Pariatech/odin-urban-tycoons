@@ -252,9 +252,9 @@ object_tool_move_object :: proc() {
 		for obj in ctx.original_objects {
 			add_object(obj)
 		}
-        for obj in ctx.objects {
+		for obj in ctx.objects {
 			delete_object_draw(obj.draw_id)
-        }
+		}
 		clear_object_tool_tile_marker_object_draws()
 		clear(&ctx.objects)
 		clear(&ctx.original_objects)
@@ -393,12 +393,7 @@ update_wall_masks_on_object_placement :: proc(
 	}
 
 	if can_add_object(ctx.objects[0]) {
-		if ctx.objects[0].type == .Window {
-			mask := window_model_to_wall_mask_map[ctx.objects[0].model]
-			set_wall_mask_from_object(ctx.objects[0], mask)
-		} else {
-			set_wall_mask_from_object(ctx.objects[0], .Door_Opening)
-		}
+		set_wall_mask_from_object(ctx.objects[0], ctx.objects[0].wall_mask.?)
 	}
 }
 

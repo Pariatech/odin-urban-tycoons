@@ -1,0 +1,11 @@
+{
+    "name": "Wood Chair",
+    "category": "Chair",
+    "model": "resources/objects/chairs/wood_chair/wood_chair.glb",
+    "icon": "resources/objects/chairs/wood_chair/wood_chair_icon.png",
+    "texture": "resources/objects/chairs/wood_chair/wood_chair.png",
+    "placement_set": [
+        "Floor"
+    ],
+    "size": [1, 1, 1]
+}

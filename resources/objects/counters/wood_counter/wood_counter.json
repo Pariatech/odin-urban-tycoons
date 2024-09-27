@@ -1,0 +1,15 @@
+{
+    "name": "Wood Counter",
+    "category": "Counter",
+    "model": "resources/objects/counters/wood_counter/wood_counter.glb",
+    "icon": "resources/objects/counters/wood_counter/wood_counter_icon.png",
+    "texture": "resources/objects/counters/wood_counter/wood_counter.png",
+    "placement_set": [
+        "Floor"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ]
+}

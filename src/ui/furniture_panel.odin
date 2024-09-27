@@ -142,6 +142,7 @@ furniture_panel_body :: proc(
 					size = blueprint.size,
 					light = {1, 1, 1},
 					placement_set = blueprint.placement_set,
+                    wall_mask = blueprint.wall_mask,
 				},
 			)
 		}

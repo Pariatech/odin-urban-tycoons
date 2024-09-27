@@ -13,6 +13,7 @@ Object_Blueprint_JSON :: struct {
 	model:         string,
 	icon:          string,
 	texture:       string,
+	wall_mask:     string,
 	placement_set: [dynamic]string,
 	size:          glsl.ivec3,
 }
@@ -24,6 +25,7 @@ Object_Blueprint :: struct {
 	icon:          string,
 	texture:       string,
 	placement_set: Object_Placement_Set,
+	wall_mask:     Maybe(Wall_Mask_Texture),
 	size:          glsl.ivec3,
 }
 
@@ -117,6 +119,7 @@ delete_object_blueprint_from_json :: proc(
 		delete(placement)
 	}
 	delete(blueprint_json.placement_set)
+	delete(blueprint_json.wall_mask)
 }
 
 @(private = "file")
@@ -131,10 +134,17 @@ object_blueprint_from_json_to_object_blueprint :: proc(
 		Object_Type,
 		blueprint_json.category,
 	) or_return
+	wall_mask, wall_mask_ok := fmt.string_to_enum_value(
+		Wall_Mask_Texture,
+		blueprint_json.wall_mask,
+	)
+	if wall_mask_ok {
+		blueprint.wall_mask = wall_mask
+	}
 	blueprint.model = blueprint_json.model
 	blueprint.icon = blueprint_json.icon
 	blueprint.texture = blueprint_json.texture
-    blueprint.size = blueprint_json.size
+	blueprint.size = blueprint_json.size
 	for &placement in blueprint_json.placement_set {
 		placement_enum := fmt.string_to_enum_value(
 			Object_Placement,

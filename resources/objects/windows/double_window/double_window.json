@@ -1,0 +1,16 @@
+{
+    "name": "Double Window",
+    "category": "Window",
+    "model": "resources/objects/windows/double_window/double_window.glb",
+    "icon": "resources/objects/windows/double_window/double_window_icon.png",
+    "texture": "resources/objects/windows/double_window/double_window.png",
+    "placement_set": [
+        "Wall"
+    ],
+    "size": [
+        2,
+        1,
+        1
+    ],
+    "wall_mask": "Double_Window"
+}

@@ -43,7 +43,7 @@ Object_Type_Set :: bit_set[Object_Type]
 ALL_OBJECT_TYPES :: Object_Type_Set {
 	.Door,
 	.Window,
-    .Chair,
+	.Chair,
 	.Table,
 	.Counter,
 	.Painting,
@@ -97,11 +97,6 @@ OLD_COMPUTER_TEXTURE :: "resources/textures/objects/Old_Computer.png"
 PLATE_TEXTURE :: "resources/textures/objects/Plate.png"
 L_COUCH_TEXTURE :: "resources/textures/objects/L_Couch.Bake.png"
 
-window_model_to_wall_mask_map := map[string]Wall_Mask_Texture {
-	WOOD_WINDOW_MODEL   = .Window_Opening,
-	DOUBLE_WINDOW_MODEL = .Double_Window,
-}
-
 Box :: struct {
 	min: glsl.vec3,
 	max: glsl.vec3,
@@ -129,6 +124,7 @@ Object :: struct {
 	bounding_box:  Box,
 	parent:        Maybe(Object_Id),
 	children:      [dynamic]Object_Id,
+	wall_mask:     Maybe(Wall_Mask_Texture),
 }
 
 Object_Chunk :: struct {
@@ -295,7 +291,7 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 		index     = len(chunk.objects),
 	}
 
-    obj.children = {}
+	obj.children = {}
 
 	add_object_to_parent(&obj)
 
@@ -309,7 +305,7 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 
 	append(&chunk.objects, obj)
 
-	if obj.type == .Window {
+	if obj.type == .Window || obj.type == .Door {
 		for x in 0 ..< obj.size.x {
 			tx := x
 			tz: i32 = 0
@@ -344,8 +340,7 @@ add_object :: proc(obj: Object) -> (id: Object_Id, ok: bool = true) {
 			}
 
 			w, _ := get_wall(wall_pos, axis)
-			mask := window_model_to_wall_mask_map[obj.model]
-			w.mask = mask
+			w.mask = obj.wall_mask.?
 			set_wall(wall_pos, axis, w)
 		}
 	}
@@ -895,12 +890,12 @@ delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {
 		for child_id, i in parent.children {
 			if child_id == id {
 				unordered_remove(&parent.children, i)
-                break
+				break
 			}
 		}
 	}
 
-    delete(object.children)
+	delete(object.children)
 
 	unordered_remove(&chunk.objects, key.index)
 

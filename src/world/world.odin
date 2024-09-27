@@ -438,6 +438,7 @@ add_house_floor_walls :: proc(
 				light = {1, 1, 1},
 				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
 				placement_set = {.Wall},
+                wall_mask = .Window_Opening,
 			},
 		)
 	} else {
@@ -455,6 +456,7 @@ add_house_floor_walls :: proc(
 				light = {1, 1, 1},
 				size = game.get_object_size(game.WOOD_DOOR_MODEL),
 				placement_set = {.Wall},
+                wall_mask = .Door_Opening,
 			},
 		)
 	}
@@ -502,6 +504,7 @@ add_house_floor_walls :: proc(
 				light = {1, 1, 1},
 				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
 				placement_set = {.Wall},
+                wall_mask = .Window_Opening,
 			},
 		)
 	}
@@ -550,6 +553,7 @@ add_house_floor_walls :: proc(
 				light = {1, 1, 1},
 				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
 				placement_set = {.Wall},
+                wall_mask = .Window_Opening,
 			},
 		)
 	}
@@ -598,6 +602,7 @@ add_house_floor_walls :: proc(
 				light = {1, 1, 1},
 				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
 				placement_set = {.Wall},
+                wall_mask = .Window_Opening,
 			},
 		)
 	}

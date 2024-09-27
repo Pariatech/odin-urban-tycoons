@@ -1,0 +1,15 @@
+{
+    "name": "Poutine Painting",
+    "category": "Painting",
+    "model": "resources/objects/paintings/poutine_painting/poutine_painting.glb",
+    "icon": "resources/objects/paintings/poutine_painting/poutine_painting_icon.png",
+    "texture": "resources/objects/paintings/poutine_painting/poutine_painting.png",
+    "placement_set": [
+        "Wall"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ]
+}

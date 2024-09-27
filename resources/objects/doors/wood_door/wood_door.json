@@ -1,0 +1,16 @@
+{
+    "name": "Wood Door",
+    "category": "Door",
+    "model": "resources/objects/doors/wood_door/wood_door.glb",
+    "icon": "resources/objects/doors/wood_door/wood_door_icon.png",
+    "texture": "resources/objects/doors/wood_door/wood_door.png",
+    "placement_set": [
+        "Wall"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ], 
+    "wall_mask": "Door_Opening"
+}

@@ -1,0 +1,15 @@
+{
+    "name": "Old Computer",
+    "category": "Computer",
+    "model": "resources/objects/computers/old_computer/old_computer.glb",
+    "icon": "resources/objects/computers/old_computer/old_computer_icon.png",
+    "texture": "resources/objects/computers/old_computer/old_computer.png",
+    "placement_set": [
+        "Table"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ]
+}

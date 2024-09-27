@@ -1,0 +1,16 @@
+{
+    "name": "Wood Window",
+    "category": "Window",
+    "model": "resources/objects/windows/wood_window/wood_window.glb",
+    "icon": "resources/objects/windows/wood_window/wood_window_icon.png",
+    "texture": "resources/objects/windows/wood_window/wood_window.png",
+    "placement_set": [
+        "Wall"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ],
+    "wall_mask": "Window_Opening"
+}

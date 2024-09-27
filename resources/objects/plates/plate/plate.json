@@ -1,0 +1,17 @@
+{
+    "name": "Plate",
+    "category": "Plate",
+    "model": "resources/objects/plates/plate/plate.glb",
+    "icon": "resources/objects/plates/plate/plate_icon.png",
+    "texture": "resources/objects/plates/plate/plate.png",
+    "placement_set": [
+        "Floor",
+        "Table",
+        "Counter"
+    ],
+    "size": [
+        1,
+        1,
+        1
+    ]
+}
