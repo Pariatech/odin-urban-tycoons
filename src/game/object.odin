@@ -73,30 +73,6 @@ Object_Placement :: enum {
 Object_Placement_Set :: bit_set[Object_Placement]
 ALL_OBJECT_PLACEMENTS :: Object_Placement_Set{.Floor, .Wall, .Counter, .Table}
 
-WOOD_COUNTER_MODEL :: "Wood.Counter.Bake"
-WOOD_WINDOW_MODEL :: "Window.Wood.Bake"
-WOOD_DOOR_MODEL :: "Door.Wood.Bake"
-WOOD_TABLE_6PLACES_MODEL :: "Table.6Places.Bake"
-PLANK_TABLE_6PLACES_MODEL :: "Plank.Table.6Places.Bake"
-WOOD_TABLE_8PLACES_MODEL :: "Table.8Places.Bake"
-POUTINE_PAINTING_MODEL :: "Poutine.Painting.Bake"
-DOUBLE_WINDOW_MODEL :: "Double_Window.Bake"
-OLD_COMPUTER_MODEL :: "Old_Computer.Bake"
-PLATE_MODEL :: "Plate.Bake"
-L_COUCH_MODEL :: "L_Couch.Bake"
-
-WOOD_COUNTER_TEXTURE :: "resources/textures/objects/Wood.Counter.png"
-WOOD_WINDOW_TEXTURE :: "resources/textures/objects/Wood.Window.png"
-WOOD_DOOR_TEXTURE :: "resources/textures/objects/Door.Wood.png"
-WOOD_TABLE_6PLACES_TEXTURE :: "resources/textures/objects/Table.6Places.Wood.png"
-PLANK_TABLE_6PLACES_TEXTURE :: "resources/textures/objects/Table.6Places.Plank.png"
-WOOD_TABLE_8PLACES_TEXTURE :: "resources/textures/objects/Table.8Places.Wood.png"
-POUTINE_PAINTING_TEXTURE :: "resources/textures/objects/Poutine.Painting.Bake.png"
-DOUBLE_WINDOW_TEXTURE :: "resources/textures/objects/Double_Window.Bake.png"
-OLD_COMPUTER_TEXTURE :: "resources/textures/objects/Old_Computer.png"
-PLATE_TEXTURE :: "resources/textures/objects/Plate.png"
-L_COUCH_TEXTURE :: "resources/textures/objects/L_Couch.Bake.png"
-
 Box :: struct {
 	min: glsl.vec3,
 	max: glsl.vec3,

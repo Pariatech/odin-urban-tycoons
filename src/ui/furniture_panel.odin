@@ -20,82 +20,6 @@ Furniture :: struct {
 	type:      g.Object_Type,
 }
 
-FURNITURE_PANEL_ICONS :: []cstring {
-	"resources/textures/object_icons/Plank.Table.6Places.png",
-	"resources/textures/object_icons/Window.Wood.png",
-	"resources/textures/object_icons/Poutine.Painting.png",
-	"resources/textures/object_icons/Double_Window.png",
-	"resources/textures/object_icons/Door_Wood.png",
-	"resources/textures/object_icons/Old_Computer.png",
-	"resources/textures/object_icons/Plate.png",
-	"resources/textures/object_icons/L_Couch.png",
-	// .Chair    = "resources/textures/object_icons/Chair.png",
-	// .Table6   = "resources/textures/object_icons/Table.6Places.png",
-	// .Letter_A = "resources/textures/object_icons/Letter_A.png",
-	// .Letter_G = "resources/textures/object_icons/Letter_G.png",
-	// .Letter_D = "resources/textures/object_icons/Letter_D.png",
-	// .Letter_E = "resources/textures/object_icons/Letter_E.png",
-}
-
-FURNITURES :: []Furniture {
-	 {
-		icon = "resources/textures/object_icons/Plank.Table.6Places.png",
-		model = g.PLANK_TABLE_6PLACES_MODEL,
-		texture = g.PLANK_TABLE_6PLACES_TEXTURE,
-		placement = {.Floor},
-		type = .Table,
-	},
-	 {
-		icon = "resources/textures/object_icons/Window.Wood.png",
-		model = g.WOOD_WINDOW_MODEL,
-		texture = g.WOOD_WINDOW_TEXTURE,
-		placement = {.Wall},
-		type = .Window,
-	},
-	 {
-		icon = "resources/textures/object_icons/Poutine.Painting.png",
-		model = g.POUTINE_PAINTING_MODEL,
-		texture = g.POUTINE_PAINTING_TEXTURE,
-		placement = {.Wall},
-		type = .Painting,
-	},
-	 {
-		icon = "resources/textures/object_icons/Double_Window.png",
-		model = g.DOUBLE_WINDOW_MODEL,
-		texture = g.DOUBLE_WINDOW_TEXTURE,
-		placement = {.Wall},
-		type = .Window,
-	},
-	 {
-		icon = "resources/textures/object_icons/Door_Wood.png",
-		model = g.WOOD_DOOR_MODEL,
-		texture = g.WOOD_DOOR_TEXTURE,
-		placement = {.Wall},
-		type = .Door,
-	},
-	 {
-		icon = "resources/textures/object_icons/Old_Computer.png",
-		model = g.OLD_COMPUTER_MODEL,
-		texture = g.OLD_COMPUTER_TEXTURE,
-		placement = {.Table},
-		type = .Computer,
-	},
-	 {
-		icon = "resources/textures/object_icons/Plate.png",
-		model = g.PLATE_MODEL,
-		texture = g.PLATE_TEXTURE,
-		placement = {.Floor, .Table, .Counter},
-		type = .Plate,
-	},
-	 {
-		icon = "resources/textures/object_icons/L_Couch.png",
-		model = g.L_COUCH_MODEL,
-		texture = g.L_COUCH_TEXTURE,
-		placement = {.Floor},
-		type = .Couch,
-	},
-}
-
 furniture_panel_icon_texture_arrays: []u32
 
 furniture_panel_body :: proc(
@@ -132,8 +56,6 @@ furniture_panel_body :: proc(
 			   bottom_border_width = border_width,
 			   color = DAY_SKY_BLUE,
 		   ) {
-			// furniture_tool.place_furniture(i)
-			furnitures := FURNITURES
 			g.set_object_tool_object(
 				 {
 					model = blueprint.model,
