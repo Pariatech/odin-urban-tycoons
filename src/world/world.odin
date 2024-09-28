@@ -36,7 +36,7 @@ update :: proc() {
 	)
 }
 
-init :: proc() {
+init :: proc() -> bool {
 	tile.chunk_init()
 
 	// furniture.add({1, 0, 1}, .Chair, .South)
@@ -50,165 +50,105 @@ init :: proc() {
 	add_house_floor_triangles(2, .Wood_Floor_008)
 
 	game.add_object(
-		 {
-			pos = {1, 0, 1},
-			model = game.WOOD_COUNTER_MODEL,
-			texture = game.WOOD_COUNTER_TEXTURE,
-			orientation = .South,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Counter,
-			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Wood Counter",
+			{1, 0, 1},
+			.South,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {2, 0, 1},
-			model = game.WOOD_COUNTER_MODEL,
-			texture = game.WOOD_COUNTER_TEXTURE,
-			orientation = .South,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Counter,
-			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Wood Counter",
+			{2, 0, 1},
+			.South,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {3, 0, 1},
-			model = game.WOOD_COUNTER_MODEL,
-			texture = game.WOOD_COUNTER_TEXTURE,
-			orientation = .South,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Counter,
-			size = game.get_object_size(game.WOOD_COUNTER_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Wood Counter",
+			{3, 0, 1},
+			.South,
+			.Floor,
+		) or_return,
 	)
 
 	game.add_object(
-		 {
-			pos = {5, 0, 1.5},
-			model = game.PLANK_TABLE_6PLACES_MODEL,
-			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
-			orientation = .South,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Plank Table",
+			{5, 0, 1.5},
+			.South,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {8.5, 0, 1.5},
-			model = game.WOOD_TABLE_8PLACES_MODEL,
-			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
-			orientation = .South,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Big Wood Table",
+			{8.5, 0, 1.5},
+			.South,
+			.Floor,
+		) or_return,
 	)
 
 	game.add_object(
-		 {
-			pos = {5.5, 0, 4},
-			model = game.PLANK_TABLE_6PLACES_MODEL,
-			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
-			orientation = .East,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Plank Table",
+			{5.5, 0, 4},
+			.East,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {8.5, 0, 4.5},
-			model = game.WOOD_TABLE_8PLACES_MODEL,
-			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
-			orientation = .East,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Big Wood Table",
+			{8.5, 0, 4.5},
+			.East,
+			.Floor,
+		) or_return,
 	)
 
 	game.add_object(
-		 {
-			pos = {5, 0, 7.5},
-			model = game.PLANK_TABLE_6PLACES_MODEL,
-			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
-			orientation = .North,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Plank Table",
+			{5, 0, 7.5},
+			.North,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {9.5, 0, 7.5},
-			model = game.WOOD_TABLE_8PLACES_MODEL,
-			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
-			orientation = .North,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Big Wood Table",
+			{9.5, 0, 7.5},
+			.North,
+			.Floor,
+		) or_return,
 	)
 
 	game.add_object(
-		 {
-			pos = {5.5, 0, 10},
-			model = game.PLANK_TABLE_6PLACES_MODEL,
-			texture = game.PLANK_TABLE_6PLACES_TEXTURE,
-			orientation = .West,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.PLANK_TABLE_6PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Plank Table",
+			{5.5, 0, 10},
+			.West,
+			.Floor,
+		) or_return,
 	)
 	game.add_object(
-		 {
-			pos = {9.5, 0, 11.5},
-			model = game.WOOD_TABLE_8PLACES_MODEL,
-			texture = game.WOOD_TABLE_8PLACES_TEXTURE,
-			orientation = .West,
-			placement = .Floor,
-			light = {1, 1, 1},
-			type = .Table,
-			size = game.get_object_size(game.WOOD_TABLE_8PLACES_MODEL),
-			placement_set = {.Floor},
-		},
+		game.make_object_from_blueprint(
+			"Big Wood Table",
+			{9.5, 0, 11.5},
+			.West,
+			.Floor,
+		) or_return,
 	)
 
 	game.add_object(
-		 {
-			pos = {5, 0, 1},
-			model = game.OLD_COMPUTER_MODEL,
-			texture = game.OLD_COMPUTER_TEXTURE,
-			orientation = .West,
-			placement = .Table,
-			light = {1, 1, 1},
-			type = .Computer,
-			size = game.get_object_size(game.OLD_COMPUTER_MODEL),
-			placement_set = {.Table},
-		},
+		game.make_object_from_blueprint(
+			"Old Computer",
+			{5, 0, 1},
+			.West,
+			.Table,
+		) or_return,
 	)
 
 	for x in 0 ..< constants.WORLD_WIDTH {
@@ -316,6 +256,8 @@ init :: proc() {
 			),
 		)
 	}
+
+	return true
 }
 
 add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
@@ -375,7 +317,7 @@ add_house_floor_walls :: proc(
 	floor: i32,
 	inside_texture: game.Wall_Texture,
 	outside_texture: game.Wall_Texture,
-) {
+) -> bool {
 	// The house's front wall
 	game.set_north_south_wall(
 		{house_x, floor, house_z},
@@ -425,39 +367,29 @@ add_house_floor_walls :: proc(
 	)
 	if floor > 0 {
 		game.add_object(
-			 {
-				pos =  {
+			game.make_object_from_blueprint(
+				"Wood Window",
+				 {
 					f32(house_x + 1),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 5),
 				},
-				model = game.WOOD_WINDOW_MODEL,
-				texture = game.WOOD_WINDOW_TEXTURE,
-				orientation = .West,
-				placement = .Wall,
-				light = {1, 1, 1},
-				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
-				placement_set = {.Wall},
-                wall_mask = .Window_Opening,
-			},
+				.West,
+				.Wall,
+			) or_return,
 		)
 	} else {
 		game.add_object(
-			 {
-				pos =  {
+			game.make_object_from_blueprint(
+				"Wood Door",
+				 {
 					f32(house_x + 1),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 5),
 				},
-				model = game.WOOD_DOOR_MODEL,
-				texture = game.WOOD_DOOR_TEXTURE,
-				orientation = .West,
-				placement = .Wall,
-				light = {1, 1, 1},
-				size = game.get_object_size(game.WOOD_DOOR_MODEL),
-				placement_set = {.Wall},
-                wall_mask = .Door_Opening,
-			},
+				.West,
+				.Wall,
+			) or_return,
 		)
 	}
 
@@ -491,21 +423,16 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			 {
-				pos =  {
+			game.make_object_from_blueprint(
+				"Wood Window",
+				 {
 					f32(house_x),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + i32(i) + 8),
 				},
-				model = game.WOOD_WINDOW_MODEL,
-				texture = game.WOOD_WINDOW_TEXTURE,
-				orientation = .West,
-				placement = .Wall,
-				light = {1, 1, 1},
-				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
-				placement_set = {.Wall},
-                wall_mask = .Window_Opening,
-			},
+				.West,
+				.Wall,
+			) or_return,
 		)
 	}
 
@@ -540,21 +467,16 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			 {
-				pos =  {
+			game.make_object_from_blueprint(
+				"Wood Window",
+				 {
 					f32(house_x + i32(i) + 1),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z),
 				},
-				model = game.WOOD_WINDOW_MODEL,
-				texture = game.WOOD_WINDOW_TEXTURE,
-				orientation = .South,
-				placement = .Wall,
-				light = {1, 1, 1},
-				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
-				placement_set = {.Wall},
-                wall_mask = .Window_Opening,
-			},
+				.South,
+				.Wall,
+			) or_return,
 		)
 	}
 
@@ -589,21 +511,16 @@ add_house_floor_walls :: proc(
 		)
 
 		game.add_object(
-			 {
-				pos =  {
+			game.make_object_from_blueprint(
+				"Wood Window",
+				 {
 					f32(house_x + i32(i) + 1),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 11),
 				},
-				model = game.WOOD_WINDOW_MODEL,
-				texture = game.WOOD_WINDOW_TEXTURE,
-				orientation = .South,
-				placement = .Wall,
-				light = {1, 1, 1},
-				size = game.get_object_size(game.WOOD_WINDOW_MODEL),
-				placement_set = {.Wall},
-                wall_mask = .Window_Opening,
-			},
+				.South,
+				.Wall,
+			) or_return,
 		)
 	}
 	game.set_east_west_wall(
@@ -659,6 +576,8 @@ add_house_floor_walls :: proc(
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
+
+    return true
 }
 
 draw :: proc() {

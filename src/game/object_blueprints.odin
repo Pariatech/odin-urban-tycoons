@@ -49,6 +49,38 @@ deload_object_blueprints :: proc(
 	delete(game.object_blueprints)
 }
 
+make_object_from_blueprint :: proc(
+	name: string,
+	pos: glsl.vec3,
+	orientation: Object_Orientation,
+	placement: Object_Placement,
+	light: glsl.vec3 = {1, 1, 1},
+	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
+) -> (
+	Object,
+	bool,
+) {
+	for blueprint in game.object_blueprints {
+		if blueprint.name == name {
+			return  {
+					pos = pos,
+					light = light,
+					placement = placement,
+					orientation = orientation,
+					model = blueprint.model,
+					texture = blueprint.texture,
+					type = blueprint.category,
+					size = blueprint.size,
+					placement_set = blueprint.placement_set,
+					wall_mask = blueprint.wall_mask,
+				},
+				true
+		}
+	}
+
+	return {}, false
+}
+
 @(private = "file")
 read_object_blueprints_dir :: proc(
 	path: string,

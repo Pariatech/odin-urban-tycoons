@@ -97,8 +97,6 @@ start :: proc() -> (ok: bool = false) {
 
 	game.load_models() or_return
 
-	world.init()
-
 	game.init_objects() or_return
 
 	floor_tool.init()
@@ -114,6 +112,8 @@ start :: proc() -> (ok: bool = false) {
 
 	game.init_game() or_return
     defer game.deinit_game()
+
+	world.init()
 
 	ui.init(&ui_ctx) or_return
 	defer ui.deinit(&ui_ctx)
