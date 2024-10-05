@@ -105,6 +105,7 @@ draw_object :: proc(object: ^Object_Draw) -> bool {
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	bind_texture(object.texture) or_return
+    defer gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	bind_model(object.model) or_return
 	draw_model(object.model)

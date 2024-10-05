@@ -8,6 +8,7 @@ Game_Context :: struct {
 	object_tool:       Object_Tool_Context,
 	object_draws:      Object_Draws,
 	object_blueprints: Object_Blueprints,
+	roofs:             Roofs_Context,
 }
 
 get_game_context :: #force_inline proc() -> ^Game_Context {
@@ -42,13 +43,29 @@ init_game :: proc() -> bool {
 	load_object_blueprints() or_return
 	init_object_draws() or_return
 	init_object_tool()
+	init_roofs() or_return
+
+	add_roof({type = .Half_Hip, start = {0, 0}, end = {0, 1}})
+	add_roof({type = .Half_Hip, start = {0, 3}, end = {0, 5}})
+	add_roof({type = .Half_Hip, start = {0, 7}, end = {1, 8}})
+	add_roof({type = .Half_Hip, start = {0, 10}, end = {3, 14}})
+	// add_roof({type = .Half_Gable, start = {-0.5, 2.5}, end = {1.5, 7.5}}) // pyramid
+
+	// add_roof({type = .Corner, start = {0, 7}, end = {1, 8}}) // corner
+	// add_roof({start = {0, 10}, end = {1, 13}}) // pyramid
+
 	return true
 }
 
 deinit_game :: proc() {
-    deload_object_blueprints()
+	deload_object_blueprints()
 	deinit_object_draws()
 	deinit_object_tool()
+	deinit_roofs()
+}
+
+draw_game :: proc() {
+	draw_roofs()
 }
 
 update_game_on_camera_rotation :: proc() {

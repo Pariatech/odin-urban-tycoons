@@ -163,6 +163,7 @@ start :: proc() -> (ok: bool = false) {
 
 
 		// game.draw_object_tool()
+        game.draw_game()
 		world.draw()
 
 		game.draw_objects() or_return
