@@ -34,6 +34,7 @@ MENU_ICON_TEXTURES :: [Menu_Icon]cstring {
 ROYAL_BLUE :: glsl.vec4{0.255, 0.412, 0.882, 1}
 DARK_BLUE :: glsl.vec4{0.0, 0.251, 0.502, 1}
 DAY_SKY_BLUE :: glsl.vec4{0.510, 0.792, 1, 1}
+BACKGROUND_BLUE :: glsl.vec4{0.169, 0.271, 0.569, 1}
 WHITE :: glsl.vec4{1, 1, 1, 1}
 
 BORDER_WIDTH :: 1

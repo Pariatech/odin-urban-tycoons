@@ -17,7 +17,7 @@ container :: proc(
 	using ctx: ^Context,
 	pos: glsl.vec2 = {},
 	size: glsl.vec2 = {},
-	color: glsl.vec4 = ROYAL_BLUE,
+	color: glsl.vec4 = BACKGROUND_BLUE,
 	left_border_width: f32 = BORDER_WIDTH,
 	right_border_width: f32 = BORDER_WIDTH,
 	top_border_width: f32 = BORDER_WIDTH,
