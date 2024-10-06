@@ -634,7 +634,7 @@ draw_half_hip_side_roof_west_face :: proc(
 	rotation: glsl.mat4,
 	face_lights: [4]glsl.vec3,
 	ratio: f32,
-    i: int = 1
+	i: int = 1,
 ) {
 	roof_vertices := HALF_HIP_SIDE_ROOF_WEST_FACE_VERTICES
 	roof_indices := HALF_HIP_SIDE_ROOF_WEST_FACE_INDICES
@@ -942,6 +942,8 @@ draw_trapezoid_hip_roof :: proc(
 	face_lights: [4]glsl.vec3,
 	ratio: f32,
 ) {
+	min_size := min(size.y, size.x)
+	max_size := max(size.y, size.x)
 	height := min(size.x, size.y) / 2
 	for i in 0 ..< 2 {
 		half_pyramid_roof_west_face_vertices :=
@@ -951,15 +953,19 @@ draw_trapezoid_hip_roof :: proc(
 		side_rotation :=
 			rotation *
 			glsl.mat4Rotate({0, 1, 0}, f32(i * 2 - 1) * (-math.PI / 2))
-		face_size := size
-		face_size.x = size.y / 2
+
+		size_scale := glsl.abs(glsl.vec4{1, 0, 0.5, 1} * rotation).xz
+		face_size := glsl.vec2{min_size, min_size} * size_scale
+		// face_size.x = size.y / 2
+		// face_size.x = min_size / 2
+		// face_size.y = min_size
 
 		// if i % 2 == 0 {
 		// face_size.x /= 2
 		// }
 
 		pos := roof.start + (roof.end - roof.start) / 2
-		pos_offset := glsl.vec4{-size.x / 2 + size.y / 4, 0, 0, 1}
+		pos_offset := glsl.vec4{-max_size / 2 + min_size / 4, 0, 0, 1}
 		pos_offset *= side_rotation
 		pos += pos_offset.xz
 
@@ -973,7 +979,7 @@ draw_trapezoid_hip_roof :: proc(
 			half_pyramid_roof_west_face_vertices[:],
 			half_pyramid_roof_west_face_indices[:],
 			height,
-			size.y,
+			min_size,
 			(i * 2) % 4,
 		)
 	}
@@ -982,17 +988,30 @@ draw_trapezoid_hip_roof :: proc(
 	for i in 0 ..< 2 {
 		face_rotation :=
 			rotation * glsl.mat4Rotate({0, 1, 0}, f32(i * 2) * (-math.PI / 2))
-		face_size := size
-        face_size.x = size.x
-        face_size.y = size.y / 2
 
-		pos_offset := glsl.vec4{-size.y / 4, 0, 0, 1}
+		size_scale := glsl.abs(glsl.vec4{0.5, 0, 1, 1} * rotation).xz
+		log.info(size, size_scale)
+		// face_size.x = min_size
+		// face_size.y = max_size / 2
+		face_size := size * size_scale
+		// face_size.x = max_size
+		// face_size.y = min_size / 2
+
+		// face_size.x = size.x
+		// face_size.y = size.y / 2
+		// face_size.x = size.x / 2
+		// face_size.y = size.y
+
+		pos_offset := glsl.vec4{-min_size / 4, 0, 0, 1}
 		pos_offset *= face_rotation
 		face_pos := center + pos_offset.xz
-        // face_pos := center
-        // log.info(face_size)
-	    // face_ratio := max(face_size.x, face_size.y) / min(face_size.x, face_size.y)
-	    face_ratio := min(face_size.x, face_size.y) / max(face_size.x, face_size.y)
+		// face_pos := center
+		// face_ratio := max(face_size.x, face_size.y) / min(face_size.x, face_size.y)
+
+		face_ratio :=
+			min(face_size.x, face_size.y) / max(face_size.x, face_size.y)
+		// face_ratio :=
+		// 	max(face_size.x, face_size.y) / min(face_size.x, face_size.y)
 		draw_half_hip_side_roof_west_face(
 			{face_pos.x, roof.offset, face_pos.y},
 			vertices,
@@ -1001,7 +1020,7 @@ draw_trapezoid_hip_roof :: proc(
 			face_rotation,
 			face_lights,
 			face_ratio,
-            (i * 2 + 1) % 4,
+			(i * 2 + 1) % 4,
 		)
 	}
 }
