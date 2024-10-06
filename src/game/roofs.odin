@@ -380,45 +380,6 @@ HALF_PYRAMID_ROOF_VERTICES :: [?]Roof_Vertex {
 HALF_PYRAMID_ROOF_INDICES :: [?]Roof_Index{0, 1, 2, 2, 3, 0, 3, 2, 4}
 
 @(private = "file")
-HALF_HIP_SIDE_ROOF_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, -0.5 + 0.33}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, -0.5 + 0.66}, texcoords = {2, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {2, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {3, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, 0.5}, texcoords = {2, 1, 0}, color = {1, 1, 1}},
-}
-
-@(private = "file")
-HALF_HIP_SIDE_ROOF_INDICES :: [?]Roof_Index {
-	0,
-	1,
-	2,
-	2,
-	3,
-	0,
-	4,
-	3,
-	2,
-	5,
-	4,
-	2,
-	6,
-	4,
-	5,
-	7,
-	6,
-	5,
-}
-
-@(private = "file")
-HALF_HIP_SIDE_SOUTH_INDICES :: [?]int{2, 3}
-@(private = "file")
-HALF_HIP_SIDE_NORTH_INDICES :: [?]int{4, 5}
-
-@(private = "file")
 draw_half_pyramid_roof :: proc(
 	roof: ^Roof,
 	vertices: ^[dynamic]Roof_Vertex,
@@ -450,39 +411,85 @@ draw_half_pyramid_roof :: proc(
 }
 
 @(private = "file")
-draw_half_hip_side_roof :: proc(
+HALF_HIP_SIDE_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+}
+
+@(private = "file")
+HALF_HIP_SIDE_ROOF_WEST_FACE_VERTICES :: [?]Roof_Vertex {
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0}, texcoords = {0.5, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {2, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+}
+
+@(private = "file")
+HALF_HIP_SIDE_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
+	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+}
+
+@(private = "file")
+HALF_HIP_SIDE_ROOF_SOUTH_FACE_INDICES :: [?]Roof_Index{0, 1, 2}
+
+@(private = "file")
+HALF_HIP_SIDE_ROOF_WEST_FACE_INDICES :: [?]Roof_Index {
+	0,
+	1,
+	2,
+	2,
+	1,
+	3,
+	2,
+	3,
+	4,
+}
+
+@(private = "file")
+HALF_HIP_SIDE_ROOF_NORTH_FACE_INDICES :: [?]Roof_Index{2, 1, 0}
+
+@(private = "file")
+HALF_HIP_SIDE_WEST_FACE_SOUTH_INDEX :: 1
+@(private = "file")
+HALF_HIP_SIDE_WEST_FACE_NORTH_INDEX :: 3
+@(private = "file")
+HALF_HIP_SIDE_SOUTH_FACE_SOUTH_INDEX :: 2
+@(private = "file")
+HALF_HIP_SIDE_NORTH_FACE_NORTH_INDEX :: 0
+
+@(private = "file")
+draw_half_hip_side_roof_south_face :: proc(
 	roof: ^Roof,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
 	face_lights: [4]glsl.vec3,
+	ratio: f32,
 ) {
-	roof_vertices := HALF_HIP_SIDE_ROOF_VERTICES
-	roof_indices := HALF_HIP_SIDE_ROOF_INDICES
+	roof_vertices := HALF_HIP_SIDE_ROOF_SOUTH_FACE_VERTICES
+	roof_indices := HALF_HIP_SIDE_ROOF_SOUTH_FACE_INDICES
+	south_index := HALF_HIP_SIDE_SOUTH_FACE_SOUTH_INDEX
 
-	north_indices := HALF_HIP_SIDE_NORTH_INDICES
-	south_indices := HALF_HIP_SIDE_SOUTH_INDICES
-	ratio := min(size.x, size.y) / max(size.x, size.y)
-	for idx in north_indices {
-		roof_vertices[idx].pos.z = 0.5 - ratio
-	}
-
-	for idx in south_indices {
-		roof_vertices[idx].pos.z = -0.5 + ratio
-	}
+	roof_vertices[south_index].pos.z = ratio - 0.5
 
 	index_offset := u32(len(vertices))
 
+    min_size := min(size.x, size.y)
 	for &vertex in roof_vertices {
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * rotation).xyz
 		vertex.pos.y *= min(size.x, size.y)
 		vertex.pos.x *= size.x
 		vertex.pos.z *= size.y
-		// vertex.texcoords.x = vertex.pos.x + vertex.pos.z
-		// vertex.texcoords.y = vertex.pos.y
+		vertex.texcoords.x *= min_size
+		vertex.texcoords.y *= min_size
 		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.color = face_lights[0]
 		append(vertices, vertex)
 	}
 
@@ -492,11 +499,130 @@ draw_half_hip_side_roof :: proc(
 }
 
 @(private = "file")
+draw_half_hip_side_roof_north_face :: proc(
+	roof: ^Roof,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+	ratio: f32,
+) {
+	roof_vertices := HALF_HIP_SIDE_ROOF_NORTH_FACE_VERTICES
+	roof_indices := HALF_HIP_SIDE_ROOF_NORTH_FACE_INDICES
+	north_index := HALF_HIP_SIDE_NORTH_FACE_NORTH_INDEX
+
+	roof_vertices[north_index].pos.z = 0.5 - ratio
+
+	index_offset := u32(len(vertices))
+
+    min_size := min(size.x, size.y)
+	for &vertex in roof_vertices {
+		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
+		vertex.pos = (pos4 * rotation).xyz
+		vertex.pos.y *= min_size
+		vertex.pos.x *= size.x
+		vertex.pos.z *= size.y
+		vertex.texcoords.x *= min_size
+		vertex.texcoords.y *= min_size
+		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.color = face_lights[2]
+		append(vertices, vertex)
+	}
+
+	for index in roof_indices {
+		append(indices, index + index_offset)
+	}
+}
+
+@(private = "file")
+draw_half_hip_side_roof_west_face :: proc(
+	roof: ^Roof,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+	ratio: f32,
+) {
+	roof_vertices := HALF_HIP_SIDE_ROOF_WEST_FACE_VERTICES
+	roof_indices := HALF_HIP_SIDE_ROOF_WEST_FACE_INDICES
+	south_index := HALF_HIP_SIDE_WEST_FACE_SOUTH_INDEX
+	north_index := HALF_HIP_SIDE_WEST_FACE_NORTH_INDEX
+
+	roof_vertices[south_index].pos.z = ratio - 0.5
+	roof_vertices[south_index].texcoords.x = ratio
+	roof_vertices[north_index].pos.z = 0.5 - ratio
+	roof_vertices[north_index].texcoords.x = 1 - ratio
+
+	index_offset := u32(len(vertices))
+
+    height := min(size.x, size.y)
+	for &vertex in roof_vertices {
+		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
+		vertex.pos = (pos4 * rotation).xyz
+		vertex.pos.y *= height
+		vertex.pos.x *= size.x
+		vertex.pos.z *= size.y
+		vertex.texcoords.x *= max(size.x, size.y)
+		vertex.texcoords.y *= height
+		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.color = face_lights[1]
+		append(vertices, vertex)
+	}
+
+	for index in roof_indices {
+		append(indices, index + index_offset)
+	}
+}
+
+@(private = "file")
+draw_half_hip_side_roof :: proc(
+	roof: ^Roof,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+) {
+	ratio := min(size.x, size.y) / max(size.x, size.y)
+
+	draw_half_hip_side_roof_south_face(
+		roof,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		ratio,
+	)
+
+	draw_half_hip_side_roof_north_face(
+		roof,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		ratio,
+	)
+
+	draw_half_hip_side_roof_west_face(
+		roof,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		ratio,
+	)
+}
+
+@(private = "file")
 HALF_HIP_END_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
 	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0, 0, -0.5}, texcoords = {0.5, 1, 0}, color = {1, 1, 1}},
+    {pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
 	{pos = {0, 1, 0}, texcoords = {0.5, 0, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
 	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
 }
 
@@ -504,9 +630,8 @@ HALF_HIP_END_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
 HALF_HIP_END_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
 	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 0}, color = {0.6, 0.6, 0.6}},
 	{pos = {0, 1, 0}, texcoords = {0.5, 0, 0}, color = {0.6, 0.6, 0.6}},
-	{pos = {0, 0, 0.5}, texcoords = {0.5, 1, 0}, color = {0.6, 0.6, 0.6}},
+    {pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {0.6, 0.6, 0.6}},
 	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {0.6, 0.6, 0.6}},
-	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {0.6, 0.6, 0.6}},
 }
 
 @(private = "file")
@@ -524,9 +649,6 @@ HALF_HIP_END_ROOF_SOUTH_FACE_INDICES :: [?]Roof_Index {
 	2,
 	1,
 	3,
-	2,
-	3,
-	4,
 }
 
 @(private = "file")
@@ -537,19 +659,16 @@ HALF_HIP_END_ROOF_NORTH_FACE_INDICES :: [?]Roof_Index {
 	2,
 	1,
 	3,
-	2,
-	3,
-	4,
 }
 
 @(private = "file")
 HALF_HIP_END_ROOF_WEST_FACE_INDICES :: [?]Roof_Index{0, 2, 1}
 
 @(private = "file")
-HALF_HIP_END_ROOF_SOUTH_FACE_MIDDLE_INDICES :: [?]Roof_Index{1, 2}
+HALF_HIP_END_ROOF_SOUTH_FACE_MIDDLE_INDICES :: [?]Roof_Index{2}
 
 @(private = "file")
-HALF_HIP_END_ROOF_NORTH_FACE_MIDDLE_INDICES :: [?]Roof_Index{1, 2}
+HALF_HIP_END_ROOF_NORTH_FACE_MIDDLE_INDICES :: [?]Roof_Index{1}
 
 @(private = "file")
 HALF_HIP_END_ROOF_WEST_FACE_MIDDLE_INDICES :: [?]Roof_Index{2}
@@ -604,7 +723,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.texcoords.x *= min_size
 		vertex.texcoords.y *= height
 		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
-        vertex.color = face_lights[0]
+		vertex.color = face_lights[0]
 		append(vertices, vertex)
 	}
 
@@ -622,7 +741,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.texcoords.x *= min_size
 		vertex.texcoords.y *= height
 		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
-        vertex.color = face_lights[2]
+		vertex.color = face_lights[2]
 		append(vertices, vertex)
 	}
 
@@ -640,7 +759,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.texcoords.x *= max_size
 		vertex.texcoords.y *= height
 		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
-        vertex.color = face_lights[1]
+		vertex.color = face_lights[1]
 		append(vertices, vertex)
 	}
 

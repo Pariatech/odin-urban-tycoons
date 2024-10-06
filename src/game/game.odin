@@ -50,6 +50,7 @@ init_game :: proc() -> bool {
 	add_roof({type = .Half_Hip, start = {0, 7}, end = {1, 8}})
 	add_roof({type = .Half_Hip, start = {0, 10}, end = {3, 14}})
 	add_roof({type = .Half_Hip, start = {0, 16}, end = {2, 17}})
+	add_roof({type = .Half_Hip, start = {0, 19}, end = {2, 26}})
 	// add_roof({type = .Half_Gable, start = {-0.5, 2.5}, end = {1.5, 7.5}}) // pyramid
 
 	// add_roof({type = .Corner, start = {0, 7}, end = {1, 8}}) // corner
