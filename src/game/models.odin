@@ -119,6 +119,9 @@ load_models :: proc() -> (ok: bool) {
 
 load_model_file :: proc(path: string) -> bool {
 	ctx := get_models_context()
+    if path in ctx.models {
+        return true
+    }
 	options: cgltf.options
 	cpath := strings.clone_to_cstring(path)
 	defer delete(cpath)

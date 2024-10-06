@@ -47,7 +47,8 @@ init :: proc() -> bool {
 	// The house
 	add_house_floor_walls(0, .Royal_Blue, .Brick)
 	add_house_floor_walls(1, .Dark_Blue, .Brick)
-	add_house_floor_triangles(2, .Wood_Floor_008)
+	add_house_floor_triangles(0, .Wood_Floor_008)
+	add_house_floor_triangles(1, .Wood_Floor_008)
 
 	game.add_object(
 		game.make_object_from_blueprint(
@@ -266,50 +267,13 @@ add_house_floor_triangles :: proc(floor: i32, texture: tile.Texture) {
 		mask_texture = .Full_Mask,
 	}
 
-	tile.set_tile_triangle({house_x + 4, floor, house_z}, .West, tri)
-	tile.set_tile_triangle({house_x + 4, floor, house_z}, .North, tri)
-
-	tile.set_tile_triangle({house_x, floor, house_z + 4}, .South, tri)
-	tile.set_tile_triangle({house_x, floor, house_z + 4}, .East, tri)
-
-	tile.set_tile_triangle({house_x, floor, house_z + 6}, .North, tri)
-	tile.set_tile_triangle({house_x, floor, house_z + 6}, .East, tri)
-
-	tile.set_tile_triangle({house_x + 4, floor, house_z + 10}, .South, tri)
-	tile.set_tile_triangle({house_x + 4, floor, house_z + 10}, .West, tri)
-
-	for x in 0 ..< 4 {
-		for z in 0 ..< 4 {
+	for x in 0 ..< 12 {
+		for z in 0 ..< 11 {
 			tile.set_tile(
 				{house_x + i32(x), floor, house_z + i32(z)},
 				tile.tile(tri),
 			)
 		}
-	}
-
-	for x in 0 ..< 3 {
-		for z in 0 ..< 3 {
-			tile.set_tile(
-				{house_x + i32(x) + 1, floor, house_z + i32(z) + 4},
-				tile.tile(tri),
-			)
-		}
-	}
-
-	for x in 0 ..< 4 {
-		for z in 0 ..< 4 {
-			tile.set_tile(
-				{house_x + i32(x), floor, house_z + i32(z) + 7},
-				tile.tile(tri),
-			)
-		}
-	}
-
-	for z in 0 ..< 9 {
-		tile.set_tile(
-			{house_x + 4, floor, house_z + i32(z) + 1},
-			tile.tile(tri),
-		)
 	}
 }
 
@@ -326,7 +290,7 @@ add_house_floor_walls :: proc(
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
-	for i in 0 ..< 2 {
+	for i in 0 ..< 9 {
 		game.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 1},
 			 {
@@ -339,38 +303,35 @@ add_house_floor_walls :: proc(
 		)
 	}
 	game.set_north_south_wall(
-		{house_x, floor, house_z + 3},
+		{house_x, floor, house_z + 10},
 		 {
 			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
 		},
 	)
 
-	game.set_south_west_north_east_wall(
-		{house_x, floor, house_z + 4},
-		 {
-			type = .Side,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
-	)
+	for i in 0 ..< 3 {
+		game.add_object(
+			game.make_object_from_blueprint(
+				"Wood Window",
+				 {
+					f32(house_x),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z + 1 + i32(i)),
+				},
+				.West,
+				.Wall,
+			) or_return,
+		)
+	}
 
 	// door?
-	mask := game.Wall_Mask_Texture.Window_Opening
-	if floor == 0 do mask = .Door_Opening
-	game.set_north_south_wall(
-		{house_x + 1, floor, house_z + 5},
-		 {
-			type = .Extended,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-			mask = mask,
-		},
-	)
 	if floor > 0 {
 		game.add_object(
 			game.make_object_from_blueprint(
 				"Wood Window",
 				 {
-					f32(house_x + 1),
+					f32(house_x),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 5),
 				},
@@ -383,7 +344,7 @@ add_house_floor_walls :: proc(
 			game.make_object_from_blueprint(
 				"Wood Door",
 				 {
-					f32(house_x + 1),
+					f32(house_x),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z + 5),
 				},
@@ -393,56 +354,20 @@ add_house_floor_walls :: proc(
 		)
 	}
 
-	game.set_north_west_south_east_wall(
-		{house_x, floor, house_z + 6},
-		 {
-			type = .Side,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
-	)
-
-	game.set_north_south_wall(
-		{house_x, floor, house_z + 7},
-		 {
-			type = .Extended_Right,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
-	)
-
-	for i in 0 ..< 2 {
-		game.set_north_south_wall(
-			{house_x, floor, house_z + i32(i) + 8},
-			 {
-				type = .Side,
-				textures =  {
-					.Inside = inside_texture,
-					.Outside = outside_texture,
-				},
-				mask = .Window_Opening,
-			},
-		)
-
+	for i in 0 ..< 3 {
 		game.add_object(
 			game.make_object_from_blueprint(
 				"Wood Window",
 				 {
 					f32(house_x),
 					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z + i32(i) + 8),
+					f32(house_z + 7 + i32(i)),
 				},
 				.West,
 				.Wall,
 			) or_return,
 		)
 	}
-
-	game.set_north_south_wall(
-		{house_x, floor, house_z + 10},
-		 {
-			type = .Extended_Left,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
-	)
 
 	// The house's right side wall
 	game.set_east_west_wall(
@@ -453,7 +378,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	for i in 0 ..< 2 {
+	for i in 0 ..< 10 {
 		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z},
 			 {
@@ -462,15 +387,76 @@ add_house_floor_walls :: proc(
 					.Inside = inside_texture,
 					.Outside = outside_texture,
 				},
-				mask = .Window_Opening,
 			},
 		)
+	}
 
+	game.set_east_west_wall(
+		{house_x + 11, floor, house_z},
+		 {
+			type = .Extended_Right,
+			textures = {.Inside = inside_texture, .Outside = outside_texture},
+		},
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 2),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 4),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 7),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	if floor == 0 {
+		game.add_object(
+			game.make_object_from_blueprint(
+				"Wood Door",
+				 {
+					f32(house_x + 9),
+					f32(floor * constants.WALL_HEIGHT),
+					f32(house_z),
+				},
+				.South,
+				.Wall,
+			) or_return,
+		)
+	} else {
 		game.add_object(
 			game.make_object_from_blueprint(
 				"Wood Window",
 				 {
-					f32(house_x + i32(i) + 1),
+					f32(house_x + 9),
 					f32(floor * constants.WALL_HEIGHT),
 					f32(house_z),
 				},
@@ -479,14 +465,6 @@ add_house_floor_walls :: proc(
 			) or_return,
 		)
 	}
-
-	game.set_east_west_wall(
-		{house_x + 3, floor, house_z},
-		 {
-			type = .Extended_Right,
-			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
-	)
 
 	// The house's left side wall
 	game.set_east_west_wall(
@@ -497,7 +475,7 @@ add_house_floor_walls :: proc(
 		},
 	)
 
-	for i in 0 ..< 2 {
+	for i in 0 ..< 10 {
 		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z + 11},
 			 {
@@ -506,51 +484,83 @@ add_house_floor_walls :: proc(
 					.Inside = outside_texture,
 					.Outside = inside_texture,
 				},
-				mask = .Window_Opening,
 			},
 		)
-
-		game.add_object(
-			game.make_object_from_blueprint(
-				"Wood Window",
-				 {
-					f32(house_x + i32(i) + 1),
-					f32(floor * constants.WALL_HEIGHT),
-					f32(house_z + 11),
-				},
-				.South,
-				.Wall,
-			) or_return,
-		)
 	}
+
 	game.set_east_west_wall(
-		{house_x + 3, floor, house_z + 11},
+		{house_x + 11, floor, house_z + 11},
 		 {
 			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 2),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 11),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 4),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 11),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 7),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 11),
+			},
+			.South,
+			.Wall,
+		) or_return,
+	)
+
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 9),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 11),
+			},
+			.South,
+			.Wall,
+		) or_return,
 	)
 
 	// The house's back wall
-	game.set_south_west_north_east_wall(
-		{house_x + 4, floor, house_z},
-		 {
-			type = .Side,
-			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
-	)
 
 	game.set_north_south_wall(
-		{house_x + 5, floor, house_z + 1},
+		{house_x + 12, floor, house_z},
 		 {
 			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
-	for i in 0 ..< 7 {
+	for i in 0 ..< 9 {
 		game.set_north_south_wall(
-			{house_x + 5, floor, house_z + i32(i) + 2},
+			{house_x + 12, floor, house_z + i32(i) + 1},
 			 {
 				type = .Side,
 				textures =  {
@@ -562,22 +572,40 @@ add_house_floor_walls :: proc(
 	}
 
 	game.set_north_south_wall(
-		{house_x + 5, floor, house_z + 9},
+		{house_x + 12, floor, house_z + 10},
 		 {
 			type = .Extended_Left,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
 		},
 	)
 
-	game.set_north_west_south_east_wall(
-		{house_x + 4, floor, house_z + 10},
-		 {
-			type = .Side,
-			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 11),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 2),
+			},
+			.East,
+			.Wall,
+		) or_return,
 	)
 
-    return true
+	game.add_object(
+		game.make_object_from_blueprint(
+			"Wood Window",
+			 {
+				f32(house_x + 11),
+				f32(floor * constants.WALL_HEIGHT),
+				f32(house_z + 8),
+			},
+			.East,
+			.Wall,
+		) or_return,
+	)
+
+	return true
 }
 
 draw :: proc() {

@@ -6,6 +6,7 @@ import "core:log"
 import "core:math/linalg/glsl"
 import "core:os"
 import "core:path/filepath"
+import "core:strings"
 
 Object_Blueprint_JSON :: struct {
 	name:          string,
@@ -57,11 +58,12 @@ make_object_from_blueprint :: proc(
 	light: glsl.vec3 = {1, 1, 1},
 	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
 ) -> (
-	Object,
-	bool,
+	obj: Object,
+	ok: bool,
 ) {
 	for blueprint in game.object_blueprints {
 		if blueprint.name == name {
+            bind_model(blueprint.model) or_return
 			return  {
 					pos = pos,
 					light = light,
