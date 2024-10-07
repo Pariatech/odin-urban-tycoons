@@ -148,7 +148,6 @@ init_roofs :: proc(
 		max_anisotropy,
 	)
 
-	log.info(game.roofs.texture_array)
 	renderer.load_texture_2D_array(ROOF_TEXTURES, 128, 128) or_return
 	set_shader_uniform(&game.roofs.shader, "texture_sampler", i32(0))
 
@@ -275,6 +274,48 @@ add_roof :: proc(
 }
 
 @(private = "file")
+EAVE_VERTICES :: [?]Roof_Vertex {
+	{pos = {-0.5, -0.2, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, -0.2, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+}
+
+@(private = "file")
+EAVE_INDICES :: [?]Roof_Index{0, 1, 2, 2, 1, 3}
+
+@(private = "file")
+draw_roof_eave :: proc(
+	pos: glsl.vec3,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+	width: f32,
+	face_light: int,
+) {
+	index_offset := u32(len(vertices))
+	eave_vertices := EAVE_VERTICES
+	eave_indices := EAVE_INDICES
+
+	for &vertex in eave_vertices {
+		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
+		vertex.pos = (pos4 * rotation).xyz
+		vertex.pos.x *= size.x
+		vertex.pos.z *= size.y
+		vertex.texcoords.x *= width
+		vertex.pos += pos
+		vertex.color = face_lights[face_light]
+		append(vertices, vertex)
+	}
+
+	for index in eave_indices {
+		append(indices, index + index_offset)
+	}
+}
+
+@(private = "file")
 draw_roof :: proc(
 	ctx: ^Roofs_Context,
 	id: Roof_Id,
@@ -369,27 +410,30 @@ draw_roof :: proc(
 }
 
 @(private = "file")
-ROOF_TEXTURES :: [?]cstring{"resources/textures/roofs/RoofingTiles002.png"}
+ROOF_TEXTURES :: [?]cstring {
+	"resources/textures/roofs/Eave.png",
+	"resources/textures/roofs/RoofingTiles002.png",
+}
 
 @(private = "file")
 HALF_PYRAMID_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
 HALF_PYRAMID_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
 HALF_PYRAMID_ROOF_WEST_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {0.5, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, 0}, texcoords = {0.5, 0, 1}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
@@ -413,7 +457,7 @@ draw_half_pyramid_roof_face :: proc(
 	roof_indices: []Roof_Index,
 	height: f32,
 	width: f32,
-    slope: f32,
+	slope: f32,
 	face_light: int,
 ) {
 	index_offset := u32(len(vertices))
@@ -434,6 +478,17 @@ draw_half_pyramid_roof_face :: proc(
 	for index in roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		width,
+		face_light,
+	)
 }
 
 @(private = "file")
@@ -470,7 +525,7 @@ draw_half_pyramid_roof :: proc(
 		half_pyramid_roof_south_face_indices[:],
 		height,
 		min(size.x, size.y),
-        roof.slope,
+		roof.slope,
 		0,
 	)
 
@@ -485,7 +540,7 @@ draw_half_pyramid_roof :: proc(
 		half_pyramid_roof_west_face_indices[:],
 		height,
 		max(size.x, size.y),
-        roof.slope,
+		roof.slope,
 		1,
 	)
 
@@ -500,32 +555,32 @@ draw_half_pyramid_roof :: proc(
 		half_pyramid_roof_north_face_indices[:],
 		height,
 		min(size.x, size.y),
-        roof.slope,
+		roof.slope,
 		2,
 	)
 }
 
 @(private = "file")
 HALF_HIP_SIDE_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
 HALF_HIP_SIDE_ROOF_WEST_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0}, texcoords = {0.5, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {2, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.33}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0}, texcoords = {0.5, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {2, 0, 1}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
 HALF_HIP_SIDE_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
+	{pos = {0.5, 1, -0.5 + 0.66}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
@@ -593,6 +648,17 @@ draw_half_hip_side_roof_south_face :: proc(
 	for index in roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation * glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI),
+		face_lights,
+		min_size,
+		0,
+	)
 }
 
 @(private = "file")
@@ -632,6 +698,17 @@ draw_half_hip_side_roof_north_face :: proc(
 	for index in roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation * glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI),
+		face_lights,
+		min_size,
+		2,
+	)
 }
 
 @(private = "file")
@@ -659,13 +736,14 @@ draw_half_hip_side_roof_west_face :: proc(
 	index_offset := u32(len(vertices))
 
 	height := min(size.x, size.y)
+	width := max(size.x, size.y)
 	for &vertex in roof_vertices {
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * rotation).xyz
 		vertex.pos.y *= height * slope
 		vertex.pos.x *= size.x
 		vertex.pos.z *= size.y
-		vertex.texcoords.x *= max(size.x, size.y)
+		vertex.texcoords.x *= width
 		vertex.texcoords.y *= height
 		vertex.pos += pos
 		vertex.color = face_lights[i]
@@ -675,6 +753,17 @@ draw_half_hip_side_roof_west_face :: proc(
 	for index in roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		width,
+		i,
+	)
 }
 
 @(private = "file")
@@ -725,25 +814,25 @@ draw_half_hip_side_roof :: proc(
 
 @(private = "file")
 HALF_HIP_END_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {0, 1, 0}, texcoords = {0.5, 0, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
+	{pos = {0, 1, 0}, texcoords = {0.5, 0, 1}, color = {1, 1, 1}},
+	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
 }
 
 @(private = "file")
 HALF_HIP_END_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 0}, color = {0.6, 0.6, 0.6}},
-	{pos = {0, 1, 0}, texcoords = {0.5, 0, 0}, color = {0.6, 0.6, 0.6}},
-	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {0.6, 0.6, 0.6}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 0}, color = {0.6, 0.6, 0.6}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 1}, color = {0.6, 0.6, 0.6}},
+	{pos = {0, 1, 0}, texcoords = {0.5, 0, 1}, color = {0.6, 0.6, 0.6}},
+	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {0.6, 0.6, 0.6}},
+	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {0.6, 0.6, 0.6}},
 }
 
 @(private = "file")
 HALF_HIP_END_ROOF_WEST_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 0}, color = {0.8, 0.8, 0.8}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 0}, color = {0.8, 0.8, 0.8}},
-	{pos = {0, 1, 0}, texcoords = {0.5, 0, 0}, color = {0.8, 0.8, 0.8}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {0.8, 0.8, 0.8}},
+	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {0.8, 0.8, 0.8}},
+	{pos = {0, 1, 0}, texcoords = {0.5, 0, 1}, color = {0.8, 0.8, 0.8}},
 }
 
 @(private = "file")
@@ -803,6 +892,8 @@ draw_half_hip_end_roof :: proc(
 	}
 
 	height := max(size.x, size.y) / 2
+	pos_xy := roof.start + (roof.end - roof.start) / 2
+    pos := glsl.vec3{pos_xy.x, roof.offset, pos_xy.y}
 
 	index_offset := u32(len(vertices))
 	for &vertex in south_face_roof_vertices {
@@ -813,7 +904,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.pos.z *= size.y
 		vertex.texcoords.x *= min_size
 		vertex.texcoords.y *= height
-		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.pos += pos
 		vertex.color = face_lights[0]
 		append(vertices, vertex)
 	}
@@ -821,6 +912,17 @@ draw_half_hip_end_roof :: proc(
 	for index in south_face_roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation * glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI),
+		face_lights,
+		min_size,
+		0,
+	)
 
 	index_offset = u32(len(vertices))
 	for &vertex in north_face_roof_vertices {
@@ -831,7 +933,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.pos.z *= size.y
 		vertex.texcoords.x *= min_size
 		vertex.texcoords.y *= height
-		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.pos += pos
 		vertex.color = face_lights[2]
 		append(vertices, vertex)
 	}
@@ -839,6 +941,17 @@ draw_half_hip_end_roof :: proc(
 	for index in north_face_roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation * glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI),
+		face_lights,
+		min_size,
+		2,
+	)
 
 	index_offset = u32(len(vertices))
 	for &vertex in west_face_roof_vertices {
@@ -849,7 +962,7 @@ draw_half_hip_end_roof :: proc(
 		vertex.pos.z *= size.y
 		vertex.texcoords.x *= max_size
 		vertex.texcoords.y *= height
-		vertex.pos.xz += roof.start + (roof.end - roof.start) / 2
+		vertex.pos += pos
 		vertex.color = face_lights[1]
 		append(vertices, vertex)
 	}
@@ -857,6 +970,17 @@ draw_half_hip_end_roof :: proc(
 	for index in west_face_roof_indices {
 		append(indices, index + index_offset)
 	}
+
+	draw_roof_eave(
+		pos,
+		vertices,
+		indices,
+		size,
+		rotation,
+		face_lights,
+		max_size,
+		1,
+	)
 }
 
 @(private = "file")
@@ -940,7 +1064,7 @@ draw_pyramid_hip_roof :: proc(
 			half_pyramid_roof_west_face_indices[:],
 			height,
 			size.x,
-            roof.slope,
+			roof.slope,
 			i,
 		)
 	}
@@ -987,7 +1111,7 @@ draw_trapezoid_hip_roof :: proc(
 			half_pyramid_roof_west_face_indices[:],
 			height,
 			min_size,
-            roof.slope,
+			roof.slope,
 			(i * 2) % 4,
 		)
 	}
@@ -1015,6 +1139,17 @@ draw_trapezoid_hip_roof :: proc(
 			face_lights,
 			face_ratio,
 			roof.slope,
+			(i * 2 + 1) % 4,
+		)
+
+		draw_roof_eave(
+			{face_pos.x, roof.offset, face_pos.y},
+			vertices,
+			indices,
+			face_size,
+			face_rotation,
+			face_lights,
+			max(face_size.x, face_size.y),
 			(i * 2 + 1) % 4,
 		)
 	}
