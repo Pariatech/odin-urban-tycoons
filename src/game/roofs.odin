@@ -69,6 +69,12 @@ Roofs_Context :: struct {
 	texture_array: u32,
 }
 
+ROOF_TEXTURES :: [?]cstring {
+	"resources/textures/roofs/Eave.png",
+	"resources/textures/roofs/RoofingTiles002.png",
+	"resources/textures/roofs/Dark Capping.png",
+}
+
 ROOF_SHADER :: Shader {
 	vertex   = "resources/shaders/roof.vert",
 	fragment = "resources/shaders/roof.frag",
@@ -368,113 +374,6 @@ draw_roof :: proc(
 }
 
 @(private = "file")
-ROOF_TEXTURES :: [?]cstring {
-	"resources/textures/roofs/Eave.png",
-	"resources/textures/roofs/RoofingTiles002.png",
-	"resources/textures/roofs/Dark Capping.png",
-}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_SOUTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
-}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_NORTH_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, 0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {1, 0, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
-}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_WEST_FACE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {0.5, 0, 1}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
-}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_WEST_FACE_CAPPING_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {0.5, 0, 1}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, -0.5}, texcoords = {0, 1, 1}, color = {1, 1, 1}},
-	{pos = {0.5, 1, 0}, texcoords = {0.5, 0, 1}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, 0.5}, texcoords = {1, 1, 1}, color = {1, 1, 1}},
-}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_SOUTH_FACE_INDICES :: [?]Roof_Index{0, 1, 2}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_NORTH_FACE_INDICES :: [?]Roof_Index{0, 1, 2}
-
-@(private = "file")
-HALF_PYRAMID_ROOF_WEST_FACE_INDICES :: [?]Roof_Index{0, 1, 2}
-
-@(private = "file")
-draw_half_pyramid_roof_face :: proc(
-	pos: glsl.vec3,
-	vertices: ^[dynamic]Roof_Vertex,
-	indices: ^[dynamic]Roof_Index,
-	size: glsl.vec3,
-	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
-	roof_vertices: []Roof_Vertex,
-	roof_indices: []Roof_Index,
-	width: f32,
-	slope: f32,
-	face_light: int,
-) {
-	index_offset := u32(len(vertices))
-	capping_scale: glsl.vec3
-	capping_translate: glsl.vec3
-	capping_scale.y = 0.2 * slope
-	if size.x - size.y > 0.01 {
-		// log.info(size)
-		capping_scale.x = 0.2 * 2
-		capping_scale.z = 0.2
-		// capping_translate.y = 0.2
-		capping_translate.y = 0.2 / 2
-		// capping_translate.x = 0.2 / 2
-	} else {
-		capping_scale.x = 0.2
-		capping_scale.z = 0.2 * 2
-		capping_translate.x = 0.2 / 2
-	}
-
-	for &vertex in roof_vertices {
-		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
-		vertex.pos = (pos4 * rotation).xyz
-		vertex.pos *= size - capping_scale
-		// vertex.pos.x *= size.x
-		// vertex.pos.z *= size.y
-		vertex.texcoords.x *= width
-		vertex.texcoords.y *= size.y / slope
-		vertex.pos += pos - capping_translate
-		vertex.color = face_lights[face_light]
-		append(vertices, vertex)
-	}
-
-	for index in roof_indices {
-		append(indices, index + index_offset)
-	}
-
-	// draw_roof_eave(
-	// 	pos,
-	// 	vertices,
-	// 	indices,
-	// 	size.xz,
-	// 	rotation,
-	// 	face_lights,
-	// 	width,
-	// 	face_light,
-	// )
-}
-
-@(private = "file")
 draw_half_pyramid_roof :: proc(
 	roof: ^Roof,
 	vertices: ^[dynamic]Roof_Vertex,
@@ -483,61 +382,61 @@ draw_half_pyramid_roof :: proc(
 	rotation: glsl.mat4,
 	face_lights: [4]glsl.vec3,
 ) {
-	half_pyramid_roof_south_face_vertices :=
-		HALF_PYRAMID_ROOF_SOUTH_FACE_VERTICES
-	half_pyramid_roof_north_face_vertices :=
-		HALF_PYRAMID_ROOF_NORTH_FACE_VERTICES
-	half_pyramid_roof_south_face_indices :=
-		HALF_PYRAMID_ROOF_SOUTH_FACE_INDICES
-	half_pyramid_roof_north_face_indices :=
-		HALF_PYRAMID_ROOF_NORTH_FACE_INDICES
-	half_pyramid_roof_west_face_vertices :=
-		HALF_PYRAMID_ROOF_WEST_FACE_VERTICES
-	half_pyramid_roof_west_face_indices := HALF_PYRAMID_ROOF_WEST_FACE_INDICES
-
-	height := min(size.x, size.y)
-	pos := roof.start + (roof.end - roof.start) / 2
-	draw_half_pyramid_roof_face(
-		{pos.x, roof.offset, pos.y},
-		vertices,
-		indices,
-		{size.x, height * roof.slope, size.y},
-		rotation,
-		face_lights,
-		half_pyramid_roof_south_face_vertices[:],
-		half_pyramid_roof_south_face_indices[:],
-		min(size.x, size.y),
-		roof.slope,
-		0,
-	)
-
-	draw_half_pyramid_roof_face(
-		{pos.x, roof.offset, pos.y},
-		vertices,
-		indices,
-		{size.x, height * roof.slope, size.y},
-		rotation,
-		face_lights,
-		half_pyramid_roof_west_face_vertices[:],
-		half_pyramid_roof_west_face_indices[:],
-		max(size.x, size.y),
-		roof.slope,
-		1,
-	)
-
-	draw_half_pyramid_roof_face(
-		{pos.x, roof.offset, pos.y},
-		vertices,
-		indices,
-		{size.x, height * roof.slope, size.y},
-		rotation,
-		face_lights,
-		half_pyramid_roof_north_face_vertices[:],
-		half_pyramid_roof_north_face_indices[:],
-		min(size.x, size.y),
-		roof.slope,
-		2,
-	)
+	// half_pyramid_roof_south_face_vertices :=
+	// 	HALF_PYRAMID_ROOF_SOUTH_FACE_VERTICES
+	// half_pyramid_roof_north_face_vertices :=
+	// 	HALF_PYRAMID_ROOF_NORTH_FACE_VERTICES
+	// half_pyramid_roof_south_face_indices :=
+	// 	HALF_PYRAMID_ROOF_SOUTH_FACE_INDICES
+	// half_pyramid_roof_north_face_indices :=
+	// 	HALF_PYRAMID_ROOF_NORTH_FACE_INDICES
+	// half_pyramid_roof_west_face_vertices :=
+	// 	HALF_PYRAMID_ROOF_WEST_FACE_VERTICES
+	// half_pyramid_roof_west_face_indices := HALF_PYRAMID_ROOF_WEST_FACE_INDICES
+	//
+	// height := min(size.x, size.y)
+	// pos := roof.start + (roof.end - roof.start) / 2
+	// draw_half_pyramid_roof_face(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	vertices,
+	// 	indices,
+	// 	{size.x, height * roof.slope, size.y},
+	// 	rotation,
+	// 	face_lights,
+	// 	half_pyramid_roof_south_face_vertices[:],
+	// 	half_pyramid_roof_south_face_indices[:],
+	// 	min(size.x, size.y),
+	// 	roof.slope,
+	// 	0,
+	// )
+	//
+	// draw_half_pyramid_roof_face(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	vertices,
+	// 	indices,
+	// 	{size.x, height * roof.slope, size.y},
+	// 	rotation,
+	// 	face_lights,
+	// 	half_pyramid_roof_west_face_vertices[:],
+	// 	half_pyramid_roof_west_face_indices[:],
+	// 	max(size.x, size.y),
+	// 	roof.slope,
+	// 	1,
+	// )
+	//
+	// draw_half_pyramid_roof_face(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	vertices,
+	// 	indices,
+	// 	{size.x, height * roof.slope, size.y},
+	// 	rotation,
+	// 	face_lights,
+	// 	half_pyramid_roof_north_face_vertices[:],
+	// 	half_pyramid_roof_north_face_indices[:],
+	// 	min(size.x, size.y),
+	// 	roof.slope,
+	// 	2,
+	// )
 }
 
 @(private = "file")
@@ -751,45 +650,67 @@ draw_half_hip_side_roof :: proc(
 	roof: ^Roof,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
-	size: glsl.vec2,
+	size: glsl.vec3,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	light: glsl.vec3,
 ) {
-	ratio := min(size.x, size.y) / max(size.x, size.y)
-	center := roof.start + (roof.end - roof.start) / 2
-
-	draw_half_hip_side_roof_south_face(
-		{center.x, roof.offset, center.y},
-		vertices,
-		indices,
-		size,
-		rotation,
-		face_lights,
-		ratio,
-		roof.slope,
-	)
-
-	draw_half_hip_side_roof_north_face(
-		{center.x, roof.offset, center.y},
-		vertices,
-		indices,
-		size,
-		rotation,
-		face_lights,
-		ratio,
-		roof.slope,
-	)
-
-	draw_half_hip_side_roof_west_face(
-		{center.x, roof.offset, center.y},
-		vertices,
-		indices,
-		size,
-		rotation,
-		face_lights,
-		ratio,
-		roof.slope,
-	)
+	// min_size := min(size.x, size.z)
+	// max_size := min(size.x, size.z)
+	// face_size := glsl.vec2{min_size, min_size}
+	//
+	// pos_offset := glsl.vec4{-(max_size - min_size) / 2, 0, 0, 1}
+	// pos_offset *= rotation
+	// pos := center + pos_offset.xz
+	// draw_roof_triangle(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	{face_size.x, height, face_size.y},
+	// 	false,
+	// 	side_rotation,
+	// 	1,
+	// 	face_lights[(i * 2 + 1) % 4],
+	// 	roof.slope,
+	// 	vertices,
+	// 	indices,
+	// )
+	//
+	// pos_offset = glsl.vec4{(max_size - min_size) / 2, 0, 0, 1}
+	// pos_offset *= side_rotation
+	// pos = center + pos_offset.xz
+	// draw_roof_triangle(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	{face_size.x, height, face_size.y},
+	// 	true,
+	// 	side_rotation,
+	// 	1,
+	// 	face_lights[(i * 2 + 1) % 4],
+	// 	roof.slope,
+	// 	vertices,
+	// 	indices,
+	// )
+	//
+	// pos = center
+	// face_size = glsl.vec2{max_size - min_size, min_size / 2}
+	// draw_roof_rectangle(
+	// 	{pos.x, roof.offset, pos.y},
+	// 	{face_size.x, height, face_size.y},
+	// 	true,
+	// 	side_rotation,
+	// 	1,
+	// 	face_lights[(i * 2 + 1) % 4],
+	// 	roof.slope,
+	// 	vertices,
+	// 	indices,
+	// )
+	//
+	// draw_roof_eave(
+	// 	{center.x, roof.offset, center.y},
+	// 	{max_size, min_size},
+	// 	side_rotation,
+	// 	face_lights[(i * 2 + 1) % 4],
+	// 	vertices,
+	// 	indices,
+	// )
+	//
 }
 
 @(private = "file")
@@ -974,14 +895,14 @@ draw_half_hip_roof :: proc(
 ) {
 	ratio := max(size.x, size.y) / min(size.x, size.y)
 	if ratio > 2 {
-		draw_half_hip_side_roof(
-			roof,
-			vertices,
-			indices,
-			size,
-			rotation,
-			face_lights,
-		)
+		// draw_half_hip_side_roof(
+		// 	roof,
+		// 	vertices,
+		// 	indices,
+		// 	size,
+		// 	rotation,
+		// 	face_lights,
+		// )
 	} else if ratio == 2 {
 		draw_half_pyramid_roof(
 			roof,
@@ -1013,39 +934,33 @@ draw_pyramid_hip_roof :: proc(
 	face_lights: [4]glsl.vec3,
 ) {
 	height := size.x / 2
+	center := roof.start + (roof.end - roof.start) / 2
 	for i in 0 ..< 4 {
-		half_pyramid_roof_west_face_vertices :=
-			HALF_PYRAMID_ROOF_WEST_FACE_VERTICES
-		half_pyramid_roof_west_face_indices :=
-			HALF_PYRAMID_ROOF_WEST_FACE_INDICES
 		side_rotation :=
-			rotation * glsl.mat4Rotate({0, 1, 0}, f32(i - 1) * (-math.PI / 2))
+			rotation * glsl.mat4Rotate({0, 1, 0}, f32(i) * (-math.PI / 2))
+		pos := center
+
 		face_size := size
-
-		if i % 2 == 0 {
-			face_size.y /= 2
-		} else {
-			face_size.x /= 2
-		}
-
-		pos := roof.start + (roof.end - roof.start) / 2
-		pos_offset := glsl.vec4{-size.x / 4, 0, 0, 1}
-		pos_offset *= side_rotation
-		pos += pos_offset.xz
-
-		draw_half_pyramid_roof_face(
+		draw_roof_pyramid_face(
 			{pos.x, roof.offset, pos.y},
-			vertices,
-			indices,
 			{face_size.x, height, face_size.y},
 			side_rotation,
-			face_lights,
-			half_pyramid_roof_west_face_vertices[:],
-			half_pyramid_roof_west_face_indices[:],
-			size.x,
+			1,
+			face_lights[i * 2 % 4],
 			roof.slope,
-			i,
+			vertices,
+			indices,
 		)
+
+		draw_roof_eave(
+			{pos.x, roof.offset, pos.y},
+			size,
+			side_rotation,
+			face_lights[i * 2 % 4],
+			vertices,
+			indices,
+		)
+
 	}
 }
 
@@ -1057,7 +972,6 @@ draw_trapezoid_hip_roof :: proc(
 	size: glsl.vec2,
 	rotation: glsl.mat4,
 	face_lights: [4]glsl.vec3,
-	ratio: f32,
 ) {
 	min_size := min(size.y, size.x)
 	max_size := max(size.y, size.x)
@@ -1071,23 +985,10 @@ draw_trapezoid_hip_roof :: proc(
 		pos_offset *= side_rotation
 		pos := center + pos_offset.xz
 
-		size_scale := glsl.abs(glsl.vec4{0.5, 0, 0.5, 1} * rotation).xz
-		face_size := glsl.vec2{min_size, min_size} * size_scale
-		draw_roof_triangle(
+		face_size := glsl.vec2{min_size, min_size} * 0.5
+		draw_roof_pyramid_face(
 			{pos.x, roof.offset, pos.y},
 			{face_size.x, height, face_size.y},
-			false,
-			side_rotation,
-			1,
-			face_lights[i * 2 % 4],
-			roof.slope,
-			vertices,
-			indices,
-		)
-		draw_roof_triangle(
-			{pos.x, roof.offset, pos.y},
-			{face_size.x, height, face_size.y},
-			true,
 			side_rotation,
 			1,
 			face_lights[i * 2 % 4],
@@ -1111,52 +1012,16 @@ draw_trapezoid_hip_roof :: proc(
 			rotation *
 			glsl.mat4Rotate({0, 1, 0}, f32(i * 2 + 1) * (-math.PI / 2))
 
-		size_scale := glsl.abs(glsl.vec4{0.5, 0, 0.5, 1} * rotation).xz
-		face_size := glsl.vec2{min_size, min_size} * size_scale
-
-		pos_offset := glsl.vec4{-(max_size - min_size) / 2, 0, 0, 1}
-		pos_offset *= side_rotation
-		pos := center + pos_offset.xz
-		draw_roof_triangle(
-			{pos.x, roof.offset, pos.y},
-			{face_size.x, height, face_size.y},
-			false,
+        draw_roof_hip_face(
+        	{center.x, roof.offset, center.y},
+			{max_size, height, min_size},
 			side_rotation,
 			1,
 			face_lights[(i * 2 + 1) % 4],
 			roof.slope,
 			vertices,
 			indices,
-		)
-
-		pos_offset = glsl.vec4{(max_size - min_size) / 2, 0, 0, 1}
-		pos_offset *= side_rotation
-		pos = center + pos_offset.xz
-		draw_roof_triangle(
-			{pos.x, roof.offset, pos.y},
-			{face_size.x, height, face_size.y},
-			true,
-			side_rotation,
-			1,
-			face_lights[(i * 2 + 1) % 4],
-			roof.slope,
-			vertices,
-			indices,
-		)
-
-		pos = center
-		face_size = glsl.vec2{max_size - min_size, min_size / 2}
-		draw_roof_rectangle(
-			{pos.x, roof.offset, pos.y},
-			{face_size.x, height, face_size.y},
-			true,
-			side_rotation,
-			1,
-			face_lights[(i * 2 + 1) % 4],
-			roof.slope,
-			vertices,
-			indices,
-		)
+)
 
 		draw_roof_eave(
 			{center.x, roof.offset, center.y},
@@ -1196,7 +1061,6 @@ draw_hip_roof :: proc(
 			size,
 			rotation,
 			face_lights,
-			ratio,
 		)
 	}
 }
@@ -1257,7 +1121,6 @@ draw_roof_triangle :: proc(
 	index_offset = u32(len(vertices))
 	capping_vertices[0].texcoords.xy = {0, 1}
 	capping_vertices[1].texcoords.xy = {1, 1}
-	log.info(size)
 	for vertex in capping_vertices {
 		vertex := vertex
 		vertex.pos *= size
@@ -1419,4 +1282,99 @@ draw_roof_eave :: proc(
 	for index in eave_indices {
 		append(indices, index + index_offset)
 	}
+}
+
+@(private = "file")
+draw_roof_pyramid_face :: proc(
+	pos: glsl.vec3,
+	size: glsl.vec3,
+	rotation: glsl.mat4,
+	texture: f32,
+	light: glsl.vec3,
+	slope: f32,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+) {
+	draw_roof_triangle(
+		pos,
+		size,
+		false,
+		rotation,
+		texture,
+		light,
+		slope,
+		vertices,
+		indices,
+	)
+	draw_roof_triangle(
+		pos,
+		size,
+		true,
+		rotation,
+		texture,
+		light,
+		slope,
+		vertices,
+		indices,
+	)
+}
+
+@(private = "file")
+draw_roof_hip_face :: proc(
+	pos: glsl.vec3,
+	size: glsl.vec3,
+	rotation: glsl.mat4,
+	texture: f32,
+	light: glsl.vec3,
+	slope: f32,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+) {
+	min_size := min(size.z, size.x)
+	max_size := max(size.z, size.x)
+
+	face_size := glsl.vec2{min_size, min_size} * 0.5
+
+	pos_offset := glsl.vec4{-(max_size - min_size) / 2, 0, 0, 1}
+	pos_offset *= rotation
+	face_pos := pos + pos_offset.xyz
+	draw_roof_triangle(
+		face_pos,
+		{face_size.x, size.y, face_size.y},
+		false,
+		rotation,
+		1,
+		light,
+		slope,
+		vertices,
+		indices,
+	)
+
+	pos_offset = glsl.vec4{(max_size - min_size) / 2, 0, 0, 1}
+	pos_offset *= rotation
+	face_pos = pos + pos_offset.xyz
+	draw_roof_triangle(
+		face_pos,
+		{face_size.x, size.y, face_size.y},
+		true,
+		rotation,
+		1,
+		light,
+		slope,
+		vertices,
+		indices,
+	)
+
+	face_size = glsl.vec2{max_size - min_size, min_size / 2}
+	draw_roof_rectangle(
+		pos,
+		{face_size.x, size.y, face_size.y},
+		true,
+		rotation,
+		1,
+		light,
+		slope,
+		vertices,
+		indices,
+	)
 }
