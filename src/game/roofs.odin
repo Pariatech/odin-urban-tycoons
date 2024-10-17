@@ -310,7 +310,27 @@ draw_roof :: proc(
 		}
 	} else if roof.start.x <= roof.end.x {
 		if size.y >= size.x {
-			rotation = glsl.mat4Rotate({0, 1, 0}, 1 * math.PI)
+			// rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+			rotation = glsl.identity(glsl.mat4)
+			// face_lights = [4]glsl.vec3 {
+			// 	{0.6, 0.6, 0.6},
+			// 	{0.4, 0.4, 0.4},
+			// 	{1, 1, 1},
+			// 	{0.8, 0.8, 0.8},
+			// }
+		} else {
+			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+			face_lights = [4]glsl.vec3 {
+				{0.4, 0.4, 0.4},
+				{1, 1, 1},
+				{0.8, 0.8, 0.8},
+				{0.6, 0.6, 0.6},
+			}
+		}
+	} else if roof.start.y <= roof.end.y {
+		if size.y >= size.x {
+			// rotation = glsl.identity(glsl.mat4)
+			rotation = glsl.mat4Rotate({0, 1, 0}, 1.0 * math.PI)
 			face_lights = [4]glsl.vec3 {
 				{0.6, 0.6, 0.6},
 				{0.4, 0.4, 0.4},
@@ -324,18 +344,6 @@ draw_roof :: proc(
 				{1, 1, 1},
 				{0.8, 0.8, 0.8},
 				{0.6, 0.6, 0.6},
-			}
-		}
-	} else if roof.start.y <= roof.end.y {
-		if size.y >= size.x {
-			rotation = glsl.identity(glsl.mat4)
-		} else {
-			rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.8, 0.8, 0.8},
-				{0.6, 0.6, 0.6},
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
 			}
 		}
 	} else {
@@ -385,13 +393,14 @@ draw_half_pyramid_roof :: proc(
     center := roof.start + (roof.end - roof.start) / 2
     min_size := min(size.x, size.y)
     max_size := max(size.x, size.y)
-    pos_offset := glsl.vec4{min_size, 0, min_size, 1} * rotation
-    pos := roof.start + pos_offset.xz
+    pos_offset := glsl.vec4{min_size / 2, 0, 0, 1} * rotation
+    pos := center + pos_offset.xz
+    log.info(center, pos, pos_offset, rotation)
 
     face_rotation := rotation
 	draw_roof_triangle(
 		{pos.x, roof.offset, pos.y},
-		{size.x, min_size, size.y / 2},
+		{min_size, min_size, max_size / 2},
 		false,
 		face_rotation,
 		1,
@@ -413,7 +422,7 @@ draw_half_pyramid_roof :: proc(
     face_rotation = rotation * glsl.mat4Rotate({0, 1, 0}, -1.0 * math.PI)
 	draw_roof_triangle(
 		{pos.x, roof.offset, pos.y},
-		{size.x, min_size, size.y / 2},
+		{min_size, min_size, max_size / 2},
 		true,
 		face_rotation,
 		1,
@@ -435,7 +444,7 @@ draw_half_pyramid_roof :: proc(
     face_rotation = rotation * glsl.mat4Rotate({0, 1, 0}, -0.5 * math.PI)
 	draw_roof_pyramid_face(
 		{pos.x, roof.offset, pos.y},
-		{size.y / 2, min_size, size.x},
+		{max_size / 2, min_size, min_size},
 		face_rotation,
 		1,
 		face_lights[1],
