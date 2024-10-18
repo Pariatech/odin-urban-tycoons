@@ -382,6 +382,14 @@ draw_roof :: proc(
 			face_lights,
 		)
 	case .Half_Gable:
+		draw_half_gable_roof(
+			roof,
+			vertices,
+			indices,
+			size,
+			rotation,
+			face_lights,
+		)
 	case .Hip:
 		draw_hip_roof(roof, vertices, indices, size, rotation, face_lights)
 	}
@@ -593,10 +601,10 @@ draw_half_hip_end_roof :: proc(
 	peak_offset := (max_size - min_size) / 2
 	peak_pos_offset := glsl.vec4{peak_offset, 0, 0, 1} * rotation
 	peak_pos := center + peak_pos_offset.xz
-    edge_size := min_size / 2 - peak_offset
-    edge_offset := min_size / 4 + peak_offset / 2
+	edge_size := min_size / 2 - peak_offset
+	edge_offset := min_size / 4 + peak_offset / 2
 	edge_pos_offset := glsl.vec4{edge_offset, 0, 0, 1} * rotation
-    edge_pos := center + edge_pos_offset.xz
+	edge_pos := center + edge_pos_offset.xz
 
 	face_rotation := rotation
 	draw_roof_triangle(
@@ -611,7 +619,7 @@ draw_half_hip_end_roof :: proc(
 		indices,
 	)
 
-    draw_roof_rectangle(
+	draw_roof_rectangle(
 		{edge_pos.x, roof.offset, edge_pos.y},
 		{edge_size, max_size / 2, max_size / 2},
 		false,
@@ -621,7 +629,7 @@ draw_half_hip_end_roof :: proc(
 		roof.slope,
 		vertices,
 		indices,
-    )
+	)
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
@@ -666,7 +674,7 @@ draw_half_hip_end_roof :: proc(
 		indices,
 	)
 
-    draw_roof_rectangle(
+	draw_roof_rectangle(
 		{edge_pos.x, roof.offset, edge_pos.y},
 		{edge_size, max_size / 2, max_size / 2},
 		false,
@@ -676,7 +684,7 @@ draw_half_hip_end_roof :: proc(
 		roof.slope,
 		vertices,
 		indices,
-    )
+	)
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
@@ -739,7 +747,6 @@ draw_pyramid_hip_roof :: proc(
 ) {
 	height := size.x / 2
 	center := roof.start + (roof.end - roof.start) / 2
-	log.info(center, size)
 	for i in 0 ..< 4 {
 		side_rotation :=
 			rotation * glsl.mat4Rotate({0, 1, 0}, f32(i) * (-math.PI / 2))
@@ -868,6 +875,67 @@ draw_hip_roof :: proc(
 			face_lights,
 		)
 	}
+}
+
+@(private = "file")
+draw_half_gable_roof :: proc(
+	roof: ^Roof,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+) {
+	min_size := min(size.y, size.x)
+	max_size := max(size.y, size.x)
+	height := min(size.x, size.y) / 2
+	center := roof.start + (roof.end - roof.start) / 2
+
+	side_rotation := rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2)
+	pos_offset := glsl.vec4{0, 0, min_size / 2, 1}
+	pos_offset *= side_rotation
+	pos := center + pos_offset.xz
+
+	draw_roof_rectangle(
+		{pos.x, roof.offset, pos.y},
+		{max_size, size.y, min_size},
+		true,
+		side_rotation,
+		1,
+		face_lights[1],
+		roof.slope,
+		vertices,
+		indices,
+	)
+
+	draw_roof_eave(
+		{center.x, roof.offset, center.y},
+		{max_size, min_size},
+		side_rotation,
+		face_lights[1],
+		vertices,
+		indices,
+	)
+
+    draw_roof_gable_eave(
+		{center.x, roof.offset, center.y},
+		{min_size, size.y,  max_size},
+		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
+		face_lights[0],
+        false,
+		vertices,
+		indices,
+    )
+
+    draw_roof_gable_eave(
+		{center.x, roof.offset, center.y},
+		{min_size, size.y,  max_size},
+		side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
+		face_lights[2],
+        true,
+		vertices,
+		indices,
+    )
 }
 
 @(private = "file")
@@ -1085,6 +1153,43 @@ draw_roof_eave :: proc(
 
 	for &vertex in eave_vertices {
 		vertex.pos.xz *= size
+		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
+		vertex.pos = (pos4 * rotation).xyz
+		vertex.texcoords.x *= size.x
+		vertex.pos += pos
+		vertex.color = light
+		append(vertices, vertex)
+	}
+
+	for index in eave_indices {
+		append(indices, index + index_offset)
+	}
+}
+
+@(private = "file")
+draw_roof_gable_eave :: proc(
+	pos: glsl.vec3,
+	size: glsl.vec3,
+	rotation: glsl.mat4,
+	light: glsl.vec3,
+    mirror: bool,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+) {
+	index_offset := u32(len(vertices))
+	eave_vertices := EAVE_VERTICES
+	eave_indices := EAVE_INDICES
+
+    if mirror {
+	    eave_vertices[0].pos.y += size.y
+	    eave_vertices[3].pos.y += size.y
+    } else {
+	    eave_vertices[1].pos.y += size.y
+	    eave_vertices[2].pos.y += size.y
+    }
+
+	for &vertex in eave_vertices {
+		vertex.pos.xz *= size.xz
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * rotation).xyz
 		vertex.texcoords.x *= size.x
