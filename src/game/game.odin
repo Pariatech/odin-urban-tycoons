@@ -109,8 +109,16 @@ init_game :: proc() -> bool {
 	add_roof({type = .Hip, start = {30.5, -0.5}, end = {27.5, 1.5}, offset = 3, slope = 1})
 	add_roof({type = .Hip, start = {30.5, 4.5}, end = {27.5, 2.5}, offset = 3, slope = 1})
 
+
     add_roof({type = .Half_Gable, start = {31.5, -0.5}, end = {34.5, 1.5}, offset = 3, slope = 1})
     add_roof({type = .Half_Gable, start = {31.5, 3.5}, end = {34.5, 1.5}, offset = 3, slope = 1})
+
+    add_roof({type = .Half_Gable, start = {31.5, 4.5}, end = {33.5, 7.5}, offset = 3, slope = 1})
+    add_roof({type = .Half_Gable, start = {35.5, 4.5}, end = {33.5, 7.5}, offset = 3, slope = 1})
+
+
+    add_roof({type = .Gable, start = {36.5, -0.5}, end = {39.5, 3.5}, offset = 3, slope = 1})
+    add_roof({type = .Gable, start = {36.5, 4.5}, end = {40.5, 7.5}, offset = 3, slope = 1})
 
 	// add_roof({type = .Half_Hip, start = {-0.5, -0.5}, end = {1.5, 0.5}, offset = 3, slope = 1.0})
 

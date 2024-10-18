@@ -21,6 +21,7 @@ Roof_Type :: enum {
 	Half_Hip,
 	Half_Gable,
 	Hip,
+	Gable,
 }
 
 Roof_Orientation :: enum {}
@@ -392,6 +393,8 @@ draw_roof :: proc(
 		)
 	case .Hip:
 		draw_hip_roof(roof, vertices, indices, size, rotation, face_lights)
+	case .Gable:
+		draw_gable_roof(roof, vertices, indices, size, rotation, face_lights)
 	}
 }
 
@@ -898,7 +901,7 @@ draw_half_gable_roof :: proc(
 
 	draw_roof_rectangle(
 		{pos.x, roof.offset, pos.y},
-		{max_size, size.y, min_size},
+		{max_size, min_size, min_size},
 		true,
 		side_rotation,
 		1,
@@ -917,25 +920,87 @@ draw_half_gable_roof :: proc(
 		indices,
 	)
 
-    draw_roof_gable_eave(
+	draw_roof_gable_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, size.y,  max_size},
+		{min_size, min_size, max_size},
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[0],
-        false,
+		false,
 		vertices,
 		indices,
-    )
+	)
 
-    draw_roof_gable_eave(
+	draw_roof_gable_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, size.y,  max_size},
+		{min_size, min_size, max_size},
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
 		face_lights[2],
-        true,
+		true,
 		vertices,
 		indices,
-    )
+	)
+}
+
+@(private = "file")
+draw_gable_roof :: proc(
+	roof: ^Roof,
+	vertices: ^[dynamic]Roof_Vertex,
+	indices: ^[dynamic]Roof_Index,
+	size: glsl.vec2,
+	rotation: glsl.mat4,
+	face_lights: [4]glsl.vec3,
+) {
+	min_size := min(size.y, size.x)
+	max_size := max(size.y, size.x)
+	height := min(size.x, size.y) / 2
+	center := roof.start + (roof.end - roof.start) / 2
+
+	for i in 0 ..< 2 {
+		side_rotation := rotation * glsl.mat4Rotate({0, 1, 0}, f32((i * 2) + 1) * -math.PI / 2)
+
+		draw_roof_rectangle(
+			{center.x, roof.offset, center.y},
+			{max_size, min_size / 2, min_size / 2},
+			true,
+			side_rotation,
+			1,
+			face_lights[(i * 2 + 1) % 4],
+			roof.slope,
+			vertices,
+			indices,
+		)
+
+		draw_roof_eave(
+			{center.x, roof.offset, center.y},
+			{max_size, min_size},
+			side_rotation,
+			face_lights[(i * 2 + 1) % 4],
+			vertices,
+			indices,
+		)
+
+	    pos_offset := glsl.vec4{0, 0, -min_size / 4, 1} * side_rotation
+		pos := center + pos_offset.xz
+		draw_roof_gable_eave(
+			{pos.x, roof.offset, pos.y},
+			{min_size / 2, min_size / 2, max_size},
+			side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
+			face_lights[i * 2],
+			false,
+			vertices,
+			indices,
+		)
+
+		draw_roof_gable_eave(
+			{pos.x, roof.offset, pos.y},
+			{min_size / 2, min_size / 2, max_size},
+			side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
+			face_lights[(i * 2 + 2) % 4],
+			true,
+			vertices,
+			indices,
+		)
+	}
 }
 
 @(private = "file")
@@ -1172,7 +1237,7 @@ draw_roof_gable_eave :: proc(
 	size: glsl.vec3,
 	rotation: glsl.mat4,
 	light: glsl.vec3,
-    mirror: bool,
+	mirror: bool,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
 ) {
@@ -1180,13 +1245,13 @@ draw_roof_gable_eave :: proc(
 	eave_vertices := EAVE_VERTICES
 	eave_indices := EAVE_INDICES
 
-    if mirror {
-	    eave_vertices[0].pos.y += size.y
-	    eave_vertices[3].pos.y += size.y
-    } else {
-	    eave_vertices[1].pos.y += size.y
-	    eave_vertices[2].pos.y += size.y
-    }
+	if mirror {
+		eave_vertices[0].pos.y += size.y
+		eave_vertices[3].pos.y += size.y
+	} else {
+		eave_vertices[1].pos.y += size.y
+		eave_vertices[2].pos.y += size.y
+	}
 
 	for &vertex in eave_vertices {
 		vertex.pos.xz *= size.xz
