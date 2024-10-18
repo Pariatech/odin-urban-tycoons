@@ -299,6 +299,12 @@ draw_roof :: proc(
 	if roof.start.x <= roof.end.x && roof.start.y <= roof.end.y {
 		if size.y >= size.x {
 			rotation = glsl.identity(glsl.mat4)
+			// face_lights = [4]glsl.vec3 {
+			// 	{0.4, 0.4, 0.4},
+			// 	{1, 1, 1},
+			// 	{0.8, 0.8, 0.8},
+			// 	{0.6, 0.6, 0.6},
+			// }
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
 			face_lights = [4]glsl.vec3 {
@@ -745,7 +751,7 @@ draw_pyramid_hip_roof :: proc(
 			{face_size.x, height, face_size.y},
 			side_rotation,
 			1,
-			face_lights[i * 2 % 4],
+			face_lights[i % 4],
 			roof.slope,
 			vertices,
 			indices,
@@ -755,7 +761,7 @@ draw_pyramid_hip_roof :: proc(
 			{pos.x, roof.offset, pos.y},
 			size,
 			side_rotation,
-			face_lights[i * 2 % 4],
+			face_lights[i % 4],
 			vertices,
 			indices,
 		)
