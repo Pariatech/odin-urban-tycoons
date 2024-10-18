@@ -61,6 +61,13 @@ init_game :: proc() -> bool {
 
 	add_roof({type = .Half_Hip, start = {-0.5, 4.5}, end = {0.5, 2.5}, offset = 3, slope = 1.0})
 	add_roof({type = .Half_Hip, start = {1.5, 4.5}, end = {0.5, 2.5}, offset = 3, slope = 1.0})
+
+	add_roof({type = .Half_Hip, start = {-0.5, 5.5}, end = {1.5, 6.5}, offset = 3, slope = 1.0})
+	add_roof({type = .Half_Hip, start = {-0.5, 7.5}, end = {1.5, 6.5}, offset = 3, slope = 1.0})
+
+	add_roof({type = .Half_Hip, start = {1.5, 8.5}, end = {-0.5, 9.5}, offset = 3, slope = 1.0})
+	add_roof({type = .Half_Hip, start = {1.5, 10.5}, end = {-0.5, 9.5}, offset = 3, slope = 1.0})
+
 	// add_roof({type = .Half_Hip, start = {-0.5, -0.5}, end = {1.5, 0.5}, offset = 3, slope = 1.0})
 
 	// add_roof({type = .Half_Hip, start = {9.5, 12}, end = {11, 22}, offset = 3, slope = 1})

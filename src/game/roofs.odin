@@ -319,12 +319,12 @@ draw_roof :: proc(
 			// 	{0.8, 0.8, 0.8},
 			// }
 		} else {
-			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
+			rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI)
 			face_lights = [4]glsl.vec3 {
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
 				{0.8, 0.8, 0.8},
 				{0.6, 0.6, 0.6},
+				{0.4, 0.4, 0.4},
+				{1, 1, 1},
 			}
 		}
 	} else if roof.start.y <= roof.end.y {
