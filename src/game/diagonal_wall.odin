@@ -131,6 +131,7 @@ draw_diagonal_wall :: proc(
 			texture,
 			wall.mask,
 			light,
+            wall.height,
 			vertex_buffer,
 			index_buffer,
 		)
@@ -148,6 +149,7 @@ draw_diagonal_wall :: proc(
 		.Wall_Top,
 		.Full_Mask,
 		light,
+        wall.height,
 		vertex_buffer,
 		index_buffer,
 	)

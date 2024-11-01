@@ -71,11 +71,24 @@ Wall_Side :: enum {
 	Outside,
 }
 
+Wall_Roof_Slope_Type :: enum {
+	Left_Side,
+	Right_Side,
+	Peak,
+}
+
+Wall_Roof_Slope :: struct {
+	height: f32,
+	type:   Wall_Roof_Slope_Type,
+}
+
 Wall :: struct {
-	type:     Wall_Type,
-	textures: [Wall_Side]Wall_Texture,
-	mask:     Wall_Mask_Texture,
-	state:    State,
+	type:       Wall_Type,
+	textures:   [Wall_Side]Wall_Texture,
+	mask:       Wall_Mask_Texture,
+	state:      State,
+	height:     f32,
+	roof_slope: Maybe(Wall_Roof_Slope),
 }
 
 
@@ -156,85 +169,129 @@ WALL_MASK_PATHS :: [Wall_Mask_Texture]cstring {
 	.Double_Window  = "resources/textures/wall-masks/Double_Window_Mask.png",
 }
 
+@(private = "file")
+WALL_ROOF_SLOPE_TYPE_MODEL_NAME_MAP ::
+	[Wall_Roof_Slope_Type][Wall_Side]string {
+		.Left_Side =  {
+			.Outside = "Wall_Roof_Slope_Left_Outside",
+			.Inside = "Wall_Roof_Slope_Left_Inside",
+		},
+		.Right_Side =  {
+			.Outside = "Wall_Roof_Slope_Right_Outside",
+			.Inside = "Wall_Roof_Slope_Right_Inside",
+		},
+		.Peak =  {
+			.Outside = "Wall_Roof_Slope_Peak_Outside",
+			.Inside = "Wall_Roof_Slope_Peak_Inside",
+		},
+	}
+
+@(private = "file")
 WALL_TYPE_MODEL_NAME_MAP :: [Wall_Type][Wall_Side]string {
-	.Start =  {
-		.Outside = "Wall.Up.Start.Outside",
-		.Inside = "Wall.Up.Start.Inside",
-	},
-	.End = {.Outside = "Wall.Up.End.Outside", .Inside = "Wall.Up.End.Inside"},
-	.Extended_Left =  {
-		.Outside = "Wall.Up.Extended_Left.Outside",
-		.Inside = "Wall.Up.Extended_Left.Inside",
-	},
-	.Extended_Right =  {
-		.Outside = "Wall.Up.Extended_Right.Outside",
-		.Inside = "Wall.Up.Extended_Right.Inside",
-	},
-	.Full =  {
-		.Outside = "Wall.Up.Full.Outside",
-		.Inside = "Wall.Up.Full.Inside",
-	},
-	.Side =  {
-		.Outside = "Wall.Up.Side.Outside",
-		.Inside = "Wall.Up.Side.Inside",
-	},
-	.Extended_Start =  {
-		.Outside = "Wall.Up.Extended_Start.Outside",
-		.Inside = "Wall.Up.Extended_Start.Inside",
-	},
-	.Extended_End =  {
-		.Outside = "Wall.Up.Extended_End.Outside",
-		.Inside = "Wall.Up.Extended_End.Inside",
-	},
-	.Extended =  {
-		.Outside = "Wall.Up.Extended.Outside",
-		.Inside = "Wall.Up.Extended.Inside",
-	},
-}
+		.Start =  {
+			.Outside = "Wall.Up.Start.Outside",
+			.Inside = "Wall.Up.Start.Inside",
+		},
+		.End =  {
+			.Outside = "Wall.Up.End.Outside",
+			.Inside = "Wall.Up.End.Inside",
+		},
+		.Extended_Left =  {
+			.Outside = "Wall.Up.Extended_Left.Outside",
+			.Inside = "Wall.Up.Extended_Left.Inside",
+		},
+		.Extended_Right =  {
+			.Outside = "Wall.Up.Extended_Right.Outside",
+			.Inside = "Wall.Up.Extended_Right.Inside",
+		},
+		.Full =  {
+			.Outside = "Wall.Up.Full.Outside",
+			.Inside = "Wall.Up.Full.Inside",
+		},
+		.Side =  {
+			.Outside = "Wall.Up.Side.Outside",
+			.Inside = "Wall.Up.Side.Inside",
+		},
+		.Extended_Start =  {
+			.Outside = "Wall.Up.Extended_Start.Outside",
+			.Inside = "Wall.Up.Extended_Start.Inside",
+		},
+		.Extended_End =  {
+			.Outside = "Wall.Up.Extended_End.Outside",
+			.Inside = "Wall.Up.Extended_End.Inside",
+		},
+		.Extended =  {
+			.Outside = "Wall.Up.Extended.Outside",
+			.Inside = "Wall.Up.Extended.Inside",
+		},
+	}
 
 WALL_TYPE_TOP_MODEL_NAME_MAP :: [Wall_Type]string {
-	.Start          = "Wall.Up.Top.Extended_Left",
-	.End            = "Wall.Up.Top.Extended_Right",
-	.Extended_Left  = "Wall.Up.Top.Extended_Left",
-	.Extended_Right = "Wall.Up.Top.Extended_Right",
-	.Full           = "Wall.Up.Top.Full",
-	.Side           = "Wall.Up.Top.Side",
-	.Extended_Start = "Wall.Up.Top.Extended_Left",
-	.Extended_End   = "Wall.Up.Top.Extended_Right",
-	.Extended       = "Wall.Up.Top.Full",
-}
+		.Start          = "Wall.Up.Top.Extended_Left",
+		.End            = "Wall.Up.Top.Extended_Right",
+		.Extended_Left  = "Wall.Up.Top.Extended_Left",
+		.Extended_Right = "Wall.Up.Top.Extended_Right",
+		.Full           = "Wall.Up.Top.Full",
+		.Side           = "Wall.Up.Top.Side",
+		.Extended_Start = "Wall.Up.Top.Extended_Left",
+		.Extended_End   = "Wall.Up.Top.Extended_Right",
+		.Extended       = "Wall.Up.Top.Full",
+	}
 
 chunks: [constants.CHUNK_HEIGHT][constants.WORLD_CHUNK_WIDTH][constants.WORLD_CHUNK_DEPTH]Chunk
 
 WALL_SIDE_TYPE_MAP :: [Wall_Type_Part][Wall_Type_Part]Wall_Type {
-	.End =  {
-		.End = .Full,
-		.Side = .Start,
-		.Left_Corner = .Extended_Start,
-		.Right_Corner = .Extended_Start,
-	},
-	.Side =  {
-		.End = .End,
-		.Side = .Side,
-		.Left_Corner = .Extended_Right,
-		.Right_Corner = .Extended_Right,
-	},
-	.Left_Corner =  {
-		.End = .Extended_End,
-		.Side = .Extended_Left,
-		.Left_Corner = .Extended,
-		.Right_Corner = .Extended,
-	},
-	.Right_Corner =  {
-		.End = .Extended_End,
-		.Side = .Extended_Left,
-		.Left_Corner = .Extended,
-		.Right_Corner = .Extended,
-	},
-}
+		.End =  {
+			.End = .Full,
+			.Side = .Start,
+			.Left_Corner = .Extended_Start,
+			.Right_Corner = .Extended_Start,
+		},
+		.Side =  {
+			.End = .End,
+			.Side = .Side,
+			.Left_Corner = .Extended_Right,
+			.Right_Corner = .Extended_Right,
+		},
+		.Left_Corner =  {
+			.End = .Extended_End,
+			.Side = .Extended_Left,
+			.Left_Corner = .Extended,
+			.Right_Corner = .Extended,
+		},
+		.Right_Corner =  {
+			.End = .Extended_End,
+			.Side = .Extended_Left,
+			.Left_Corner = .Extended,
+			.Right_Corner = .Extended,
+		},
+	}
 
 wall_texture_array: u32
 wall_mask_array: u32
+
+make_wall :: proc(
+	type: Wall_Type = .Full,
+	textures: [Wall_Side]Wall_Texture =  {
+		.Outside = .Drywall,
+		.Inside = .Drywall,
+	},
+	mask: Wall_Mask_Texture = .Full_Mask,
+	state: State = .Up,
+	height: f32 = 3,
+	roof_slope: Maybe(Wall_Roof_Slope) = nil,
+) -> Wall {
+	return(
+		 {
+			type = type,
+			textures = textures,
+			mask = mask,
+			state = state,
+			height = height,
+			roof_slope = roof_slope,
+		} \
+	)
+}
 
 load_wall_mask_array :: proc() -> (ok: bool) {
 	gl.ActiveTexture(gl.TEXTURE1)
@@ -301,6 +358,7 @@ draw_wall_mesh :: proc(
 	texture: Wall_Texture,
 	mask: Wall_Mask_Texture,
 	light: glsl.vec3,
+	height: f32,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
@@ -312,7 +370,54 @@ draw_wall_mesh :: proc(
 		vertex.light = light
 		vertex.texcoords.z = f32(texture)
 		vertex.texcoords.w = f32(mask)
-		vertex.pos = linalg.mul(model, utils.vec4(vertex.pos, 1)).xyz
+
+		if vertex.pos.y >= 2.99 {
+			vertex.texcoords.y = (vertex.pos.y - height) / 3
+			vertex.pos.y = height
+		}
+
+		vertex.pos = (model * utils.vec4(vertex.pos, 1)).xyz
+
+		append(vertex_buffer, vertex)
+	}
+
+	for idx in indices {
+		append(index_buffer, idx + index_offset)
+	}
+}
+
+draw_wall_roof_slope_mesh :: proc(
+	transform: glsl.mat4,
+	texture: Wall_Texture,
+	light: glsl.vec3,
+	side: Wall_Side,
+	roof_slope: Wall_Roof_Slope,
+    wall_height: f32,
+	vertex_buffer: ^[dynamic]Wall_Vertex,
+	index_buffer: ^[dynamic]Wall_Index,
+) {
+	models := get_models_context()
+
+	model_name_map := WALL_ROOF_SLOPE_TYPE_MODEL_NAME_MAP
+	model_name := model_name_map[roof_slope.type][side]
+    log.info(model_name)
+	model := models.models[model_name]
+	vertices := model.vertices[:]
+	indices := model.indices[:]
+
+	index_offset := u32(len(vertex_buffer))
+
+	for i in 0 ..< len(vertices) {
+		vertex: Wall_Vertex
+		vertex.pos = vertices[i].pos
+		vertex.texcoords.xy = vertices[i].texcoords.xy
+		vertex.pos.y *= roof_slope.height
+		vertex.texcoords.y *= roof_slope.height / 3
+		vertex.light = light
+		vertex.texcoords.z = f32(texture)
+
+        vertex.pos.y += wall_height
+		vertex.pos = (transform * utils.vec4(vertex.pos, 1)).xyz
 
 		append(vertex_buffer, vertex)
 	}
@@ -360,9 +465,23 @@ draw_wall :: proc(
 			texture,
 			wall.mask,
 			light,
+			wall.height,
 			vertex_buffer,
 			index_buffer,
 		)
+
+		if roof_slope, ok := wall.roof_slope.?; ok {
+			draw_wall_roof_slope_mesh(
+				transform,
+				texture,
+				light,
+				side,
+				roof_slope,
+                wall.height,
+				vertex_buffer,
+				index_buffer,
+			)
+		}
 	}
 
 	model_name_map := WALL_TYPE_TOP_MODEL_NAME_MAP
@@ -377,6 +496,7 @@ draw_wall :: proc(
 		.Wall_Top,
 		.Full_Mask,
 		light,
+		wall.height,
 		vertex_buffer,
 		index_buffer,
 	)

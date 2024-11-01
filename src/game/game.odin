@@ -1,5 +1,7 @@
 package game
 
+import "core:math/linalg/glsl"
+
 Game_Context :: struct {
 	textures:          Textures_Context,
 	models:            Models_Context,
@@ -54,71 +56,773 @@ init_game :: proc() -> bool {
 	// add_roof({type = .Half_Hip, start = {0, 28}, end = {2, 33}})
 	// add_roof({type = .Hip, start = {3, 0}, end = {6, 3}})
 	//
-	add_roof({type = .Hip, start = {11, 11}, end = {24, 23}, offset = 6, slope = 1})
+	add_roof(
+		{type = .Hip, start = {11, 11}, end = {24, 23}, offset = 6, slope = 1},
+	)
 
-	add_roof({type = .Half_Hip, start = {-0.5, -0.5}, end = {0.5, 1.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {1.5, -0.5}, end = {0.5, 1.5}, offset = 3, slope = 1.0})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {-0.5, -0.5},
+			end = {0.5, 1.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {1.5, -0.5},
+			end = {0.5, 1.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
-	add_roof({type = .Half_Hip, start = {-0.5, 4.5}, end = {0.5, 2.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {1.5, 4.5}, end = {0.5, 2.5}, offset = 3, slope = 1.0})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {-0.5, 4.5},
+			end = {0.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {1.5, 4.5},
+			end = {0.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
-	add_roof({type = .Half_Hip, start = {-0.5, 5.5}, end = {1.5, 6.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {-0.5, 7.5}, end = {1.5, 6.5}, offset = 3, slope = 1.0})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {-0.5, 5.5},
+			end = {1.5, 6.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {-0.5, 7.5},
+			end = {1.5, 6.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
-	add_roof({type = .Half_Hip, start = {1.5, 8.5}, end = {-0.5, 9.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {1.5, 10.5}, end = {-0.5, 9.5}, offset = 3, slope = 1.0})
-
-
-	add_roof({type = .Half_Hip, start = {2.5, -0.5}, end = {3.5, 2.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {4.5, -0.5}, end = {3.5, 2.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {2.5, 6.5}, end = {3.5, 3.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {4.5, 6.5}, end = {3.5, 3.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {2.5, 7.5}, end = {5.5, 8.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {2.5, 9.5}, end = {5.5, 8.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {5.5, 10.5}, end = {2.5, 11.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {5.5, 12.5}, end = {2.5, 11.5}, offset = 3, slope = 1.0})
-
-
-	add_roof({type = .Half_Hip, start = {6.5, -0.5}, end = {8.5, 2.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {10.5, -0.5}, end = {8.5, 2.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {6.5, 6.5}, end = {8.5, 3.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {10.5, 6.5}, end = {8.5, 3.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {6.5, 7.5}, end = {9.5, 9.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {6.5, 11.5}, end = {9.5, 9.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Half_Hip, start = {9.5, 12.5}, end = {6.5, 14.5}, offset = 3, slope = 1.0})
-	add_roof({type = .Half_Hip, start = {9.5, 16.5}, end = {6.5, 14.5}, offset = 3, slope = 1.0})
-
-	add_roof({type = .Hip, start = {11.5, -0.5}, end = {13.5, 1.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {11.5, 4.5}, end = {13.5, 2.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {16.5, -0.5}, end = {14.5, 1.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {16.5, 4.5}, end = {14.5, 2.5}, offset = 3, slope = 1})
-
-	add_roof({type = .Hip, start = {17.5, -0.5}, end = {19.5, 2.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {17.5, 6.5}, end = {19.5, 3.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {22.5, -0.5}, end = {20.5, 2.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {22.5, 6.5}, end = {20.5, 3.5}, offset = 3, slope = 1})
-
-	add_roof({type = .Hip, start = {23.5, -0.5}, end = {26.5, 1.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {23.5, 4.5}, end = {26.5, 2.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {30.5, -0.5}, end = {27.5, 1.5}, offset = 3, slope = 1})
-	add_roof({type = .Hip, start = {30.5, 4.5}, end = {27.5, 2.5}, offset = 3, slope = 1})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {1.5, 8.5},
+			end = {-0.5, 9.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {1.5, 10.5},
+			end = {-0.5, 9.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
 
-    add_roof({type = .Half_Gable, start = {31.5, -0.5}, end = {34.5, 1.5}, offset = 3, slope = 1})
-    add_roof({type = .Half_Gable, start = {31.5, 3.5}, end = {34.5, 1.5}, offset = 3, slope = 1})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {2.5, -0.5},
+			end = {3.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {4.5, -0.5},
+			end = {3.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
-    add_roof({type = .Half_Gable, start = {31.5, 4.5}, end = {33.5, 7.5}, offset = 3, slope = 1})
-    add_roof({type = .Half_Gable, start = {35.5, 4.5}, end = {33.5, 7.5}, offset = 3, slope = 1})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {2.5, 6.5},
+			end = {3.5, 3.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {4.5, 6.5},
+			end = {3.5, 3.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {2.5, 7.5},
+			end = {5.5, 8.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {2.5, 9.5},
+			end = {5.5, 8.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {5.5, 10.5},
+			end = {2.5, 11.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {5.5, 12.5},
+			end = {2.5, 11.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
 
 
-    add_roof({type = .Gable, start = {36.5, -0.5}, end = {39.5, 3.5}, offset = 3, slope = 1})
-    add_roof({type = .Gable, start = {36.5, 4.5}, end = {40.5, 7.5}, offset = 3, slope = 1})
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {6.5, -0.5},
+			end = {8.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {10.5, -0.5},
+			end = {8.5, 2.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {6.5, 6.5},
+			end = {8.5, 3.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {10.5, 6.5},
+			end = {8.5, 3.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {6.5, 7.5},
+			end = {9.5, 9.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {6.5, 11.5},
+			end = {9.5, 9.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {9.5, 12.5},
+			end = {6.5, 14.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Hip,
+			start = {9.5, 16.5},
+			end = {6.5, 14.5},
+			offset = 3,
+			slope = 1.0,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Hip,
+			start = {11.5, -0.5},
+			end = {13.5, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {11.5, 4.5},
+			end = {13.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {16.5, -0.5},
+			end = {14.5, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {16.5, 4.5},
+			end = {14.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Hip,
+			start = {17.5, -0.5},
+			end = {19.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {17.5, 6.5},
+			end = {19.5, 3.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {22.5, -0.5},
+			end = {20.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {22.5, 6.5},
+			end = {20.5, 3.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Hip,
+			start = {23.5, -0.5},
+			end = {26.5, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {23.5, 4.5},
+			end = {26.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {30.5, -0.5},
+			end = {27.5, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Hip,
+			start = {30.5, 4.5},
+			end = {27.5, 2.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+
+	add_roof(
+		 {
+			type = .Half_Gable,
+			start = {31.4, -0.6},
+			end = {34.6, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Gable,
+			start = {31.4, 3.6},
+			end = {34.6, 1.5},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	set_wall(
+		{32, 1, 0},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{32, 1, 1},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{32, 1, 2},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{32, 1, 3},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 0},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 1},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 2},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 3},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Half_Gable,
+			start = {31.4, 4.4},
+			end = {33.5, 7.6},
+			offset = 3,
+			slope = 1,
+		},
+	)
+	add_roof(
+		 {
+			type = .Half_Gable,
+			start = {35.6, 4.4},
+			end = {33.5, 7.6},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	set_wall(
+		{32, 1, 5},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{33, 1, 5},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{34, 1, 5},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 5},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{32, 1, 8},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{33, 1, 8},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{34, 1, 8},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{35, 1, 8},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Gable,
+			start = {36.4, -0.6},
+			end = {39.6, 3.6},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	set_wall(
+		{37, 1, 0},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{38, 1, 0},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{39, 1, 0},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{37, 1, 4},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{38, 1, 4},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{39, 1, 4},
+		.E_W,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Gable,
+			start = {36.4, 4.4},
+			end = {40.6, 7.6},
+			offset = 3,
+			slope = 1,
+		},
+	)
+
+	set_wall(
+		{37, 1, 5},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{37, 1, 6},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{37, 1, 7},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{41, 1, 5},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{41, 1, 6},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{41, 1, 7},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
 
 	// add_roof({type = .Half_Hip, start = {-0.5, -0.5}, end = {1.5, 0.5}, offset = 3, slope = 1.0})
 

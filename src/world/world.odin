@@ -285,29 +285,29 @@ add_house_floor_walls :: proc(
 	// The house's front wall
 	game.set_north_south_wall(
 		{house_x, floor, house_z},
-		 {
+		game.make_wall(
 			type = .Extended_Right,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
+		),
 	)
 	for i in 0 ..< 9 {
 		game.set_north_south_wall(
 			{house_x, floor, house_z + i32(i) + 1},
-			 {
+			game.make_wall(
 				type = .Side,
 				textures =  {
 					.Inside = inside_texture,
 					.Outside = outside_texture,
 				},
-			},
+			),
 		)
 	}
 	game.set_north_south_wall(
 		{house_x, floor, house_z + 10},
-		 {
+		game.make_wall(
 			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
+		),
 	)
 
 	for i in 0 ..< 3 {
@@ -372,31 +372,31 @@ add_house_floor_walls :: proc(
 	// The house's right side wall
 	game.set_east_west_wall(
 		{house_x, floor, house_z},
-		 {
+		game.make_wall(
 			type = .Extended_Left,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
+		),
 	)
 
 	for i in 0 ..< 10 {
 		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z},
-			 {
+			game.make_wall(
 				type = .Side,
 				textures =  {
 					.Inside = inside_texture,
 					.Outside = outside_texture,
 				},
-			},
+			),
 		)
 	}
 
 	game.set_east_west_wall(
 		{house_x + 11, floor, house_z},
-		 {
+		game.make_wall(
 			type = .Extended_Right,
 			textures = {.Inside = inside_texture, .Outside = outside_texture},
-		},
+		),
 	)
 
 	game.add_object(
@@ -469,31 +469,31 @@ add_house_floor_walls :: proc(
 	// The house's left side wall
 	game.set_east_west_wall(
 		{house_x, floor, house_z + 11},
-		 {
+		game.make_wall(
 			type = .Extended_Left,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
+		),
 	)
 
 	for i in 0 ..< 10 {
 		game.set_east_west_wall(
 			{house_x + i32(i) + 1, floor, house_z + 11},
-			 {
+			game.make_wall(
 				type = .Side,
 				textures =  {
 					.Inside = outside_texture,
 					.Outside = inside_texture,
 				},
-			},
+			),
 		)
 	}
 
 	game.set_east_west_wall(
 		{house_x + 11, floor, house_z + 11},
-		 {
+		game.make_wall(
 			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
+		),
 	)
 
 	game.add_object(
@@ -552,31 +552,31 @@ add_house_floor_walls :: proc(
 
 	game.set_north_south_wall(
 		{house_x + 12, floor, house_z},
-		 {
+		game.make_wall(
 			type = .Extended_Right,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
+		),
 	)
 
 	for i in 0 ..< 9 {
 		game.set_north_south_wall(
 			{house_x + 12, floor, house_z + i32(i) + 1},
-			 {
+			game.make_wall(
 				type = .Side,
 				textures =  {
 					.Inside = outside_texture,
 					.Outside = inside_texture,
 				},
-			},
+			),
 		)
 	}
 
 	game.set_north_south_wall(
 		{house_x + 12, floor, house_z + 10},
-		 {
+		game.make_wall(
 			type = .Extended_Left,
 			textures = {.Inside = outside_texture, .Outside = inside_texture},
-		},
+		),
 	)
 
 	game.add_object(

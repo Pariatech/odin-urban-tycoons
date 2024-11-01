@@ -609,7 +609,10 @@ set_south_west_north_east_wall :: proc(
 
 	game.set_south_west_north_east_wall(
 		pos,
-		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
+		game.make_wall(
+			type = .Side,
+			textures = {.Inside = texture, .Outside = texture},
+		),
 	)
 	update_south_west_north_east_wall_and_neighbors(pos)
 }
@@ -637,7 +640,10 @@ set_north_west_south_east_wall :: proc(
 
 	game.set_north_west_south_east_wall(
 		pos,
-		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
+		game.make_wall(
+			type = .Side,
+			textures = {.Inside = texture, .Outside = texture},
+		),
 	)
 
 	update_north_west_south_east_wall_and_neighbors(pos)
@@ -663,7 +669,10 @@ set_east_west_wall :: proc(pos: glsl.ivec3, texture: game.Wall_Texture) {
 
 	game.set_east_west_wall(
 		pos,
-		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
+		game.make_wall(
+			type = .Side,
+			textures = {.Inside = texture, .Outside = texture},
+		),
 	)
 	update_east_west_wall_and_neighbors(pos)
 }
@@ -688,7 +697,10 @@ set_north_south_wall :: proc(pos: glsl.ivec3, texture: game.Wall_Texture) {
 
 	game.set_north_south_wall(
 		pos,
-		{type = .Side, textures = {.Inside = texture, .Outside = texture}},
+		game.make_wall(
+			type = .Side,
+			textures = {.Inside = texture, .Outside = texture},
+		),
 	)
 	update_north_south_wall_and_neighbors(pos)
 }
