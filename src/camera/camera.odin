@@ -21,7 +21,7 @@ ANGLE :: f64(math.RAD_PER_DEG * 30)
 zoom: f64 = 1
 position: glsl.dvec3
 rotation: Rotation
-distance := f64(20)
+distance := f64(40)
 translate := glsl.dvec3 {
 	-distance,
 	math.sqrt(math.pow(distance, 2) * 2) * math.tan(ANGLE),
@@ -110,7 +110,7 @@ update :: proc(delta_time: f64) {
 	bottom = -aspect_ratio * scale
 	top = aspect_ratio * scale
 
-	dproj = glsl.dmat4Ortho3d(left, right, bottom, top, 0.1, 100.0)
+	dproj = glsl.dmat4Ortho3d(left, right, bottom, top, 0.1, 120.0)
 
 	dview_proj = dproj * dview
 	dinverse_view_proj = linalg.inverse(dview_proj)
