@@ -10,6 +10,7 @@ import "../camera"
 import c "../constants"
 import "../floor"
 import "../renderer"
+import "../terrain"
 
 Roof_Id :: int
 
@@ -28,16 +29,15 @@ Roof_Type :: enum {
 Roof_Orientation :: enum {}
 
 Roof :: struct {
-	id:           Roof_Id,
-	offset:       f32,
-	start:        glsl.vec2,
-	end:          glsl.vec2,
-	slope:        f32,
-	light:        glsl.vec3,
-	type:         Roof_Type,
-	top_texture:  string,
-	side_texture: string,
-	orientation:  Roof_Orientation,
+	id:          Roof_Id,
+	offset:      f32,
+	start:       glsl.vec2,
+	end:         glsl.vec2,
+	slope:       f32,
+	light:       glsl.vec3,
+	type:        Roof_Type,
+	texture:     string,
+	orientation: Roof_Orientation,
 }
 
 Roof_Chunk :: struct {
@@ -69,6 +69,7 @@ Roofs_Context :: struct {
 	shader:        Shader,
 	vao, vbo, ebo: u32,
 	texture_array: u32,
+	floor_offset:  i32,
 }
 
 ROOF_TEXTURES :: [?]cstring {
@@ -82,8 +83,7 @@ ROOF_SHADER :: Shader {
 	fragment = "resources/shaders/roof.frag",
 }
 
-init_roofs :: proc(
-) -> bool {
+init_roofs :: proc() -> bool {
 	roofs := get_roofs_context()
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -211,7 +211,7 @@ draw_roofs :: proc() {
 
 	roof_ids: [dynamic]Roof_Id
 	defer delete(roof_ids)
-	for y in 0 ..< floor.floor {
+	for y in 0 ..< floor.floor + roofs.floor_offset {
 		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
 			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
 				chunk := &roofs.chunks[y][x][z]
@@ -259,23 +259,45 @@ draw_roofs :: proc() {
 }
 
 add_roof :: proc(roof: Roof) -> Roof_Id {
+	roof := roof
 	roofs := get_roofs_context()
+	chunk_pos := get_roof_chunk_pos(roof)
+	chunk := &roofs.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	roof.id = roofs.next_id
+	roofs.next_id += 1
+	roofs.keys[roof.id] = {
+		chunk_pos = chunk_pos,
+		index     = len(chunk.roofs),
+	}
+	append(&chunk.roofs, roof)
+	append(&chunk.roofs_inside, roof.id)
+
+	return roof.id
+}
+
+update_roof :: proc(roof: Roof) {
+	ctx := get_roofs_context()
+	key := &ctx.keys[roof.id]
+	chunk_pos := key.chunk_pos
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk.dirty = true
+
+	chunk.roofs[key.index] = roof
+}
+
+@(private = "file")
+ROOF_SIZE_PADDING :: glsl.vec2{0.3, 0.3}
+
+@(private = "file")
+get_roof_chunk_pos :: proc(roof: Roof) -> glsl.ivec3 {
 	x := i32(roof.start.x + 0.5)
 	z := i32(roof.start.y + 0.5)
 	chunk_x := x / c.CHUNK_WIDTH
-	chunk_y := i32(roof.offset / 3)
-	chunk_z := z / c.CHUNK_DEPTH
-	chunk := &roofs.chunks[chunk_y][chunk_x][chunk_z]
-	id := roofs.next_id
-	roofs.next_id += 1
-	roofs.keys[id] = {
-		chunk_pos = {chunk_x, chunk_y, chunk_z},
-		index = len(chunk.roofs),
-	}
-	append(&chunk.roofs, roof)
-	append(&chunk.roofs_inside, id)
 
-	return id
+	tile_height := terrain.get_tile_height(int(x), int(z))
+	chunk_y := i32((roof.offset - tile_height) / 3)
+	chunk_z := z / c.CHUNK_DEPTH
+	return {chunk_x, chunk_y, chunk_z}
 }
 
 @(private = "file")
@@ -287,7 +309,7 @@ draw_roof :: proc(
 	ctx := get_roofs_context()
 	key := ctx.keys[id]
 	roof := &ctx.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z].roofs[key.index]
-	size := glsl.abs(roof.end - roof.start)
+	size := glsl.abs(roof.end - roof.start) + ROOF_SIZE_PADDING
 	rotation: glsl.mat4
 	face_lights := [4]glsl.vec3 {
 		{1, 1, 1},
