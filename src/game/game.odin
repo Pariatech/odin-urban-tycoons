@@ -11,6 +11,7 @@ Game_Context :: struct {
 	object_draws:      Object_Draws,
 	object_blueprints: Object_Blueprints,
 	roofs:             Roofs_Context,
+	roof_tool:         Roof_Tool_Context,
 }
 
 get_game_context :: #force_inline proc() -> ^Game_Context {
@@ -41,6 +42,14 @@ get_object_draws_context :: proc() -> ^Object_Draws {
 	return &get_game_context().object_draws
 }
 
+get_roofs_context :: proc() -> ^Roofs_Context {
+    return &get_game_context().roofs
+}
+
+get_roof_tool_context :: proc() -> ^Roof_Tool_Context {
+    return &get_game_context().roof_tool
+}
+
 init_game :: proc() -> bool {
 	load_object_blueprints() or_return
 	init_object_draws() or_return
@@ -56,9 +65,109 @@ init_game :: proc() -> bool {
 	// add_roof({type = .Half_Hip, start = {0, 28}, end = {2, 33}})
 	// add_roof({type = .Hip, start = {3, 0}, end = {6, 3}})
 	//
+
 	add_roof(
-		{type = .Hip, start = {11, 11}, end = {24, 23}, offset = 6, slope = 1},
+		{type = .Hip, start = {-4, -4}, end = {-3, -3}, offset = 0, slope = 1},
 	)
+
+	add_roof(
+		 {
+			type = .Hip,
+			start = {11.4, 11.4},
+			end = {23.6, 22.6},
+			offset = 6,
+			slope = 1,
+		},
+	)
+
+	add_roof(
+		 {
+			type = .Gable,
+			start = {11.4, 15.4},
+			end = {15.6, 18.6},
+			offset = 6,
+			slope = 1,
+		},
+	)
+
+	set_wall(
+		{12, 2, 16},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{12, 2, 17},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{12, 2, 18},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
+	set_wall(
+		{16, 2, 16},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Left_Side},
+		},
+	)
+
+	set_wall(
+		{16, 2, 17},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 1,
+			roof_slope = Wall_Roof_Slope{height = 0.5, type = .Peak},
+		},
+	)
+
+	set_wall(
+		{16, 2, 18},
+		.N_S,
+		 {
+			type = .Side,
+			textures = {.Inside = .Brick, .Outside = .Brick},
+			mask = .Full_Mask,
+			state = .Up,
+			height = 0,
+			roof_slope = Wall_Roof_Slope{height = 1, type = .Right_Side},
+		},
+	)
+
 
 	add_roof(
 		 {

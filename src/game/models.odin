@@ -37,7 +37,7 @@ load_models :: proc() -> (ok: bool) {
 	options: cgltf.options
 	data, result := cgltf.parse_file(options, MODELS_PATH)
 	if result != .success {
-		log.error("Failed to parse models file!", result)
+		log.error("Failed to parse models file!", MODELS_PATH, result)
 		return false
 	}
 	result = cgltf.load_buffers(options, data, MODELS_PATH)

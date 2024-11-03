@@ -32,6 +32,7 @@ Object_Type :: enum {
 	Computer,
 	Plate,
 	Couch,
+    Cursor,
 	// Carpet,
 	// Tree,
 	// Wall,

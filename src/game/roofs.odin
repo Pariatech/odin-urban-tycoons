@@ -8,12 +8,13 @@ import gl "vendor:OpenGL"
 
 import "../camera"
 import c "../constants"
+import "../floor"
 import "../renderer"
 
 Roof_Id :: int
 
 Roof_Key :: struct {
-	chunk_pos: glsl.ivec2,
+	chunk_pos: glsl.ivec3,
 	index:     int,
 }
 
@@ -45,7 +46,7 @@ Roof_Chunk :: struct {
 	roofs_inside: [dynamic]Roof_Id,
 }
 
-Roof_Chunks :: [c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Roof_Chunk
+Roof_Chunks :: [c.CHUNK_HEIGHT][c.WORLD_CHUNK_WIDTH][c.WORLD_CHUNK_DEPTH]Roof_Chunk
 
 Roof_Uniform_Object :: struct {
 	mvp:   glsl.mat4,
@@ -82,27 +83,25 @@ ROOF_SHADER :: Shader {
 }
 
 init_roofs :: proc(
-	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
 ) -> bool {
+	roofs := get_roofs_context()
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
 	gl.BindVertexArray(0)
 
-	game.roofs.shader = ROOF_SHADER
-	init_shader(&game.roofs.shader) or_return
+	roofs.shader = ROOF_SHADER
+	init_shader(&roofs.shader) or_return
 
-	// set_shader_uniform(&game.roofs.shader, "texture_sampler", i32(0))
+	gl.GenBuffers(1, &roofs.ubo)
 
-	gl.GenBuffers(1, &game.roofs.ubo)
+	gl.GenVertexArrays(1, &roofs.vao)
+	gl.BindVertexArray(roofs.vao)
+	gl.GenBuffers(1, &roofs.vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, roofs.vbo)
 
-	gl.GenVertexArrays(1, &game.roofs.vao)
-	gl.BindVertexArray(game.roofs.vao)
-	gl.GenBuffers(1, &game.roofs.vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, game.roofs.vbo)
-
-	gl.GenBuffers(1, &game.roofs.ebo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, game.roofs.ebo)
+	gl.GenBuffers(1, &roofs.ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, roofs.ebo)
 
 	gl.VertexAttribPointer(
 		0,
@@ -135,8 +134,8 @@ init_roofs :: proc(
 	gl.EnableVertexAttribArray(2)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.GenTextures(1, &game.roofs.texture_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, game.roofs.texture_array)
+	gl.GenTextures(1, &roofs.texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -156,7 +155,7 @@ init_roofs :: proc(
 	)
 
 	renderer.load_texture_2D_array(ROOF_TEXTURES, 128, 128) or_return
-	set_shader_uniform(&game.roofs.shader, "texture_sampler", i32(0))
+	set_shader_uniform(&roofs.shader, "texture_sampler", i32(0))
 
 	gl.BindVertexArray(0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
@@ -168,37 +167,35 @@ init_roofs :: proc(
 	return true
 }
 
-deinit_roofs :: proc(
-	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
-) {
-	delete(game.roofs.keys)
-	for &row in game.roofs.chunks {
-		for chunk in row {
-			delete(chunk.roofs)
-			delete(chunk.roofs_inside)
+deinit_roofs :: proc() {
+	roofs := get_roofs_context()
+	delete(roofs.keys)
+	for &layer in roofs.chunks {
+		for &row in layer {
+			for chunk in row {
+				delete(chunk.roofs)
+				delete(chunk.roofs_inside)
+			}
 		}
 	}
 }
 
-draw_roofs :: proc(game: ^Game_Context = cast(^Game_Context)context.user_ptr) {
+draw_roofs :: proc() {
+	roofs := get_roofs_context()
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, game.roofs.texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
-	gl.BindVertexArray(game.roofs.vao)
+	gl.BindVertexArray(roofs.vao)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, game.roofs.vbo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, game.roofs.ebo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, roofs.vbo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, roofs.ebo)
 
-	bind_shader(&game.roofs.shader)
+	bind_shader(&roofs.shader)
 
-	gl.BindBuffer(gl.UNIFORM_BUFFER, game.roofs.ubo)
-	set_shader_unifrom_block_binding(
-		&game.roofs.shader,
-		"UniformBufferObject",
-		2,
-	)
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, game.roofs.ubo)
+	gl.BindBuffer(gl.UNIFORM_BUFFER, roofs.ubo)
+	set_shader_unifrom_block_binding(&roofs.shader, "UniformBufferObject", 2)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, roofs.ubo)
 
 	uniform_object := Roof_Uniform_Object {
 		mvp = camera.view_proj,
@@ -214,21 +211,23 @@ draw_roofs :: proc(game: ^Game_Context = cast(^Game_Context)context.user_ptr) {
 
 	roof_ids: [dynamic]Roof_Id
 	defer delete(roof_ids)
-	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
-		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
-			chunk := &game.roofs.chunks[x][z]
-			for roof_inside_id in chunk.roofs_inside {
-				existing := false
+	for y in 0 ..< floor.floor {
+		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
+			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
+				chunk := &roofs.chunks[y][x][z]
+				for roof_inside_id in chunk.roofs_inside {
+					existing := false
 
-				for roof_id in roof_ids {
-					if roof_inside_id == roof_id {
-						existing = true
-						break
+					for roof_id in roof_ids {
+						if roof_inside_id == roof_id {
+							existing = true
+							break
+						}
 					}
-				}
 
-				if !existing {
-					append(&roof_ids, roof_inside_id)
+					if !existing {
+						append(&roof_ids, roof_inside_id)
+					}
 				}
 			}
 		}
@@ -239,7 +238,7 @@ draw_roofs :: proc(game: ^Game_Context = cast(^Game_Context)context.user_ptr) {
 	indices: [dynamic]Roof_Index
 	defer delete(indices)
 	for roof_id in roof_ids {
-		draw_roof(&game.roofs, roof_id, &vertices, &indices)
+		draw_roof(roof_id, &vertices, &indices)
 	}
 
 	gl.BufferData(
@@ -259,19 +258,18 @@ draw_roofs :: proc(game: ^Game_Context = cast(^Game_Context)context.user_ptr) {
 	gl.DrawElements(gl.TRIANGLES, i32(len(indices)), gl.UNSIGNED_INT, nil)
 }
 
-add_roof :: proc(
-	roof: Roof,
-	game: ^Game_Context = cast(^Game_Context)context.user_ptr,
-) -> Roof_Id {
+add_roof :: proc(roof: Roof) -> Roof_Id {
+	roofs := get_roofs_context()
 	x := i32(roof.start.x + 0.5)
 	z := i32(roof.start.y + 0.5)
 	chunk_x := x / c.CHUNK_WIDTH
+	chunk_y := i32(roof.offset / 3)
 	chunk_z := z / c.CHUNK_DEPTH
-	chunk := &game.roofs.chunks[chunk_x][chunk_z]
-	id := game.roofs.next_id
-	game.roofs.next_id += 1
-	game.roofs.keys[id] = {
-		chunk_pos = {chunk_x, chunk_z},
+	chunk := &roofs.chunks[chunk_y][chunk_x][chunk_z]
+	id := roofs.next_id
+	roofs.next_id += 1
+	roofs.keys[id] = {
+		chunk_pos = {chunk_x, chunk_y, chunk_z},
 		index = len(chunk.roofs),
 	}
 	append(&chunk.roofs, roof)
@@ -282,13 +280,13 @@ add_roof :: proc(
 
 @(private = "file")
 draw_roof :: proc(
-	ctx: ^Roofs_Context,
 	id: Roof_Id,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
 ) {
+	ctx := get_roofs_context()
 	key := ctx.keys[id]
-	roof := &ctx.chunks[key.chunk_pos.x][key.chunk_pos.y].roofs[key.index]
+	roof := &ctx.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z].roofs[key.index]
 	size := glsl.abs(roof.end - roof.start)
 	rotation: glsl.mat4
 	face_lights := [4]glsl.vec3 {
@@ -300,12 +298,6 @@ draw_roof :: proc(
 	if roof.start.x <= roof.end.x && roof.start.y <= roof.end.y {
 		if size.y >= size.x {
 			rotation = glsl.identity(glsl.mat4)
-			// face_lights = [4]glsl.vec3 {
-			// 	{0.4, 0.4, 0.4},
-			// 	{1, 1, 1},
-			// 	{0.8, 0.8, 0.8},
-			// 	{0.6, 0.6, 0.6},
-			// }
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
 			face_lights = [4]glsl.vec3 {
@@ -317,14 +309,7 @@ draw_roof :: proc(
 		}
 	} else if roof.start.x <= roof.end.x {
 		if size.y >= size.x {
-			// rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
 			rotation = glsl.identity(glsl.mat4)
-			// face_lights = [4]glsl.vec3 {
-			// 	{0.6, 0.6, 0.6},
-			// 	{0.4, 0.4, 0.4},
-			// 	{1, 1, 1},
-			// 	{0.8, 0.8, 0.8},
-			// }
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI)
 			face_lights = [4]glsl.vec3 {
@@ -336,7 +321,6 @@ draw_roof :: proc(
 		}
 	} else if roof.start.y <= roof.end.y {
 		if size.y >= size.x {
-			// rotation = glsl.identity(glsl.mat4)
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.0 * math.PI)
 			face_lights = [4]glsl.vec3 {
 				{0.6, 0.6, 0.6},
@@ -956,7 +940,9 @@ draw_gable_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 
 	for i in 0 ..< 2 {
-		side_rotation := rotation * glsl.mat4Rotate({0, 1, 0}, f32((i * 2) + 1) * -math.PI / 2)
+		side_rotation :=
+			rotation *
+			glsl.mat4Rotate({0, 1, 0}, f32((i * 2) + 1) * -math.PI / 2)
 
 		draw_roof_rectangle(
 			{center.x, roof.offset, center.y},
@@ -979,7 +965,7 @@ draw_gable_roof :: proc(
 			indices,
 		)
 
-	    pos_offset := glsl.vec4{0, 0, -min_size / 4, 1} * side_rotation
+		pos_offset := glsl.vec4{0, 0, -min_size / 4, 1} * side_rotation
 		pos := center + pos_offset.xz
 		draw_roof_gable_eave(
 			{pos.x, roof.offset, pos.y},

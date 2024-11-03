@@ -1,21 +1,18 @@
 package tools
 
+import "core:log"
+
 import "../keyboard"
-import "door_tool"
 import "floor_tool"
 import "paint_tool"
 import "terrain_tool"
 import "wall_tool"
-import "window_tool"
-import "furniture_tool"
 import "../game"
 
 TERRAIN_TOOL_KEY :: keyboard.Key_Value.Key_1
 WALL_TOOL_KEY :: keyboard.Key_Value.Key_2
 FLOOR_TOOL_KEY :: keyboard.Key_Value.Key_3
 PAINT_TOOL_KEY :: keyboard.Key_Value.Key_4
-DOOR_TOOL_KEY :: keyboard.Key_Value.Key_5
-WINDOW_TOOL_KEY :: keyboard.Key_Value.Key_6
 FURNITURE_TOOL_KEY :: keyboard.Key_Value.Key_7
 
 active_tool: Tool = .Furniture
@@ -25,9 +22,8 @@ Tool :: enum {
 	Wall,
 	Floor,
 	Paint,
-	Door,
-	Window,
     Furniture,
+    Roof,
 }
 
 update :: proc(delta_time: f64) {
@@ -39,10 +35,6 @@ update :: proc(delta_time: f64) {
 		open_floor_tool()
 	} else if keyboard.is_key_press(PAINT_TOOL_KEY) {
 		open_paint_tool()
-	} else if keyboard.is_key_press(DOOR_TOOL_KEY) {
-		open_door_tool()
-	} else if keyboard.is_key_press(WINDOW_TOOL_KEY) {
-		open_window_tool()
 	} else if keyboard.is_key_press(FURNITURE_TOOL_KEY) {
         // open_furniture_tool()
     }
@@ -56,13 +48,10 @@ update :: proc(delta_time: f64) {
 		floor_tool.update()
 	case .Paint:
 		paint_tool.update()
-	case .Door:
-		door_tool.update()
-	case .Window:
-		window_tool.update()
     case .Furniture:
-        // furniture_tool.update()
         game.update_object_tool()
+    case .Roof:
+        game.update_roof_tool()
 	}
 }
 
@@ -70,9 +59,8 @@ open_wall_tool :: proc() {
 	terrain_tool.deinit()
 	floor_tool.deinit()
 	paint_tool.deinit()
-	door_tool.deinit()
-    window_tool.deinit()
-    furniture_tool.deinit()
+    game.close_object_tool()
+    close_roof_tool()
 
 	wall_tool.init()
 	active_tool = .Wall
@@ -82,9 +70,8 @@ open_land_tool :: proc() {
 	wall_tool.deinit()
 	floor_tool.deinit()
 	paint_tool.deinit()
-	door_tool.deinit()
-    window_tool.deinit()
-    furniture_tool.deinit()
+    game.close_object_tool()
+    close_roof_tool()
 
 	terrain_tool.init()
 	active_tool = .Terrain
@@ -94,9 +81,8 @@ open_floor_tool :: proc() {
 	wall_tool.deinit()
 	terrain_tool.deinit()
 	paint_tool.deinit()
-	door_tool.deinit()
-    window_tool.deinit()
-    furniture_tool.deinit()
+    game.close_object_tool()
+    close_roof_tool()
 
 	floor_tool.init()
 	active_tool = .Floor
@@ -106,37 +92,11 @@ open_paint_tool :: proc() {
 	floor_tool.deinit()
 	wall_tool.deinit()
 	terrain_tool.deinit()
-	door_tool.deinit()
-    window_tool.deinit()
-    furniture_tool.deinit()
+    game.close_object_tool()
+    close_roof_tool()
 
 	paint_tool.init()
 	active_tool = .Paint
-}
-
-open_door_tool :: proc() {
-	floor_tool.deinit()
-	wall_tool.deinit()
-	terrain_tool.deinit()
-	paint_tool.deinit()
-    window_tool.deinit()
-    furniture_tool.deinit()
-
-	door_tool.init()
-	active_tool = .Door
-}
-
-
-open_window_tool :: proc() {
-	floor_tool.deinit()
-	wall_tool.deinit()
-	terrain_tool.deinit()
-	paint_tool.deinit()
-	door_tool.deinit()
-    furniture_tool.deinit()
-
-	window_tool.init()
-	active_tool = .Window
 }
 
 open_furniture_tool :: proc() {
@@ -144,11 +104,30 @@ open_furniture_tool :: proc() {
 	wall_tool.deinit()
 	terrain_tool.deinit()
 	paint_tool.deinit()
-	door_tool.deinit()
-	window_tool.deinit()
+    close_roof_tool()
 
-    // furniture_tool.init()
-    // game.init_object_tool()
 	active_tool = .Furniture
+}
+
+close_roof_tool :: proc() {
+    if active_tool != .Roof {
+        return
+    }
+
+    game.deinit_roof_tool()
+}
+
+open_roof_tool :: proc() {
+    if active_tool == .Roof {
+        return
+    }
+	floor_tool.deinit()
+	wall_tool.deinit()
+	terrain_tool.deinit()
+	paint_tool.deinit()
+    game.close_object_tool()
+
+    game.init_roof_tool()
+	active_tool = .Roof
 }
 

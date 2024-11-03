@@ -6,7 +6,6 @@ import "core:strings"
 import "../billboard"
 import g "../game"
 import "../tools"
-import "../tools/furniture_tool"
 import "../window"
 
 FURNITURE_PANEL_TILE_SIZE :: 47
@@ -31,9 +30,6 @@ furniture_panel_body :: proc(
 
 	for blueprint, i in game.object_blueprints {
 		border_width := f32(BORDER_WIDTH)
-		// if furniture_tool.type == i && furniture_tool.state == .Moving {
-		// 	border_width *= 2
-		// }
 
 		if icon_button(
 			   ctx,

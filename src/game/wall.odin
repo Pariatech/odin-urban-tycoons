@@ -187,6 +187,13 @@ WALL_ROOF_SLOPE_TYPE_MODEL_NAME_MAP ::
 	}
 
 @(private = "file")
+WALL_ROOF_SLOPE_TYPE_MODEL_TOP_NAME_MAP :: [Wall_Roof_Slope_Type]string {
+		.Left_Side  = "Wall_Roof_Slope_Left_Top",
+		.Right_Side = "Wall_Roof_Slope_Right_Top",
+		.Peak       = "Wall_Roof_Slope_Peak_Top",
+	}
+
+@(private = "file")
 WALL_TYPE_MODEL_NAME_MAP :: [Wall_Type][Wall_Side]string {
 		.Start =  {
 			.Outside = "Wall.Up.Start.Outside",
@@ -386,13 +393,14 @@ draw_wall_mesh :: proc(
 	}
 }
 
+@(private = "file")
 draw_wall_roof_slope_mesh :: proc(
 	transform: glsl.mat4,
 	texture: Wall_Texture,
 	light: glsl.vec3,
 	side: Wall_Side,
 	roof_slope: Wall_Roof_Slope,
-    wall_height: f32,
+	wall_height: f32,
 	vertex_buffer: ^[dynamic]Wall_Vertex,
 	index_buffer: ^[dynamic]Wall_Index,
 ) {
@@ -400,7 +408,6 @@ draw_wall_roof_slope_mesh :: proc(
 
 	model_name_map := WALL_ROOF_SLOPE_TYPE_MODEL_NAME_MAP
 	model_name := model_name_map[roof_slope.type][side]
-    log.info(model_name)
 	model := models.models[model_name]
 	vertices := model.vertices[:]
 	indices := model.indices[:]
@@ -416,7 +423,46 @@ draw_wall_roof_slope_mesh :: proc(
 		vertex.light = light
 		vertex.texcoords.z = f32(texture)
 
-        vertex.pos.y += wall_height
+		vertex.pos.y += wall_height
+		vertex.pos = (transform * utils.vec4(vertex.pos, 1)).xyz
+
+		append(vertex_buffer, vertex)
+	}
+
+	for idx in indices {
+		append(index_buffer, idx + index_offset)
+	}
+}
+
+@(private = "file")
+draw_wall_roof_slope_top_mesh :: proc(
+	transform: glsl.mat4,
+	light: glsl.vec3,
+	roof_slope: Wall_Roof_Slope,
+	wall_height: f32,
+	vertex_buffer: ^[dynamic]Wall_Vertex,
+	index_buffer: ^[dynamic]Wall_Index,
+) {
+	models := get_models_context()
+
+	model_name_map := WALL_ROOF_SLOPE_TYPE_MODEL_TOP_NAME_MAP
+	model_name := model_name_map[roof_slope.type]
+	model := models.models[model_name]
+	vertices := model.vertices[:]
+	indices := model.indices[:]
+
+	index_offset := u32(len(vertex_buffer))
+
+	for i in 0 ..< len(vertices) {
+		vertex: Wall_Vertex
+		vertex.pos = vertices[i].pos
+		vertex.texcoords.xy = vertices[i].texcoords.xy
+		vertex.pos.y *= roof_slope.height
+		// vertex.texcoords.y *= roof_slope.height / 3
+		vertex.light = light
+		vertex.texcoords.z = f32(Wall_Texture.Wall_Top)
+
+		vertex.pos.y += wall_height
 		vertex.pos = (transform * utils.vec4(vertex.pos, 1)).xyz
 
 		append(vertex_buffer, vertex)
@@ -469,37 +515,48 @@ draw_wall :: proc(
 			vertex_buffer,
 			index_buffer,
 		)
+	}
 
-		if roof_slope, ok := wall.roof_slope.?; ok {
+	if roof_slope, ok := wall.roof_slope.?; ok {
+		for texture, side in wall.textures {
 			draw_wall_roof_slope_mesh(
 				transform,
 				texture,
 				light,
 				side,
 				roof_slope,
-                wall.height,
+				wall.height,
+				vertex_buffer,
+				index_buffer,
+			)
+
+			draw_wall_roof_slope_top_mesh(
+				transform,
+				light,
+				roof_slope,
+				wall.height,
 				vertex_buffer,
 				index_buffer,
 			)
 		}
+	} else {
+		model_name_map := WALL_TYPE_TOP_MODEL_NAME_MAP
+		model_name := model_name_map[wall.type]
+		model := models.models[model_name]
+		vertices := model.vertices[:]
+		indices := model.indices[:]
+		draw_wall_mesh(
+			vertices,
+			indices,
+			transform,
+			.Wall_Top,
+			.Full_Mask,
+			light,
+			wall.height,
+			vertex_buffer,
+			index_buffer,
+		)
 	}
-
-	model_name_map := WALL_TYPE_TOP_MODEL_NAME_MAP
-	model_name := model_name_map[wall.type]
-	model := models.models[model_name]
-	vertices := model.vertices[:]
-	indices := model.indices[:]
-	draw_wall_mesh(
-		vertices,
-		indices,
-		transform,
-		.Wall_Top,
-		.Full_Mask,
-		light,
-		wall.height,
-		vertex_buffer,
-		index_buffer,
-	)
 }
 
 get_chunk :: proc(pos: glsl.ivec3) -> ^Chunk {

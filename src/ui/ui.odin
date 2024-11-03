@@ -28,6 +28,7 @@ MENU_ICON_TEXTURES :: [Menu_Icon]cstring {
 	.Furniture = "resources/icons/furniture.png",
     .Undo = "resources/icons/undo.png",
     .Redo = "resources/icons/redo.png",
+    .Roof = "resources/objects/cursors/roof_cursor/Hip_Roof_Icon.png",
 }
 
 
@@ -56,6 +57,7 @@ Menu_Icon :: enum (int) {
 	Floor,
 	Paint,
 	Furniture,
+    Roof,
 }
 
 Draw_Call :: union {
@@ -119,8 +121,6 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 
 	init_land_panel() or_return
 	init_paint_panel() or_return
-	init_door_panel() or_return
-	init_window_panel() or_return
     init_furniture_panel() or_return
 
 	return true
@@ -172,6 +172,9 @@ handle_menu_item_clicked :: proc(using ctx: ^Context, item: Menu_Icon) {
 	case .Furniture:
 		floor_panel_ctx.opened = false
 		tools.open_furniture_tool()
+    case .Roof:
+		floor_panel_ctx.opened = false
+        tools.open_roof_tool()
     case .Undo:
         tools.undo()
     case .Redo:
@@ -217,8 +220,6 @@ update :: proc(using ctx: ^Context) {
 
 	land_panel(ctx)
 	paint_panel(ctx)
-	door_panel(ctx)
-	window_panel(ctx)
 	furniture_panel(ctx)
 
 	container(
