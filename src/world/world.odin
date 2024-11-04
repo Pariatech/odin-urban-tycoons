@@ -612,29 +612,31 @@ draw :: proc() {
 	renderer.uniform_object.view = camera.view
 	renderer.uniform_object.proj = camera.proj
 
-	gl.BindBuffer(gl.UNIFORM_BUFFER, renderer.ubo)
-
-	ubo_index := gl.GetUniformBlockIndex(
-		renderer.shader_program,
-		"UniformBufferObject",
-	)
-	gl.UniformBlockBinding(renderer.shader_program, ubo_index, 2)
-
-	// ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "ubo")
-	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, renderer.ubo)
-	gl.BufferSubData(
-		gl.UNIFORM_BUFFER,
-		0,
-		size_of(renderer.Uniform_Object),
-		&renderer.uniform_object,
-	)
-
 
 	for flr in 0 ..= floor.floor {
+		gl.BindBuffer(gl.UNIFORM_BUFFER, renderer.ubo)
+
+		ubo_index := gl.GetUniformBlockIndex(
+			renderer.shader_program,
+			"UniformBufferObject",
+		)
+		gl.UniformBlockBinding(renderer.shader_program, ubo_index, 2)
+
+		// ubo_index := gl.GetUniformBlockIndex(renderer.shader_program, "ubo")
+		gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, renderer.ubo)
+		gl.BufferSubData(
+			gl.UNIFORM_BUFFER,
+			0,
+			size_of(renderer.Uniform_Object),
+			&renderer.uniform_object,
+		)
+
 		gl.UseProgram(renderer.shader_program)
 		tile.draw_tiles(flr)
 		game.draw_walls(flr)
 		billboard.draw_billboards(flr)
+
+		game.draw_game(flr)
 		// object.draw(flr)
 	}
 }

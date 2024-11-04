@@ -34,7 +34,7 @@ Roof :: struct {
 	start:       glsl.vec2,
 	end:         glsl.vec2,
 	slope:       f32,
-	light:       glsl.vec3,
+	light:       glsl.vec4,
 	type:        Roof_Type,
 	texture:     string,
 	orientation: Roof_Orientation,
@@ -56,7 +56,7 @@ Roof_Uniform_Object :: struct {
 Roof_Vertex :: struct {
 	pos:       glsl.vec3,
 	texcoords: glsl.vec3,
-	color:     glsl.vec3,
+	color:     glsl.vec4,
 }
 
 Roof_Index :: u32
@@ -125,7 +125,7 @@ init_roofs :: proc() -> bool {
 
 	gl.VertexAttribPointer(
 		2,
-		3,
+		4,
 		gl.FLOAT,
 		gl.FALSE,
 		size_of(Roof_Vertex),
@@ -180,8 +180,11 @@ deinit_roofs :: proc() {
 	}
 }
 
-draw_roofs :: proc() {
+draw_roofs :: proc(flr: i32) {
 	roofs := get_roofs_context()
+	if flr >= floor.floor + roofs.floor_offset {
+		return
+	}
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
@@ -211,23 +214,22 @@ draw_roofs :: proc() {
 
 	roof_ids: [dynamic]Roof_Id
 	defer delete(roof_ids)
-	for y in 0 ..< floor.floor + roofs.floor_offset {
-		for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
-			for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
-				chunk := &roofs.chunks[y][x][z]
-				for roof_inside_id in chunk.roofs_inside {
-					existing := false
+	y := flr
+	for x in camera.visible_chunks_start.x ..< camera.visible_chunks_end.x {
+		for z in camera.visible_chunks_start.y ..< camera.visible_chunks_end.y {
+			chunk := &roofs.chunks[y][x][z]
+			for roof_inside_id in chunk.roofs_inside {
+				existing := false
 
-					for roof_id in roof_ids {
-						if roof_inside_id == roof_id {
-							existing = true
-							break
-						}
+				for roof_id in roof_ids {
+					if roof_inside_id == roof_id {
+						existing = true
+						break
 					}
+				}
 
-					if !existing {
-						append(&roof_ids, roof_inside_id)
-					}
+				if !existing {
+					append(&roof_ids, roof_inside_id)
 				}
 			}
 		}
@@ -311,22 +313,22 @@ draw_roof :: proc(
 	roof := &ctx.chunks[key.chunk_pos.y][key.chunk_pos.x][key.chunk_pos.z].roofs[key.index]
 	size := glsl.abs(roof.end - roof.start) + ROOF_SIZE_PADDING
 	rotation: glsl.mat4
-	face_lights := [4]glsl.vec3 {
-		{1, 1, 1},
-		{0.8, 0.8, 0.8},
-		{0.6, 0.6, 0.6},
-		{0.4, 0.4, 0.4},
+	face_lights := [4]glsl.vec4 {
+		{1, 1, 1, 1},
+		{0.8, 0.8, 0.8, 1},
+		{0.6, 0.6, 0.6, 1},
+		{0.4, 0.4, 0.4, 1},
 	}
 	if roof.start.x <= roof.end.x && roof.start.y <= roof.end.y {
 		if size.y >= size.x {
 			rotation = glsl.identity(glsl.mat4)
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
-				{0.8, 0.8, 0.8},
-				{0.6, 0.6, 0.6},
+			face_lights =  {
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
+				{0.8, 0.8, 0.8, 1},
+				{0.6, 0.6, 0.6, 1},
 			}
 		}
 	} else if roof.start.x <= roof.end.x {
@@ -334,50 +336,55 @@ draw_roof :: proc(
 			rotation = glsl.identity(glsl.mat4)
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.8, 0.8, 0.8},
-				{0.6, 0.6, 0.6},
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
+			face_lights =  {
+				{0.8, 0.8, 0.8, 1},
+				{0.6, 0.6, 0.6, 1},
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
 			}
 		}
 	} else if roof.start.y <= roof.end.y {
 		if size.y >= size.x {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.0 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.6, 0.6, 0.6},
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
-				{0.8, 0.8, 0.8},
+			face_lights =  {
+				{0.6, 0.6, 0.6, 1},
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
+				{0.8, 0.8, 0.8, 1},
 			}
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 0.5 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
-				{0.8, 0.8, 0.8},
-				{0.6, 0.6, 0.6},
+			face_lights =  {
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
+				{0.8, 0.8, 0.8, 1},
+				{0.6, 0.6, 0.6, 1},
 			}
 		}
 	} else {
 		if size.y >= size.x {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.0 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.6, 0.6, 0.6},
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
-				{0.8, 0.8, 0.8},
+			face_lights =  {
+				{0.6, 0.6, 0.6, 1},
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
+				{0.8, 0.8, 0.8, 1},
 			}
 		} else {
 			rotation = glsl.mat4Rotate({0, 1, 0}, 1.5 * math.PI)
-			face_lights = [4]glsl.vec3 {
-				{0.8, 0.8, 0.8},
-				{0.6, 0.6, 0.6},
-				{0.4, 0.4, 0.4},
-				{1, 1, 1},
+			face_lights =  {
+				{0.8, 0.8, 0.8, 1},
+				{0.6, 0.6, 0.6, 1},
+				{0.4, 0.4, 0.4, 1},
+				{1, 1, 1, 1},
 			}
 		}
 	}
+
+	for &light in face_lights {
+		light *= roof.light
+	}
+
 	switch roof.type {
 	case .Half_Hip:
 		draw_half_hip_roof(
@@ -411,7 +418,7 @@ draw_half_pyramid_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	center := roof.start + (roof.end - roof.start) / 2
 	min_size := min(size.x, size.y)
@@ -492,7 +499,7 @@ draw_half_hip_side_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	center := roof.start + (roof.end - roof.start) / 2
 	min_size := min(size.x, size.y)
@@ -602,7 +609,7 @@ draw_half_hip_end_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	center := roof.start + (roof.end - roof.start) / 2
 	min_size := min(size.x, size.y)
@@ -712,7 +719,7 @@ draw_half_hip_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	ratio := max(size.x, size.y) / min(size.x, size.y)
 	if ratio > 2 {
@@ -752,7 +759,7 @@ draw_pyramid_hip_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	height := size.x / 2
 	center := roof.start + (roof.end - roof.start) / 2
@@ -792,7 +799,7 @@ draw_trapezoid_hip_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	min_size := min(size.y, size.x)
 	max_size := max(size.y, size.x)
@@ -862,7 +869,7 @@ draw_hip_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	ratio := max(size.x, size.y) / min(size.x, size.y)
 	if ratio == 1 {
@@ -893,7 +900,7 @@ draw_half_gable_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	min_size := min(size.y, size.x)
 	max_size := max(size.y, size.x)
@@ -954,7 +961,7 @@ draw_gable_roof :: proc(
 	indices: ^[dynamic]Roof_Index,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	face_lights: [4]glsl.vec3,
+	face_lights: [4]glsl.vec4,
 ) {
 	min_size := min(size.y, size.x)
 	max_size := max(size.y, size.x)
@@ -1018,7 +1025,7 @@ draw_roof_triangle :: proc(
 	mirrored: bool,
 	rotation: glsl.mat4,
 	texture: f32,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	slope: f32,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
@@ -1115,7 +1122,7 @@ draw_roof_rectangle :: proc(
 	mirrored: bool,
 	rotation: glsl.mat4,
 	texture: f32,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	slope: f32,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
@@ -1202,10 +1209,10 @@ draw_roof_rectangle :: proc(
 
 @(private = "file")
 EAVE_VERTICES :: [?]Roof_Vertex {
-	{pos = {-0.5, -0.2, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, -0.2, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1}},
-	{pos = {0.5, 0, -0.5}, texcoords = {0, 0, 0}, color = {1, 1, 1}},
-	{pos = {-0.5, 0, -0.5}, texcoords = {1, 0, 0}, color = {1, 1, 1}},
+	{pos = {-0.5, -0.2, -0.5}, texcoords = {0, 1, 0}, color = {1, 1, 1, 1}},
+	{pos = {0.5, -0.2, -0.5}, texcoords = {1, 1, 0}, color = {1, 1, 1, 1}},
+	{pos = {0.5, 0, -0.5}, texcoords = {0, 0, 0}, color = {1, 1, 1, 1}},
+	{pos = {-0.5, 0, -0.5}, texcoords = {1, 0, 0}, color = {1, 1, 1, 1}},
 }
 
 @(private = "file")
@@ -1216,7 +1223,7 @@ draw_roof_eave :: proc(
 	pos: glsl.vec3,
 	size: glsl.vec2,
 	rotation: glsl.mat4,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
 ) {
@@ -1244,7 +1251,7 @@ draw_roof_gable_eave :: proc(
 	pos: glsl.vec3,
 	size: glsl.vec3,
 	rotation: glsl.mat4,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	mirror: bool,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
@@ -1282,7 +1289,7 @@ draw_roof_pyramid_face :: proc(
 	size: glsl.vec3,
 	rotation: glsl.mat4,
 	texture: f32,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	slope: f32,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
@@ -1317,7 +1324,7 @@ draw_roof_hip_face :: proc(
 	size: glsl.vec3,
 	rotation: glsl.mat4,
 	texture: f32,
-	light: glsl.vec3,
+	light: glsl.vec4,
 	slope: f32,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,

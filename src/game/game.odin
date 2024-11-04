@@ -43,11 +43,11 @@ get_object_draws_context :: proc() -> ^Object_Draws {
 }
 
 get_roofs_context :: proc() -> ^Roofs_Context {
-    return &get_game_context().roofs
+	return &get_game_context().roofs
 }
 
 get_roof_tool_context :: proc() -> ^Roof_Tool_Context {
-    return &get_game_context().roof_tool
+	return &get_game_context().roof_tool
 }
 
 init_game :: proc() -> bool {
@@ -67,7 +67,14 @@ init_game :: proc() -> bool {
 	//
 
 	add_roof(
-		{type = .Hip, start = {-4, -4}, end = {-3, -3}, offset = 0, slope = 1},
+		 {
+			type = .Hip,
+			start = {-4, -4},
+			end = {-3, -3},
+			offset = 0,
+			slope = 1,
+			light = {1, 1, 1, 1},
+		},
 	)
 
 	add_roof(
@@ -77,6 +84,7 @@ init_game :: proc() -> bool {
 			end = {23.6, 22.6},
 			offset = 6,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -87,6 +95,7 @@ init_game :: proc() -> bool {
 			end = {15.6, 18.6},
 			offset = 6,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -176,6 +185,7 @@ init_game :: proc() -> bool {
 			end = {0.5, 1.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -185,6 +195,7 @@ init_game :: proc() -> bool {
 			end = {0.5, 1.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -195,6 +206,7 @@ init_game :: proc() -> bool {
 			end = {0.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -204,6 +216,7 @@ init_game :: proc() -> bool {
 			end = {0.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -214,6 +227,7 @@ init_game :: proc() -> bool {
 			end = {1.5, 6.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -223,6 +237,7 @@ init_game :: proc() -> bool {
 			end = {1.5, 6.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -233,6 +248,7 @@ init_game :: proc() -> bool {
 			end = {-0.5, 9.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -242,6 +258,7 @@ init_game :: proc() -> bool {
 			end = {-0.5, 9.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -253,6 +270,7 @@ init_game :: proc() -> bool {
 			end = {3.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -262,6 +280,7 @@ init_game :: proc() -> bool {
 			end = {3.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -272,6 +291,7 @@ init_game :: proc() -> bool {
 			end = {3.5, 3.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -281,6 +301,7 @@ init_game :: proc() -> bool {
 			end = {3.5, 3.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -291,6 +312,7 @@ init_game :: proc() -> bool {
 			end = {5.5, 8.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -300,6 +322,7 @@ init_game :: proc() -> bool {
 			end = {5.5, 8.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -310,6 +333,7 @@ init_game :: proc() -> bool {
 			end = {2.5, 11.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -319,6 +343,7 @@ init_game :: proc() -> bool {
 			end = {2.5, 11.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -330,6 +355,7 @@ init_game :: proc() -> bool {
 			end = {8.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -339,6 +365,7 @@ init_game :: proc() -> bool {
 			end = {8.5, 2.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -349,6 +376,7 @@ init_game :: proc() -> bool {
 			end = {8.5, 3.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -358,6 +386,7 @@ init_game :: proc() -> bool {
 			end = {8.5, 3.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -368,6 +397,7 @@ init_game :: proc() -> bool {
 			end = {9.5, 9.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -377,6 +407,7 @@ init_game :: proc() -> bool {
 			end = {9.5, 9.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -387,6 +418,7 @@ init_game :: proc() -> bool {
 			end = {6.5, 14.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -396,6 +428,7 @@ init_game :: proc() -> bool {
 			end = {6.5, 14.5},
 			offset = 3,
 			slope = 1.0,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -406,6 +439,7 @@ init_game :: proc() -> bool {
 			end = {13.5, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -415,6 +449,7 @@ init_game :: proc() -> bool {
 			end = {13.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -424,6 +459,7 @@ init_game :: proc() -> bool {
 			end = {14.5, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -433,6 +469,7 @@ init_game :: proc() -> bool {
 			end = {14.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -443,6 +480,7 @@ init_game :: proc() -> bool {
 			end = {19.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -452,6 +490,7 @@ init_game :: proc() -> bool {
 			end = {19.5, 3.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -461,6 +500,7 @@ init_game :: proc() -> bool {
 			end = {20.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -470,6 +510,7 @@ init_game :: proc() -> bool {
 			end = {20.5, 3.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -480,6 +521,7 @@ init_game :: proc() -> bool {
 			end = {26.5, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -489,6 +531,7 @@ init_game :: proc() -> bool {
 			end = {26.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -498,6 +541,7 @@ init_game :: proc() -> bool {
 			end = {27.5, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -507,6 +551,7 @@ init_game :: proc() -> bool {
 			end = {27.5, 2.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -518,6 +563,7 @@ init_game :: proc() -> bool {
 			end = {34.6, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -527,6 +573,7 @@ init_game :: proc() -> bool {
 			end = {34.6, 1.5},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -641,6 +688,7 @@ init_game :: proc() -> bool {
 			end = {33.5, 7.6},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 	add_roof(
@@ -650,6 +698,7 @@ init_game :: proc() -> bool {
 			end = {33.5, 7.6},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -764,6 +813,7 @@ init_game :: proc() -> bool {
 			end = {39.6, 3.6},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -852,6 +902,7 @@ init_game :: proc() -> bool {
 			end = {40.6, 7.6},
 			offset = 3,
 			slope = 1,
+			light = {1, 1, 1, 1},
 		},
 	)
 
@@ -956,8 +1007,11 @@ deinit_game :: proc() {
 	deinit_roofs()
 }
 
-draw_game :: proc() {
-	draw_roofs()
+draw_game :: proc(floor: i32) -> bool {
+	draw_objects(floor) or_return
+	draw_roofs(floor)
+
+    return true
 }
 
 update_game_on_camera_rotation :: proc() {

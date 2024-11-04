@@ -59,14 +59,14 @@ update_roof_tool :: proc() {
 				int(ctx.cursor.pos.x + 0.5),
 				int(ctx.cursor.pos.y + 0.5),
 			)
+        ctx.roof.light = {1, 1, 1, 0.5}
 		ctx.roof.id = add_roof(ctx.roof)
-		log.info("add roof: ", ctx.roof)
 	} else if mouse.is_button_down(.Left) {
 		ctx.roof.end = ctx.cursor.pos.xz
 		update_roof(ctx.roof)
-		log.info("update roof: ", ctx.roof)
 	} else if mouse.is_button_release(.Left) {
-
+        ctx.roof.light = {1, 1, 1, 1}
+		update_roof(ctx.roof)
 	}
 
 	// draw_roofs()

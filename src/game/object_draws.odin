@@ -166,7 +166,7 @@ draw_chunk :: proc(chunk: ^Object_Draw_Chunk) -> bool {
 	return true
 }
 
-draw_objects :: proc() -> bool {
+draw_objects :: proc(floor: i32) -> bool {
 	ctx := get_object_draws_context()
 
 	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
@@ -182,12 +182,12 @@ draw_objects :: proc() -> bool {
 	bind_shader(&ctx.shader)
 	// gl.UseProgram(shader_program)
 
-	for floor in 0 ..= floor.floor {
+	// for floor in 0 ..= floor.floor {
 		it := camera.make_visible_chunk_iterator()
 		for pos in it->next() {
 			draw_chunk(&ctx.chunks[floor][pos.x][pos.y]) or_return
 		}
-	}
+	// }
 
 	return true
 }

@@ -8,7 +8,7 @@ layout (std140) uniform UniformBufferObject {
 } ubo;
 
 layout(location = 0) in vec3  frag_texcoord;
-layout(location = 1) in vec3  frag_color;
+layout(location = 1) in vec4  frag_color;
 
 layout(location = 0) out vec4 color;
 
@@ -17,5 +17,5 @@ void main() {
     if (tex.a < 0.01) {
         discard;
     }
-    color = tex * vec4(ubo.light, 1) * vec4(frag_color, 1);
+    color = tex * vec4(ubo.light, 1) * frag_color;
 }
