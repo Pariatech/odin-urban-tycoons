@@ -1008,8 +1008,8 @@ deinit_game :: proc() {
 }
 
 draw_game :: proc(floor: i32) -> bool {
-	draw_objects(floor) or_return
 	draw_roofs(floor)
+	draw_objects(floor) or_return
 
     return true
 }
