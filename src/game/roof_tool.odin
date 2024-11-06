@@ -13,6 +13,7 @@ import "../terrain"
 Roof_Tool_Context :: struct {
 	cursor: Object_Draw,
 	roof:   Roof,
+    active: bool,
 }
 
 init_roof_tool :: proc() {
@@ -20,19 +21,20 @@ init_roof_tool :: proc() {
 	ctx.cursor.model = ROOF_TOOL_CURSOR_MODEL
 	ctx.cursor.texture = ROOF_TOOL_CURSOR_TEXTURE
 	ctx.cursor.light = {1, 1, 1}
-	ctx.cursor.id = create_object_draw(ctx.cursor)
 
 	floor.show_markers = true
 
 	get_roofs_context().floor_offset = 1
+    ctx.active = true
 }
 
 deinit_roof_tool :: proc() {
 	ctx := get_roof_tool_context()
-	delete_object_draw(ctx.cursor.id)
+	// delete_object_draw(ctx.cursor.id)
 
 	floor.show_markers = false
 	get_roofs_context().floor_offset = 0
+    ctx.active = false
 }
 
 update_roof_tool :: proc() {
@@ -46,12 +48,9 @@ update_roof_tool :: proc() {
 
 	ctx.cursor.transform = glsl.mat4Translate(ctx.cursor.pos)
 
-	update_object_draw(ctx.cursor)
-
 	if mouse.is_button_press(.Left) {
 		ctx.roof.start = ctx.cursor.pos.xz
 		ctx.roof.end = ctx.roof.start
-		ctx.roof.type = .Hip
 		ctx.roof.slope = 1
 		ctx.roof.offset =
 			f32(floor.floor) * 3 +
@@ -68,8 +67,17 @@ update_roof_tool :: proc() {
         ctx.roof.light = {1, 1, 1, 1}
 		update_roof(ctx.roof)
 	}
+}
 
-	// draw_roofs()
+draw_roof_tool :: proc() {
+	ctx := get_roof_tool_context()
+    if !ctx.active { return }
+    draw_one_object(&ctx.cursor)
+}
+
+set_roof_tool_roof_type :: proc(type: Roof_Type) {
+	ctx := get_roof_tool_context()
+    ctx.roof.type = type
 }
 
 @(private = "file")

@@ -68,8 +68,8 @@ init_game :: proc() -> bool {
 
 	add_roof(
 		 {
-			type = .Hip,
-			start = {-4, -4},
+			type = .Half_Gable,
+			start = {-4, -5},
 			end = {-3, -3},
 			offset = 0,
 			slope = 1,
@@ -188,16 +188,16 @@ init_game :: proc() -> bool {
 			light = {1, 1, 1, 1},
 		},
 	)
-	add_roof(
-		 {
-			type = .Half_Hip,
-			start = {1.5, -0.5},
-			end = {0.5, 1.5},
-			offset = 3,
-			slope = 1.0,
-			light = {1, 1, 1, 1},
-		},
-	)
+	// add_roof(
+	// 	 {
+	// 		type = .Half_Hip,
+	// 		start = {1.5, -0.5},
+	// 		end = {0.5, 1.5},
+	// 		offset = 3,
+	// 		slope = 1.0,
+	// 		light = {1, 1, 1, 1},
+	// 	},
+	// )
 
 	add_roof(
 		 {
@@ -1008,6 +1008,7 @@ deinit_game :: proc() {
 }
 
 draw_game :: proc(floor: i32) -> bool {
+    draw_roof_tool()
 	draw_roofs(floor)
 	draw_objects(floor) or_return
 

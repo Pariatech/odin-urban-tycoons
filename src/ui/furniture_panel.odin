@@ -3,7 +3,6 @@ package ui
 import "core:math/linalg/glsl"
 import "core:strings"
 
-import "../billboard"
 import g "../game"
 import "../tools"
 import "../window"

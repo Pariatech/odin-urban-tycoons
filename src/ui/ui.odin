@@ -122,6 +122,7 @@ init :: proc(using ctx: ^Context) -> (ok: bool = false) {
 	init_land_panel() or_return
 	init_paint_panel() or_return
     init_furniture_panel() or_return
+    init_roof_panel() or_return
 
 	return true
 }
@@ -221,6 +222,7 @@ update :: proc(using ctx: ^Context) {
 	land_panel(ctx)
 	paint_panel(ctx)
 	furniture_panel(ctx)
+    roof_panel(ctx)
 
 	container(
 		ctx,

@@ -504,9 +504,10 @@ draw_half_hip_side_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 	min_size := min(size.x, size.y)
 	max_size := max(size.x, size.y)
-	left_pos_offset := glsl.vec4{min_size / 2, 0, min_size / 2, 1} * rotation
+
+	left_pos_offset := glsl.vec4{min_size / 2, 0, (max_size - min_size * 2) / 2, 1} * rotation
 	left_pos := center + left_pos_offset.xz
-	right_pos_offset := glsl.vec4{min_size / 2, 0, -min_size / 2, 1} * rotation
+	right_pos_offset := glsl.vec4{min_size / 2, 0, -(max_size - min_size * 2) / 2, 1} * rotation
 	right_pos := center + right_pos_offset.xz
 	middle_pos_offset := glsl.vec4{min_size / 2, 0, 0, 1} * rotation
 	middle_pos := center + middle_pos_offset.xz
@@ -614,6 +615,8 @@ draw_half_hip_end_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 	min_size := min(size.x, size.y)
 	max_size := max(size.x, size.y)
+
+	// left_pos_offset := glsl.vec4{min_size / 2, 0, (max_size - min_size * 2) / 2, 1} * rotation
 	peak_offset := (max_size - min_size) / 2
 	peak_pos_offset := glsl.vec4{peak_offset, 0, 0, 1} * rotation
 	peak_pos := center + peak_pos_offset.xz
@@ -625,7 +628,7 @@ draw_half_hip_end_roof :: proc(
 	face_rotation := rotation
 	draw_roof_triangle(
 		{peak_pos.x, roof.offset, peak_pos.y},
-		{min_size - peak_offset, max_size / 2, max_size / 2},
+		{min_size / 2 + peak_offset, max_size / 2, max_size / 2},
 		false,
 		face_rotation,
 		1,
@@ -659,7 +662,7 @@ draw_half_hip_end_roof :: proc(
 	face_rotation = rotation * glsl.mat4Rotate({0, 1, 0}, -0.5 * math.PI)
 	draw_roof_pyramid_face(
 		{peak_pos.x, roof.offset, peak_pos.y},
-		{max_size / 2, max_size / 2, min_size - peak_offset},
+		{max_size / 2, max_size / 2, min_size / 2 + peak_offset},
 		face_rotation,
 		1,
 		face_lights[1],
@@ -680,7 +683,7 @@ draw_half_hip_end_roof :: proc(
 	face_rotation = rotation * glsl.mat4Rotate({0, 1, 0}, -1.0 * math.PI)
 	draw_roof_triangle(
 		{peak_pos.x, roof.offset, peak_pos.y},
-		{min_size - peak_offset, max_size / 2, max_size / 2},
+		{min_size / 2 + peak_offset, max_size / 2, max_size / 2},
 		true,
 		face_rotation,
 		1,

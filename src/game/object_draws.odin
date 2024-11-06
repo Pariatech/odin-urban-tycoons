@@ -192,6 +192,20 @@ draw_objects :: proc(floor: i32) -> bool {
 	return true
 }
 
+draw_one_object :: proc(object: ^Object_Draw) -> bool {
+	ctx := get_object_draws_context()
+
+	gl.BindBuffer(gl.UNIFORM_BUFFER, ctx.ubo)
+	set_shader_unifrom_block_binding(&ctx.shader, "UniformBufferObject", 2)
+	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, ctx.ubo)
+
+	bind_shader(&ctx.shader)
+
+	draw_object(object) or_return
+
+    return true
+}
+
 create_object_draw :: proc(draw: Object_Draw) -> Object_Draw_Id {
 	draw := draw
 	ctx := get_object_draws_context()
