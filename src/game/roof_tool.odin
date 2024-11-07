@@ -12,6 +12,7 @@ import "../terrain"
 
 Roof_Tool_Context :: struct {
 	cursor: Object_Draw,
+    cursor_top: Object_Draw,
 	roof:   Roof,
     active: bool,
 }
@@ -21,6 +22,9 @@ init_roof_tool :: proc() {
 	ctx.cursor.model = ROOF_TOOL_CURSOR_MODEL
 	ctx.cursor.texture = ROOF_TOOL_CURSOR_TEXTURE
 	ctx.cursor.light = {1, 1, 1}
+
+    ctx.cursor_top.model = ROOF_TOOL_CURSOR_TOP_MODEL
+	ctx.cursor_top.light = {1, 1, 1}
 
 	floor.show_markers = true
 
@@ -81,10 +85,21 @@ set_roof_tool_roof_type :: proc(type: Roof_Type) {
 }
 
 @(private = "file")
-ROOF_TOOL_CURSOR_MODEL :: "resources/objects/cursors/roof_cursor/Roof_Cursor.glb"
+ROOF_TOOL_CURSOR_MODEL :: "resources/roofs/roof_cursor.glb"
 
 @(private = "file")
-ROOF_TOOL_CURSOR_TEXTURE :: "resources/objects/cursors/roof_cursor/Hip_Roof_Cursor.png"
+ROOF_TOOL_CURSOR_TEXTURE :: "resources/roofs/roof_cursor.png"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_TOP_MODEL :: "resources/roofs/roof_cursor_top.glb"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_TOP_MAP :: [Roof_Type]string {
+	.Half_Hip   = "resources/roofs/half_hip_roof.png",
+	.Half_Gable = "resources/roofs/half_gable_roof.png",
+	.Hip        = "resources/roofs/hip_roof.png",
+	.Gable      = "resources/roofs/gable_roof.png",
+}
 
 @(private = "file")
 roof_tool_on_intersect :: proc(intersect: glsl.vec3) {
