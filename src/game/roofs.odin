@@ -601,6 +601,39 @@ draw_half_hip_side_roof :: proc(
 		vertices,
 		indices,
 	)
+    
+	draw_roof_eave(
+		{center.x, roof.offset + min_size, center.y},
+		{max_size - min_size * 2, min_size},
+		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
+		face_lights[3],
+		vertices,
+		indices,
+	)
+
+	left_gable_pos_offset := glsl.vec4{0, 0, (max_size - min_size) / 2, 1} * rotation
+	left_gable_pos := center + left_gable_pos_offset.xz
+	draw_roof_gable_eave(
+		{left_gable_pos.x, roof.offset, left_gable_pos.y},
+		{min_size, min_size, min_size},
+		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
+		face_lights[3],
+		true,
+		vertices,
+		indices,
+	)
+
+	right_gable_pos_offset := glsl.vec4{0, 0, -(max_size - min_size) / 2, 1} * rotation
+	right_gable_pos := center + right_gable_pos_offset.xz
+	draw_roof_gable_eave(
+		{right_gable_pos.x, roof.offset, right_gable_pos.y},
+		{min_size, min_size, min_size},
+		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
+		face_lights[3],
+		false,
+		vertices,
+		indices,
+	)
 }
 
 @(private = "file")
@@ -932,6 +965,15 @@ draw_half_gable_roof :: proc(
 		{max_size, min_size},
 		side_rotation,
 		face_lights[1],
+		vertices,
+		indices,
+	)
+
+	draw_roof_eave(
+		{center.x, roof.offset + min_size, center.y},
+		{max_size, min_size},
+		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI),
+		face_lights[3],
 		vertices,
 		indices,
 	)

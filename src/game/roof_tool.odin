@@ -371,7 +371,19 @@ add_gable_roof_walls :: proc(roof: Roof) {
 
 @(private = "file")
 add_half_hip_roof_walls :: proc(roof: Roof) {
+	start := roof.start + {0.5, 0.5}
+	end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(start.x), int(start.y))
+	floor := i32((roof.offset - tile_height) / 3)
 
+	start = glsl.min(start, end)
+	end = glsl.max(start, end)
+	size := end - start
+
+	if size.x > size.y {
+    } else {
+
+    }
 }
 
 @(private = "file")
