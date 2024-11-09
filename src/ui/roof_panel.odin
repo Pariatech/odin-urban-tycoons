@@ -27,6 +27,10 @@ roof_panel_body :: proc(
 ) {
     icons := ROOF_PANEL_ICONS
     for icon, i in icons {
+        color := DAY_SKY_BLUE
+        if game.get_roof_tool_context().roof.type == i {
+            color = DARK_BLUE
+        }
 		if icon_button(
 			   ctx,
 			    {
@@ -46,7 +50,7 @@ roof_panel_body :: proc(
 			   right_border_width = f32(BORDER_WIDTH),
 			   top_border_width = f32(BORDER_WIDTH),
 			   bottom_border_width = f32(BORDER_WIDTH),
-			   color = DAY_SKY_BLUE,
+			   color = color,
 		   ) {
             log.info(i)
 			game.set_roof_tool_roof_type(i)

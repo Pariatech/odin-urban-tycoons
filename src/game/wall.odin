@@ -578,6 +578,19 @@ get_north_south_wall :: proc(pos: glsl.ivec3) -> (Wall, bool) {
 	return chunk_get_north_south_wall(get_chunk(pos), pos)
 }
 
+add_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis, w: Wall) {
+	switch axis {
+	case .E_W:
+		add_east_west_wall(pos, w)
+	case .N_S:
+		add_north_south_wall(pos, w)
+	case .NW_SE:
+		add_north_west_south_east_wall(pos, w)
+	case .SW_NE:
+		add_south_west_north_east_wall(pos, w)
+	}
+}
+
 set_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis, w: Wall) {
 	switch axis {
 	case .E_W:
@@ -955,4 +968,40 @@ draw_walls :: proc(floor: i32) {
 			chunk_draw_walls(chunk, {x, i32(floor), z})
 		}
 	}
+}
+
+@(private = "file")
+add_east_west_wall :: proc(pos: glsl.ivec3, w: Wall) {
+    if has_east_west_wall(pos) {
+        return
+    }
+
+    set_east_west_wall(pos, w)
+}
+
+@(private = "file")
+add_north_south_wall :: proc(pos: glsl.ivec3, w: Wall) {
+    if has_north_south_wall(pos) {
+        return
+    }
+
+    set_north_south_wall(pos, w)
+}
+
+@(private = "file")
+add_north_west_south_east_wall :: proc(pos: glsl.ivec3, w: Wall) {
+    if has_north_west_south_east_wall(pos) {
+        return
+    }
+
+    set_north_west_south_east_wall(pos, w)
+}
+
+@(private = "file")
+add_south_west_north_east_wall :: proc(pos: glsl.ivec3, w: Wall) {
+    if has_south_west_north_east_wall(pos) {
+        return
+    }
+
+    set_south_west_north_east_wall(pos, w)
 }
