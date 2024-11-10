@@ -353,37 +353,110 @@ add_east_west_gable_roof_walls :: proc(
 
 @(private = "file")
 add_gable_roof_walls :: proc(roof: Roof) {
-	start := roof.start + {0.5, 0.5}
-	end := roof.end + {0.5, 0.5}
-	tile_height := terrain.get_tile_height(int(start.x), int(start.y))
+	t_start := roof.start + {0.5, 0.5}
+	t_end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(t_start.x), int(t_start.y))
 	floor := i32((roof.offset - tile_height) / 3)
 
-	start = glsl.min(start, end)
-	end = glsl.max(start, end)
+	start := glsl.min(t_start, t_end)
+	end := glsl.max(t_start, t_end)
 	size := end - start
 
 	if size.x > size.y {
 		add_north_south_gable_roof_walls(roof, start, end, size, floor)
 	} else {
-        add_east_west_gable_roof_walls(roof, start,end, size, floor)
+		add_east_west_gable_roof_walls(roof, start, end, size, floor)
 	}
 }
 
 @(private = "file")
 add_half_hip_roof_walls :: proc(roof: Roof) {
-	start := roof.start + {0.5, 0.5}
-	end := roof.end + {0.5, 0.5}
-	tile_height := terrain.get_tile_height(int(start.x), int(start.y))
+	t_start := roof.start + {0.5, 0.5}
+	t_end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(t_start.x), int(t_start.y))
 	floor := i32((roof.offset - tile_height) / 3)
 
-	start = glsl.min(start, end)
-	end = glsl.max(start, end)
+	start := glsl.min(t_start, t_end)
+	end := glsl.max(t_start, t_end)
 	size := end - start
+	log.info(end, start, size, roof.start, roof.end)
 
 	if size.x > size.y {
-    } else {
+		log.info("uh?", size.y)
+		for dx in 0 ..< math.trunc(size.x / 2) {
+			log.info(dx, start.x, roof.end.y)
+			add_wall(
+				{i32(start.x + dx), floor, i32(t_end.y)},
+				.E_W,
+				 {
+					type = .Side,
+					textures = {.Inside = .Brick, .Outside = .Brick},
+					mask = .Full_Mask,
+					state = .Up,
+					height = f32(dx) * roof.slope,
+					roof_slope = Wall_Roof_Slope {
+						height = roof.slope,
+						type = .Right_Side,
+					},
+				},
+			)
 
-    }
+			add_wall(
+				{i32(end.x - dx - 1), floor, i32(t_end.y)},
+				.E_W,
+				 {
+					type = .Side,
+					textures = {.Inside = .Brick, .Outside = .Brick},
+					mask = .Full_Mask,
+					state = .Up,
+					height = f32(dx) * roof.slope,
+					roof_slope = Wall_Roof_Slope {
+						height = roof.slope,
+						type = .Left_Side,
+					},
+				},
+			)
+		}
+
+        log.info(math.remainder(size.x, 2))
+		if math.remainder(size.x, 2) != 0 && size.x / size.y < 2 {
+			add_wall(
+				 {
+					i32(start.x + math.trunc(size.x / 2)),
+					floor,
+					i32(t_end.y),
+				},
+				.E_W,
+				 {
+					type = .Side,
+					textures = {.Inside = .Brick, .Outside = .Brick},
+					mask = .Full_Mask,
+					state = .Up,
+					height = math.trunc(size.x / 2) * roof.slope,
+					roof_slope = Wall_Roof_Slope {
+						height = roof.slope / 2,
+						type = .Peak,
+					},
+				},
+			)
+		}
+
+		for dx in 0 ..< size.x - size.y * 2 {
+			add_wall(
+				{i32(start.x + size.y + dx), floor, i32(t_end.y)},
+				.E_W,
+				 {
+					type = .Side,
+					textures = {.Inside = .Brick, .Outside = .Brick},
+					mask = .Full_Mask,
+					state = .Up,
+					height = f32(size.y) * roof.slope,
+				},
+			)
+		}
+	} else {
+
+	}
 }
 
 @(private = "file")
