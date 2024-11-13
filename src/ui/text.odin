@@ -7,7 +7,6 @@ import "core:strings"
 
 import gl "vendor:OpenGL"
 import "vendor:fontstash"
-import stbi "vendor:stb/image"
 
 import "../renderer"
 import "../window"

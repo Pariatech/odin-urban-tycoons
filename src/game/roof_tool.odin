@@ -1,8 +1,10 @@
 package game
 
+import "core:fmt"
 import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:strings"
 
 import "../cursor"
 import "../floor"
@@ -15,6 +17,7 @@ Roof_Tool_Context :: struct {
 	cursor_top: Object_Draw,
 	roof:       Roof,
 	active:     bool,
+	// angle_str:  string,
 }
 
 init_roof_tool :: proc() {
@@ -30,6 +33,9 @@ init_roof_tool :: proc() {
 
 	floor.show_markers = true
 
+	ctx.roof.slope = 1
+	// ctx.angle_str = fmt.aprint("45", "°", sep = "")
+
 	get_roofs_context().floor_offset = 1
 	ctx.active = true
 }
@@ -41,6 +47,8 @@ deinit_roof_tool :: proc() {
 	floor.show_markers = false
 	get_roofs_context().floor_offset = 0
 	ctx.active = false
+
+	// delete(ctx.angle_str)
 }
 
 update_roof_tool :: proc() {
@@ -57,7 +65,6 @@ update_roof_tool :: proc() {
 	if mouse.is_button_press(.Left) {
 		ctx.roof.start = ctx.cursor.pos.xz
 		ctx.roof.end = ctx.roof.start
-		ctx.roof.slope = 1
 		ctx.roof.offset =
 			f32(floor.floor) * 3 +
 			terrain.get_tile_height(
@@ -91,6 +98,37 @@ set_roof_tool_roof_type :: proc(type: Roof_Type) {
 	ctx.roof.type = type
 	cursor_top_map := ROOF_TOOL_CURSOR_TOP_MAP
 	ctx.cursor_top.texture = cursor_top_map[type]
+}
+
+get_roof_tool_roof_angle :: proc() -> f32 {
+	ctx := get_roof_tool_context()
+	return math.atan(ctx.roof.slope) / math.PI * 180
+}
+
+increment_roof_tool_roof_angle :: proc() {
+	ctx := get_roof_tool_context()
+	angle := get_roof_tool_roof_angle()
+
+	if angle >= 75 {
+		return
+	}
+
+	angle += 15
+
+	ctx.roof.slope = math.tan(angle / 180 * math.PI)
+}
+
+decrement_roof_tool_roof_angle :: proc() {
+	ctx := get_roof_tool_context()
+	angle := get_roof_tool_roof_angle()
+
+	if angle <= 15 {
+		return
+	}
+
+	angle -= 15
+
+	ctx.roof.slope = math.tan(angle / 180 * math.PI)
 }
 
 @(private = "file")

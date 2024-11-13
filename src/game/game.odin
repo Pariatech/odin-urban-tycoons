@@ -68,8 +68,8 @@ init_game :: proc() -> bool {
 
 	add_roof(
 		 {
-			type = .Half_Gable,
-			start = {-4, -5},
+			type = .Hip,
+			start = {-4, -4},
 			end = {-3, -3},
 			offset = 0,
 			slope = 1,

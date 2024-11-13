@@ -178,6 +178,8 @@ start :: proc() -> (ok: bool = false) {
 		mouse.update()
 		cursor.update()
 
+        free_all(context.temp_allocator)
+
 		frames += 1
 	}
 
