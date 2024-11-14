@@ -419,7 +419,13 @@ draw_wall_roof_slope_mesh :: proc(
 		vertex.pos = vertices[i].pos
 		vertex.texcoords.xy = vertices[i].texcoords.xy
 		vertex.pos.y *= roof_slope.height
-		vertex.texcoords.y *= roof_slope.height / 3
+		log.info("before:", vertex.pos.y, vertex.texcoords.y)
+        if vertex.texcoords.y == 0 {
+		    vertex.texcoords.y = (3 - (roof_slope.height + wall_height)) / 3
+        } else {
+		    vertex.texcoords.y = (3 - wall_height) / 3
+        }
+		log.info("after:", vertex.pos.y, vertex.texcoords.y)
 		vertex.light = light
 		vertex.texcoords.z = f32(texture)
 
@@ -972,36 +978,36 @@ draw_walls :: proc(floor: i32) {
 
 @(private = "file")
 add_east_west_wall :: proc(pos: glsl.ivec3, w: Wall) {
-    if has_east_west_wall(pos) {
-        return
-    }
+	if has_east_west_wall(pos) {
+		return
+	}
 
-    set_east_west_wall(pos, w)
+	set_east_west_wall(pos, w)
 }
 
 @(private = "file")
 add_north_south_wall :: proc(pos: glsl.ivec3, w: Wall) {
-    if has_north_south_wall(pos) {
-        return
-    }
+	if has_north_south_wall(pos) {
+		return
+	}
 
-    set_north_south_wall(pos, w)
+	set_north_south_wall(pos, w)
 }
 
 @(private = "file")
 add_north_west_south_east_wall :: proc(pos: glsl.ivec3, w: Wall) {
-    if has_north_west_south_east_wall(pos) {
-        return
-    }
+	if has_north_west_south_east_wall(pos) {
+		return
+	}
 
-    set_north_west_south_east_wall(pos, w)
+	set_north_west_south_east_wall(pos, w)
 }
 
 @(private = "file")
 add_south_west_north_east_wall :: proc(pos: glsl.ivec3, w: Wall) {
-    if has_south_west_north_east_wall(pos) {
-        return
-    }
+	if has_south_west_north_east_wall(pos) {
+		return
+	}
 
-    set_south_west_north_east_wall(pos, w)
+	set_south_west_north_east_wall(pos, w)
 }

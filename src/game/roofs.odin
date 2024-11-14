@@ -505,9 +505,12 @@ draw_half_hip_side_roof :: proc(
 	min_size := min(size.x, size.y)
 	max_size := max(size.x, size.y)
 
-	left_pos_offset := glsl.vec4{min_size / 2, 0, (max_size - min_size * 2) / 2, 1} * rotation
+	left_pos_offset :=
+		glsl.vec4{min_size / 2, 0, (max_size - min_size * 2) / 2, 1} * rotation
 	left_pos := center + left_pos_offset.xz
-	right_pos_offset := glsl.vec4{min_size / 2, 0, -(max_size - min_size * 2) / 2, 1} * rotation
+	right_pos_offset :=
+		glsl.vec4{min_size / 2, 0, -(max_size - min_size * 2) / 2, 1} *
+		rotation
 	right_pos := center + right_pos_offset.xz
 	middle_pos_offset := glsl.vec4{min_size / 2, 0, 0, 1} * rotation
 	middle_pos := center + middle_pos_offset.xz
@@ -601,7 +604,7 @@ draw_half_hip_side_roof :: proc(
 		vertices,
 		indices,
 	)
-    
+
 	draw_roof_eave(
 		{center.x, roof.offset + min_size, center.y},
 		{max_size - min_size * 2, min_size},
@@ -611,7 +614,8 @@ draw_half_hip_side_roof :: proc(
 		indices,
 	)
 
-	left_gable_pos_offset := glsl.vec4{0, 0, (max_size - min_size) / 2, 1} * rotation
+	left_gable_pos_offset :=
+		glsl.vec4{0, 0, (max_size - min_size) / 2, 1} * rotation
 	left_gable_pos := center + left_gable_pos_offset.xz
 	draw_roof_gable_eave(
 		{left_gable_pos.x, roof.offset, left_gable_pos.y},
@@ -619,11 +623,13 @@ draw_half_hip_side_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		true,
+		roof.slope,
 		vertices,
 		indices,
 	)
 
-	right_gable_pos_offset := glsl.vec4{0, 0, -(max_size - min_size) / 2, 1} * rotation
+	right_gable_pos_offset :=
+		glsl.vec4{0, 0, -(max_size - min_size) / 2, 1} * rotation
 	right_gable_pos := center + right_gable_pos_offset.xz
 	draw_roof_gable_eave(
 		{right_gable_pos.x, roof.offset, right_gable_pos.y},
@@ -631,6 +637,7 @@ draw_half_hip_side_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		false,
+		roof.slope,
 		vertices,
 		indices,
 	)
@@ -755,6 +762,7 @@ draw_half_hip_end_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		true,
+		roof.slope,
 		vertices,
 		indices,
 	)
@@ -767,6 +775,7 @@ draw_half_hip_end_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		false,
+		roof.slope,
 		vertices,
 		indices,
 	)
@@ -1008,6 +1017,7 @@ draw_half_gable_roof :: proc(
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[0],
 		false,
+		roof.slope,
 		vertices,
 		indices,
 	)
@@ -1018,6 +1028,7 @@ draw_half_gable_roof :: proc(
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
 		face_lights[2],
 		true,
+		roof.slope,
 		vertices,
 		indices,
 	)
@@ -1071,6 +1082,7 @@ draw_gable_roof :: proc(
 			side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 			face_lights[i * 2],
 			false,
+			roof.slope,
 			vertices,
 			indices,
 		)
@@ -1081,6 +1093,7 @@ draw_gable_roof :: proc(
 			side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
 			face_lights[(i * 2 + 2) % 4],
 			true,
+			roof.slope,
 			vertices,
 			indices,
 		)
@@ -1322,12 +1335,16 @@ draw_roof_gable_eave :: proc(
 	rotation: glsl.mat4,
 	light: glsl.vec4,
 	mirror: bool,
+	slope: f32,
 	vertices: ^[dynamic]Roof_Vertex,
 	indices: ^[dynamic]Roof_Index,
 ) {
 	index_offset := u32(len(vertices))
 	eave_vertices := EAVE_VERTICES
 	eave_indices := EAVE_INDICES
+
+	eave_vertices[0].pos.y *= slope
+	eave_vertices[1].pos.y *= slope
 
 	if mirror {
 		eave_vertices[0].pos.y += size.y
