@@ -288,7 +288,7 @@ update_roof :: proc(roof: Roof) {
 }
 
 @(private = "file")
-ROOF_SIZE_PADDING :: glsl.vec2{0.3, 0.3}
+ROOF_SIZE_PADDING :: glsl.vec2{0.2, 0.2}
 
 @(private = "file")
 get_roof_chunk_pos :: proc(roof: Roof) -> glsl.ivec3 {
