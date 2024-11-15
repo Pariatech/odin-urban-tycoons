@@ -304,9 +304,9 @@ add_east_west_gable_roof_walls :: proc(
 	trunc_half := math.trunc(size.x / 2)
 	for x, i in start.x ..< end.x - ceil_half {
 		type := Wall_Type.Side
-		if x == start.x {
-			type = .Start
-		}
+		// if x == start.x {
+		// 	type = .Start
+		// }
 		add_wall(
 			{i32(x), floor, i32(start.y)},
 			.E_W,
@@ -379,9 +379,9 @@ add_east_west_gable_roof_walls :: proc(
 
 	for x, i in end.x - trunc_half ..< end.x {
 		type := Wall_Type.Side
-		if x == end.x - 1 {
-			type = .End
-		}
+		// if x == end.x - 1 {
+		// 	type = .End
+		// }
 		add_wall(
 			{i32(x), floor, i32(start.y)},
 			.E_W,
