@@ -287,8 +287,8 @@ update_roof :: proc(roof: Roof) {
 	chunk.roofs[key.index] = roof
 }
 
-@(private = "file")
-ROOF_SIZE_PADDING :: glsl.vec2{0.2, 0.2}
+// @(private = "file")
+ROOF_SIZE_PADDING :: glsl.vec2{0.4, 0.4}
 
 @(private = "file")
 get_roof_chunk_pos :: proc(roof: Roof) -> glsl.ivec3 {
@@ -441,7 +441,7 @@ draw_half_pyramid_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[0],
 		vertices,
@@ -463,7 +463,7 @@ draw_half_pyramid_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[2],
 		vertices,
@@ -484,7 +484,7 @@ draw_half_pyramid_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{max_size, min_size},
+		{max_size, 1, min_size},
 		face_rotation,
 		face_lights[1],
 		vertices,
@@ -530,7 +530,7 @@ draw_half_hip_side_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[0],
 		vertices,
@@ -576,7 +576,7 @@ draw_half_hip_side_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{max_size, min_size},
+		{max_size, 1, min_size},
 		face_rotation,
 		face_lights[1],
 		vertices,
@@ -598,7 +598,7 @@ draw_half_hip_side_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[2],
 		vertices,
@@ -607,7 +607,7 @@ draw_half_hip_side_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset + min_size, center.y},
-		{max_size - min_size * 2, min_size},
+		{max_size - min_size * 2, 1, min_size},
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		vertices,
@@ -623,7 +623,8 @@ draw_half_hip_side_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		true,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -637,7 +638,8 @@ draw_half_hip_side_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		false,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -692,7 +694,7 @@ draw_half_hip_end_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[0],
 		vertices,
@@ -713,7 +715,7 @@ draw_half_hip_end_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{max_size, min_size},
+		{max_size, 1, min_size},
 		face_rotation,
 		face_lights[1],
 		vertices,
@@ -747,7 +749,7 @@ draw_half_hip_end_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{min_size, max_size},
+		{min_size, 1, max_size},
 		face_rotation,
 		face_lights[2],
 		vertices,
@@ -762,7 +764,8 @@ draw_half_hip_end_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		true,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -775,7 +778,8 @@ draw_half_hip_end_roof :: proc(
 		rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[3],
 		false,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -851,7 +855,7 @@ draw_pyramid_hip_roof :: proc(
 
 		draw_roof_eave(
 			{pos.x, roof.offset, pos.y},
-			size,
+			{size.x, 1, size.y},
 			side_rotation,
 			face_lights[i % 4],
 			vertices,
@@ -896,7 +900,7 @@ draw_trapezoid_hip_roof :: proc(
 
 		draw_roof_eave(
 			{pos.x, roof.offset, pos.y},
-			{min_size, min_size},
+			{min_size, 1, min_size},
 			side_rotation,
 			face_lights[i * 2 % 4],
 			vertices,
@@ -922,7 +926,7 @@ draw_trapezoid_hip_roof :: proc(
 
 		draw_roof_eave(
 			{center.x, roof.offset, center.y},
-			{max_size, min_size},
+			{max_size, 1, min_size},
 			side_rotation,
 			face_lights[(i * 2 + 1) % 4],
 			vertices,
@@ -995,7 +999,7 @@ draw_half_gable_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset, center.y},
-		{max_size, min_size},
+		{max_size, 1, min_size},
 		side_rotation,
 		face_lights[1],
 		vertices,
@@ -1004,7 +1008,7 @@ draw_half_gable_roof :: proc(
 
 	draw_roof_eave(
 		{center.x, roof.offset + min_size * roof.slope, center.y},
-		{max_size, min_size},
+		{max_size, 1, min_size},
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI),
 		face_lights[3],
 		vertices,
@@ -1017,7 +1021,8 @@ draw_half_gable_roof :: proc(
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 		face_lights[0],
 		false,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -1028,7 +1033,8 @@ draw_half_gable_roof :: proc(
 		side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
 		face_lights[2],
 		true,
-		roof.slope,
+		// roof.slope,
+        1,
 		vertices,
 		indices,
 	)
@@ -1067,7 +1073,7 @@ draw_gable_roof :: proc(
 
 		draw_roof_eave(
 			{center.x, roof.offset, center.y},
-			{max_size, min_size},
+			{max_size, 1, min_size},
 			side_rotation,
 			face_lights[(i * 2 + 1) % 4],
 			vertices,
@@ -1082,7 +1088,8 @@ draw_gable_roof :: proc(
 			side_rotation * glsl.mat4Rotate({0, 1, 0}, math.PI / 2),
 			face_lights[i * 2],
 			false,
-			roof.slope,
+			// roof.slope,
+        1,
 			vertices,
 			indices,
 		)
@@ -1093,7 +1100,8 @@ draw_gable_roof :: proc(
 			side_rotation * glsl.mat4Rotate({0, 1, 0}, -math.PI / 2),
 			face_lights[(i * 2 + 2) % 4],
 			true,
-			roof.slope,
+			// roof.slope,
+        1,
 			vertices,
 			indices,
 		)
@@ -1303,7 +1311,7 @@ EAVE_INDICES :: [?]Roof_Index{0, 1, 2, 0, 2, 3}
 @(private = "file")
 draw_roof_eave :: proc(
 	pos: glsl.vec3,
-	size: glsl.vec2,
+	size: glsl.vec3,
 	rotation: glsl.mat4,
 	light: glsl.vec4,
 	vertices: ^[dynamic]Roof_Vertex,
@@ -1314,7 +1322,7 @@ draw_roof_eave :: proc(
 	eave_indices := EAVE_INDICES
 
 	for &vertex in eave_vertices {
-		vertex.pos.xz *= size
+		vertex.pos *= size
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * rotation).xyz
 		vertex.texcoords.x *= size.x

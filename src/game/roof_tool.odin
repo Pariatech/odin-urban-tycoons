@@ -109,7 +109,7 @@ increment_roof_tool_roof_angle :: proc() {
 	ctx := get_roof_tool_context()
 	angle := get_roof_tool_roof_angle()
 
-	if angle >= 75 {
+	if angle >= 60 {
 		return
 	}
 
@@ -188,7 +188,8 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = f32(i) * roof.slope,
+				height = (f32(i) + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Left_Side,
@@ -203,7 +204,8 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = f32(i) * roof.slope,
+				height = (f32(i) + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Left_Side,
@@ -221,7 +223,8 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half) * roof.slope,
+				height = (trunc_half + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope / 2,
 					type = .Peak,
@@ -237,7 +240,8 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half) * roof.slope,
+				height = (trunc_half + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope / 2,
 					type = .Peak,
@@ -255,7 +259,12 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half - f32(i) - 1) * roof.slope,
+				height = (trunc_half -
+					f32(i) -
+					1 +
+					ROOF_SIZE_PADDING.y / 2 -
+					0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Right_Side,
@@ -270,7 +279,12 @@ add_north_south_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half - f32(i) - 1) * roof.slope,
+				height = (trunc_half -
+					f32(i) -
+					1 +
+					ROOF_SIZE_PADDING.y / 2 -
+					0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Right_Side,
@@ -289,15 +303,20 @@ add_east_west_gable_roof_walls :: proc(
 	ceil_half := math.ceil(size.x / 2)
 	trunc_half := math.trunc(size.x / 2)
 	for x, i in start.x ..< end.x - ceil_half {
+		type := Wall_Type.Side
+		if x == start.x {
+			type = .Start
+		}
 		add_wall(
 			{i32(x), floor, i32(start.y)},
 			.E_W,
 			 {
-				type = .Side,
+				type = type,
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = f32(i) * roof.slope,
+				height = (f32(i) + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Right_Side,
@@ -308,11 +327,12 @@ add_east_west_gable_roof_walls :: proc(
 			{i32(x), floor, i32(end.y)},
 			.E_W,
 			 {
-				type = .Side,
+				type = type,
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = f32(i) * roof.slope,
+				height = (f32(i) + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Right_Side,
@@ -330,7 +350,8 @@ add_east_west_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half) * roof.slope,
+				height = (trunc_half + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope / 2,
 					type = .Peak,
@@ -346,7 +367,8 @@ add_east_west_gable_roof_walls :: proc(
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half) * roof.slope,
+				height = (trunc_half + ROOF_SIZE_PADDING.y / 2 - 0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope / 2,
 					type = .Peak,
@@ -356,15 +378,24 @@ add_east_west_gable_roof_walls :: proc(
 	}
 
 	for x, i in end.x - trunc_half ..< end.x {
+		type := Wall_Type.Side
+		if x == end.x - 1 {
+			type = .End
+		}
 		add_wall(
 			{i32(x), floor, i32(start.y)},
 			.E_W,
 			 {
-				type = .Side,
+				type = type,
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half - f32(i) - 1) * roof.slope,
+				height = (trunc_half -
+					f32(i) -
+					1 +
+					ROOF_SIZE_PADDING.y / 2 -
+					0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Left_Side,
@@ -375,11 +406,16 @@ add_east_west_gable_roof_walls :: proc(
 			{i32(x), floor, i32(end.y)},
 			.E_W,
 			 {
-				type = .Side,
+				type = type,
 				textures = {.Inside = .Brick, .Outside = .Brick},
 				mask = .Full_Mask,
 				state = .Up,
-				height = (trunc_half - f32(i) - 1) * roof.slope,
+				height = (trunc_half -
+					f32(i) -
+					1 +
+					ROOF_SIZE_PADDING.y / 2 -
+					0.01) *
+				roof.slope,
 				roof_slope = Wall_Roof_Slope {
 					height = roof.slope,
 					type = .Left_Side,
