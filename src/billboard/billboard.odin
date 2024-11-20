@@ -525,10 +525,10 @@ load_billboard_model :: proc(
 
 	for mesh in data.meshes {
 		primitive := mesh.primitives[0]
-        log.info(mesh.name)
+		log.info(mesh.name)
 		if primitive.indices != nil {
 			accessor := primitive.indices
-            log.info(path, accessor.count)
+			log.info(path, accessor.count)
 			for i in 0 ..< accessor.count {
 				index := cgltf.accessor_read_index(accessor, i)
 				indices[i] = u8(index)
@@ -675,11 +675,7 @@ load_billboard_texture_array :: proc(
 
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-	gl.TexParameteri(
-		gl.TEXTURE_2D_ARRAY,
-		gl.TEXTURE_MIN_FILTER,
-		gl.NEAREST,
-	)
+	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	// gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	textures :: len(paths)
@@ -989,9 +985,10 @@ chunk_billboards_draw :: proc(
 		gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	}
 
-    if len(billboard_draw_context.indices) == 0 {
-        return
-    }
+	if len(billboard_draw_context.indices) == 0 ||
+	   len(billboards.instances) == 0 {
+		return
+	}
 
 	gl.BindVertexArray(billboards.vao)
 	gl.DrawElementsInstanced(
@@ -1108,8 +1105,11 @@ update_after_clockwise_rotation_2x2 :: proc(
 
 draw_billboards :: proc(floor: i32) {
 	gl.BindBuffer(gl.UNIFORM_BUFFER, billboard_ubo)
-    ubo_index := gl.GetUniformBlockIndex(billboard_shader_program, "UniformBufferObject")
-    gl.UniformBlockBinding(billboard_shader_program, ubo_index, 2)
+	ubo_index := gl.GetUniformBlockIndex(
+		billboard_shader_program,
+		"UniformBufferObject",
+	)
+	gl.UniformBlockBinding(billboard_shader_program, ubo_index, 2)
 	gl.BindBufferBase(gl.UNIFORM_BUFFER, 2, billboard_ubo)
 
 	billboard_uniform_object.view = camera.view

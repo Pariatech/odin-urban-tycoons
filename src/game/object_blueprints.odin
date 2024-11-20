@@ -1,10 +1,10 @@
 package game
 
-import "core:encoding/json"
 import "core:fmt"
 import "core:log"
 import "core:math/linalg/glsl"
 import "core:os"
+import "core:encoding/json"
 import "core:path/filepath"
 import "core:strings"
 

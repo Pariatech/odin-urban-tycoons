@@ -6,14 +6,25 @@ import stbi "vendor:stb/image"
 
 TEXTURE_SIZE :: 128
 
-load_texture_2D_array :: proc(
+load_texture_2D_array_from_array :: proc(
 	paths: [$T]cstring,
 	width: i32 = TEXTURE_SIZE,
 	height: i32 = TEXTURE_SIZE,
 ) -> (
 	ok: bool = true,
 ) {
-	textures :: len(paths)
+    paths := paths
+    return load_texture_2D_array_from_slice(raw_data(&paths)[:len(paths)], width, height)
+}
+
+load_texture_2D_array_from_slice :: proc(
+	paths: []cstring,
+	width: i32 = TEXTURE_SIZE,
+	height: i32 = TEXTURE_SIZE,
+) -> (
+	ok: bool = true,
+) {
+	textures := i32(len(paths))
 
 	if (textures == 0) {
 		fmt.println("No textures to load.")
@@ -30,7 +41,7 @@ load_texture_2D_array :: proc(
 		width,
 		height,
 		textures,
-        0,
+		0,
 		gl.RGBA,
 		gl.UNSIGNED_BYTE,
 		nil,
@@ -88,4 +99,9 @@ load_texture_2D_array :: proc(
 	gl.GenerateMipmap(gl.TEXTURE_2D_ARRAY)
 
 	return
+}
+
+load_texture_2D_array :: proc {
+	load_texture_2D_array_from_array,
+	load_texture_2D_array_from_slice,
 }

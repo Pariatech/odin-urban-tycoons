@@ -1,8 +1,12 @@
 package game
 
+import "core:encoding/json"
 import "core:log"
 import "core:math"
 import "core:math/linalg/glsl"
+import "core:os"
+import "core:path/filepath"
+import "core:strings"
 
 import gl "vendor:OpenGL"
 
@@ -36,7 +40,7 @@ Roof :: struct {
 	slope:       f32,
 	light:       glsl.vec4,
 	type:        Roof_Type,
-	texture:     string,
+	color:       string,
 	orientation: Roof_Orientation,
 }
 
@@ -68,14 +72,30 @@ Roofs_Context :: struct {
 	ubo:           u32,
 	shader:        Shader,
 	vao, vbo, ebo: u32,
-	texture_array: u32,
+	texture_array: Texture_Array,
 	floor_offset:  i32,
+	color_map:     Roof_Color_Map,
 }
+
+Roof_Color :: struct {
+	key:             string,
+	name:            string,
+	roof_texture:    string,
+	capping_texture: string,
+}
+
+Texture_Array :: struct {
+	handle:            u32,
+	texture_index_map: map[string]f32,
+}
+
+Roof_Color_Map :: map[string]Roof_Color
 
 ROOF_TEXTURES :: [?]cstring {
 	"resources/textures/roofs/Eave.png",
-	"resources/textures/roofs/RoofingTiles002.png",
-	"resources/textures/roofs/Dark Capping.png",
+	"resources/roofs/colors/long_tiles/128x128.png",
+	// "resources/textures/roofs/RoofingTiles002.png",
+	"resources/roofs/colors/long_tiles/capping_128x128.png",
 }
 
 ROOF_SHADER :: Shader {
@@ -83,8 +103,14 @@ ROOF_SHADER :: Shader {
 	fragment = "resources/shaders/roof.frag",
 }
 
+@(private = "file")
+EAVE_TEXTURE :: "resources/textures/roofs/Eave.png"
+
 init_roofs :: proc() -> bool {
 	roofs := get_roofs_context()
+
+	init_roof_colors() or_return
+
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
 	gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
 	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0)
@@ -134,8 +160,8 @@ init_roofs :: proc() -> bool {
 	gl.EnableVertexAttribArray(2)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.GenTextures(1, &roofs.texture_array)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array)
+	gl.GenTextures(1, &roofs.texture_array.handle)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array.handle)
 
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.REPEAT)
 	gl.TexParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.REPEAT)
@@ -154,7 +180,19 @@ init_roofs :: proc() -> bool {
 		max_anisotropy,
 	)
 
-	renderer.load_texture_2D_array(ROOF_TEXTURES, 128, 128) or_return
+	textures := make(
+		[]cstring,
+		len(roofs.texture_array.texture_index_map),
+		allocator = context.temp_allocator,
+	)
+	for k, v in roofs.texture_array.texture_index_map {
+		textures[int(v)] = strings.clone_to_cstring(
+			k,
+			allocator = context.temp_allocator,
+		)
+	}
+
+	renderer.load_texture_2D_array(textures, 128, 128) or_return
 	set_shader_uniform(&roofs.shader, "texture_sampler", i32(0))
 
 	gl.BindVertexArray(0)
@@ -178,6 +216,17 @@ deinit_roofs :: proc() {
 			}
 		}
 	}
+
+	for k, v in roofs.color_map {
+		delete(v.key)
+		delete(v.name)
+		delete(v.roof_texture)
+		delete(v.capping_texture)
+		// delete(k)
+	}
+	delete(roofs.color_map)
+    delete(roofs.texture_array.texture_index_map)
+	// clear(&roofs.color_map)
 }
 
 draw_roofs :: proc(flr: i32) {
@@ -186,7 +235,7 @@ draw_roofs :: proc(flr: i32) {
 		return
 	}
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array)
+	gl.BindTexture(gl.TEXTURE_2D_ARRAY, roofs.texture_array.handle)
 	defer gl.BindTexture(gl.TEXTURE_2D_ARRAY, 0)
 
 	gl.BindVertexArray(roofs.vao)
@@ -624,7 +673,7 @@ draw_half_hip_side_roof :: proc(
 		face_lights[3],
 		true,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -639,7 +688,7 @@ draw_half_hip_side_roof :: proc(
 		face_lights[3],
 		false,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -765,7 +814,7 @@ draw_half_hip_end_roof :: proc(
 		face_lights[3],
 		true,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -779,7 +828,7 @@ draw_half_hip_end_roof :: proc(
 		face_lights[3],
 		false,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -1022,7 +1071,7 @@ draw_half_gable_roof :: proc(
 		face_lights[0],
 		false,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -1034,7 +1083,7 @@ draw_half_gable_roof :: proc(
 		face_lights[2],
 		true,
 		// roof.slope,
-        1,
+		1,
 		vertices,
 		indices,
 	)
@@ -1089,7 +1138,7 @@ draw_gable_roof :: proc(
 			face_lights[i * 2],
 			false,
 			// roof.slope,
-        1,
+			1,
 			vertices,
 			indices,
 		)
@@ -1101,12 +1150,15 @@ draw_gable_roof :: proc(
 			face_lights[(i * 2 + 2) % 4],
 			true,
 			// roof.slope,
-        1,
+			1,
 			vertices,
 			indices,
 		)
 	}
 }
+
+@(private = "file")
+ROOF_CAPPING_SIZE :: 0.1
 
 @(private = "file")
 draw_roof_triangle :: proc(
@@ -1146,9 +1198,9 @@ draw_roof_triangle :: proc(
 
 	index_offset := u32(len(vertices))
 	for &vertex in triangle_vertices {
-		vertex.pos *= size - 0.2
+		vertex.pos *= size - ROOF_CAPPING_SIZE
 		vertex.pos.y *= slope
-		vertex.pos.z -= 0.2
+		vertex.pos.z -= ROOF_CAPPING_SIZE
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * transform).xyz
 		vertex.pos += pos
@@ -1165,8 +1217,8 @@ draw_roof_triangle :: proc(
 		capping_vertices[0].pos * size - capping_vertices[1].pos * size,
 	)
 	short_length := glsl.length(
-		capping_vertices[0].pos * (size - 0.2) -
-		capping_vertices[1].pos * (size - 0.2),
+		capping_vertices[0].pos * (size - ROOF_CAPPING_SIZE) -
+		capping_vertices[1].pos * (size - ROOF_CAPPING_SIZE),
 	)
 
 	index_offset = u32(len(vertices))
@@ -1189,9 +1241,9 @@ draw_roof_triangle :: proc(
 	capping_vertices[1].texcoords.xy = {1 - length_ratio, 0}
 	for vertex in capping_vertices {
 		vertex := vertex
-		vertex.pos *= size - 0.2
+		vertex.pos *= size - ROOF_CAPPING_SIZE
 		vertex.pos.y *= slope
-		vertex.pos.z -= 0.2
+		vertex.pos.z -= ROOF_CAPPING_SIZE
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * transform).xyz
 		vertex.pos += pos
@@ -1244,10 +1296,10 @@ draw_roof_rectangle :: proc(
 
 	index_offset := u32(len(vertices))
 	for &vertex in rectangle_vertices {
-		vertex.pos.zy *= size.zy - 0.2
+		vertex.pos.zy *= size.zy - ROOF_CAPPING_SIZE
 		vertex.pos.x *= size.x
 		vertex.pos.y *= slope
-		vertex.pos.z -= 0.2
+		vertex.pos.z -= ROOF_CAPPING_SIZE
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * transform).xyz
 		vertex.pos += pos
@@ -1279,10 +1331,10 @@ draw_roof_rectangle :: proc(
 	capping_vertices[1].texcoords.y = 0
 	for vertex in capping_vertices {
 		vertex := vertex
-		vertex.pos.zy *= size.zy - 0.2
+		vertex.pos.zy *= size.zy - ROOF_CAPPING_SIZE
 		vertex.pos.x *= size.x
 		vertex.pos.y *= slope
-		vertex.pos.z -= 0.2
+		vertex.pos.z -= ROOF_CAPPING_SIZE
 		pos4 := glsl.vec4{vertex.pos.x, vertex.pos.y, vertex.pos.z, 1}
 		vertex.pos = (pos4 * transform).xyz
 		vertex.pos += pos
@@ -1470,4 +1522,107 @@ draw_roof_hip_face :: proc(
 		vertices,
 		indices,
 	)
+}
+
+
+@(private = "file")
+ROOF_COLORS_DIR :: "resources/roofs/colors/"
+
+@(private = "file")
+init_roof_colors :: proc() -> bool {
+	roofs := get_roofs_context()
+
+	read_roof_colors_dir(ROOF_COLORS_DIR) or_return
+
+    roofs.texture_array.texture_index_map[EAVE_TEXTURE] = 0
+
+	for k, v in roofs.color_map {
+		if !(v.roof_texture in roofs.texture_array.texture_index_map) {
+			i := len(roofs.texture_array.texture_index_map)
+			roofs.texture_array.texture_index_map[v.roof_texture] = f32(i)
+		}
+
+		if !(v.capping_texture in roofs.texture_array.texture_index_map) {
+			i := len(roofs.texture_array.texture_index_map)
+			roofs.texture_array.texture_index_map[v.capping_texture] = f32(i)
+		}
+	}
+
+	return true
+}
+
+@(private = "file")
+read_roof_colors_dir :: proc(path: string) -> bool {
+	dir, err := os.open(path)
+	defer os.close(dir)
+	if err != nil {
+		log.fatal("Failed to open", path)
+		return false
+	}
+
+	if !os.is_dir(dir) {
+		log.fatal(path, "is not a dir!")
+		return false
+	}
+
+	file_infos, err1 := os.read_dir(dir, 0, allocator = context.temp_allocator)
+	// defer delete(file_infos)
+	if err1 != nil {
+		log.fatal("Failed to read", path)
+	}
+
+	for file_info in file_infos {
+		// defer delete(file_info.fullpath)
+		if file_info.is_dir {
+			read_roof_colors_dir(file_info.fullpath) or_return
+		} else if filepath.ext(file_info.name) == ".json" {
+			read_roof_color_json(file_info.fullpath) or_return
+		}
+	}
+	return true
+}
+
+@(private = "file")
+read_roof_color_json :: proc(pathname: string) -> bool {
+	data := os.read_entire_file_from_filename(
+		pathname,
+		allocator = context.temp_allocator,
+	) or_return
+
+	roof_color: Roof_Color
+
+	err := json.unmarshal(
+		data,
+		&roof_color,
+		allocator = context.temp_allocator,
+	)
+	if err != nil {
+		return false
+	}
+
+	dir := filepath.dir(pathname, allocator = context.temp_allocator)
+	roof_texture := roof_color.roof_texture
+	if !strings.starts_with(roof_texture, "resources/") {
+		roof_texture = filepath.join(
+			{dir, roof_color.roof_texture},
+			allocator = context.temp_allocator,
+		)
+	}
+	capping_texture := roof_color.capping_texture
+	if !strings.starts_with(capping_texture, "resources/") {
+		capping_texture = filepath.join(
+			{dir, roof_color.capping_texture},
+			allocator = context.temp_allocator,
+		)
+	}
+
+	roof_color.roof_texture = strings.clone(roof_texture)
+	roof_color.capping_texture = strings.clone(capping_texture)
+	roof_color.key = strings.clone(roof_color.key)
+	roof_color.name = strings.clone(roof_color.name)
+	log.info(roof_color)
+
+	ctx := get_roofs_context()
+	ctx.color_map[roof_color.key] = roof_color
+	return true
 }

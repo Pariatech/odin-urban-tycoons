@@ -1,0 +1,6 @@
+{
+    "key": "big_square_tiles",
+    "name": "Big Square Tiles",
+    "roof_texture": "./128x128.png",
+    "capping_texture": "./capping_128x128.png"
+}

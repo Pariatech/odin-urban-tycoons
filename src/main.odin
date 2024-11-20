@@ -125,6 +125,7 @@ start :: proc() -> (ok: bool = false) {
 	time.stopwatch_start(&fps_stopwatch)
 	frames: i64 = 0
 
+    free_all(context.temp_allocator)
 
 	for !should_close {
 		previous_time_ns = current_time_ns
