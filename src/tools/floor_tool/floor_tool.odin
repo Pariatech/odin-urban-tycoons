@@ -7,11 +7,11 @@ import "core:math/linalg/glsl"
 
 import "../../cursor"
 import "../../floor"
+import "../../game"
 import "../../keyboard"
 import "../../mouse"
 import "../../terrain"
 import "../../tile"
-import "../../game"
 
 position: glsl.ivec2
 side: tile.Tile_Triangle_Side
@@ -91,7 +91,7 @@ update :: proc() {
 		}
 
 		if mouse.is_button_press(.Left) {
-            save_command()
+			save_command()
 			clear(&previous_floor_tiles)
 		}
 	} else if mouse.is_button_press(.Left) {
@@ -108,7 +108,7 @@ update :: proc() {
 		}
 	} else if placing && mouse.is_button_release(.Left) {
 		placing = false
-        save_command()
+		save_command()
 		clear(&previous_floor_tiles)
 	} else {
 		drag_start = {position.x, floor.floor, position.y}
@@ -229,7 +229,11 @@ on_intersect :: proc(intersect: glsl.vec3) {
 
 revert_tiles :: proc() {
 	for k, v in previous_floor_tiles {
-		tile.set_tile_triangle(k.pos, k.side, v)
+		if k.pos.y != floor.floor && v.?.texture == .Floor_Marker {
+		    tile.set_tile_triangle(k.pos, k.side, nil)
+		} else {
+		    tile.set_tile_triangle(k.pos, k.side, v)
+        }
 	}
 
 	clear(&previous_floor_tiles)
