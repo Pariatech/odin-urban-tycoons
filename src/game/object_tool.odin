@@ -466,6 +466,7 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		}
 
 		draw := object_draw_from_object(object)
+        log.info(draw)
 		update_object_draw(draw)
 	}
 	update_object_tool_tile_marker_object_draws(light)

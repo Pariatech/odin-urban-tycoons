@@ -167,8 +167,8 @@ calculate_terrain_light :: proc(x, z: int) {
 }
 
 get_tile_height :: proc(x, z: int) -> f32 {
-	x := math.clamp(x, 0, constants.WORLD_WIDTH + 1)
-	z := math.clamp(z, 0, constants.WORLD_DEPTH + 1)
+	x := math.clamp(x, 0, constants.WORLD_WIDTH - 1)
+	z := math.clamp(z, 0, constants.WORLD_DEPTH - 1)
 	total :=
 		terrain_heights[x][z] +
 		terrain_heights[x + 1][z] +
@@ -181,7 +181,7 @@ is_tile_flat :: proc(xz: glsl.ivec2) -> bool {
 	xz := glsl.clamp(
 		xz,
 		glsl.ivec2{0, 0},
-		glsl.ivec2{constants.WORLD_WIDTH + 1, constants.WORLD_DEPTH + 1},
+		glsl.ivec2{constants.WORLD_WIDTH - 1, constants.WORLD_DEPTH - 1},
 	)
 	return(
 		terrain_heights[xz.x][xz.y] == terrain_heights[xz.x + 1][xz.y] &&
@@ -198,6 +198,6 @@ set_terrain_height :: proc(x, z: int, height: f32) {
 
 get_terrain_height :: proc(pos: glsl.ivec2) -> f32 {
 	return(
-		terrain_heights[clamp(pos.x, 0, constants.WORLD_WIDTH + 1)][clamp(pos.y, 0, constants.WORLD_DEPTH + 1)] \
+		terrain_heights[clamp(pos.x, 0, constants.WORLD_WIDTH)][clamp(pos.y, 0, constants.WORLD_DEPTH)] \
 	)
 }
