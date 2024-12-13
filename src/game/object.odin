@@ -175,8 +175,8 @@ update_objects_on_camera_rotation :: proc() {
 }
 
 world_pos_to_tile_pos :: proc(pos: glsl.vec3) -> (tile_pos: glsl.ivec2) {
-	tile_pos.x = i32(pos.x + 0.5)
-	tile_pos.y = i32(pos.z + 0.5)
+	tile_pos.x = clamp(i32(pos.x + 0.5), 0, c.WORLD_WIDTH - 1)
+	tile_pos.y = clamp(i32(pos.z + 0.5), 0, c.WORLD_DEPTH - 1)
 	return
 }
 

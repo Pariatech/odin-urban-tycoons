@@ -7,6 +7,7 @@ import "core:math/linalg/glsl"
 
 import gl "vendor:OpenGL"
 
+import "../constants"
 import "../cursor"
 import "../floor"
 import "../keyboard"
@@ -255,6 +256,14 @@ object_tool_place_object :: proc() {
 			}
 		}
 		ctx.objects[0].pos = ctx.cursor_pos
+
+        log.info(ctx.objects[0].pos)
+        ctx.objects[0].bounding_box
+		ctx.objects[0].pos.xz = glsl.clamp(
+			ctx.objects[0].pos.xz,
+			glsl.vec2{0, 0},
+			glsl.vec2{constants.WORLD_WIDTH - 1, constants.WORLD_DEPTH - 1},
+		)
 	}
 }
 
@@ -309,8 +318,17 @@ object_tool_move_object :: proc() {
 		}
 
 		new_pos := ctx.cursor_pos
+		log.info(new_pos)
 		for &obj in ctx.objects {
 			obj.pos += new_pos - root_pos
+			obj.pos.xz = glsl.clamp(
+				obj.pos.xz,
+				glsl.vec2{0, 0},
+				glsl.vec2 {
+					constants.WORLD_WIDTH - 1,
+					constants.WORLD_DEPTH - 1,
+				},
+			)
 		}
 	}
 }
@@ -466,7 +484,7 @@ draw_object_tool :: proc(can_add: bool) -> bool {
 		}
 
 		draw := object_draw_from_object(object)
-        log.info(draw)
+		// log.info(draw)
 		update_object_draw(draw)
 	}
 	update_object_tool_tile_marker_object_draws(light)
