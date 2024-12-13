@@ -552,9 +552,9 @@ move_point_height :: proc(x, z: i32, movement: f32) {
 adjust_points :: proc(x, z, w, h: int, movement: f32) {
 	for i in 1 ..< int(terrain_tool_brush_size) {
 		start_x := max(x - i, 0) + 1
-		end_x := max(x + i, 0)
+		end_x := min(max(x + i, 0), constants.WORLD_WIDTH)
 		start_z := max(z - i, 0)
-		end_z := max(z + i, 0)
+		end_z := min(max(z + i, 0), constants.WORLD_DEPTH)
 
 		if x - i >= 0 {
 			for z in start_z ..= end_z {
@@ -568,7 +568,7 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 			}
 		}
 
-		if x + w + i < constants.WORLD_WIDTH {
+		if x + w + i <= constants.WORLD_WIDTH {
 			for z in start_z ..= end_z {
 				move_point_height(
 					i32(x + w + i),
@@ -592,7 +592,7 @@ adjust_points :: proc(x, z, w, h: int, movement: f32) {
 			}
 		}
 
-		if z + h + i < constants.WORLD_DEPTH {
+		if z + h + i <= constants.WORLD_DEPTH {
 			for x in start_x ..< end_x {
 				move_point_height(
 					i32(x),
