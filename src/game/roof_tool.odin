@@ -34,6 +34,7 @@ init_roof_tool :: proc() {
 	floor.show_markers = true
 
 	ctx.roof.slope = 1
+    ctx.roof.color = "big_square_tiles"
 	// ctx.angle_str = fmt.aprint("45", "°", sep = "")
 
 	get_roofs_context().floor_offset = 1
@@ -98,6 +99,11 @@ set_roof_tool_roof_type :: proc(type: Roof_Type) {
 	ctx.roof.type = type
 	cursor_top_map := ROOF_TOOL_CURSOR_TOP_MAP
 	ctx.cursor_top.texture = cursor_top_map[type]
+}
+
+set_roof_tool_roof_color :: proc(color: string) {
+	ctx := get_roof_tool_context()
+	ctx.roof.color = color
 }
 
 get_roof_tool_roof_angle :: proc() -> f32 {

@@ -58,14 +58,52 @@ roof_panel_body :: proc(using ctx: ^Context, pos: glsl.vec2, size: glsl.vec2) {
 			   bottom_border_width = f32(BORDER_WIDTH),
 			   color = color,
 		   ) {
-			log.info(i)
 			game.set_roof_tool_roof_type(i)
 		}
 	}
-	// for blueprint, i in game.object_blueprints {
-	// 	border_width := f32(BORDER_WIDTH)
-	//
-	// }
+}
+
+roof_panel_color_picker :: proc(
+	using ctx: ^Context,
+	pos: glsl.vec2,
+	size: glsl.vec2,
+) {
+	roofs := game.get_roofs_context()
+    i: int
+	for k, v in roofs.color_map {
+        texture_index := roofs.texture_array.texture_index_map[v.roof_texture]
+		color := DAY_SKY_BLUE
+
+        border_width := f32(BORDER_WIDTH)
+		if game.get_roof_tool_context().roof.color == v.key {
+			border_width *= 2
+		}
+
+		if icon_button(
+			   ctx,
+			    {
+				   pos.x + 2 + f32(i32(i) / 2) * (ROOF_PANEL_TILE_SIZE + 2),
+				   pos.y +
+				   FURNITURE_PANEL_PADDING +
+				   f32(i32(i) % 2) * (FURNITURE_PANEL_TILE_SIZE + 2),
+			   }, // 2 + f32(i) * (FURNITURE_PANEL_TILE_SIZE + 2),// window.size.y - 31 - PANEL_HEIGHT + FLOOR_PANEL_PADDING,
+			   {FURNITURE_PANEL_TILE_SIZE, FURNITURE_PANEL_TILE_SIZE},
+			   roofs.texture_array.handle,
+			   int(texture_index),
+			   top_padding = 0,
+			   bottom_padding = 0,
+			   left_padding = 0,
+			   right_padding = 0,
+			   left_border_width = border_width,
+			   right_border_width = border_width,
+			   top_border_width = border_width,
+			   bottom_border_width = border_width,
+			   color = color,
+		   ) {
+			game.set_roof_tool_roof_color(v.key)
+		}
+        i += 1
+	}
 }
 
 
@@ -78,6 +116,10 @@ ROOF_PANEL_ROOF_HEIGHT_ICON_HEIGHT :: 96
 @(private = "file")
 ROOF_PANEL_ROOF_HEIGHT_PANEL_WIDTH ::
 	ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH + 4 + 32 + 4 * 2
+
+@(private = "file")
+ROOF_PANEL_ROOF_PANEL_WIDTH ::
+	4 + len(ROOF_PANEL_ICONS) / 2 * (ROOF_PANEL_TILE_SIZE + 2)
 
 @(private = "file")
 roof_panel_roof_height_panel :: proc(
@@ -99,40 +141,40 @@ roof_panel_roof_height_panel :: proc(
 	)
 
 	if button(
-		ctx,
-		{pos.x + 8 + ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH, pos.y + 4},
-		{32, 32},
-		"+",
-		padding_top = 4,
-	) {
-        game.increment_roof_tool_roof_angle()
-    }
+		   ctx,
+		   {pos.x + 8 + ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH, pos.y + 4},
+		   {32, 32},
+		   "+",
+		   padding_top = 4,
+	   ) {
+		game.increment_roof_tool_roof_angle()
+	}
 
-    roof_tool_ctx := game.get_roof_tool_context()
-    angle := game.get_roof_tool_roof_angle()
+	roof_tool_ctx := game.get_roof_tool_context()
+	angle := game.get_roof_tool_roof_angle()
 
-    bytes := transmute([]u8)roof_panel_roof_angle    
-    bytes[0] = u8(angle / 10) + '0'
-    bytes[1] = u8(int(angle) % 10) + '0'
-    // defer delete(angle)
+	bytes := transmute([]u8)roof_panel_roof_angle
+	bytes[0] = u8(angle / 10) + '0'
+	bytes[1] = u8(int(angle) % 10) + '0'
+	// defer delete(angle)
 	text(
 		ctx,
 		{pos.x + 8 + ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH + 16, pos.y + 6 + 48},
 		roof_panel_roof_angle,
 		ah = .CENTER,
 		av = .MIDDLE,
-        size = 24,
+		size = 24,
 	)
 
 	if button(
-		ctx,
-		{pos.x + 8 + ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH, pos.y + 4 + 64},
-		{32, 32},
-		"-",
-		padding_top = 2,
-	) {
-        game.decrement_roof_tool_roof_angle()
-    }
+		   ctx,
+		   {pos.x + 8 + ROOF_PANEL_ROOF_HEIGHT_ICON_WIDTH, pos.y + 4 + 64},
+		   {32, 32},
+		   "-",
+		   padding_top = 2,
+	   ) {
+		game.decrement_roof_tool_roof_angle()
+	}
 }
 
 roof_panel :: proc(using ctx: ^Context) {
@@ -152,11 +194,25 @@ roof_panel :: proc(using ctx: ^Context) {
 				window.size.y - 31 - PANEL_HEIGHT,
 			},
 			size =  {
-				window.size.x - ROOF_PANEL_ROOF_HEIGHT_PANEL_WIDTH,
+				ROOF_PANEL_ROOF_PANEL_WIDTH,
 				PANEL_HEIGHT,
 			},
 			left_border_width = 0,
 			body = roof_panel_body,
+		)
+
+		container(
+			ctx,
+			pos =  {
+				ROOF_PANEL_ROOF_HEIGHT_PANEL_WIDTH + ROOF_PANEL_ROOF_PANEL_WIDTH,
+				window.size.y - 31 - PANEL_HEIGHT,
+			},
+			size =  {
+				window.size.x - ROOF_PANEL_ROOF_HEIGHT_PANEL_WIDTH - ROOF_PANEL_ROOF_PANEL_WIDTH,
+				PANEL_HEIGHT,
+			},
+			left_border_width = 0,
+			body = roof_panel_color_picker,
 		)
 	}
 }
@@ -174,7 +230,7 @@ init_roof_panel :: proc() -> bool {
 		roof_height_icon[:],
 	) or_return
 
-    roof_panel_roof_angle = fmt.aprint("45", "°", sep = "")
+	roof_panel_roof_angle = fmt.aprint("45", "°", sep = "")
 
 	//    for blueprint, i in game.object_blueprints {
 	// 	init_icon_texture_array(
