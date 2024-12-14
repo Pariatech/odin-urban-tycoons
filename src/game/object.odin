@@ -32,7 +32,7 @@ Object_Type :: enum {
 	Computer,
 	Plate,
 	Couch,
-    Cursor,
+	Cursor,
 	// Carpet,
 	// Tree,
 	// Wall,
@@ -345,6 +345,21 @@ clamp_object :: proc(object: ^Object) {
 	object.pos.z =
 		math.floor(object.pos.z + f32(rotated_size.z % 2) / 2) +
 		f32((rotated_size.z + 1) % 2) / 2
+
+	if rotated_size.x != 1 {
+		object.pos.x = math.clamp(
+			object.pos.x,
+			f32(rotated_size.x) / 2,
+			c.WORLD_WIDTH - f32(rotated_size.x + 1) / 2,
+		)
+	}
+	if rotated_size.z != 1 {
+		object.pos.z = math.clamp(
+			object.pos.z,
+			f32(rotated_size.x) / 2,
+			c.WORLD_DEPTH - f32(rotated_size.z + 1) / 2,
+		)
+	}
 }
 
 make_object_tiles_iterator :: proc(object: Object) -> Object_Tiles_Iterator {
@@ -836,6 +851,7 @@ rotate_object :: proc(object: ^Object) {
 	object.orientation = Object_Orientation(
 		(int(object.orientation) + 1) % len(Object_Orientation),
 	)
+	calculate_object_bounding_box(object)
 }
 
 delete_object_by_id :: proc(id: Object_Id) -> (ok: bool = true) {

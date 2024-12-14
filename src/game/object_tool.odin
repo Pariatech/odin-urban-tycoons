@@ -256,14 +256,6 @@ object_tool_place_object :: proc() {
 			}
 		}
 		ctx.objects[0].pos = ctx.cursor_pos
-
-        log.info(ctx.objects[0].pos)
-        ctx.objects[0].bounding_box
-		ctx.objects[0].pos.xz = glsl.clamp(
-			ctx.objects[0].pos.xz,
-			glsl.vec2{0, 0},
-			glsl.vec2{constants.WORLD_WIDTH - 1, constants.WORLD_DEPTH - 1},
-		)
 	}
 }
 
