@@ -86,7 +86,7 @@ init_game :: proc() -> bool {
 			offset = 6,
 			slope = 1,
 			light = {1, 1, 1, 1},
-            color = "big_square_tiles",
+            color = "hexagon_tiles",
 		},
 	)
 
