@@ -610,6 +610,19 @@ set_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis, w: Wall) {
 	}
 }
 
+remove_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis) {
+	switch axis {
+	case .E_W:
+		remove_east_west_wall(pos)
+	case .N_S:
+		remove_north_south_wall(pos)
+	case .NW_SE:
+		remove_north_west_south_east_wall(pos)
+	case .SW_NE:
+		remove_south_west_north_east_wall(pos)
+	}
+}
+
 get_wall :: proc(pos: glsl.ivec3, axis: Wall_Axis) -> (Wall, bool) {
 	switch axis {
 	case .E_W:

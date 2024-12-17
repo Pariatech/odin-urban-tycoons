@@ -14,11 +14,12 @@ import "../mouse"
 import "../terrain"
 
 Roof_Tool_Context :: struct {
-	cursor:     Object_Draw,
-	cursor_top: Object_Draw,
-	roof:       Roof,
-	active:     bool,
-	state:      Roof_Tool_State,
+	cursor:            Object_Draw,
+	cursor_top:        Object_Draw,
+	roof:              Roof,
+	active:            bool,
+	state:             Roof_Tool_State,
+	roof_under_cursor: Maybe(Roof),
 	// angle_str:  string,
 }
 
@@ -74,11 +75,11 @@ update_roof_tool :: proc() {
 
 	switch ctx.state {
 	case .Idle:
-        handle_roof_tool_idle()
+		ctx.state = handle_roof_tool_idle()
 	case .Placing:
-		handle_roof_tool_placing()
+		ctx.state = handle_roof_tool_placing()
 	case .Removing:
-		handle_roof_tool_removing()
+		ctx.state = handle_roof_tool_removing()
 	}
 
 	ctx.cursor_top.light = ctx.cursor.light
@@ -777,7 +778,6 @@ add_north_south_half_gable_roof_walls :: proc(
 			},
 		)
 	}
-
 }
 
 @(private = "file")
@@ -815,14 +815,16 @@ add_half_gable_roof_walls :: proc(roof: Roof) {
 }
 
 @(private = "file")
-handle_roof_tool_idle :: proc() {
+handle_roof_tool_idle :: proc() -> Roof_Tool_State {
 	ctx := get_roof_tool_context()
 
 	if keyboard.is_key_down(.Key_Left_Control) {
 		ctx.cursor.light = {1, 0, 0}
 
-		ctx.state = .Removing
-	} else if mouse.is_button_press(.Left) {
+		return .Removing
+	}
+
+	if mouse.is_button_press(.Left) {
 		ctx.roof.start = ctx.cursor.pos.xz
 		ctx.roof.end = ctx.roof.start
 		ctx.roof.offset =
@@ -834,37 +836,292 @@ handle_roof_tool_idle :: proc() {
 		ctx.roof.light = {1, 1, 1, 0.5}
 		ctx.roof.id = add_roof(ctx.roof)
 
-		ctx.state = .Placing
+		return .Placing
 	}
+
+	return ctx.state
 }
 
 @(private = "file")
-handle_roof_tool_placing :: proc() {
+handle_roof_tool_placing :: proc() -> Roof_Tool_State {
 	ctx := get_roof_tool_context()
 
 	if keyboard.is_key_down(.Key_Left_Control) {
 		ctx.cursor.light = {1, 0, 0}
 		remove_roof(ctx.roof)
-		ctx.state = .Removing
-	} else if mouse.is_button_release(.Left) {
+		return .Removing
+	}
+
+	if mouse.is_button_release(.Left) {
 		ctx.roof.light = {1, 1, 1, 1}
 		update_roof(ctx.roof)
 		add_roof_walls(ctx.roof)
-		ctx.state = .Idle
+		return .Idle
+	}
+
+	ctx.roof.end = ctx.cursor.pos.xz
+	update_roof(ctx.roof)
+	return ctx.state
+}
+
+@(private = "file")
+handle_roof_tool_removing :: proc() -> Roof_Tool_State {
+	ctx := get_roof_tool_context()
+
+	if roof, ok := ctx.roof_under_cursor.?; ok {
+		roof.light = {1, 1, 1, 1}
+		update_roof(roof)
+	}
+
+	if keyboard.is_key_release(.Key_Left_Control) {
+		ctx.cursor.light = {1, 1, 1}
+		return .Idle
+	}
+
+	roofs := get_roofs_context()
+
+	pos :=
+		glsl.floor(ctx.cursor.pos + glsl.vec3{0.5, 0, 0.5}) -
+		glsl.vec3{0.5, 0, 0.5}
+	if roof, ok := get_roof_at(pos); ok {
+		if mouse.is_button_press(.Left) {
+			ctx.roof_under_cursor = nil
+            remove_roof_walls(roof)
+			remove_roof(roof)
+		} else {
+			roof.light = {1, 0, 0, 1}
+			ctx.roof_under_cursor = roof
+			update_roof(roof)
+		}
 	} else {
-		ctx.roof.end = ctx.cursor.pos.xz
-		update_roof(ctx.roof)
+		ctx.roof_under_cursor = nil
+	}
+
+	return ctx.state
+}
+
+@(private = "file")
+remove_roof_walls :: proc(roof: Roof) {
+	switch roof.type {
+	case .Hip:
+	case .Gable:
+		remove_gable_roof_walls(roof)
+	case .Half_Hip:
+		remove_half_hip_roof_walls(roof)
+	case .Half_Gable:
+		remove_half_gable_roof_walls(roof)
 	}
 }
 
 @(private = "file")
-handle_roof_tool_removing :: proc() {
-	ctx := get_roof_tool_context()
+remove_north_south_gable_roof_walls :: proc(
+	roof: Roof,
+	start, end, size: glsl.vec2,
+	floor: i32,
+) {
+	ceil_half := math.ceil(size.y / 2)
+	trunc_half := math.trunc(size.y / 2)
+	for y, i in start.y ..< end.y - ceil_half {
+		remove_wall({i32(start.x), floor, i32(y)}, .N_S)
+		remove_wall({i32(end.x), floor, i32(y)}, .N_S)
+	}
 
-	if keyboard.is_key_release(.Key_Left_Control) {
-		ctx.cursor.light = {1, 1, 1}
-        ctx.state = .Idle
+	if ceil_half != trunc_half {
+		remove_wall({i32(start.x), floor, i32(start.y + trunc_half)}, .N_S)
+		remove_wall({i32(end.x), floor, i32(start.y + trunc_half)}, .N_S)
+	}
+
+	for y, i in end.y - trunc_half ..< end.y {
+		remove_wall({i32(start.x), floor, i32(y)}, .N_S)
+		remove_wall({i32(end.x), floor, i32(y)}, .N_S)
+	}
+}
+
+@(private = "file")
+remove_east_west_gable_roof_walls :: proc(
+	roof: Roof,
+	start, end, size: glsl.vec2,
+	floor: i32,
+) {
+	ceil_half := math.ceil(size.x / 2)
+	trunc_half := math.trunc(size.x / 2)
+	for x, i in start.x ..< end.x - ceil_half {
+		remove_wall({i32(x), floor, i32(start.y)}, .E_W)
+		remove_wall({i32(x), floor, i32(end.y)}, .E_W)
+	}
+
+	if ceil_half != trunc_half {
+		remove_wall({i32(start.x + trunc_half), floor, i32(start.y)}, .E_W)
+
+		remove_wall({i32(start.x + trunc_half), floor, i32(end.y)}, .E_W)
+	}
+
+	for x, i in end.x - trunc_half ..< end.x {
+		remove_wall({i32(x), floor, i32(start.y)}, .E_W)
+		remove_wall({i32(x), floor, i32(end.y)}, .E_W)
+	}
+}
+
+@(private = "file")
+remove_gable_roof_walls :: proc(roof: Roof) {
+	t_start := roof.start + {0.5, 0.5}
+	t_end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(t_start.x), int(t_start.y))
+	floor := i32((roof.offset - tile_height) / 3)
+
+	start := glsl.min(t_start, t_end)
+	end := glsl.max(t_start, t_end)
+	size := end - start
+
+	if size.x > size.y {
+		remove_north_south_gable_roof_walls(roof, start, end, size, floor)
 	} else {
+		remove_east_west_gable_roof_walls(roof, start, end, size, floor)
+	}
+}
 
-    }
+@(private = "file")
+remove_east_west_half_hip_roof_walls :: proc(
+	roof: Roof,
+	start, end, t_start, t_end, size: glsl.vec2,
+	floor: i32,
+) {
+	for dx in 0 ..< math.min(math.trunc(size.x / 2), size.y) {
+		remove_wall({i32(start.x + dx), floor, i32(t_end.y)}, .E_W)
+		remove_wall({i32(end.x - dx - 1), floor, i32(t_end.y)}, .E_W)
+	}
+
+	if math.remainder(size.x, 2) != 0 && size.x / size.y < 2 {
+		remove_wall(
+			{i32(start.x + math.trunc(size.x / 2)), floor, i32(t_end.y)},
+			.E_W,
+		)
+	}
+
+	for dx in 0 ..< size.x - size.y * 2 {
+		remove_wall({i32(start.x + size.y + dx), floor, i32(t_end.y)}, .E_W)
+	}
+}
+
+@(private = "file")
+remove_north_south_half_hip_roof_walls :: proc(
+	roof: Roof,
+	start, end, t_start, t_end, size: glsl.vec2,
+	floor: i32,
+) {
+	for dy in 0 ..< math.min(math.trunc(size.y / 2), size.x) {
+		remove_wall({i32(t_end.x), floor, i32(start.y + dy)}, .N_S)
+		remove_wall({i32(t_end.x), floor, i32(end.y - dy - 1)}, .N_S)
+	}
+
+	if math.remainder(size.y, 2) != 0 && size.y / size.x < 2 {
+		remove_wall(
+			{i32(t_end.x), floor, i32(start.y + math.trunc(size.y / 2))},
+			.N_S,
+		)
+	}
+
+	for dy in 0 ..< size.y - size.x * 2 {
+		remove_wall({i32(t_end.x), floor, i32(start.y + size.x + dy)}, .N_S)
+	}
+}
+
+@(private = "file")
+remove_half_hip_roof_walls :: proc(roof: Roof) {
+	t_start := roof.start + {0.5, 0.5}
+	t_end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(t_start.x), int(t_start.y))
+	floor := i32((roof.offset - tile_height) / 3)
+
+	start := glsl.min(t_start, t_end)
+	end := glsl.max(t_start, t_end)
+	size := end - start
+
+	if size.x > size.y {
+		remove_east_west_half_hip_roof_walls(
+			roof,
+			start,
+			end,
+			t_start,
+			t_end,
+			size,
+			floor,
+		)
+	} else {
+		remove_north_south_half_hip_roof_walls(
+			roof,
+			start,
+			end,
+			t_start,
+			t_end,
+			size,
+			floor,
+		)
+	}
+}
+
+@(private = "file")
+remove_east_west_half_gable_roof_walls :: proc(
+	roof: Roof,
+	start, end, t_start, t_end, size: glsl.vec2,
+	floor: i32,
+) {
+	for x in start.x ..< end.x {
+		remove_wall({i32(x), floor, i32(t_end.y)}, .E_W)
+	}
+
+	for y, i in start.y ..< end.y {
+		remove_wall({i32(start.x), floor, i32(y)}, .N_S)
+		remove_wall({i32(end.x), floor, i32(y)}, .N_S)
+	}
+}
+
+@(private = "file")
+remove_north_south_half_gable_roof_walls :: proc(
+	roof: Roof,
+	start, end, t_start, t_end, size: glsl.vec2,
+	floor: i32,
+) {
+	for y in start.y ..< end.y {
+		remove_wall({i32(t_end.x), floor, i32(y)}, .N_S)
+	}
+
+	for x, i in start.x ..< end.x {
+		remove_wall({i32(x), floor, i32(start.y)}, .E_W)
+		remove_wall({i32(x), floor, i32(end.y)}, .E_W)
+	}
+}
+
+@(private = "file")
+remove_half_gable_roof_walls :: proc(roof: Roof) {
+	t_start := roof.start + {0.5, 0.5}
+	t_end := roof.end + {0.5, 0.5}
+	tile_height := terrain.get_tile_height(int(t_start.x), int(t_start.y))
+	floor := i32((roof.offset - tile_height) / 3)
+
+	start := glsl.min(t_start, t_end)
+	end := glsl.max(t_start, t_end)
+	size := end - start
+
+	if size.x > size.y {
+		remove_east_west_half_gable_roof_walls(
+			roof,
+			start,
+			end,
+			t_start,
+			t_end,
+			size,
+			floor,
+		)
+	} else {
+		remove_north_south_half_gable_roof_walls(
+			roof,
+			start,
+			end,
+			t_start,
+			t_end,
+			size,
+			floor,
+		)
+	}
 }

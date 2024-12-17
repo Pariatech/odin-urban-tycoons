@@ -309,6 +309,32 @@ draw_roofs :: proc(flr: i32) {
 	gl.DrawElements(gl.TRIANGLES, i32(len(indices)), gl.UNSIGNED_INT, nil)
 }
 
+get_roof_at :: proc(pos: glsl.vec3) -> (ptr: Roof, ok: bool) {
+	roofs := get_roofs_context()
+	chunk_pos := world_pos_to_chunk_pos(pos)
+	chunk := &roofs.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+
+	for id in chunk.roofs_inside {
+		roof := get_roof_by_id(id) or_return
+		start := glsl.min(roof.start, roof.end)
+		end := glsl.max(roof.start, roof.end)
+		if (start.x <= pos.x && pos.x <= end.x) &&
+		   (start.y <= pos.z && pos.z <= end.y) {
+			return roof, true
+		}
+	}
+
+	return {}, false
+}
+
+get_roof_by_id :: proc(id: Roof_Id) -> (ptr: Roof, ok: bool) {
+	ctx := get_roofs_context()
+	key := ctx.keys[id] or_return
+	chunk_pos := key.chunk_pos
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	return chunk.roofs[key.index], true
+}
+
 add_roof :: proc(roof: Roof) -> Roof_Id {
 	roof := roof
 	roofs := get_roofs_context()
@@ -321,7 +347,20 @@ add_roof :: proc(roof: Roof) -> Roof_Id {
 		index     = len(chunk.roofs),
 	}
 	append(&chunk.roofs, roof)
-	append(&chunk.roofs_inside, roof.id)
+
+	start := glsl.min(roof.start, roof.end)
+	end := glsl.max(roof.start, roof.end)
+	log.info(start, end)
+	for x := int(start.x + 0.5); x <= int(end.x + 0.5); x += c.CHUNK_WIDTH {
+		for z := int(start.y + 0.5);
+		    z <= int(end.y + 0.5);
+		    z += c.CHUNK_DEPTH {
+			cx := x / c.CHUNK_WIDTH
+			cz := z / c.CHUNK_DEPTH
+			append(&roofs.chunks[chunk_pos.y][cx][cz].roofs_inside, roof.id)
+		}
+	}
+	// append(&chunk.roofs_inside, roof.id)
 
 	return roof.id
 }
@@ -337,14 +376,14 @@ remove_roof :: proc(roof: Roof) {
 	if key.index < len(chunk.roofs) {
 		moved_id := chunk.roofs[key.index].id
 		moved_key := &ctx.keys[moved_id]
-        moved_key.index = key.index
+		moved_key.index = key.index
 	}
 
-	for x := int(roof.start.x + 0.5);
-	    x < int(roof.end.x + 0.5);
-	    x += c.CHUNK_WIDTH {
-		for z := int(roof.start.y + 0.5);
-		    z < int(roof.end.y + 0.5);
+	start := glsl.min(roof.start, roof.end)
+	end := glsl.max(roof.start, roof.end)
+	for x := int(start.x + 0.5); x <= int(end.x + 0.5); x += c.CHUNK_WIDTH {
+		for z := int(start.y + 0.5);
+		    z <= int(end.y + 0.5);
 		    z += c.CHUNK_DEPTH {
 			cx := x / c.CHUNK_WIDTH
 			cz := z / c.CHUNK_DEPTH
@@ -357,6 +396,8 @@ remove_roof :: proc(roof: Roof) {
 			}
 		}
 	}
+
+	delete_key(&ctx.keys, roof.id)
 }
 
 update_roof :: proc(roof: Roof) {
@@ -367,12 +408,14 @@ update_roof :: proc(roof: Roof) {
 	chunk.dirty = true
 
 	old_roof := chunk.roofs[key.index]
-	if old_roof.start != roof.start && old_roof.end != roof.end {
-		for x := int(old_roof.start.x + 0.5);
-		    x < int(old_roof.end.x + 0.5);
+	if old_roof.start != roof.start || old_roof.end != roof.end {
+		start := glsl.min(old_roof.start, old_roof.end)
+		end := glsl.max(old_roof.start, old_roof.end)
+		for x := int(start.x + 0.5);
+		    x <= int(end.x + 0.5);
 		    x += c.CHUNK_WIDTH {
-			for z := int(old_roof.start.y + 0.5);
-			    z < int(old_roof.end.y + 0.5);
+			for z := int(start.y + 0.5);
+			    z <= int(end.y + 0.5);
 			    z += c.CHUNK_DEPTH {
 				cx := x / c.CHUNK_WIDTH
 				cz := z / c.CHUNK_DEPTH
@@ -385,11 +428,14 @@ update_roof :: proc(roof: Roof) {
 				}
 			}
 		}
-		for x := int(roof.start.x + 0.5);
-		    x < int(roof.end.x + 0.5);
+
+		start = glsl.min(roof.start, roof.end)
+		end = glsl.max(roof.start, roof.end)
+		for x := int(start.x + 0.5);
+		    x <= int(end.x + 0.5);
 		    x += c.CHUNK_WIDTH {
-			for z := int(roof.start.y + 0.5);
-			    z < int(roof.end.y + 0.5);
+			for z := int(start.y + 0.5);
+			    z <= int(end.y + 0.5);
 			    z += c.CHUNK_DEPTH {
 				cx := x / c.CHUNK_WIDTH
 				cz := z / c.CHUNK_DEPTH
@@ -410,7 +456,7 @@ get_roof_chunk_pos :: proc(roof: Roof) -> glsl.ivec3 {
 	chunk_x := x / c.CHUNK_WIDTH
 
 	tile_height := terrain.get_tile_height(int(x), int(z))
-	chunk_y := i32((roof.offset - tile_height) / 3)
+	chunk_y := i32((roof.offset - tile_height) / c.WALL_HEIGHT)
 	chunk_z := z / c.CHUNK_DEPTH
 	return {chunk_x, chunk_y, chunk_z}
 }
