@@ -225,7 +225,7 @@ deinit_roofs :: proc() {
 		// delete(k)
 	}
 	delete(roofs.color_map)
-    delete(roofs.texture_array.texture_index_map)
+	delete(roofs.texture_array.texture_index_map)
 	// clear(&roofs.color_map)
 }
 
@@ -326,6 +326,39 @@ add_roof :: proc(roof: Roof) -> Roof_Id {
 	return roof.id
 }
 
+remove_roof :: proc(roof: Roof) {
+	ctx := get_roofs_context()
+	key := &ctx.keys[roof.id]
+	chunk_pos := key.chunk_pos
+	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
+	chunk.dirty = true
+
+	unordered_remove(&chunk.roofs, key.index)
+	if key.index < len(chunk.roofs) {
+		moved_id := chunk.roofs[key.index].id
+		moved_key := &ctx.keys[moved_id]
+        moved_key.index = key.index
+	}
+
+	for x := int(roof.start.x + 0.5);
+	    x < int(roof.end.x + 0.5);
+	    x += c.CHUNK_WIDTH {
+		for z := int(roof.start.y + 0.5);
+		    z < int(roof.end.y + 0.5);
+		    z += c.CHUNK_DEPTH {
+			cx := x / c.CHUNK_WIDTH
+			cz := z / c.CHUNK_DEPTH
+			current_chunk := &ctx.chunks[chunk_pos.y][cx][cz]
+			for id, i in current_chunk.roofs_inside {
+				if id == roof.id {
+					unordered_remove(&current_chunk.roofs_inside, i)
+					break
+				}
+			}
+		}
+	}
+}
+
 update_roof :: proc(roof: Roof) {
 	ctx := get_roofs_context()
 	key := &ctx.keys[roof.id]
@@ -333,6 +366,37 @@ update_roof :: proc(roof: Roof) {
 	chunk := &ctx.chunks[chunk_pos.y][chunk_pos.x][chunk_pos.z]
 	chunk.dirty = true
 
+	old_roof := chunk.roofs[key.index]
+	if old_roof.start != roof.start && old_roof.end != roof.end {
+		for x := int(old_roof.start.x + 0.5);
+		    x < int(old_roof.end.x + 0.5);
+		    x += c.CHUNK_WIDTH {
+			for z := int(old_roof.start.y + 0.5);
+			    z < int(old_roof.end.y + 0.5);
+			    z += c.CHUNK_DEPTH {
+				cx := x / c.CHUNK_WIDTH
+				cz := z / c.CHUNK_DEPTH
+				current_chunk := &ctx.chunks[chunk_pos.y][cx][cz]
+				for id, i in current_chunk.roofs_inside {
+					if id == roof.id {
+						unordered_remove(&current_chunk.roofs_inside, i)
+						break
+					}
+				}
+			}
+		}
+		for x := int(roof.start.x + 0.5);
+		    x < int(roof.end.x + 0.5);
+		    x += c.CHUNK_WIDTH {
+			for z := int(roof.start.y + 0.5);
+			    z < int(roof.end.y + 0.5);
+			    z += c.CHUNK_DEPTH {
+				cx := x / c.CHUNK_WIDTH
+				cz := z / c.CHUNK_DEPTH
+				append(&ctx.chunks[chunk_pos.y][cx][cz].roofs_inside, roof.id)
+			}
+		}
+	}
 	chunk.roofs[key.index] = roof
 }
 
@@ -474,11 +538,12 @@ draw_half_pyramid_roof :: proc(
 	max_size := max(size.x, size.y)
 	pos_offset := glsl.vec4{min_size / 2, 0, 0, 1} * rotation
 	pos := center + pos_offset.xz
-    
+
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	face_rotation := rotation
 	draw_roof_triangle(
@@ -487,7 +552,7 @@ draw_half_pyramid_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[0],
 		roof.slope,
 		vertices,
@@ -510,7 +575,7 @@ draw_half_pyramid_roof :: proc(
 		true,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[2],
 		roof.slope,
 		vertices,
@@ -532,7 +597,7 @@ draw_half_pyramid_roof :: proc(
 		{max_size / 2, min_size, min_size},
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -573,9 +638,10 @@ draw_half_hip_side_roof :: proc(
 	middle_pos := center + middle_pos_offset.xz
 
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	face_rotation := rotation
 	draw_roof_triangle(
@@ -584,7 +650,7 @@ draw_half_hip_side_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[0],
 		roof.slope,
 		vertices,
@@ -607,7 +673,7 @@ draw_half_hip_side_roof :: proc(
 		true,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -620,7 +686,7 @@ draw_half_hip_side_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -633,7 +699,7 @@ draw_half_hip_side_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -656,7 +722,7 @@ draw_half_hip_side_roof :: proc(
 		true,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[2],
 		roof.slope,
 		vertices,
@@ -735,9 +801,10 @@ draw_half_hip_end_roof :: proc(
 	edge_pos := center + edge_pos_offset.xz
 
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	face_rotation := rotation
 	draw_roof_triangle(
@@ -746,7 +813,7 @@ draw_half_hip_end_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[0],
 		roof.slope,
 		vertices,
@@ -759,7 +826,7 @@ draw_half_hip_end_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[0],
 		roof.slope,
 		vertices,
@@ -781,7 +848,7 @@ draw_half_hip_end_roof :: proc(
 		{max_size / 2, max_size / 2, min_size / 2 + peak_offset},
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -804,7 +871,7 @@ draw_half_hip_end_roof :: proc(
 		true,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[2],
 		roof.slope,
 		vertices,
@@ -817,7 +884,7 @@ draw_half_hip_end_roof :: proc(
 		false,
 		face_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[2],
 		roof.slope,
 		vertices,
@@ -915,9 +982,10 @@ draw_pyramid_hip_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	for i in 0 ..< 4 {
 		side_rotation :=
@@ -930,7 +998,7 @@ draw_pyramid_hip_roof :: proc(
 			{face_size.x, height, face_size.y},
 			side_rotation,
 			roof_texture,
-            capping_texture,
+			capping_texture,
 			face_lights[i % 4],
 			roof.slope,
 			vertices,
@@ -965,9 +1033,10 @@ draw_trapezoid_hip_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	for i in 0 ..< 2 {
 		side_rotation :=
@@ -982,7 +1051,7 @@ draw_trapezoid_hip_roof :: proc(
 			{face_size.x, height, face_size.y},
 			side_rotation,
 			roof_texture,
-            capping_texture,
+			capping_texture,
 			face_lights[i * 2 % 4],
 			roof.slope,
 			vertices,
@@ -1009,7 +1078,7 @@ draw_trapezoid_hip_roof :: proc(
 			{max_size, height, min_size},
 			side_rotation,
 			roof_texture,
-            capping_texture,
+			capping_texture,
 			face_lights[(i * 2 + 1) % 4],
 			roof.slope,
 			vertices,
@@ -1076,11 +1145,12 @@ draw_half_gable_roof :: proc(
 	pos_offset := glsl.vec4{0, 0, min_size / 2, 1}
 	pos_offset *= side_rotation
 	pos := center + pos_offset.xz
-    
+
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	draw_roof_rectangle(
 		{pos.x, roof.offset, pos.y},
@@ -1088,7 +1158,7 @@ draw_half_gable_roof :: proc(
 		true,
 		side_rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		face_lights[1],
 		roof.slope,
 		vertices,
@@ -1153,9 +1223,10 @@ draw_gable_roof :: proc(
 	center := roof.start + (roof.end - roof.start) / 2
 
 	ctx := get_roofs_context()
-    color := ctx.color_map[roof.color]
-    roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
-    capping_texture := ctx.texture_array.texture_index_map[color.capping_texture]
+	color := ctx.color_map[roof.color]
+	roof_texture := ctx.texture_array.texture_index_map[color.roof_texture]
+	capping_texture :=
+		ctx.texture_array.texture_index_map[color.capping_texture]
 
 	for i in 0 ..< 2 {
 		side_rotation :=
@@ -1168,7 +1239,7 @@ draw_gable_roof :: proc(
 			true,
 			side_rotation,
 			roof_texture,
-            capping_texture,
+			capping_texture,
 			face_lights[(i * 2 + 1) % 4],
 			roof.slope,
 			vertices,
@@ -1237,7 +1308,11 @@ draw_roof_triangle :: proc(
 	}
 
 	capping_vertices := [?]Roof_Vertex {
-		{pos = {-1, 0, -1}, texcoords = {0, 1, capping_texture}, color = light},
+		 {
+			pos = {-1, 0, -1},
+			texcoords = {0, 1, capping_texture},
+			color = light,
+		},
 		{pos = {0, 1, 0}, texcoords = {0, 0, capping_texture}, color = light},
 	}
 
@@ -1336,8 +1411,16 @@ draw_roof_rectangle :: proc(
 	}
 
 	capping_vertices := [?]Roof_Vertex {
-		{pos = {-0.5, 1, 0}, texcoords = {0, 1, capping_texture}, color = light},
-		{pos = {0.5, 1, 0}, texcoords = {1, 1, capping_texture}, color = light},
+		 {
+			pos = {-0.5, 1, 0},
+			texcoords = {0, 1, capping_texture},
+			color = light,
+		},
+		 {
+			pos = {0.5, 1, 0},
+			texcoords = {1, 1, capping_texture},
+			color = light,
+		},
 	}
 
 	capping_indices := [?]Roof_Index{0, 2, 3, 0, 3, 1}
@@ -1504,7 +1587,7 @@ draw_roof_pyramid_face :: proc(
 		false,
 		rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		light,
 		slope,
 		vertices,
@@ -1516,7 +1599,7 @@ draw_roof_pyramid_face :: proc(
 		true,
 		rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		light,
 		slope,
 		vertices,
@@ -1550,7 +1633,7 @@ draw_roof_hip_face :: proc(
 		false,
 		rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		light,
 		slope,
 		vertices,
@@ -1566,7 +1649,7 @@ draw_roof_hip_face :: proc(
 		true,
 		rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		light,
 		slope,
 		vertices,
@@ -1580,7 +1663,7 @@ draw_roof_hip_face :: proc(
 		true,
 		rotation,
 		roof_texture,
-        capping_texture,
+		capping_texture,
 		light,
 		slope,
 		vertices,
@@ -1598,7 +1681,7 @@ init_roof_colors :: proc() -> bool {
 
 	read_roof_colors_dir(ROOF_COLORS_DIR) or_return
 
-    roofs.texture_array.texture_index_map[EAVE_TEXTURE] = 0
+	roofs.texture_array.texture_index_map[EAVE_TEXTURE] = 0
 
 	for k, v in roofs.color_map {
 		if !(v.roof_texture in roofs.texture_array.texture_index_map) {

@@ -8,6 +8,7 @@ import "core:strings"
 
 import "../cursor"
 import "../floor"
+import "../keyboard"
 import "../mouse"
 
 import "../terrain"
@@ -17,7 +18,15 @@ Roof_Tool_Context :: struct {
 	cursor_top: Object_Draw,
 	roof:       Roof,
 	active:     bool,
+	state:      Roof_Tool_State,
 	// angle_str:  string,
+}
+
+@(private = "file")
+Roof_Tool_State :: enum {
+	Idle,
+	Placing,
+	Removing,
 }
 
 init_roof_tool :: proc() {
@@ -34,7 +43,7 @@ init_roof_tool :: proc() {
 	floor.show_markers = true
 
 	ctx.roof.slope = 1
-    ctx.roof.color = "big_square_tiles"
+	ctx.roof.color = "big_square_tiles"
 	// ctx.angle_str = fmt.aprint("45", "°", sep = "")
 
 	get_roofs_context().floor_offset = 1
@@ -63,25 +72,16 @@ update_roof_tool :: proc() {
 
 	ctx.cursor.transform = glsl.mat4Translate(ctx.cursor.pos)
 
-	if mouse.is_button_press(.Left) {
-		ctx.roof.start = ctx.cursor.pos.xz
-		ctx.roof.end = ctx.roof.start
-		ctx.roof.offset =
-			f32(floor.floor) * 3 +
-			terrain.get_tile_height(
-				int(ctx.cursor.pos.x + 0.5),
-				int(ctx.cursor.pos.y + 0.5),
-			)
-		ctx.roof.light = {1, 1, 1, 0.5}
-		ctx.roof.id = add_roof(ctx.roof)
-	} else if mouse.is_button_down(.Left) {
-		ctx.roof.end = ctx.cursor.pos.xz
-		update_roof(ctx.roof)
-	} else if mouse.is_button_release(.Left) {
-		ctx.roof.light = {1, 1, 1, 1}
-		update_roof(ctx.roof)
-		add_roof_walls(ctx.roof)
+	switch ctx.state {
+	case .Idle:
+        handle_roof_tool_idle()
+	case .Placing:
+		handle_roof_tool_placing()
+	case .Removing:
+		handle_roof_tool_removing()
 	}
+
+	ctx.cursor_top.light = ctx.cursor.light
 }
 
 draw_roof_tool :: proc() {
@@ -812,4 +812,59 @@ add_half_gable_roof_walls :: proc(roof: Roof) {
 			floor,
 		)
 	}
+}
+
+@(private = "file")
+handle_roof_tool_idle :: proc() {
+	ctx := get_roof_tool_context()
+
+	if keyboard.is_key_down(.Key_Left_Control) {
+		ctx.cursor.light = {1, 0, 0}
+
+		ctx.state = .Removing
+	} else if mouse.is_button_press(.Left) {
+		ctx.roof.start = ctx.cursor.pos.xz
+		ctx.roof.end = ctx.roof.start
+		ctx.roof.offset =
+			f32(floor.floor) * 3 +
+			terrain.get_tile_height(
+				int(ctx.cursor.pos.x + 0.5),
+				int(ctx.cursor.pos.y + 0.5),
+			)
+		ctx.roof.light = {1, 1, 1, 0.5}
+		ctx.roof.id = add_roof(ctx.roof)
+
+		ctx.state = .Placing
+	}
+}
+
+@(private = "file")
+handle_roof_tool_placing :: proc() {
+	ctx := get_roof_tool_context()
+
+	if keyboard.is_key_down(.Key_Left_Control) {
+		ctx.cursor.light = {1, 0, 0}
+		remove_roof(ctx.roof)
+		ctx.state = .Removing
+	} else if mouse.is_button_release(.Left) {
+		ctx.roof.light = {1, 1, 1, 1}
+		update_roof(ctx.roof)
+		add_roof_walls(ctx.roof)
+		ctx.state = .Idle
+	} else {
+		ctx.roof.end = ctx.cursor.pos.xz
+		update_roof(ctx.roof)
+	}
+}
+
+@(private = "file")
+handle_roof_tool_removing :: proc() {
+	ctx := get_roof_tool_context()
+
+	if keyboard.is_key_release(.Key_Left_Control) {
+		ctx.cursor.light = {1, 1, 1}
+        ctx.state = .Idle
+	} else {
+
+    }
 }
