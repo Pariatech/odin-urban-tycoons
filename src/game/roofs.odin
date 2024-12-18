@@ -350,10 +350,11 @@ add_roof :: proc(roof: Roof) -> Roof_Id {
 
 	start := glsl.min(roof.start, roof.end)
 	end := glsl.max(roof.start, roof.end)
-	log.info(start, end)
-	for x := int(start.x + 0.5); x <= int(end.x + 0.5); x += c.CHUNK_WIDTH {
+	for x := int(start.x + 0.5);
+	    x < int(end.x + 0.5) + c.CHUNK_WIDTH;
+	    x += c.CHUNK_WIDTH {
 		for z := int(start.y + 0.5);
-		    z <= int(end.y + 0.5);
+		    z < int(end.y + 0.5) + c.CHUNK_DEPTH;
 		    z += c.CHUNK_DEPTH {
 			cx := x / c.CHUNK_WIDTH
 			cz := z / c.CHUNK_DEPTH
@@ -381,9 +382,11 @@ remove_roof :: proc(roof: Roof) {
 
 	start := glsl.min(roof.start, roof.end)
 	end := glsl.max(roof.start, roof.end)
-	for x := int(start.x + 0.5); x <= int(end.x + 0.5); x += c.CHUNK_WIDTH {
+	for x := int(start.x + 0.5);
+	    x < int(end.x + 0.5) + c.CHUNK_WIDTH;
+	    x += c.CHUNK_WIDTH {
 		for z := int(start.y + 0.5);
-		    z <= int(end.y + 0.5);
+		    z < int(end.y + 0.5) + c.CHUNK_DEPTH;
 		    z += c.CHUNK_DEPTH {
 			cx := x / c.CHUNK_WIDTH
 			cz := z / c.CHUNK_DEPTH
@@ -412,10 +415,10 @@ update_roof :: proc(roof: Roof) {
 		start := glsl.min(old_roof.start, old_roof.end)
 		end := glsl.max(old_roof.start, old_roof.end)
 		for x := int(start.x + 0.5);
-		    x <= int(end.x + 0.5);
+		    x < int(end.x + 0.5) + c.CHUNK_WIDTH;
 		    x += c.CHUNK_WIDTH {
 			for z := int(start.y + 0.5);
-			    z <= int(end.y + 0.5);
+			    z < int(end.y + 0.5) + c.CHUNK_DEPTH;
 			    z += c.CHUNK_DEPTH {
 				cx := x / c.CHUNK_WIDTH
 				cz := z / c.CHUNK_DEPTH
@@ -432,13 +435,14 @@ update_roof :: proc(roof: Roof) {
 		start = glsl.min(roof.start, roof.end)
 		end = glsl.max(roof.start, roof.end)
 		for x := int(start.x + 0.5);
-		    x <= int(end.x + 0.5);
+		    x < int(end.x + 0.5) + c.CHUNK_WIDTH;
 		    x += c.CHUNK_WIDTH {
 			for z := int(start.y + 0.5);
-			    z <= int(end.y + 0.5);
+			    z < int(end.y + 0.5) + c.CHUNK_DEPTH;
 			    z += c.CHUNK_DEPTH {
 				cx := x / c.CHUNK_WIDTH
 				cz := z / c.CHUNK_DEPTH
+				log.info(cx, cz)
 				append(&ctx.chunks[chunk_pos.y][cx][cz].roofs_inside, roof.id)
 			}
 		}
