@@ -28,7 +28,7 @@ MENU_ICON_TEXTURES :: [Menu_Icon]cstring {
 	.Furniture = "resources/icons/furniture.png",
     .Undo = "resources/icons/undo.png",
     .Redo = "resources/icons/redo.png",
-    .Roof = "resources/objects/cursors/roof_cursor/Hip_Roof_Icon.png",
+    .Roof = "resources/roofs/roof_icon.png",
 }
 
 

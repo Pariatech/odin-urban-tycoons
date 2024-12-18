@@ -82,7 +82,7 @@ update_roof_tool :: proc() {
 		ctx.state = handle_roof_tool_removing()
 	}
 
-	ctx.cursor_top.light = ctx.cursor.light
+	// ctx.cursor_top.light = ctx.cursor.light
 }
 
 draw_roof_tool :: proc() {
@@ -146,6 +146,12 @@ ROOF_TOOL_CURSOR_TEXTURE :: "resources/roofs/roof_cursor.png"
 
 @(private = "file")
 ROOF_TOOL_CURSOR_TOP_MODEL :: "resources/roofs/roof_cursor_top.glb"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_WRECKING_BALL_MODEL :: "resources/roofs/Wrecking_Crane.glb"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_WRECKING_BALL_TEXTURE :: "resources/roofs/Wrecking_Crane.png"
 
 @(private = "file")
 ROOF_TOOL_CURSOR_TOP_MAP :: [Roof_Type]string {
@@ -819,7 +825,7 @@ handle_roof_tool_idle :: proc() -> Roof_Tool_State {
 	ctx := get_roof_tool_context()
 
 	if keyboard.is_key_down(.Key_Left_Control) {
-		ctx.cursor.light = {1, 0, 0}
+		transition_to_remove_roof_state()
 
 		return .Removing
 	}
@@ -847,7 +853,7 @@ handle_roof_tool_placing :: proc() -> Roof_Tool_State {
 	ctx := get_roof_tool_context()
 
 	if keyboard.is_key_down(.Key_Left_Control) {
-		ctx.cursor.light = {1, 0, 0}
+		transition_to_remove_roof_state()
 		remove_roof(ctx.roof)
 		return .Removing
 	}
@@ -874,7 +880,7 @@ handle_roof_tool_removing :: proc() -> Roof_Tool_State {
 	}
 
 	if keyboard.is_key_release(.Key_Left_Control) {
-		ctx.cursor.light = {1, 1, 1}
+		transition_out_of_remove_roof_state()
 		return .Idle
 	}
 
@@ -886,7 +892,7 @@ handle_roof_tool_removing :: proc() -> Roof_Tool_State {
 	if roof, ok := get_roof_at(pos); ok {
 		if mouse.is_button_press(.Left) {
 			ctx.roof_under_cursor = nil
-            remove_roof_walls(roof)
+			remove_roof_walls(roof)
 			remove_roof(roof)
 		} else {
 			roof.light = {1, 0, 0, 1}
@@ -1124,4 +1130,21 @@ remove_half_gable_roof_walls :: proc(roof: Roof) {
 			floor,
 		)
 	}
+}
+
+@(private = "file")
+transition_to_remove_roof_state :: proc() {
+	ctx := get_roof_tool_context()
+	ctx.cursor.light = {1, 0, 0}
+	ctx.cursor_top.model = ROOF_TOOL_CURSOR_WRECKING_BALL_MODEL
+	ctx.cursor_top.texture = ROOF_TOOL_CURSOR_WRECKING_BALL_TEXTURE
+}
+
+@(private = "file")
+transition_out_of_remove_roof_state :: proc() {
+	ctx := get_roof_tool_context()
+	ctx.cursor.light = {1, 1, 1}
+	ctx.cursor_top.model = ROOF_TOOL_CURSOR_TOP_MODEL
+	top_map := ROOF_TOOL_CURSOR_TOP_MAP
+	ctx.cursor_top.texture = top_map[ctx.roof.type]
 }
