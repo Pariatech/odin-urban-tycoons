@@ -28,6 +28,7 @@ Roof_Tool_State :: enum {
 	Idle,
 	Placing,
 	Removing,
+	Painting,
 }
 
 init_roof_tool :: proc() {
@@ -80,6 +81,8 @@ update_roof_tool :: proc() {
 		ctx.state = handle_roof_tool_placing()
 	case .Removing:
 		ctx.state = handle_roof_tool_removing()
+	case .Painting:
+		ctx.state = handle_roof_tool_painting()
 	}
 
 	// ctx.cursor_top.light = ctx.cursor.light
@@ -105,6 +108,39 @@ set_roof_tool_roof_type :: proc(type: Roof_Type) {
 set_roof_tool_roof_color :: proc(color: string) {
 	ctx := get_roof_tool_context()
 	ctx.roof.color = color
+}
+
+set_roof_tool_state :: proc(state: Roof_Tool_State) {
+	ctx := get_roof_tool_context()
+	switch state {
+	case .Idle:
+	case .Painting:
+		transition_to_paint_roof_state()
+	case .Removing:
+		transition_to_remove_roof_state()
+	case .Placing:
+	}
+	ctx.state = state
+}
+
+toggle_roof_tool_state :: proc(state: Roof_Tool_State) {
+	ctx := get_roof_tool_context()
+
+    if ctx.state == state {
+        transition_to_idle_roof_state()
+	    ctx.state = .Idle
+        return
+    }
+
+	set_roof_tool_state(state)
+}
+
+is_roof_tool_state_removing :: proc() -> bool {
+    return get_roof_tool_context().state == .Removing
+}
+
+is_roof_tool_state_painting :: proc() -> bool {
+    return get_roof_tool_context().state == .Painting
 }
 
 get_roof_tool_roof_angle :: proc() -> f32 {
@@ -152,6 +188,12 @@ ROOF_TOOL_CURSOR_WRECKING_BALL_MODEL :: "resources/roofs/Wrecking_Crane.glb"
 
 @(private = "file")
 ROOF_TOOL_CURSOR_WRECKING_BALL_TEXTURE :: "resources/roofs/Wrecking_Crane.png"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_PAINT_BRUSH_MODEL :: "resources/roofs/Paint_Brush.glb"
+
+@(private = "file")
+ROOF_TOOL_CURSOR_PAINT_BRUSH_TEXTURE :: "resources/roofs/Paint_Brush.png"
 
 @(private = "file")
 ROOF_TOOL_CURSOR_TOP_MAP :: [Roof_Type]string {
@@ -830,6 +872,12 @@ handle_roof_tool_idle :: proc() -> Roof_Tool_State {
 		return .Removing
 	}
 
+	if keyboard.is_key_press(.Key_Left_Shift) {
+		transition_to_paint_roof_state()
+
+		return .Painting
+	}
+
 	if mouse.is_button_press(.Left) {
 		ctx.roof.start = ctx.cursor.pos.xz
 		ctx.roof.end = ctx.roof.start
@@ -879,9 +927,14 @@ handle_roof_tool_removing :: proc() -> Roof_Tool_State {
 		update_roof(roof)
 	}
 
-	if keyboard.is_key_release(.Key_Left_Control) {
-		transition_out_of_remove_roof_state()
+	if keyboard.is_key_release(.Key_Left_Control) || keyboard.is_key_press(.Key_Escape)  {
+		transition_to_idle_roof_state()
 		return .Idle
+	}
+
+	if keyboard.is_key_press(.Key_Left_Shift) {
+		transition_to_paint_roof_state()
+		return .Painting
 	}
 
 	roofs := get_roofs_context()
@@ -899,6 +952,44 @@ handle_roof_tool_removing :: proc() -> Roof_Tool_State {
 			ctx.roof_under_cursor = roof
 			update_roof(roof)
 		}
+	} else {
+		ctx.roof_under_cursor = nil
+	}
+
+	return ctx.state
+}
+
+@(private = "file")
+handle_roof_tool_painting :: proc() -> Roof_Tool_State {
+	ctx := get_roof_tool_context()
+
+	if roof, ok := ctx.roof_under_cursor.?; ok {
+		update_roof(roof)
+	}
+
+	if keyboard.is_key_release(.Key_Left_Shift) || keyboard.is_key_press(.Key_Escape) {
+		transition_to_idle_roof_state()
+		return .Idle
+	}
+
+	roofs := get_roofs_context()
+
+	pos :=
+		glsl.floor(ctx.cursor.pos + glsl.vec3{0.5, 0, 0.5}) -
+		glsl.vec3{0.5, 0, 0.5}
+	if roof, ok := get_roof_at(pos); ok {
+		if mouse.is_button_press(.Left) {
+			ctx.roof_under_cursor = nil
+		} else {
+			if roof_under_cursor, ok := ctx.roof_under_cursor.?; ok {
+				if roof.color == ctx.roof.color {
+					roof.color = roof_under_cursor.color
+				}
+			}
+			ctx.roof_under_cursor = roof
+		}
+		roof.color = ctx.roof.color
+		update_roof(roof)
 	} else {
 		ctx.roof_under_cursor = nil
 	}
@@ -1141,10 +1232,18 @@ transition_to_remove_roof_state :: proc() {
 }
 
 @(private = "file")
-transition_out_of_remove_roof_state :: proc() {
+transition_to_idle_roof_state :: proc() {
 	ctx := get_roof_tool_context()
 	ctx.cursor.light = {1, 1, 1}
 	ctx.cursor_top.model = ROOF_TOOL_CURSOR_TOP_MODEL
 	top_map := ROOF_TOOL_CURSOR_TOP_MAP
 	ctx.cursor_top.texture = top_map[ctx.roof.type]
+}
+
+@(private = "file")
+transition_to_paint_roof_state :: proc() {
+	ctx := get_roof_tool_context()
+	ctx.cursor.light = {1, 1, 1}
+	ctx.cursor_top.model = ROOF_TOOL_CURSOR_PAINT_BRUSH_MODEL
+	ctx.cursor_top.texture = ROOF_TOOL_CURSOR_PAINT_BRUSH_TEXTURE
 }
